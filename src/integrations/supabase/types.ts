@@ -14,7 +14,216 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      installments: {
+        Row: {
+          created_at: string
+          due_date: string
+          id: string
+          installment_number: number
+          order_id: string
+          paid_at: string | null
+          status: string | null
+          supplier_id: string
+          updated_at: string
+          user_id: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          due_date: string
+          id?: string
+          installment_number: number
+          order_id: string
+          paid_at?: string | null
+          status?: string | null
+          supplier_id: string
+          updated_at?: string
+          user_id: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          due_date?: string
+          id?: string
+          installment_number?: number
+          order_id?: string
+          paid_at?: string | null
+          status?: string | null
+          supplier_id?: string
+          updated_at?: string
+          user_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "installments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "installments_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          created_at: string
+          discount: number | null
+          freight: number | null
+          id: string
+          items: Json | null
+          order_number: string
+          payment_condition_id: string
+          status: string | null
+          supplier_id: string
+          total_value: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          discount?: number | null
+          freight?: number | null
+          id?: string
+          items?: Json | null
+          order_number: string
+          payment_condition_id: string
+          status?: string | null
+          supplier_id: string
+          total_value: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          discount?: number | null
+          freight?: number | null
+          id?: string
+          items?: Json | null
+          order_number?: string
+          payment_condition_id?: string
+          status?: string | null
+          supplier_id?: string
+          total_value?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_payment_condition_id_fkey"
+            columns: ["payment_condition_id"]
+            isOneToOne: false
+            referencedRelation: "payment_conditions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_conditions: {
+        Row: {
+          created_at: string
+          down_payment_percent: number | null
+          id: string
+          installments: number
+          interval_days: number
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          down_payment_percent?: number | null
+          id?: string
+          installments: number
+          interval_days: number
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          down_payment_percent?: number | null
+          id?: string
+          installments?: number
+          interval_days?: number
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          role: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          role?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          role?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      suppliers: {
+        Row: {
+          cnpj: string
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cnpj: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cnpj?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

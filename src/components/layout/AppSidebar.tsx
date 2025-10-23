@@ -1,5 +1,6 @@
 import { LayoutDashboard, ShoppingCart, CreditCard, Wallet, Users, LogOut } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Sidebar,
   SidebarContent,
@@ -22,6 +23,8 @@ const menuItems = [
 ];
 
 export function AppSidebar() {
+  const { signOut } = useAuth();
+
   return (
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border p-6">
@@ -64,7 +67,7 @@ export function AppSidebar() {
       <SidebarFooter className="border-t border-sidebar-border p-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton>
+            <SidebarMenuButton onClick={signOut}>
               <LogOut className="h-4 w-4" />
               <span>Sair</span>
             </SidebarMenuButton>
