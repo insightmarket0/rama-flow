@@ -57,6 +57,17 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        rama: {
+          "green-dark": "hsl(var(--rama-green-dark))",
+          "green-medium": "hsl(var(--rama-green-medium))",
+          yellow: "hsl(var(--rama-yellow))",
+          success: "hsl(var(--rama-success))",
+          warning: "hsl(var(--rama-warning))",
+          danger: "hsl(var(--rama-danger))",
+        },
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
         lg: "var(--radius)",
