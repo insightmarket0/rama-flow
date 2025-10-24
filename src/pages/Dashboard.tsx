@@ -1,64 +1,137 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, TrendingUp, AlertCircle, ShoppingCart, Users } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { OrderDialog } from "@/components/orders/OrderDialog";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import {
+  Plus,
+  TrendingUp,
+  AlertCircle,
+  ShoppingCart,
+  Users,
+} from "lucide-react";
+import { useDashboard } from "@/hooks/useDashboard";
+import {
+  InstallmentStatus,
+  InstallmentWithRelations,
+} from "@/hooks/useInstallments";
+import { format, parseISO } from "date-fns";
+
+const statusLabels: Record<InstallmentStatus, string> = {
+  pendente: "Pendente",
+  atrasado: "Atrasado",
+  pago: "Pago",
+};
+
+const getStatusVariant = (status: InstallmentStatus) => {
+  switch (status) {
+    case "pago":
+      return "default";
+    case "atrasado":
+      return "destructive";
+    default:
+      return "secondary";
+  }
+};
+
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+
+const formatNumber = (value: number) =>
+  new Intl.NumberFormat("pt-BR").format(value);
+
+const chartConfig = {
+  total: {
+    label: "Valor a pagar",
+    color: "hsl(var(--chart-1))",
+  },
+};
+
+const renderUpcomingItem = (installment: InstallmentWithRelations) => (
+  <div
+    key={installment.id}
+    className="flex items-center justify-between gap-4 p-3 bg-muted/50 rounded-lg"
+  >
+    <div className="flex-1">
+      <p className="font-medium text-sm">
+        {installment.supplier?.name ?? "Fornecedor não informado"}
+      </p>
+      <p className="text-xs text-muted-foreground">
+        Pedido {installment.order?.order_number ?? "-"} •{" "}
+        {installment.installment_number === 0
+          ? "Entrada"
+          : `Parcela ${installment.installment_number}`}
+      </p>
+    </div>
+    <div className="text-right">
+      <p className="font-semibold text-sm">
+        {formatCurrency(installment.value)}
+      </p>
+      <p className="text-xs text-muted-foreground">
+        {format(parseISO(installment.due_date), "dd/MM/yyyy")}
+      </p>
+    </div>
+    <Badge variant={getStatusVariant(installment.status)}>
+      {statusLabels[installment.status]}
+    </Badge>
+  </div>
+);
 
 const Dashboard = () => {
+  const { data, isLoading, isError, refetch } = useDashboard();
+
   const metrics = [
     {
       title: "Total a Pagar (30 dias)",
-      value: "R$ 125.450,00",
       icon: TrendingUp,
       color: "text-secondary",
+      value: data ? formatCurrency(data.metrics.upcoming30DaysTotal) : null,
     },
     {
       title: "Parcelas Vencidas",
-      value: "3",
       icon: AlertCircle,
       color: "text-destructive",
+      value: data ? formatNumber(data.metrics.overdueCount) : null,
     },
     {
       title: "Pedidos em Aberto",
-      value: "12",
       icon: ShoppingCart,
       color: "text-accent",
+      value: data ? formatNumber(data.metrics.openOrdersCount) : null,
     },
     {
       title: "Fornecedores Ativos",
-      value: "24",
       icon: Users,
       color: "text-primary",
+      value: data ? formatNumber(data.metrics.activeSuppliersCount) : null,
     },
   ];
 
-  const upcomingPayments = [
-    { date: "2025-10-25", supplier: "Fornecedor ABC", order: "#001", value: "R$ 5.500,00", status: "Pendente" },
-    { date: "2025-10-27", supplier: "Fornecedor XYZ", order: "#002", value: "R$ 3.200,00", status: "Pendente" },
-    { date: "2025-10-30", supplier: "Fornecedor 123", order: "#003", value: "R$ 8.750,00", status: "Atrasado" },
-    { date: "2025-11-02", supplier: "Fornecedor DEF", order: "#004", value: "R$ 2.100,00", status: "Pendente" },
-  ];
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Pago":
-        return "text-secondary";
-      case "Atrasado":
-        return "text-destructive";
-      default:
-        return "text-accent";
-    }
-  };
+  const chartData = data?.chartData ?? [];
+  const chartHasData = chartData.some((item) => item.total > 0);
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Visão geral das suas finanças</p>
+          <p className="text-muted-foreground mt-1">
+            Visão geral das suas finanças
+          </p>
         </div>
-        <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Pedido
-        </Button>
+        <OrderDialog>
+          <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Pedido
+          </Button>
+        </OrderDialog>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -71,7 +144,15 @@ const Dashboard = () => {
               <metric.icon className={`h-5 w-5 ${metric.color}`} />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{metric.value}</div>
+              {isLoading ? (
+                <Skeleton className="h-8 w-24" />
+              ) : metric.value !== null ? (
+                <div className="text-2xl font-bold">{metric.value}</div>
+              ) : (
+                <div className="text-sm text-muted-foreground">
+                  Erro ao carregar métricas.
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}
@@ -83,12 +164,56 @@ const Dashboard = () => {
             <CardTitle>Valores a Pagar (Próximas Semanas)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64 flex items-center justify-center text-muted-foreground">
-              <div className="text-center">
-                <TrendingUp className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                <p>Gráfico de valores em desenvolvimento</p>
+            {isLoading ? (
+              <Skeleton className="h-64 w-full" />
+            ) : chartHasData ? (
+              <ChartContainer config={chartConfig} className="h-64 w-full">
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="4 4" vertical={false} />
+                  <XAxis
+                    dataKey="label"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    width={80}
+                    tickFormatter={(value) =>
+                      new Intl.NumberFormat("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                        maximumFractionDigits: 0,
+                      }).format(value as number)
+                    }
+                  />
+                  <ChartTooltip
+                    cursor={{ fill: "rgba(148, 163, 184, 0.12)" }}
+                    content={
+                      <ChartTooltipContent
+                        labelFormatter={(_, payload) =>
+                          payload?.[0]?.payload.range ?? ""
+                        }
+                        formatter={(value) => [
+                          formatCurrency(value as number),
+                          "Valor a pagar",
+                        ]}
+                      />
+                    }
+                  />
+                  <Bar
+                    dataKey="total"
+                    fill="var(--color-total)"
+                    radius={[6, 6, 0, 0]}
+                  />
+                </BarChart>
+              </ChartContainer>
+            ) : (
+              <div className="h-64 flex items-center justify-center text-sm text-muted-foreground text-center">
+                Nenhum valor pendente para as próximas semanas.
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
 
@@ -97,26 +222,37 @@ const Dashboard = () => {
             <CardTitle>Próximos Vencimentos</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {upcomingPayments.map((payment, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                  <div className="flex-1">
-                    <p className="font-medium text-sm">{payment.supplier}</p>
-                    <p className="text-xs text-muted-foreground">Pedido {payment.order}</p>
-                  </div>
-                  <div className="text-right mr-4">
-                    <p className="font-semibold text-sm">{payment.value}</p>
-                    <p className="text-xs text-muted-foreground">{payment.date}</p>
-                  </div>
-                  <span className={`text-xs font-medium ${getStatusColor(payment.status)}`}>
-                    {payment.status}
-                  </span>
-                </div>
-              ))}
-            </div>
+            {isLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <Skeleton key={index} className="h-16 w-full" />
+                ))}
+              </div>
+            ) : data && data.upcomingInstallments.length > 0 ? (
+              <div className="space-y-3">
+                {data.upcomingInstallments.map(renderUpcomingItem)}
+              </div>
+            ) : (
+              <div className="text-sm text-muted-foreground">
+                Nenhuma parcela pendente no momento.
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
+
+      {isError ? (
+        <div className="border border-destructive/30 bg-destructive/10 text-destructive rounded-md p-4 text-sm">
+          Ocorreu um erro ao carregar os dados.{" "}
+          <button
+            type="button"
+            className="underline font-medium"
+            onClick={() => refetch()}
+          >
+            Tentar novamente
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 };
