@@ -104,7 +104,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -130,6 +130,27 @@ const Auth = () => {
           });
         }
       } else {
+        const user = data.user;
+        // Se tiver user.id disponível, cria o perfil
+        if (user?.id) {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .upsert({ 
+              user_id: user.id, 
+              full_name: fullName,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            });
+
+          if (profileError) {
+            toast({
+              title: 'Erro ao salvar perfil',
+              description: profileError.message,
+              variant: 'destructive',
+            });
+          }
+        }
+
         toast({
           title: "Conta criada!",
           description: "Você já pode fazer login.",
