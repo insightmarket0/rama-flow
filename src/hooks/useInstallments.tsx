@@ -133,6 +133,7 @@ export const useInstallments = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["installments"] });
+      queryClient.invalidateQueries({ queryKey: ["onboarding", "progress"] });
       toast({
         title: "Parcela atualizada",
         description: "Status marcado como pago.",

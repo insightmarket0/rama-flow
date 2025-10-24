@@ -60,6 +60,52 @@ All colors MUST be HSL.
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
   }
+
+  .dark {
+    --background: 150 25% 5%;
+    --foreground: 150 20% 90%;
+
+    --card: 150 23% 9%;
+    --card-foreground: 150 20% 92%;
+
+    --popover: 150 23% 9%;
+    --popover-foreground: 150 20% 92%;
+
+    --primary: 142 71% 45%;
+    --primary-foreground: 150 20% 8%;
+
+    --secondary: 150 32% 18%;
+    --secondary-foreground: 150 20% 92%;
+
+    --muted: 150 21% 14%;
+    --muted-foreground: 150 19% 70%;
+
+    --accent: 50 100% 58%;
+    --accent-foreground: 150 20% 12%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 150 24% 18%;
+    --input: 150 24% 18%;
+    --ring: 142 71% 40%;
+
+    --sidebar-background: 150 23% 9%;
+    --sidebar-foreground: 150 20% 92%;
+    --sidebar-primary: 142 71% 45%;
+    --sidebar-primary-foreground: 150 20% 8%;
+    --sidebar-accent: 150 26% 16%;
+    --sidebar-accent-foreground: 150 20% 92%;
+    --sidebar-border: 150 24% 18%;
+    --sidebar-ring: 50 100% 58%;
+
+    --rama-green-dark: 150 23% 12%;
+    --rama-green-medium: 142 71% 45%;
+    --rama-yellow: 50 100% 58%;
+    --rama-success: 142 71% 45%;
+    --rama-warning: 50 100% 58%;
+    --rama-danger: 0 70% 50%;
+  }
 }
 
 @layer base {

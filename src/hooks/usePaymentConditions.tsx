@@ -39,6 +39,7 @@ export const usePaymentConditions = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["payment_conditions"] });
+      queryClient.invalidateQueries({ queryKey: ["onboarding", "progress"] });
       toast.success("Condição de pagamento criada com sucesso!");
     },
     onError: (error) => {
@@ -60,6 +61,7 @@ export const usePaymentConditions = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["payment_conditions"] });
+      queryClient.invalidateQueries({ queryKey: ["onboarding", "progress"] });
       toast.success("Condição de pagamento atualizada com sucesso!");
     },
     onError: (error) => {
@@ -78,6 +80,7 @@ export const usePaymentConditions = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["payment_conditions"] });
+      queryClient.invalidateQueries({ queryKey: ["onboarding", "progress"] });
       toast.success("Condição de pagamento excluída com sucesso!");
     },
     onError: (error) => {

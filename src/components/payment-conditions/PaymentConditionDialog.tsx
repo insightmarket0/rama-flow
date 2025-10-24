@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { OPEN_PAYMENT_CONDITION_DIALOG_EVENT } from "@/lib/events";
 
 const paymentConditionSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório").max(100),
@@ -20,10 +21,11 @@ type PaymentConditionFormData = z.infer<typeof paymentConditionSchema>;
 
 interface PaymentConditionDialogProps {
   condition?: Tables<"payment_conditions">;
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
+  listenForGlobalOpen?: boolean;
 }
 
-export const PaymentConditionDialog = ({ condition, trigger }: PaymentConditionDialogProps) => {
+export const PaymentConditionDialog = ({ condition, trigger, listenForGlobalOpen = false }: PaymentConditionDialogProps) => {
   const [open, setOpen] = useState(false);
   const { createPaymentCondition, updatePaymentCondition } = usePaymentConditions();
 
@@ -36,6 +38,25 @@ export const PaymentConditionDialog = ({ condition, trigger }: PaymentConditionD
       down_payment_percent: condition?.down_payment_percent || 0,
     },
   });
+
+  useEffect(() => {
+    if (!listenForGlobalOpen || condition || typeof window === "undefined") {
+      return;
+    }
+
+    const handleOpen = () => {
+      form.reset({
+        name: "",
+        installments: 1,
+        interval_days: 30,
+        down_payment_percent: 0,
+      });
+      setOpen(true);
+    };
+
+    window.addEventListener(OPEN_PAYMENT_CONDITION_DIALOG_EVENT, handleOpen);
+    return () => window.removeEventListener(OPEN_PAYMENT_CONDITION_DIALOG_EVENT, handleOpen);
+  }, [condition, form, listenForGlobalOpen]);
 
   const onSubmit = async (data: PaymentConditionFormData) => {
     try {
@@ -60,7 +81,7 @@ export const PaymentConditionDialog = ({ condition, trigger }: PaymentConditionD
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      {trigger ? <DialogTrigger asChild>{trigger}</DialogTrigger> : null}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{condition ? "Editar Condição" : "Nova Condição de Pagamento"}</DialogTitle>

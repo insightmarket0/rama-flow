@@ -2,22 +2,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { OrderDialog } from "@/components/orders/OrderDialog";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
-  Plus,
-  TrendingUp,
-  AlertCircle,
-  ShoppingCart,
-  Users,
-} from "lucide-react";
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Plus, TrendingUp, AlertCircle, ShoppingCart, Users, BarChart3, CalendarClock } from "lucide-react";
+import { format, parseISO } from "date-fns";
 import { useDashboard } from "@/hooks/useDashboard";
 import {
   InstallmentStatus,
   InstallmentWithRelations,
 } from "@/hooks/useInstallments";
-import { format, parseISO } from "date-fns";
+import { formatCurrencyBRL, formatNumberBR } from "@/lib/format";
+import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
+import { EmptyState } from "@/components/layout/EmptyState";
+import { dispatchAppEvent, OPEN_ORDER_DIALOG_EVENT } from "@/lib/events";
 
 const statusLabels: Record<InstallmentStatus, string> = {
   pendente: "Pendente",
@@ -35,17 +36,6 @@ const getStatusVariant = (status: InstallmentStatus) => {
       return "secondary";
   }
 };
-
-const formatCurrency = (value: number) =>
-  new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
-
-const formatNumber = (value: number) =>
-  new Intl.NumberFormat("pt-BR").format(value);
 
 const chartConfig = {
   total: {
@@ -72,7 +62,7 @@ const renderUpcomingItem = (installment: InstallmentWithRelations) => (
     </div>
     <div className="text-right">
       <p className="font-semibold text-sm">
-        {formatCurrency(installment.value)}
+        {formatCurrencyBRL(installment.value)}
       </p>
       <p className="text-xs text-muted-foreground">
         {format(parseISO(installment.due_date), "dd/MM/yyyy")}
@@ -92,25 +82,25 @@ const Dashboard = () => {
       title: "Total a Pagar (30 dias)",
       icon: TrendingUp,
       color: "text-secondary",
-      value: data ? formatCurrency(data.metrics.upcoming30DaysTotal) : null,
+      value: data ? formatCurrencyBRL(data.metrics.upcoming30DaysTotal) : null,
     },
     {
       title: "Parcelas Vencidas",
       icon: AlertCircle,
       color: "text-destructive",
-      value: data ? formatNumber(data.metrics.overdueCount) : null,
+      value: data ? formatNumberBR(data.metrics.overdueCount) : null,
     },
     {
       title: "Pedidos em Aberto",
       icon: ShoppingCart,
       color: "text-accent",
-      value: data ? formatNumber(data.metrics.openOrdersCount) : null,
+      value: data ? formatNumberBR(data.metrics.openOrdersCount) : null,
     },
     {
       title: "Fornecedores Ativos",
       icon: Users,
       color: "text-primary",
-      value: data ? formatNumber(data.metrics.activeSuppliersCount) : null,
+      value: data ? formatNumberBR(data.metrics.activeSuppliersCount) : null,
     },
   ];
 
@@ -119,6 +109,7 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
+      <OnboardingChecklist />
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
@@ -126,12 +117,13 @@ const Dashboard = () => {
             Visão geral das suas finanças
           </p>
         </div>
-        <OrderDialog>
-          <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">
-            <Plus className="h-4 w-4 mr-2" />
-            Novo Pedido
-          </Button>
-        </OrderDialog>
+        <Button
+          className="bg-accent hover:bg-accent/90 text-accent-foreground"
+          onClick={() => dispatchAppEvent(OPEN_ORDER_DIALOG_EVENT)}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Novo Pedido
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -196,7 +188,7 @@ const Dashboard = () => {
                           payload?.[0]?.payload.range ?? ""
                         }
                         formatter={(value) => [
-                          formatCurrency(value as number),
+                          formatCurrencyBRL(value as number),
                           "Valor a pagar",
                         ]}
                       />
@@ -210,9 +202,22 @@ const Dashboard = () => {
                 </BarChart>
               </ChartContainer>
             ) : (
-              <div className="h-64 flex items-center justify-center text-sm text-muted-foreground text-center">
-                Nenhum valor pendente para as próximas semanas.
-              </div>
+              <EmptyState
+                className="h-64"
+                icon={<BarChart3 className="h-6 w-6" />}
+                title="Sem valores previstos"
+                description="Não encontramos valores a pagar para as próximas semanas. Cadastre pedidos para ver projeções aqui."
+                action={
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => dispatchAppEvent(OPEN_ORDER_DIALOG_EVENT)}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Criar pedido
+                  </Button>
+                }
+              />
             )}
           </CardContent>
         </Card>
@@ -233,9 +238,11 @@ const Dashboard = () => {
                 {data.upcomingInstallments.map(renderUpcomingItem)}
               </div>
             ) : (
-              <div className="text-sm text-muted-foreground">
-                Nenhuma parcela pendente no momento.
-              </div>
+              <EmptyState
+                icon={<CalendarClock className="h-6 w-6" />}
+                title="Sem vencimentos próximos"
+                description="As parcelas aparecerão aqui quando estiverem próximas do vencimento."
+              />
             )}
           </CardContent>
         </Card>

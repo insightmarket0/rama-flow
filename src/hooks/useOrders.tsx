@@ -152,6 +152,7 @@ export const useOrders = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       queryClient.invalidateQueries({ queryKey: ["installments"] });
+      queryClient.invalidateQueries({ queryKey: ["onboarding", "progress"] });
       toast({
         title: "Pedido criado com sucesso!",
         description: "As parcelas foram geradas automaticamente.",
@@ -183,6 +184,7 @@ export const useOrders = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       queryClient.invalidateQueries({ queryKey: ["installments"] });
+      queryClient.invalidateQueries({ queryKey: ["onboarding", "progress"] });
       toast({
         title: "Pedido deletado com sucesso!",
       });
@@ -207,6 +209,7 @@ export const useOrders = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["onboarding", "progress"] });
       toast({
         title: "Status atualizado!",
       });

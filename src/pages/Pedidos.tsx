@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, ShoppingCart } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -22,8 +22,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useOrders } from "@/hooks/useOrders";
-import { OrderDialog } from "@/components/orders/OrderDialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { dispatchAppEvent, OPEN_ORDER_DIALOG_EVENT } from "@/lib/events";
+import { formatCurrencyBRL } from "@/lib/format";
+import { EmptyState } from "@/components/layout/EmptyState";
 
 const Pedidos = () => {
   const { orders, isLoading, deleteOrder, updateOrderStatus } = useOrders();
@@ -46,12 +48,13 @@ const Pedidos = () => {
           <h1 className="text-3xl font-bold text-foreground">Pedidos de Compra</h1>
           <p className="text-muted-foreground mt-1">Gerencie seus pedidos e fornecedores</p>
         </div>
-        <OrderDialog>
-          <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">
-            <Plus className="h-4 w-4 mr-2" />
-            Novo Pedido
-          </Button>
-        </OrderDialog>
+        <Button
+          className="bg-accent hover:bg-accent/90 text-accent-foreground"
+          onClick={() => dispatchAppEvent(OPEN_ORDER_DIALOG_EVENT)}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Novo Pedido
+        </Button>
       </div>
 
       <Card className="card-shadow">
@@ -59,20 +62,20 @@ const Pedidos = () => {
           <CardTitle>Lista de Pedidos</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nº do Pedido</TableHead>
-                <TableHead>Fornecedor</TableHead>
-                <TableHead>Valor Total</TableHead>
-                <TableHead>Condição</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                Array.from({ length: 3 }).map((_, index) => (
+          {isLoading ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nº do Pedido</TableHead>
+                  <TableHead>Fornecedor</TableHead>
+                  <TableHead>Valor Total</TableHead>
+                  <TableHead>Condição</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Array.from({ length: 3 }).map((_, index) => (
                   <TableRow key={index}>
                     <TableCell><Skeleton className="h-4 w-16" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-32" /></TableCell>
@@ -81,13 +84,27 @@ const Pedidos = () => {
                     <TableCell><Skeleton className="h-6 w-16" /></TableCell>
                     <TableCell><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
                   </TableRow>
-                ))
-              ) : orders && orders.length > 0 ? (
-                orders.map((order) => (
+                ))}
+              </TableBody>
+            </Table>
+          ) : orders && orders.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nº do Pedido</TableHead>
+                  <TableHead>Fornecedor</TableHead>
+                  <TableHead>Valor Total</TableHead>
+                  <TableHead>Condição</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {orders.map((order) => (
                   <TableRow key={order.id}>
                     <TableCell className="font-medium">{order.order_number}</TableCell>
                     <TableCell>{order.supplier?.name || "N/A"}</TableCell>
-                    <TableCell>R$ {order.total_value.toFixed(2)}</TableCell>
+                    <TableCell>{formatCurrencyBRL(order.total_value)}</TableCell>
                     <TableCell>{order.payment_condition?.name || "N/A"}</TableCell>
                     <TableCell>
                       <Badge variant={getStatusVariant(order.status)}>
@@ -125,9 +142,7 @@ const Pedidos = () => {
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => deleteOrder.mutate(order.id)}
-                              >
+                              <AlertDialogAction onClick={() => deleteOrder.mutate(order.id)}>
                                 Deletar
                               </AlertDialogAction>
                             </AlertDialogFooter>
@@ -136,16 +151,22 @@ const Pedidos = () => {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground">
-                    Nenhum pedido encontrado. Crie seu primeiro pedido!
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <EmptyState
+              icon={<ShoppingCart className="h-6 w-6" />}
+              title="Nenhum pedido ainda"
+              description="Crie seu primeiro pedido de compra para gerar automaticamente as parcelas a pagar."
+              action={
+                <Button onClick={() => dispatchAppEvent(OPEN_ORDER_DIALOG_EVENT)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Criar pedido
+                </Button>
+              }
+            />
+          )}
         </CardContent>
       </Card>
     </div>

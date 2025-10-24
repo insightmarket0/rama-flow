@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -38,6 +38,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { OPEN_ORDER_DIALOG_EVENT } from "@/lib/events";
+import { formatCurrencyBRL } from "@/lib/format";
 
 const orderSchema = z.object({
   supplier_id: z.string().min(1, "Selecione um fornecedor"),
@@ -47,10 +49,11 @@ const orderSchema = z.object({
 });
 
 interface OrderDialogProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  enableGlobalOpen?: boolean;
 }
 
-export function OrderDialog({ children }: OrderDialogProps) {
+export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogProps) {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<OrderItem[]>([]);
   const [currentItem, setCurrentItem] = useState({
@@ -73,6 +76,19 @@ export function OrderDialog({ children }: OrderDialogProps) {
       discount: 0,
     },
   });
+
+  useEffect(() => {
+    if (!enableGlobalOpen || typeof window === "undefined") {
+      return;
+    }
+
+    const handleOpen = () => {
+      setOpen(true);
+    };
+
+    window.addEventListener(OPEN_ORDER_DIALOG_EVENT, handleOpen);
+    return () => window.removeEventListener(OPEN_ORDER_DIALOG_EVENT, handleOpen);
+  }, [enableGlobalOpen]);
 
   const addItem = () => {
     if (
@@ -164,7 +180,7 @@ export function OrderDialog({ children }: OrderDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      {children ? <DialogTrigger asChild>{children}</DialogTrigger> : null}
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Novo Pedido de Compra</DialogTitle>
@@ -292,10 +308,10 @@ export function OrderDialog({ children }: OrderDialogProps) {
                         <TableCell>{item.description}</TableCell>
                         <TableCell>{item.quantity}</TableCell>
                         <TableCell>
-                          R$ {item.unit_price.toFixed(2)}
+                          {formatCurrencyBRL(item.unit_price)}
                         </TableCell>
                         <TableCell>
-                          R$ {(item.quantity * item.unit_price).toFixed(2)}
+                          {formatCurrencyBRL(item.quantity * item.unit_price)}
                         </TableCell>
                         <TableCell>
                           <Button
@@ -347,7 +363,7 @@ export function OrderDialog({ children }: OrderDialogProps) {
             <div className="bg-muted p-4 rounded-lg space-y-2">
               <div className="flex justify-between font-semibold">
                 <span>Valor Total:</span>
-                <span>R$ {calculateTotal().toFixed(2)}</span>
+                <span>{formatCurrencyBRL(calculateTotal())}</span>
               </div>
             </div>
 
@@ -362,7 +378,7 @@ export function OrderDialog({ children }: OrderDialogProps) {
                           ? "Entrada"
                           : `Parcela ${inst.number}`}
                       </span>
-                      <span>R$ {inst.value.toFixed(2)}</span>
+                      <span>{formatCurrencyBRL(inst.value)}</span>
                       <span>{inst.date}</span>
                     </div>
                   ))}

@@ -39,6 +39,7 @@ export const useSuppliers = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["suppliers"] });
+      queryClient.invalidateQueries({ queryKey: ["onboarding", "progress"] });
       toast.success("Fornecedor criado com sucesso!");
     },
     onError: (error) => {
@@ -60,6 +61,7 @@ export const useSuppliers = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["suppliers"] });
+      queryClient.invalidateQueries({ queryKey: ["onboarding", "progress"] });
       toast.success("Fornecedor atualizado com sucesso!");
     },
     onError: (error) => {
@@ -78,6 +80,7 @@ export const useSuppliers = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["suppliers"] });
+      queryClient.invalidateQueries({ queryKey: ["onboarding", "progress"] });
       toast.success("Fornecedor excluído com sucesso!");
     },
     onError: (error) => {

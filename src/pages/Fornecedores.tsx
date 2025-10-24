@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, Users } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -22,6 +22,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import { dispatchAppEvent, OPEN_SUPPLIER_DIALOG_EVENT } from "@/lib/events";
+import { EmptyState } from "@/components/layout/EmptyState";
 
 const Fornecedores = () => {
   const { suppliers, isLoading, deleteSupplier } = useSuppliers();
@@ -33,14 +36,13 @@ const Fornecedores = () => {
           <h1 className="text-3xl font-bold text-foreground">Fornecedores</h1>
           <p className="text-muted-foreground mt-1">Gerencie seus fornecedores e histórico</p>
         </div>
-        <SupplierDialog
-          trigger={
-            <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Fornecedor
-            </Button>
-          }
-        />
+        <Button
+          className="bg-accent hover:bg-accent/90 text-accent-foreground"
+          onClick={() => dispatchAppEvent(OPEN_SUPPLIER_DIALOG_EVENT)}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Novo Fornecedor
+        </Button>
       </div>
 
       <Card className="card-shadow">
@@ -48,33 +50,42 @@ const Fornecedores = () => {
           <CardTitle>Lista de Fornecedores</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>CNPJ</TableHead>
-                <TableHead>E-mail</TableHead>
-                <TableHead>Telefone</TableHead>
-                <TableHead>Pedidos</TableHead>
-                <TableHead>Total Comprado</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
+          {isLoading ? (
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center">
-                    Carregando...
+                  <TableHead>Nome</TableHead>
+                  <TableHead>CNPJ</TableHead>
+                  <TableHead>E-mail</TableHead>
+                  <TableHead>Telefone</TableHead>
+                  <TableHead>Pedidos</TableHead>
+                  <TableHead>Total Comprado</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell colSpan={7}>
+                    <Skeleton className="h-12 w-full" />
                   </TableCell>
                 </TableRow>
-              ) : suppliers?.length === 0 ? (
+              </TableBody>
+            </Table>
+          ) : suppliers && suppliers.length > 0 ? (
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center">
-                    Nenhum fornecedor cadastrado
-                  </TableCell>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>CNPJ</TableHead>
+                  <TableHead>E-mail</TableHead>
+                  <TableHead>Telefone</TableHead>
+                  <TableHead>Pedidos</TableHead>
+                  <TableHead>Total Comprado</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
-              ) : (
-                suppliers?.map((supplier) => (
+              </TableHeader>
+              <TableBody>
+                {suppliers.map((supplier) => (
                   <TableRow key={supplier.id}>
                     <TableCell className="font-medium">{supplier.name}</TableCell>
                     <TableCell>{supplier.cnpj}</TableCell>
@@ -117,10 +128,22 @@ const Fornecedores = () => {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <EmptyState
+              icon={<Users className="h-6 w-6" />}
+              title="Cadastre seu primeiro fornecedor"
+              description="Centralize seus parceiros e facilite a gestão dos pedidos registrados."
+              action={
+                <Button onClick={() => dispatchAppEvent(OPEN_SUPPLIER_DIALOG_EVENT)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Novo fornecedor
+                </Button>
+              }
+            />
+          )}
         </CardContent>
       </Card>
     </div>

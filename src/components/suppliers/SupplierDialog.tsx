@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { OPEN_SUPPLIER_DIALOG_EVENT } from "@/lib/events";
 
 const supplierSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório").max(100),
@@ -21,10 +22,11 @@ type SupplierFormData = z.infer<typeof supplierSchema>;
 
 interface SupplierDialogProps {
   supplier?: Tables<"suppliers">;
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
+  listenForGlobalOpen?: boolean;
 }
 
-export const SupplierDialog = ({ supplier, trigger }: SupplierDialogProps) => {
+export const SupplierDialog = ({ supplier, trigger, listenForGlobalOpen = false }: SupplierDialogProps) => {
   const [open, setOpen] = useState(false);
   const { createSupplier, updateSupplier } = useSuppliers();
 
@@ -37,6 +39,25 @@ export const SupplierDialog = ({ supplier, trigger }: SupplierDialogProps) => {
       phone: supplier?.phone || "",
     },
   });
+
+  useEffect(() => {
+    if (!listenForGlobalOpen || supplier || typeof window === "undefined") {
+      return;
+    }
+
+    const handleOpen = () => {
+      form.reset({
+        name: "",
+        cnpj: "",
+        email: "",
+        phone: "",
+      });
+      setOpen(true);
+    };
+
+    window.addEventListener(OPEN_SUPPLIER_DIALOG_EVENT, handleOpen);
+    return () => window.removeEventListener(OPEN_SUPPLIER_DIALOG_EVENT, handleOpen);
+  }, [form, listenForGlobalOpen, supplier]);
 
   const onSubmit = async (data: SupplierFormData) => {
     try {
@@ -61,7 +82,7 @@ export const SupplierDialog = ({ supplier, trigger }: SupplierDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      {trigger ? <DialogTrigger asChild>{trigger}</DialogTrigger> : null}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{supplier ? "Editar Fornecedor" : "Novo Fornecedor"}</DialogTitle>
