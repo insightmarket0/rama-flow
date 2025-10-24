@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Círculo de fundo -->
+  <circle cx="256" cy="256" r="256" fill="#1D4434"/>
+  
+  <!-- Folha estilizada (3 partes) -->
+  <path d="M256 120 L356 256 L256 392 L156 256 Z" fill="#FFD700"/>
+  <path d="M256 160 L326 256 L256 352 L186 256 Z" fill="#1D4434"/>
+  <path d="M256 200 L296 256 L256 312 L216 256 Z" fill="#FFD700"/>
+  
+  <!-- Detalhes da folha -->
+  <path d="M256 120 L276 150 L256 180 L236 150 Z" fill="#23A557"/>
+  <path d="M256 352 L276 382 L256 412 L236 382 Z" fill="#23A557"/>
+</svg>

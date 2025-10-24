@@ -183,12 +183,17 @@ const Auth = () => {
       <Card className="w-full max-w-md card-shadow-lg">
         <CardHeader className="space-y-3">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="h-12 w-12 rounded-lg bg-accent flex items-center justify-center">
-              <span className="text-3xl">🌿</span>
-            </div>
-            <div>
-              <CardTitle className="text-2xl">RAMA</CardTitle>
-              <CardDescription>Gestão Financeira B2B</CardDescription>
+            <div className="flex items-center">
+              <img
+                src="/assets/logo.png"
+                alt="RAMA"
+                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                className="h-12 w-auto max-w-[48px] object-contain"
+              />
+              <div className="ml-3 text-left">
+                <CardTitle className="text-2xl">RAMA</CardTitle>
+                <CardDescription>Gestão Financeira B2B</CardDescription>
+              </div>
             </div>
           </div>
         </CardHeader>

@@ -29,12 +29,18 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border p-6">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-rama-yellow flex items-center justify-center">
-            <span className="text-2xl">🌿</span>
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-sidebar-foreground">RAMA</h1>
-            <p className="text-xs text-sidebar-foreground/70">Gestão Financeira</p>
+          {/* Logo: coloque o arquivo em public/assets/rama-logo.png ou .svg */}
+          <div className="flex items-center">
+            <img
+              src="/assets/logo.png"
+              alt="RAMA"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+              className="h-10 w-auto max-w-[40px] object-contain"
+            />
+            <div className="ml-3">
+              <h1 className="text-xl font-bold text-sidebar-foreground">RAMA</h1>
+              <p className="text-xs text-sidebar-foreground/70">Gestão Financeira</p>
+            </div>
           </div>
         </div>
       </SidebarHeader>
