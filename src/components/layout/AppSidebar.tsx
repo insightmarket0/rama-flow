@@ -27,20 +27,20 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="border-b border-sidebar-border p-6">
-        <div className="flex items-center gap-3">
-          {/* Logo: coloque o arquivo em public/assets/rama-logo.png ou .svg */}
-          <div className="flex items-center">
+      <SidebarHeader className="border-b border-sidebar-border p-6 bg-gradient-to-br from-accent/10 via-transparent to-primary/5">
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <div className="absolute inset-0 bg-accent/20 blur-xl rounded-full" />
             <img
               src="/assets/logo.png"
               alt="RAMA"
               onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
-              className="h-10 w-auto max-w-[40px] object-contain"
+              className="relative h-14 w-auto object-contain"
             />
-            <div className="ml-3">
-              <h1 className="text-xl font-bold text-sidebar-foreground">RAMA</h1>
-              <p className="text-xs text-sidebar-foreground/70">Gestão Financeira</p>
-            </div>
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-wide text-sidebar-foreground">RAMA</h1>
+            <p className="text-xs font-medium text-accent">Gestão Financeira</p>
           </div>
         </div>
       </SidebarHeader>
