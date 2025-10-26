@@ -4,11 +4,13 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { Plus, TrendingUp, AlertCircle, ShoppingCart, Users, BarChart3, CalendarClock } from "lucide-react";
+import { Plus, TrendingUp, AlertCircle, ShoppingCart, Users, BarChart3, CalendarClock, Wallet } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { useDashboard } from "@/hooks/useDashboard";
 import {
@@ -38,9 +40,13 @@ const getStatusVariant = (status: InstallmentStatus) => {
 };
 
 const chartConfig = {
-  total: {
-    label: "Valor a pagar",
+  variaveis: {
+    label: "Variáveis",
     color: "hsl(var(--chart-1))",
+  },
+  fixas: {
+    label: "Fixas",
+    color: "hsl(var(--chart-2))",
   },
 };
 
@@ -79,10 +85,22 @@ const Dashboard = () => {
 
   const metrics = [
     {
-      title: "Total a Pagar (30 dias)",
+      title: "Projeção de Caixa (30 dias)",
       icon: TrendingUp,
       color: "text-secondary",
-      value: data ? formatCurrencyBRL(data.metrics.upcoming30DaysTotal) : null,
+      value: data ? formatCurrencyBRL(data.metrics.cashProjectionNext30Days) : null,
+    },
+    {
+      title: "Despesas Variáveis (30 dias)",
+      icon: Wallet,
+      color: "text-accent",
+      value: data ? formatCurrencyBRL(data.metrics.upcomingVariable30DaysTotal) : null,
+    },
+    {
+      title: "Despesas Fixas (mês atual)",
+      icon: CalendarClock,
+      color: "text-primary",
+      value: data ? formatCurrencyBRL(data.metrics.recurringMonthlyTotal) : null,
     },
     {
       title: "Parcelas Vencidas",
@@ -93,19 +111,19 @@ const Dashboard = () => {
     {
       title: "Pedidos em Aberto",
       icon: ShoppingCart,
-      color: "text-accent",
+      color: "text-muted-foreground",
       value: data ? formatNumberBR(data.metrics.openOrdersCount) : null,
     },
     {
       title: "Fornecedores Ativos",
       icon: Users,
-      color: "text-primary",
+      color: "text-muted-foreground",
       value: data ? formatNumberBR(data.metrics.activeSuppliersCount) : null,
     },
   ];
 
-  const chartData = data?.chartData ?? [];
-  const chartHasData = chartData.some((item) => item.total > 0);
+  const chartData = data?.variableVsFixedChart ?? [];
+  const chartHasData = chartData.some((item) => item.variaveis > 0 || item.fixas > 0);
 
   return (
     <div className="space-y-6">
@@ -126,7 +144,7 @@ const Dashboard = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-6">
         {metrics.map((metric) => (
           <Card key={metric.title} className="hover-scale card-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -153,60 +171,71 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="card-shadow">
           <CardHeader>
-            <CardTitle>Valores a Pagar (Próximas Semanas)</CardTitle>
+            <CardTitle>Variáveis vs Fixas (Próximas Semanas)</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <Skeleton className="h-64 w-full" />
             ) : chartHasData ? (
-              <ChartContainer config={chartConfig} className="h-64 w-full">
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="4 4" vertical={false} />
-                  <XAxis
-                    dataKey="label"
-                    tickLine={false}
-                    axisLine={false}
-                    tickMargin={8}
-                  />
-                  <YAxis
-                    tickLine={false}
-                    axisLine={false}
-                    width={80}
-                    tickFormatter={(value) =>
-                      new Intl.NumberFormat("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                        maximumFractionDigits: 0,
-                      }).format(value as number)
-                    }
-                  />
-                  <ChartTooltip
-                    cursor={{ fill: "rgba(148, 163, 184, 0.12)" }}
-                    content={
-                      <ChartTooltipContent
-                        labelFormatter={(_, payload) =>
-                          payload?.[0]?.payload.range ?? ""
-                        }
-                        formatter={(value) => [
-                          formatCurrencyBRL(value as number),
-                          "Valor a pagar",
-                        ]}
-                      />
-                    }
-                  />
-                  <Bar
-                    dataKey="total"
-                    fill="var(--color-total)"
-                    radius={[6, 6, 0, 0]}
-                  />
-                </BarChart>
-              </ChartContainer>
+              <>
+                <ChartContainer config={chartConfig} className="h-64 w-full">
+                  <BarChart data={chartData}>
+                    <CartesianGrid strokeDasharray="4 4" vertical={false} />
+                    <XAxis
+                      dataKey="label"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                    />
+                    <YAxis
+                      tickLine={false}
+                      axisLine={false}
+                      width={80}
+                      tickFormatter={(value) =>
+                        new Intl.NumberFormat("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                          maximumFractionDigits: 0,
+                        }).format(value as number)
+                      }
+                    />
+                    <ChartTooltip
+                      cursor={{ fill: "rgba(148, 163, 184, 0.12)" }}
+                      content={
+                        <ChartTooltipContent
+                          labelFormatter={(_, payload) =>
+                            payload?.[0]?.payload.range ?? ""
+                          }
+                          formatter={(value, seriesKey) => [
+                            formatCurrencyBRL(value as number),
+                            seriesKey === "variaveis" ? "Variáveis" : "Fixas",
+                          ]}
+                        />
+                      }
+                    />
+                    <ChartLegend
+                      content={<ChartLegendContent />}
+                      wrapperStyle={{ paddingTop: 12 }}
+                    />
+                    <Bar
+                      dataKey="variaveis"
+                      fill="var(--color-variaveis)"
+                      radius={[6, 6, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="fixas"
+                      fill="var(--color-fixas)"
+                      radius={[6, 6, 0, 0]}
+                    />
+                  </BarChart>
+                </ChartContainer>
+              </>
             ) : (
               <EmptyState
                 className="h-64"
                 icon={<BarChart3 className="h-6 w-6" />}
                 title="Sem valores previstos"
-                description="Não encontramos valores a pagar para as próximas semanas. Cadastre pedidos para ver projeções aqui."
+                description="Cadastre pedidos ou contas fixas para ver projeções aqui."
                 action={
                   <Button
                     variant="secondary"

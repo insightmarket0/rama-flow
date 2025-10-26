@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +20,7 @@ import {
   Clock,
   AlertCircle
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -33,7 +33,7 @@ export default function ContasFixas() {
   const getCategoryIcon = (category: string) => {
     const cat = EXPENSE_CATEGORIES.find((c) => c.value === category);
     if (!cat) return <DollarSign className="h-5 w-5" />;
-    const IconComponent = LucideIcons[cat.icon as keyof typeof LucideIcons] as any;
+    const IconComponent = LucideIcons[cat.icon as keyof typeof LucideIcons] as LucideIcon | undefined;
     return IconComponent ? <IconComponent className="h-5 w-5" /> : <DollarSign className="h-5 w-5" />;
   };
 
@@ -42,7 +42,7 @@ export default function ContasFixas() {
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, { variant: "default" | "secondary" | "destructive"; icon: any }> = {
+    const variants: Record<string, { variant: "default" | "secondary" | "destructive"; icon: LucideIcon }> = {
       pendente: { variant: "secondary", icon: Clock },
       atrasado: { variant: "destructive", icon: AlertCircle },
       pago: { variant: "default", icon: CheckCircle2 },
@@ -73,8 +73,8 @@ export default function ContasFixas() {
   const totalUpcoming = upcomingInstallments?.reduce((sum, inst) => sum + Number(inst.value), 0) || 0;
 
   return (
-    <MainLayout>
-      <div className="container mx-auto py-6 space-y-6">
+    <>
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Contas Fixas</h1>
@@ -248,6 +248,6 @@ export default function ContasFixas() {
       </div>
 
       <RecurringExpenseDialog open={dialogOpen} onOpenChange={setDialogOpen} />
-    </MainLayout>
+    </>
   );
 }
