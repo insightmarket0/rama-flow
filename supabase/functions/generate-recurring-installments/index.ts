@@ -13,17 +13,36 @@ serve(async (req) => {
 
   try {
     console.log('Starting recurring installments generation...');
-    
+
+    let payload: Record<string, unknown> = {};
+    try {
+      if (req.headers.get('content-type')?.includes('application/json')) {
+        payload = await req.json();
+      }
+    } catch (parseError) {
+      console.warn('Could not parse request body for generate-recurring-installments:', parseError);
+    }
+
+    const expenseId = typeof payload.expenseId === 'string' ? payload.expenseId : undefined;
+    const monthsAheadRaw = Number(payload.monthsAhead);
+    const monthsAhead = Number.isFinite(monthsAheadRaw) ? Math.min(Math.max(monthsAheadRaw, 1), 12) : 3;
+
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
     // Fetch active recurring expenses
-    const { data: expenses, error: fetchError } = await supabase
+    let expensesQuery = supabase
       .from('recurring_expenses')
       .select('*')
       .eq('is_active', true);
+
+    if (expenseId) {
+      expensesQuery = expensesQuery.eq('id', expenseId);
+    }
+
+    const { data: expenses, error: fetchError } = await expensesQuery;
 
     if (fetchError) {
       console.error('Error fetching expenses:', fetchError);
@@ -47,9 +66,10 @@ serve(async (req) => {
       console.log(`Processing expense: ${expense.name}`);
       
       const monthsToAdd = recurrenceMonths[expense.recurrence_type] || 1;
-      
-      // Generate for next 3 periods
-      for (let i = 0; i < 3; i++) {
+
+      const periodsToGenerate = Math.max(1, Math.ceil(monthsAhead / monthsToAdd));
+
+      for (let i = 0; i < periodsToGenerate; i++) {
         const referenceDate = new Date(today);
         referenceDate.setMonth(referenceDate.getMonth() + (i * monthsToAdd));
         referenceDate.setDate(1); // First day of the month

@@ -71,3 +71,14 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Supabase configuration
+
+The cron job that gera parcelas automáticas chama a edge function `generate-recurring-installments` usando a configuração `app.settings.service_role_key`. Antes de habilitar o agendamento, defina esse valor no seu banco Supabase (substitua pelo Service Role Key real, encontrado nas configurações do projeto):
+
+```sql
+-- Execute no SQL Editor do Supabase
+alter database postgres set app.settings.service_role_key = 'SUPABASE_SERVICE_ROLE_KEY_AQUI';
+```
+
+Depois de aplicar o comando, reinicie as conexões (ou aguarde alguns segundos) para que o valor fique disponível para `current_setting('app.settings.service_role_key', true)`. Sem essa configuração, o job agendado retornará erro de autorização ao acionar a função edge.

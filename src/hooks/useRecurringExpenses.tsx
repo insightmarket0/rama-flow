@@ -38,12 +38,25 @@ export const useRecurringExpenses = () => {
         .insert({ ...expense, user_id: user.id })
         .select()
         .single();
-      
+
       if (error) throw error;
-      return data;
+
+      // Generate installments immediately so the timeline reflects the new expense
+      if (data?.id) {
+        try {
+          await supabase.functions.invoke("generate-recurring-installments", {
+            body: { expenseId: data.id, monthsAhead: 6 },
+          });
+        } catch (invokeError) {
+          console.error("Erro ao gerar parcelas para a nova conta fixa:", invokeError);
+        }
+      }
+
+      return data as RecurringExpense;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recurring-expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["recurring-expense-installments"] });
       queryClient.invalidateQueries({ queryKey: ["onboarding", "progress"] });
       toast.success("Conta fixa criada com sucesso!");
     },
