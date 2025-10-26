@@ -14,6 +14,9 @@ const Condicoes = lazy(() => import("./pages/Condicoes"));
 const Contas = lazy(() => import("./pages/Contas"));
 const ContasFixas = lazy(() => import("./pages/ContasFixas"));
 const Fornecedores = lazy(() => import("./pages/Fornecedores"));
+const Quotations = lazy(() => import("./pages/Quotations"));
+const QuotationForm = lazy(() => import("./pages/QuotationForm"));
+const QuotationDetail = lazy(() => import("./pages/QuotationDetail"));
 const Auth = lazy(() => import("./pages/Auth"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -94,6 +97,46 @@ const App = () => (
                 <ProtectedRoute>
                   <MainLayout>
                     <Fornecedores />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/quotations"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <Quotations />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/quotations/new"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <QuotationForm />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/quotations/:id/edit"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <QuotationForm />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/quotations/:id"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <QuotationDetail />
                   </MainLayout>
                 </ProtectedRoute>
               }

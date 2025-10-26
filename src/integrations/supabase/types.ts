@@ -161,6 +161,99 @@ export type Database = {
           name?: string
           updated_at?: string
           user_id?: string
+      }
+      Relationships: []
+    }
+      quotation_responses: {
+        Row: {
+          condicao_pagamento: string | null
+          created_at: string
+          fornecedor_id: string
+          id: string
+          observacao: string | null
+          prazo_dias: number
+          quotation_id: string
+          status: string
+          updated_at: string
+          user_id: string
+          valor_total: number
+        }
+        Insert: {
+          condicao_pagamento?: string | null
+          created_at?: string
+          fornecedor_id: string
+          id?: string
+          observacao?: string | null
+          prazo_dias?: number
+          quotation_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          valor_total: number
+        }
+        Update: {
+          condicao_pagamento?: string | null
+          created_at?: string
+          fornecedor_id?: string
+          id?: string
+          observacao?: string | null
+          prazo_dias?: number
+          quotation_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          valor_total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotation_responses_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotation_responses_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: false
+            referencedRelation: "quotations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotations: {
+        Row: {
+          created_at: string
+          data_limite: string | null
+          descricao: string | null
+          id: string
+          organization_id: string | null
+          status: string
+          titulo: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_limite?: string | null
+          descricao?: string | null
+          id?: string
+          organization_id?: string | null
+          status?: string
+          titulo: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data_limite?: string | null
+          descricao?: string | null
+          id?: string
+          organization_id?: string | null
+          status?: string
+          titulo?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

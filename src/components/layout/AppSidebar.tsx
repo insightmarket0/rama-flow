@@ -1,4 +1,4 @@
-import { LayoutDashboard, ShoppingCart, Wallet, Users, LogOut, Calendar } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, Wallet, Users, LogOut, Calendar, ClipboardList } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -19,6 +19,7 @@ const menuItems = [
   { title: "Pedidos de Compra", url: "/pedidos", icon: ShoppingCart },
   { title: "Contas a Pagar", url: "/contas", icon: Wallet },
   { title: "Contas Fixas", url: "/contas-fixas", icon: Calendar },
+  { title: "Cotações", url: "/quotations", icon: ClipboardList },
   { title: "Fornecedores", url: "/fornecedores", icon: Users },
 ];
 
