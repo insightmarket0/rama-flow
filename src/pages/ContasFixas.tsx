@@ -71,6 +71,18 @@ export default function ContasFixas() {
   };
 
   const totalUpcoming = upcomingInstallments?.reduce((sum, inst) => sum + Number(inst.value), 0) || 0;
+  const formatInstallmentDueDate = (value?: string | null) => {
+    if (!value) {
+      return "Data não informada";
+    }
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return "Data inválida";
+    }
+
+    return format(parsed, "dd 'de' MMMM", { locale: ptBR });
+  };
 
   return (
     <>
@@ -218,7 +230,7 @@ export default function ContasFixas() {
                                 {inst.recurring_expense?.name || "Despesa"}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                {format(new Date(inst.due_date), "dd 'de' MMMM", { locale: ptBR })}
+                                {formatInstallmentDueDate(inst.due_date)}
                               </p>
                             </div>
                             {getStatusBadge(inst.status || "pendente")}
