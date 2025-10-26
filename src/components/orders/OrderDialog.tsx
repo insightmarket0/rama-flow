@@ -40,6 +40,9 @@ import {
 } from "@/components/ui/table";
 import { OPEN_ORDER_DIALOG_EVENT } from "@/lib/events";
 import { formatCurrencyBRL } from "@/lib/format";
+import { PaymentConditionDialog } from "@/components/payment-conditions/PaymentConditionDialog";
+import { PaymentConditionsPanel } from "@/components/payment-conditions/PaymentConditionsPanel";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 const orderSchema = z.object({
   supplier_id: z.string().min(1, "Selecione um fornecedor"),
@@ -222,23 +225,55 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Condição de Pagamento</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {paymentConditions?.map((condition) => (
-                          <SelectItem key={condition.id} value={condition.id}>
-                            {condition.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="min-w-[220px]">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {paymentConditions?.map((condition) => (
+                            <SelectItem key={condition.id} value={condition.id}>
+                              {condition.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <PaymentConditionDialog
+                        onSuccess={(condition) => {
+                          form.setValue("payment_condition_id", condition.id, { shouldValidate: true });
+                        }}
+                        trigger={
+                          <Button type="button" variant="outline" size="sm">
+                            Nova
+                          </Button>
+                        }
+                      />
+                      <Sheet>
+                        <SheetTrigger asChild>
+                          <Button type="button" variant="outline" size="sm">
+                            Gerenciar
+                          </Button>
+                        </SheetTrigger>
+                        <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+                          <SheetHeader>
+                            <SheetTitle>Condições de Pagamento</SheetTitle>
+                          </SheetHeader>
+                          <div className="mt-6">
+                            <PaymentConditionsPanel
+                              variant="flat"
+                              onCreateSuccess={(condition) => {
+                                form.setValue("payment_condition_id", condition.id, { shouldValidate: true });
+                              }}
+                            />
+                          </div>
+                        </SheetContent>
+                      </Sheet>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}

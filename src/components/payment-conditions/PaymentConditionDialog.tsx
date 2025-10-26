@@ -23,9 +23,15 @@ interface PaymentConditionDialogProps {
   condition?: Tables<"payment_conditions">;
   trigger?: React.ReactNode;
   listenForGlobalOpen?: boolean;
+  onSuccess?: (condition: Tables<"payment_conditions">) => void;
 }
 
-export const PaymentConditionDialog = ({ condition, trigger, listenForGlobalOpen = false }: PaymentConditionDialogProps) => {
+export const PaymentConditionDialog = ({
+  condition,
+  trigger,
+  listenForGlobalOpen = false,
+  onSuccess,
+}: PaymentConditionDialogProps) => {
   const [open, setOpen] = useState(false);
   const { createPaymentCondition, updatePaymentCondition } = usePaymentConditions();
 
@@ -67,13 +73,15 @@ export const PaymentConditionDialog = ({ condition, trigger, listenForGlobalOpen
         down_payment_percent: data.down_payment_percent || 0,
       };
 
-      if (condition) {
-        await updatePaymentCondition.mutateAsync({ id: condition.id, ...conditionData });
-      } else {
-        await createPaymentCondition.mutateAsync(conditionData);
-      }
+      const savedCondition = condition
+        ? await updatePaymentCondition.mutateAsync({ id: condition.id, ...conditionData })
+        : await createPaymentCondition.mutateAsync(conditionData);
+
       setOpen(false);
       form.reset();
+      if (savedCondition) {
+        onSuccess?.(savedCondition as Tables<"payment_conditions">);
+      }
     } catch (error) {
       console.error("Erro ao salvar condição:", error);
     }

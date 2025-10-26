@@ -26,6 +26,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { dispatchAppEvent, OPEN_ORDER_DIALOG_EVENT } from "@/lib/events";
 import { formatCurrencyBRL } from "@/lib/format";
 import { EmptyState } from "@/components/layout/EmptyState";
+import { PaymentConditionsPanel } from "@/components/payment-conditions/PaymentConditionsPanel";
 
 const Pedidos = () => {
   const { orders, isLoading, deleteOrder, updateOrderStatus } = useOrders();
@@ -169,6 +170,8 @@ const Pedidos = () => {
           )}
         </CardContent>
       </Card>
+
+      <PaymentConditionsPanel className="card-shadow" title="Condições de Pagamento" />
     </div>
   );
 };

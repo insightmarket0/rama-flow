@@ -113,10 +113,6 @@ export const CommandMenu = () => {
               <ShoppingCart className="mr-2 h-4 w-4" />
               Pedidos de compra
             </CommandItem>
-            <CommandItem onSelect={() => handleNavigate("/condicoes")}>
-              <CreditCard className="mr-2 h-4 w-4" />
-              Condições de pagamento
-            </CommandItem>
             <CommandItem onSelect={() => handleNavigate("/contas")}>
               <Wallet className="mr-2 h-4 w-4" />
               Contas a pagar
