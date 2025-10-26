@@ -8,6 +8,7 @@ interface OnboardingCounts {
   paymentConditions: number;
   orders: number;
   paidInstallments: number;
+  recurringExpenses: number;
 }
 
 const fetchOnboardingCounts = async (userId: string): Promise<OnboardingCounts> => {
@@ -18,6 +19,7 @@ const fetchOnboardingCounts = async (userId: string): Promise<OnboardingCounts> 
     { count: conditionsCount, error: conditionsError },
     { count: ordersCount, error: ordersError },
     { count: paidInstallmentsCount, error: installmentsError },
+    { count: recurringExpensesCount, error: recurringExpensesError },
   ] = await Promise.all([
     supabase
       .from("suppliers")
@@ -36,18 +38,24 @@ const fetchOnboardingCounts = async (userId: string): Promise<OnboardingCounts> 
       .select("id", headOptions)
       .eq("user_id", userId)
       .eq("status", "pago"),
+    supabase
+      .from("recurring_expenses")
+      .select("id", headOptions)
+      .eq("user_id", userId),
   ]);
 
   if (suppliersError) throw suppliersError;
   if (conditionsError) throw conditionsError;
   if (ordersError) throw ordersError;
   if (installmentsError) throw installmentsError;
+  if (recurringExpensesError) throw recurringExpensesError;
 
   return {
     suppliers: suppliersCount ?? 0,
     paymentConditions: conditionsCount ?? 0,
     orders: ordersCount ?? 0,
     paidInstallments: paidInstallmentsCount ?? 0,
+    recurringExpenses: recurringExpensesCount ?? 0,
   };
 };
 
@@ -67,6 +75,7 @@ export const useOnboardingProgress = () => {
       paymentConditions: query.data?.paymentConditions ?? 0,
       orders: query.data?.orders ?? 0,
       paidInstallments: query.data?.paidInstallments ?? 0,
+      recurringExpenses: query.data?.recurringExpenses ?? 0,
     }),
     [query.data],
   );

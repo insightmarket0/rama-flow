@@ -191,6 +191,128 @@ export type Database = {
         }
         Relationships: []
       }
+      recurring_expense_installments: {
+        Row: {
+          created_at: string | null
+          due_date: string
+          id: string
+          notes: string | null
+          paid_at: string | null
+          payment_proof: string | null
+          recurring_expense_id: string
+          reference_month: string
+          status: string | null
+          supplier_id: string | null
+          updated_at: string | null
+          user_id: string
+          value: number
+        }
+        Insert: {
+          created_at?: string | null
+          due_date: string
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_proof?: string | null
+          recurring_expense_id: string
+          reference_month: string
+          status?: string | null
+          supplier_id?: string | null
+          updated_at?: string | null
+          user_id: string
+          value: number
+        }
+        Update: {
+          created_at?: string | null
+          due_date?: string
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_proof?: string | null
+          recurring_expense_id?: string
+          reference_month?: string
+          status?: string | null
+          supplier_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_expense_installments_recurring_expense_id_fkey"
+            columns: ["recurring_expense_id"]
+            isOneToOne: false
+            referencedRelation: "recurring_expenses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_expense_installments_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recurring_expenses: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string | null
+          due_day: number
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          notes: string | null
+          recurrence_type: string
+          start_date: string
+          supplier_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string | null
+          due_day: number
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          notes?: string | null
+          recurrence_type: string
+          start_date: string
+          supplier_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string | null
+          due_day?: number
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          notes?: string | null
+          recurrence_type?: string
+          start_date?: string
+          supplier_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_expenses_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           cnpj: string

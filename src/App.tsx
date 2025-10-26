@@ -12,6 +12,7 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Pedidos = lazy(() => import("./pages/Pedidos"));
 const Condicoes = lazy(() => import("./pages/Condicoes"));
 const Contas = lazy(() => import("./pages/Contas"));
+const ContasFixas = lazy(() => import("./pages/ContasFixas"));
 const Fornecedores = lazy(() => import("./pages/Fornecedores"));
 const Auth = lazy(() => import("./pages/Auth"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -73,6 +74,16 @@ const App = () => (
                 <ProtectedRoute>
                   <MainLayout>
                     <Contas />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/contas-fixas"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <ContasFixas />
                   </MainLayout>
                 </ProtectedRoute>
               }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Search, LayoutDashboard, ShoppingCart, CreditCard, Wallet, Users, LogOut } from "lucide-react";
+import { Search, LayoutDashboard, ShoppingCart, CreditCard, Wallet, Users, LogOut, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   CommandDialog,
@@ -120,6 +120,10 @@ export const CommandMenu = () => {
             <CommandItem onSelect={() => handleNavigate("/contas")}>
               <Wallet className="mr-2 h-4 w-4" />
               Contas a pagar
+            </CommandItem>
+            <CommandItem onSelect={() => handleNavigate("/contas-fixas")}>
+              <Calendar className="mr-2 h-4 w-4" />
+              Contas fixas
             </CommandItem>
             <CommandItem onSelect={() => handleNavigate("/fornecedores")}>
               <Users className="mr-2 h-4 w-4" />

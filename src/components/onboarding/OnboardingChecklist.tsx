@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckCircle2, Loader2, Users, CreditCard, ShoppingCart, Wallet } from "lucide-react";
+import { CheckCircle2, Loader2, Users, CreditCard, ShoppingCart, Wallet, Calendar } from "lucide-react";
 import { useOnboardingProgress } from "@/hooks/useOnboardingProgress";
 import {
   dispatchAppEvent,
@@ -70,6 +70,15 @@ export const OnboardingChecklist = () => {
         icon: ShoppingCart,
         completed: counts.orders > 0,
         onAction: () => dispatchAppEvent(OPEN_ORDER_DIALOG_EVENT),
+      },
+      {
+        id: "recurring_expense",
+        title: "Configure uma conta fixa",
+        description: "Cadastre despesas recorrentes como aluguel e salários.",
+        actionLabel: "Ir para Contas Fixas",
+        icon: Calendar,
+        completed: counts.recurringExpenses > 0,
+        onAction: () => navigate("/contas-fixas"),
       },
       {
         id: "installment",
@@ -147,7 +156,7 @@ export const OnboardingChecklist = () => {
       <CardHeader className="gap-3">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle className="text-xl">Comece em 4 passos</CardTitle>
+            <CardTitle className="text-xl">Comece em 5 passos</CardTitle>
             <CardDescription>
               Complete a checklist abaixo para dominar o essencial em poucos minutos.
             </CardDescription>
