@@ -26,6 +26,20 @@ serve(async (req) => {
     const expenseId = typeof payload.expenseId === 'string' ? payload.expenseId : undefined;
     const monthsAheadRaw = Number(payload.monthsAhead);
     const monthsAhead = Number.isFinite(monthsAheadRaw) ? Math.min(Math.max(monthsAheadRaw, 1), 12) : 3;
+    const rebuildModeRaw = typeof payload.rebuildMode === 'string' ? payload.rebuildMode : undefined;
+    const validRebuildModes = new Set(['replace-upcoming', 'remove-upcoming']);
+    const rebuildMode = rebuildModeRaw && validRebuildModes.has(rebuildModeRaw) ? rebuildModeRaw : null;
+    const rebuildFrom = typeof payload.rebuildFrom === 'string' ? payload.rebuildFrom : undefined;
+
+    const baseDate = new Date();
+    const todayISO = baseDate.toISOString().split('T')[0];
+    const rebuildFromDate = rebuildFrom ? new Date(rebuildFrom) : baseDate;
+    const rebuildFromISO = Number.isNaN(rebuildFromDate.getTime())
+      ? todayISO
+      : rebuildFromDate.toISOString().split('T')[0];
+    const rebuildReferenceDate = Number.isNaN(rebuildFromDate.getTime()) ? new Date(baseDate) : new Date(rebuildFromDate);
+    rebuildReferenceDate.setDate(1);
+    const rebuildReferenceISO = rebuildReferenceDate.toISOString().split('T')[0];
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -35,11 +49,15 @@ serve(async (req) => {
     // Fetch active recurring expenses
     let expensesQuery = supabase
       .from('recurring_expenses')
-      .select('*')
-      .eq('is_active', true);
+      .select('*');
 
     if (expenseId) {
       expensesQuery = expensesQuery.eq('id', expenseId);
+      if (rebuildMode !== 'remove-upcoming') {
+        expensesQuery = expensesQuery.eq('is_active', true);
+      }
+    } else {
+      expensesQuery = expensesQuery.eq('is_active', true);
     }
 
     const { data: expenses, error: fetchError } = await expensesQuery;
@@ -51,7 +69,6 @@ serve(async (req) => {
 
     console.log(`Found ${expenses?.length || 0} active recurring expenses`);
 
-    const today = new Date();
     const installmentsToCreate = [];
 
     const recurrenceMonths: Record<string, number> = {
@@ -64,13 +81,37 @@ serve(async (req) => {
 
     for (const expense of expenses || []) {
       console.log(`Processing expense: ${expense.name}`);
+
+      if ((rebuildMode === 'replace-upcoming' || rebuildMode === 'remove-upcoming') && expense.id) {
+        const { error: deleteError } = await supabase
+          .from('recurring_expense_installments')
+          .delete()
+          .eq('recurring_expense_id', expense.id)
+          .neq('status', 'pago')
+          .gte('reference_month', rebuildReferenceISO);
+
+        if (deleteError) {
+          console.error('Error removing existing installments:', deleteError);
+          throw deleteError;
+        }
+
+        if (rebuildMode === 'remove-upcoming') {
+          console.log(`Removed upcoming installments for ${expense.name} (mode: remove-upcoming)`);
+          continue;
+        }
+      }
+
+      if (!expense.is_active) {
+        console.log(`Skipping generation for ${expense.name} because it is inactive.`);
+        continue;
+      }
       
       const monthsToAdd = recurrenceMonths[expense.recurrence_type] || 1;
 
       const periodsToGenerate = Math.max(1, Math.ceil(monthsAhead / monthsToAdd));
 
       for (let i = 0; i < periodsToGenerate; i++) {
-        const referenceDate = new Date(today);
+        const referenceDate = new Date(baseDate);
         referenceDate.setMonth(referenceDate.getMonth() + (i * monthsToAdd));
         referenceDate.setDate(1); // First day of the month
         

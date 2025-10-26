@@ -45,7 +45,11 @@ export const useRecurringExpenses = () => {
       if (data?.id) {
         try {
           await supabase.functions.invoke("generate-recurring-installments", {
-            body: { expenseId: data.id, monthsAhead: 6 },
+            body: {
+              expenseId: data.id,
+              monthsAhead: 6,
+              rebuildMode: "replace-upcoming",
+            },
           });
         } catch (invokeError) {
           console.error("Erro ao gerar parcelas para a nova conta fixa:", invokeError);
@@ -58,6 +62,7 @@ export const useRecurringExpenses = () => {
       queryClient.invalidateQueries({ queryKey: ["recurring-expenses"] });
       queryClient.invalidateQueries({ queryKey: ["recurring-expense-installments"] });
       queryClient.invalidateQueries({ queryKey: ["onboarding", "progress"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       toast.success("Conta fixa criada com sucesso!");
     },
     onError: (error) => {
@@ -75,10 +80,28 @@ export const useRecurringExpenses = () => {
         .single();
       
       if (error) throw error;
+      if (data?.id) {
+        try {
+          const rebuildMode = data.is_active ? "replace-upcoming" : "remove-upcoming";
+          const todayISO = new Date().toISOString().split("T")[0];
+          await supabase.functions.invoke("generate-recurring-installments", {
+            body: {
+              expenseId: data.id,
+              monthsAhead: 6,
+              rebuildMode,
+              rebuildFrom: todayISO,
+            },
+          });
+        } catch (invokeError) {
+          console.error("Erro ao sincronizar parcelas da conta fixa:", invokeError);
+        }
+      }
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recurring-expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["recurring-expense-installments"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       toast.success("Conta fixa atualizada com sucesso!");
     },
     onError: (error) => {
@@ -94,10 +117,20 @@ export const useRecurringExpenses = () => {
         .eq("id", id);
       
       if (error) throw error;
+      try {
+        await supabase
+          .from("recurring_expense_installments")
+          .delete()
+          .eq("recurring_expense_id", id)
+          .neq("status", "pago");
+      } catch (cleanupError) {
+        console.error("Erro ao remover parcelas da conta fixa excluída:", cleanupError);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recurring-expenses"] });
       queryClient.invalidateQueries({ queryKey: ["recurring-expense-installments"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       toast.success("Conta fixa excluída com sucesso!");
     },
     onError: (error) => {
