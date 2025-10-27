@@ -12,6 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CheckCircle2, Loader2, Users, CreditCard, ShoppingCart, Wallet, Calendar } from "lucide-react";
 import { useOnboardingProgress } from "@/hooks/useOnboardingProgress";
+import { useAuth } from "@/hooks/useAuth";
 import {
   dispatchAppEvent,
   OPEN_ORDER_DIALOG_EVENT,
@@ -19,12 +20,16 @@ import {
   OPEN_SUPPLIER_DIALOG_EVENT,
 } from "@/lib/events";
 
-const STORAGE_KEY_DISMISSED = "rama:onboarding-dismissed";
-const STORAGE_KEY_COMPLETED = "rama:onboarding-complete";
+const buildDismissedKey = (userId?: string | null) => `rama:onboarding-dismissed:${userId ?? "anonymous"}`;
+const buildCompletedKey = (userId?: string | null) => `rama:onboarding-complete:${userId ?? "anonymous"}`;
 
 export const OnboardingChecklist = () => {
   const navigate = useNavigate();
   const { counts, isLoading, isFetching } = useOnboardingProgress();
+  const { user } = useAuth();
+
+  const dismissedStorageKey = useMemo(() => buildDismissedKey(user?.id), [user?.id]);
+  const completedStorageKey = useMemo(() => buildCompletedKey(user?.id), [user?.id]);
 
   const [hydrated, setHydrated] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
@@ -35,12 +40,12 @@ export const OnboardingChecklist = () => {
       return;
     }
 
-    const dismissed = window.localStorage.getItem(STORAGE_KEY_DISMISSED) === "true";
-    const completed = window.localStorage.getItem(STORAGE_KEY_COMPLETED) === "true";
+    const dismissed = window.localStorage.getItem(dismissedStorageKey) === "true";
+    const completed = window.localStorage.getItem(completedStorageKey) === "true";
     setIsDismissed(dismissed);
     setCompletionAcknowledged(completed);
     setHydrated(true);
-  }, []);
+  }, [dismissedStorageKey, completedStorageKey]);
 
   const steps = useMemo(
     () => [
@@ -80,15 +85,6 @@ export const OnboardingChecklist = () => {
         completed: counts.recurringExpenses > 0,
         onAction: () => navigate("/contas-fixas"),
       },
-      {
-        id: "installment",
-        title: "Marque uma parcela como paga",
-        description: "Atualize o status de um pagamento na tela de Contas.",
-        actionLabel: "Ir para Contas",
-        icon: Wallet,
-        completed: counts.paidInstallments > 0,
-        onAction: () => navigate("/contas"),
-      },
     ],
     [counts, navigate],
   );
@@ -103,19 +99,19 @@ export const OnboardingChecklist = () => {
       return;
     }
 
-    window.localStorage.setItem(STORAGE_KEY_COMPLETED, "true");
-  }, [allStepsCompleted]);
+    window.localStorage.setItem(completedStorageKey, "true");
+  }, [allStepsCompleted, completedStorageKey]);
 
   const handleDismiss = () => {
     if (typeof window !== "undefined") {
-      window.localStorage.setItem(STORAGE_KEY_DISMISSED, "true");
+      window.localStorage.setItem(dismissedStorageKey, "true");
     }
     setIsDismissed(true);
   };
 
   const handleAcknowledgeCompletion = () => {
     if (typeof window !== "undefined") {
-      window.localStorage.setItem(STORAGE_KEY_COMPLETED, "true");
+      window.localStorage.setItem(completedStorageKey, "true");
     }
     setCompletionAcknowledged(true);
   };
@@ -156,7 +152,7 @@ export const OnboardingChecklist = () => {
       <CardHeader className="gap-3">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle className="text-xl">Comece em 5 passos</CardTitle>
+            <CardTitle className="text-xl">Comece em 4 passos</CardTitle>
             <CardDescription>
               Complete a checklist abaixo para dominar o essencial em poucos minutos.
             </CardDescription>
