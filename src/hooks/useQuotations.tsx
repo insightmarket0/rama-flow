@@ -195,6 +195,29 @@ export const useQuotations = (filters?: QuotationFilters) => {
     },
   });
 
+  const deleteQuotation = useMutation({
+    mutationFn: async (id: string) => {
+      const userId = await getAuthenticatedUserId();
+      const { error } = await supabase.from("quotations").delete().eq("id", id).eq("user_id", userId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["quotations"] });
+      toast({
+        title: "Cotação excluída!",
+        description: "A cotação e suas respostas associadas foram removidas.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro ao excluir cotação",
+        description: friendly(error),
+        variant: "destructive",
+      });
+    },
+  });
+
   return {
     quotations,
     isLoading,
@@ -202,6 +225,7 @@ export const useQuotations = (filters?: QuotationFilters) => {
     createQuotation,
     updateQuotation,
     updateQuotationStatus,
+    deleteQuotation,
   };
 };
 

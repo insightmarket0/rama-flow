@@ -13,12 +13,23 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { formatCurrencyBRL } from "@/lib/format";
 import { QuotationStatusBadge } from "@/components/quotations/StatusBadges";
 import { useQuotations } from "@/hooks/useQuotations";
 import { QuotationStatus } from "@/types/quotations";
 import { EmptyState } from "@/components/layout/EmptyState";
-import { ClipboardList, Plus } from "lucide-react";
+import { ClipboardList, Plus, Trash2 } from "lucide-react";
 
 const statusFilters: Array<{ label: string; value: QuotationStatus | "todos" }> = [
   { label: "Todos", value: "todos" },
@@ -38,7 +49,7 @@ const Quotations = () => {
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
 
-  const { quotations, isLoading, isFetching } = useQuotations({
+  const { quotations, isLoading, isFetching, deleteQuotation } = useQuotations({
     status,
     startDate: startDate || undefined,
     endDate: endDate || undefined,
@@ -157,26 +168,59 @@ const Quotations = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {quotations.map((quotation) => (
-                  <TableRow key={quotation.id} className="hover:bg-muted/50">
-                    <TableCell className="font-medium">{quotation.titulo}</TableCell>
-                    <TableCell>{formatDate(quotation.created_at)}</TableCell>
-                    <TableCell>{quotation.responsesCount}</TableCell>
-                    <TableCell>
-                      {quotation.bestOfferValue !== null && quotation.bestOfferValue !== undefined
-                        ? formatCurrencyBRL(quotation.bestOfferValue)
-                        : "—"}
-                    </TableCell>
-                    <TableCell>
-                      <QuotationStatusBadge status={quotation.status as QuotationStatus} />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" onClick={() => navigate(`/quotations/${quotation.id}`)}>
-                        Ver detalhes
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {quotations.map((quotation) => {
+                  const isDeleting = deleteQuotation.isPending && deleteQuotation.variables === quotation.id;
+
+                  return (
+                    <TableRow key={quotation.id} className="hover:bg-muted/50">
+                      <TableCell className="font-medium">{quotation.titulo}</TableCell>
+                      <TableCell>{formatDate(quotation.created_at)}</TableCell>
+                      <TableCell>{quotation.responsesCount}</TableCell>
+                      <TableCell>
+                        {quotation.bestOfferValue !== null && quotation.bestOfferValue !== undefined
+                          ? formatCurrencyBRL(quotation.bestOfferValue)
+                          : "—"}
+                      </TableCell>
+                      <TableCell>
+                        <QuotationStatusBadge status={quotation.status as QuotationStatus} />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button variant="ghost" size="sm" onClick={() => navigate(`/quotations/${quotation.id}`)}>
+                            Ver detalhes
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                                <Trash2 className="mr-1 h-4 w-4" />
+                                Excluir
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Excluir cotação</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Essa ação removerá a cotação e todas as respostas de fornecedores vinculadas. Essa operação
+                                  não pode ser desfeita.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  disabled={isDeleting}
+                                  onClick={() => deleteQuotation.mutate(quotation.id)}
+                                >
+                                  {isDeleting ? "Excluindo..." : "Excluir"}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}
