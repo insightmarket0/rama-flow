@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { QuotationStatusBadge, ResponseStatusBadge } from "@/components/quotations/StatusBadges";
 import { useQuotationDetail, useQuotations } from "@/hooks/useQuotations";
 import { useQuotationResponses } from "@/hooks/useQuotationResponses";
@@ -160,9 +161,36 @@ const QuotationDetail = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Fornecedor</TableHead>
-                    <TableHead>Valor total</TableHead>
-                    <TableHead>Prazo (dias)</TableHead>
-                    <TableHead>Condição</TableHead>
+                    <TableHead>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger className="text-left">Valor total</TooltipTrigger>
+                          <TooltipContent>
+                            <p>Menor valor recebe destaque em verde.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableHead>
+                    <TableHead>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger className="text-left">Prazo (dias)</TooltipTrigger>
+                          <TooltipContent>
+                            <p>Menor prazo recebe destaque em azul.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableHead>
+                    <TableHead>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger className="text-left">Condição</TooltipTrigger>
+                          <TooltipContent>
+                            <p>Mais curta: à vista &lt; 30 &lt; 30/60 &lt; 30/60/90.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableHead>
                     <TableHead>Observações</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>

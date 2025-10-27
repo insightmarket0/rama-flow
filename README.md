@@ -82,3 +82,34 @@ alter database postgres set app.settings.service_role_key = 'SUPABASE_SERVICE_RO
 ```
 
 Depois de aplicar o comando, reinicie as conexões (ou aguarde alguns segundos) para que o valor fique disponível para `current_setting('app.settings.service_role_key', true)`. Sem essa configuração, o job agendado retornará erro de autorização ao acionar a função edge.
+## Módulo de Cotações – Setup rápido
+
+1) Aplicar migrations no Supabase
+
+- Execute o SQL de `supabase/migrations/20251029212649_add_quotations_module.sql` no SQL Editor do seu projeto, ou rode `supabase db push` se estiver usando a CLI.
+- A migration inclui `NOTIFY pgrst, 'reload schema'` ao final para recarregar o schema do PostgREST.
+
+- Multiempresa (opcional): aplique também `supabase/migrations/20251027130518_quotations_rls_by_organization.sql` para liberar acesso por `organization_id` (sem quebrar o fluxo por `user_id`).
+
+2) Recarregar preview
+
+- Feche/reabra o preview/dev-server após aplicar as migrations. Caso veja mensagens sobre "schema cache", é sintoma de schema desatualizado.
+
+3) Verificação rápida
+
+- No SQL Editor: `select to_regclass('public.quotations');` deve retornar `public.quotations`.
+- Na UI: crie uma nova cotação em `/quotations/new`.
+
+4) Sanity helper
+
+- Use `supabase/sanity/quotations_sanity.sql` no SQL Editor para:
+  - Verificar existência das tabelas
+  - Listar policies
+  - Disparar reload do schema do PostgREST
+
+5) Observações
+
+- RLS: o projeto usa `user_id` para isolar dados. Há campo `organization_id` previsto, mas sem policies ativas por organização.
+- Multiempresa: com a migration de RLS por organização aplicada, usuários com `organization_id` no JWT passam a ler/editar linhas da mesma organização. Se o claim não existir, o acesso continua valendo por `user_id`.
+- O client tenta enviar `organization_id` ao criar cotação lendo `user_metadata.organization_id` (fallback: `organizationId`/`org_id`).
+- Aprovação: a função `approve_quotation_response` garante apenas uma resposta aprovada por cotação e atualiza o status da cotação.

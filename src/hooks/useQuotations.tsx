@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { getAuthenticatedUserId } from "@/lib/auth";
+import { getAuthenticatedUserId, getCurrentOrganizationId } from "@/lib/auth";
 import { normalizeQuotation } from "@/lib/quotations";
 import {
   CreateQuotationInput,
@@ -40,6 +40,17 @@ const buildFiltersKey = (filters?: QuotationFilters) => [
 export const useQuotations = (filters?: QuotationFilters) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const friendly = (e: unknown) => {
+    const msg = typeof e === "object" && e && "message" in e ? String((e as any).message) : String(e);
+    if (msg.includes("Could not find the table 'public.quotations'")) {
+      return "Tabelas de cotações não encontradas. Aplique as migrações e reabra o app (reload do schema).";
+    }
+    if (msg.toLowerCase().includes("schema cache")) {
+      return "Schema do PostgREST desatualizado. Aplique migrações e reabra o preview.";
+    }
+    return msg;
+  };
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["quotations", ...buildFiltersKey(filters)],
@@ -82,6 +93,7 @@ export const useQuotations = (filters?: QuotationFilters) => {
   const createQuotation = useMutation({
     mutationFn: async (payload: CreateQuotationInput) => {
       const userId = await getAuthenticatedUserId();
+      const orgId = await getCurrentOrganizationId();
       const { data: quotation, error } = await supabase
         .from("quotations")
         .insert([
@@ -90,7 +102,7 @@ export const useQuotations = (filters?: QuotationFilters) => {
             titulo: payload.titulo,
             descricao: payload.descricao ?? null,
             data_limite: payload.data_limite ?? null,
-            organization_id: payload.organization_id ?? null,
+            organization_id: payload.organization_id ?? orgId ?? null,
             status: "aberta",
           },
         ])
@@ -109,7 +121,7 @@ export const useQuotations = (filters?: QuotationFilters) => {
     onError: (error) => {
       toast({
         title: "Erro ao criar cotação",
-        description: error.message,
+        description: friendly(error),
         variant: "destructive",
       });
     },
@@ -141,7 +153,7 @@ export const useQuotations = (filters?: QuotationFilters) => {
     onError: (error) => {
       toast({
         title: "Erro ao atualizar cotação",
-        description: error.message,
+        description: friendly(error),
         variant: "destructive",
       });
     },
@@ -169,7 +181,7 @@ export const useQuotations = (filters?: QuotationFilters) => {
     onError: (error) => {
       toast({
         title: "Erro ao atualizar status",
-        description: error.message,
+        description: friendly(error),
         variant: "destructive",
       });
     },

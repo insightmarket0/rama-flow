@@ -11,3 +11,17 @@ export const getAuthenticatedUserId = async () => {
 
   return userId;
 };
+
+export const getCurrentOrganizationId = async (): Promise<string | null> => {
+  const { data, error } = await supabase.auth.getUser();
+  if (error) throw error;
+
+  const meta = (data.user?.user_metadata ?? {}) as Record<string, unknown>;
+  const candidate =
+    (meta["organization_id"] as string | undefined) ||
+    (meta["organizationId"] as string | undefined) ||
+    (meta["org_id"] as string | undefined) ||
+    null;
+
+  return candidate ?? null;
+};

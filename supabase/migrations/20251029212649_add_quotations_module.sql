@@ -147,3 +147,6 @@ BEGIN
      AND user_id = v_user_id;
 END;
 $$;
+
+-- Solicita recarregar o cache do PostgREST para refletir novas tabelas
+NOTIFY pgrst, 'reload schema';

@@ -14,6 +14,17 @@ export const useQuotationResponses = (quotationId: string | null) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const friendly = (e: unknown) => {
+    const msg = typeof e === "object" && e && "message" in e ? String((e as any).message) : String(e);
+    if (msg.includes("Could not find the table 'public.quotation_responses'")) {
+      return "Tabela de respostas não encontrada. Aplique as migrações e reabra o app.";
+    }
+    if (msg.toLowerCase().includes("schema cache")) {
+      return "Schema do PostgREST desatualizado. Aplique migrações e reabra o preview.";
+    }
+    return msg;
+  };
+
   const { data, isLoading } = useQuery({
     queryKey: ["quotation-responses", quotationId],
     queryFn: async () => {
@@ -88,7 +99,7 @@ export const useQuotationResponses = (quotationId: string | null) => {
     onError: (error) => {
       toast({
         title: "Erro ao salvar resposta",
-        description: error.message,
+        description: friendly(error),
         variant: "destructive",
       });
     },
@@ -114,7 +125,7 @@ export const useQuotationResponses = (quotationId: string | null) => {
     onError: (error) => {
       toast({
         title: "Erro ao remover resposta",
-        description: error.message,
+        description: friendly(error),
         variant: "destructive",
       });
     },
@@ -139,7 +150,7 @@ export const useQuotationResponses = (quotationId: string | null) => {
     onError: (error) => {
       toast({
         title: "Erro ao aprovar fornecedor",
-        description: error.message,
+        description: friendly(error),
         variant: "destructive",
       });
     },
@@ -165,7 +176,7 @@ export const useQuotationResponses = (quotationId: string | null) => {
     onError: (error) => {
       toast({
         title: "Erro ao atualizar status",
-        description: error.message,
+        description: friendly(error),
         variant: "destructive",
       });
     },
