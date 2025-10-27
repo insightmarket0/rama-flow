@@ -1,4 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { differenceInCalendarDays, format, parseISO } from "date-fns";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,7 +14,6 @@ import {
 } from "@/components/ui/chart";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { Plus, TrendingUp, AlertCircle, ShoppingCart, Users, BarChart3, CalendarClock, Wallet } from "lucide-react";
-import { format, parseISO } from "date-fns";
 import { useDashboard } from "@/hooks/useDashboard";
 import {
   InstallmentStatus,
@@ -81,6 +83,7 @@ const renderUpcomingItem = (installment: InstallmentWithRelations) => (
 );
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { data, isLoading, isError, refetch } = useDashboard();
 
   const metrics = [
@@ -125,6 +128,76 @@ const Dashboard = () => {
   const chartData = data?.variableVsFixedChart ?? [];
   const chartHasData = chartData.some((item) => item.variaveis > 0 || item.fixas > 0);
 
+  const insights = useMemo(() => {
+    if (!data) return [];
+
+    const items: Array<{
+      id: string;
+      title: string;
+      description: string;
+      actionLabel?: string;
+      onAction?: () => void;
+      tone?: "warning" | "info" | "success";
+    }> = [];
+
+    if (data.metrics.overdueCount > 0) {
+      items.push({
+        id: "overdue",
+        title: `${formatNumberBR(data.metrics.overdueCount)} parcela(s) em atraso`,
+        description: "Priorize pagamentos atrasados para manter fornecedores confiantes.",
+        actionLabel: "Ver contas a pagar",
+        onAction: () => navigate("/contas"),
+        tone: "warning",
+      });
+    }
+
+    if (data.metrics.openOrdersCount > 0) {
+      items.push({
+        id: "orders",
+        title: `${formatNumberBR(data.metrics.openOrdersCount)} pedido(s) aguardando avanço`,
+        description: "Finalize negociações ou atualize o status dos pedidos em aberto.",
+        actionLabel: "Pedidos de compra",
+        onAction: () => navigate("/pedidos"),
+        tone: "info",
+      });
+    }
+
+    const nextInstallment = data.upcomingInstallments[0];
+    if (nextInstallment) {
+      const dueDate = parseISO(nextInstallment.due_date);
+      const daysToDue = differenceInCalendarDays(dueDate, new Date());
+
+      if (daysToDue >= 0 && daysToDue <= 7) {
+        items.push({
+          id: "next-installment",
+          title: `Próximo vencimento em ${format(dueDate, "dd/MM")}`,
+          description: `Parcela de ${formatCurrencyBRL(nextInstallment.value)} para ${nextInstallment.supplier?.name ?? "fornecedor sem nome"}.`,
+          actionLabel: "Organizar pagamento",
+          onAction: () => navigate("/contas"),
+          tone: "info",
+        });
+      }
+    }
+
+    if (items.length === 0) {
+      items.push({
+        id: "all-good",
+        title: "Fluxo financeiro sob controle",
+        description:
+          "Sem pendências urgentes no momento. Aproveite para planejar novas compras ou revisar oportunidades de economia.",
+        tone: "success",
+      });
+    }
+
+    return items;
+  }, [data, navigate]);
+
+  const insightToneClasses: Record<"warning" | "info" | "success", string> = {
+    warning: "border-amber-200 bg-amber-50 text-amber-900",
+    info: "border-primary/20 bg-primary/5",
+    success: "border-emerald-200 bg-emerald-50 text-emerald-900",
+  };
+
   return (
     <div className="space-y-6">
       <OnboardingChecklist />
@@ -167,6 +240,48 @@ const Dashboard = () => {
           </Card>
         ))}
       </div>
+
+      <Card className="card-shadow">
+        <CardHeader className="pb-3">
+          <CardTitle>Prioridades do dia</CardTitle>
+          <CardDescription>
+            Foque nas ações que mantêm o caixa saudável e o relacionamento com fornecedores em dia.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {isLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <Skeleton key={index} className="h-16 w-full" />
+              ))}
+            </div>
+          ) : insights.length > 0 ? (
+            insights.map((insight) => {
+              const tone = insight.tone ?? "info";
+              return (
+                <div
+                  key={insight.id}
+                  className={`flex flex-col gap-3 rounded-lg border p-4 md:flex-row md:items-center md:justify-between ${insightToneClasses[tone]}`}
+                >
+                  <div className="space-y-1">
+                    <p className="font-medium text-sm md:text-base text-foreground">{insight.title}</p>
+                    <p className="text-sm text-muted-foreground">{insight.description}</p>
+                  </div>
+                  {insight.onAction ? (
+                    <Button size="sm" variant="secondary" onClick={insight.onAction}>
+                      {insight.actionLabel ?? "Ver detalhes"}
+                    </Button>
+                  ) : null}
+                </div>
+              );
+            })
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Não foi possível carregar as prioridades agora. Atualize a página ou tente novamente mais tarde.
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="card-shadow">

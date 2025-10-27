@@ -48,6 +48,14 @@ alter database postgres set app.settings.service_role_key = 'SUPABASE_SERVICE_RO
 
 Depois de aplicar o comando, reinicie as conexões (ou aguarde alguns segundos) para que o valor fique disponível para `current_setting('app.settings.service_role_key', true)`. Sem essa configuração, o job agendado retornará erro de autorização ao acionar a função edge.
 
+Experiência orientada ao empresário
+-----------------------------------
+
+- **Atalhos em qualquer tela**: o botão “Novo registro” (no cabeçalho) abre pedidos, cotações ou cadastro de fornecedores em um clique.
+- **Central de alertas**: indicadores críticos (parcelas atrasadas, pedidos parados, cotações abertas) aparecem no topo da interface com links diretos para ação.
+- **Prioridades do dia**: o dashboard destaca rapidamente o que precisa da sua atenção (pendências, próximos vencimentos e projeção de caixa).
+- **Visão rápida das cotações**: cards de resumo, busca textual e filtros combináveis ajudam a decidir mais rápido quais negociações priorizar.
+
 Módulo de Cotações – Setup rápido
 ---------------------------------
 

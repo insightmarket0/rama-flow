@@ -4,6 +4,8 @@ import { ThemeToggle } from "./ThemeToggle";
 import { GlobalDialogs } from "./GlobalDialogs";
 import { CommandMenu } from "./CommandMenu";
 import { GlobalShortcuts } from "./GlobalShortcuts";
+import { QuickCreateMenu } from "./QuickCreateMenu";
+import { GlobalAlerts } from "./GlobalAlerts";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -105,12 +107,18 @@ export function MainLayout({ children }: MainLayoutProps) {
                 </div>
               </div>
               <div className="ml-auto flex items-center gap-2">
+                <QuickCreateMenu />
                 <CommandMenu />
                 <ThemeToggle />
               </div>
             </div>
           </header>
-          <main className="flex-1 p-6">{children}</main>
+          <main className="flex-1 p-6">
+            <div className="space-y-6">
+              <GlobalAlerts />
+              {children}
+            </div>
+          </main>
         </div>
       </div>
     </SidebarProvider>
