@@ -23,6 +23,7 @@ import { formatCurrencyBRL, formatNumberBR } from "@/lib/format";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { dispatchAppEvent, OPEN_ORDER_DIALOG_EVENT } from "@/lib/events";
+import { cn } from "@/lib/utils";
 
 const statusLabels: Record<InstallmentStatus, string> = {
   pendente: "Pendente",
@@ -192,10 +193,25 @@ const Dashboard = () => {
     return items;
   }, [data, navigate]);
 
-  const insightToneClasses: Record<"warning" | "info" | "success", string> = {
-    warning: "border-amber-200 bg-amber-50 text-amber-900",
-    info: "border-primary/20 bg-primary/5",
-    success: "border-emerald-200 bg-emerald-50 text-emerald-900",
+  const insightToneStyles: Record<
+    "warning" | "info" | "success",
+    { container: string; title: string; description: string }
+  > = {
+    warning: {
+      container: "border-amber-200 bg-amber-50 dark:border-amber-300 dark:bg-amber-500/20",
+      title: "text-amber-900 dark:text-amber-100",
+      description: "text-amber-700 dark:text-amber-200",
+    },
+    info: {
+      container: "border-primary/30 bg-primary/10 dark:border-primary/50 dark:bg-primary/20",
+      title: "text-primary dark:text-primary-foreground",
+      description: "text-primary/80 dark:text-primary-foreground dark:opacity-80",
+    },
+    success: {
+      container: "border-emerald-200 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-500/20",
+      title: "text-emerald-900 dark:text-emerald-100",
+      description: "text-emerald-700 dark:text-emerald-200",
+    },
   };
 
   return (
@@ -261,11 +277,28 @@ const Dashboard = () => {
               return (
                 <div
                   key={insight.id}
-                  className={`flex flex-col gap-3 rounded-lg border p-4 md:flex-row md:items-center md:justify-between ${insightToneClasses[tone]}`}
+                  className={cn(
+                    "flex flex-col gap-3 rounded-lg border p-4 md:flex-row md:items-center md:justify-between",
+                    insightToneStyles[tone].container,
+                  )}
                 >
                   <div className="space-y-1">
-                    <p className="font-medium text-sm md:text-base text-foreground">{insight.title}</p>
-                    <p className="text-sm text-muted-foreground">{insight.description}</p>
+                    <p
+                      className={cn(
+                        "font-medium text-sm md:text-base",
+                        insightToneStyles[tone].title,
+                      )}
+                    >
+                      {insight.title}
+                    </p>
+                    <p
+                      className={cn(
+                        "text-sm",
+                        insightToneStyles[tone].description,
+                      )}
+                    >
+                      {insight.description}
+                    </p>
                   </div>
                   {insight.onAction ? (
                     <Button size="sm" variant="secondary" onClick={insight.onAction}>
