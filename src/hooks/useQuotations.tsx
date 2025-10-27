@@ -43,11 +43,19 @@ export const useQuotations = (filters?: QuotationFilters) => {
 
   const friendly = (e: unknown) => {
     const msg = typeof e === "object" && e && "message" in e ? String((e as any).message) : String(e);
-    if (msg.includes("Could not find the table 'public.quotations'")) {
-      return "Tabelas de cotações não encontradas. Aplique as migrações e reabra o app (reload do schema).";
+    const normalized = msg.toLowerCase();
+    // Falta de tabelas (variações comuns do PostgREST/Postgres)
+    if (
+      normalized.includes("could not find the table 'public.quotations'") ||
+      normalized.includes("relation \"public.quotations\" does not exist") ||
+      normalized.includes("relation 'public.quotations' does not exist") ||
+      normalized.includes("relation \"quotations\" does not exist")
+    ) {
+      return "Tabelas de cotações não encontradas. Aplique as migrações em supabase/migrations e reabra o app (reload do schema).";
     }
-    if (msg.toLowerCase().includes("schema cache")) {
-      return "Schema do PostgREST desatualizado. Aplique migrações e reabra o preview.";
+    // Cache do PostgREST desatualizado
+    if (normalized.includes("schema cache") || normalized.includes("cached schema")) {
+      return "Schema do PostgREST desatualizado. Aplique migrações e reabra o preview (ou dispare NOTIFY pgrst, 'reload schema').";
     }
     return msg;
   };

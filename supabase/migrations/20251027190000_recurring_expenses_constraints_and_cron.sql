@@ -11,8 +11,12 @@ ALTER TABLE public.recurring_expense_installments
 CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA extensions;
 CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA extensions;
 
--- Recreate the daily cron job that triggers the recurring installments generator
-SELECT cron.unschedule('generate-recurring-installments');
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'generate-recurring-installments') THEN
+    PERFORM cron.unschedule('generate-recurring-installments');
+  END IF;
+END$$;
 
 SELECT cron.schedule(
   'generate-recurring-installments',
@@ -20,7 +24,7 @@ SELECT cron.schedule(
   $$
   SELECT
     net.http_post(
-      url := 'https://njxbxijllwattlarwoxr.supabase.co/functions/v1/generate-recurring-installments',
+      url := 'https://unfveyhxbfnshjdadcfn.supabase.co/functions/v1/generate-recurring-installments',
       headers := jsonb_build_object(
         'Content-Type', 'application/json',
         'Authorization', 'Bearer ' || coalesce(current_setting('app.settings.service_role_key', true), '')

@@ -1,80 +1,45 @@
-# Welcome to your Lovable project
+Rama Flow
+=========
 
-## Project info
+Aplicação web construída com Vite + React para gestão financeira, usando Supabase como backend (Postgres, autenticação e edge functions).
 
-**URL**: https://lovable.dev/projects/a3e10015-2c0f-4bb6-9faf-59366c91f871
+Como rodar localmente
+---------------------
 
-## How can I edit this code?
+1. Instale as dependências: `npm install`
+2. Configure o arquivo `.env` com as chaves do seu projeto Supabase (veja a seção *Variáveis de ambiente*).
+3. Suba o dev server: `npm run dev`
 
-There are several ways of editing your application.
+Variáveis de ambiente
+---------------------
 
-**Use Lovable**
+No arquivo `.env` mantenha (ou adicione) as seguintes chaves:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/a3e10015-2c0f-4bb6-9faf-59366c91f871) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+VITE_SUPABASE_PROJECT_ID=unfveyhxbfnshjdadcfn
+VITE_SUPABASE_URL=https://unfveyhxbfnshjdadcfn.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=<ANON_PUBLIC_KEY_DO_SUPABASE>
+SUPABASE_DB_URL=postgresql://postgres:<SENHA>@db.unfveyhxbfnshjdadcfn.supabase.co:5432/postgres
 ```
 
-**Edit a file directly in GitHub**
+Use a *anon/public key* (chave pública) e a senha do banco reais do seu projeto Supabase. Esses valores não devem ser commitados em repositórios públicos.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Linkando o projeto pela CLI
+---------------------------
 
-**Use GitHub Codespaces**
+Para aplicar as migrations e gerenciar edge functions a partir deste repositório:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```
+supabase login
+supabase link --project-ref unfveyhxbfnshjdadcfn
+```
 
-## What technologies are used for this project?
+Depois rode `supabase db push` para aplicar as migrations existentes em `supabase/migrations`.
 
-This project is built with:
+Supabase configuration
+----------------------
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/a3e10015-2c0f-4bb6-9faf-59366c91f871) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
-
-## Supabase configuration
-
-The cron job that gera parcelas automáticas chama a edge function `generate-recurring-installments` usando a configuração `app.settings.service_role_key`. Antes de habilitar o agendamento, defina esse valor no seu banco Supabase (substitua pelo Service Role Key real, encontrado nas configurações do projeto):
+O cron job que gera parcelas automáticas chama a edge function `generate-recurring-installments` usando a configuração `app.settings.service_role_key`. Antes de habilitar o agendamento, defina esse valor no seu banco Supabase (substitua pelo Service Role Key real, encontrado nas configurações do projeto):
 
 ```sql
 -- Execute no SQL Editor do Supabase
@@ -82,14 +47,16 @@ alter database postgres set app.settings.service_role_key = 'SUPABASE_SERVICE_RO
 ```
 
 Depois de aplicar o comando, reinicie as conexões (ou aguarde alguns segundos) para que o valor fique disponível para `current_setting('app.settings.service_role_key', true)`. Sem essa configuração, o job agendado retornará erro de autorização ao acionar a função edge.
-## Módulo de Cotações – Setup rápido
+
+Módulo de Cotações – Setup rápido
+---------------------------------
 
 1) Aplicar migrations no Supabase
 
 - Execute o SQL de `supabase/migrations/20251029212649_add_quotations_module.sql` no SQL Editor do seu projeto, ou rode `supabase db push` se estiver usando a CLI.
 - A migration inclui `NOTIFY pgrst, 'reload schema'` ao final para recarregar o schema do PostgREST.
 
-- Multiempresa (opcional): aplique também `supabase/migrations/20251027130518_quotations_rls_by_organization.sql` para liberar acesso por `organization_id` (sem quebrar o fluxo por `user_id`).
+- Multiempresa (opcional): aplique também `supabase/migrations/20251029222600_quotations_rls_by_organization.sql` para liberar acesso por `organization_id` (sem quebrar o fluxo por `user_id`).
 
 2) Recarregar preview
 
