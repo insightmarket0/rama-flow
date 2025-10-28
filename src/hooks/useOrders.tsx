@@ -18,6 +18,7 @@ export interface Order {
   total_value: number;
   freight: number;
   discount: number;
+  taxes: number;
   status: string;
   items: OrderItem[];
   created_at: string;
@@ -35,6 +36,7 @@ export interface CreateOrderData {
   items: OrderItem[];
   freight: number;
   discount: number;
+  taxes: number;
 }
 
 export const useOrders = () => {
@@ -71,7 +73,7 @@ export const useOrders = () => {
         (sum, item) => sum + item.quantity * item.unit_price,
         0
       );
-      const total_value = itemsTotal + orderData.freight - orderData.discount;
+      const total_value = itemsTotal + orderData.freight + orderData.taxes - orderData.discount;
 
       // Generate order number
       const orderCount = orders?.length || 0;
@@ -88,6 +90,7 @@ export const useOrders = () => {
           total_value,
           freight: orderData.freight,
           discount: orderData.discount,
+          taxes: orderData.taxes,
           items: orderData.items as any,
           status: "aberto",
         }])

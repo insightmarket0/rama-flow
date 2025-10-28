@@ -49,6 +49,7 @@ const orderSchema = z.object({
   payment_condition_id: z.string().min(1, "Selecione uma condição"),
   freight: z.number().or(z.string()).transform((val) => typeof val === 'string' ? parseFloat(val) || 0 : val),
   discount: z.number().or(z.string()).transform((val) => typeof val === 'string' ? parseFloat(val) || 0 : val),
+  taxes: z.number().or(z.string()).transform((val) => typeof val === 'string' ? parseFloat(val) || 0 : val),
 });
 
 interface OrderDialogProps {
@@ -77,6 +78,7 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
       payment_condition_id: "",
       freight: 0,
       discount: 0,
+      taxes: 0,
     },
   });
 
@@ -124,7 +126,8 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
     );
     const freight = Number(form.watch("freight")) || 0;
     const discount = Number(form.watch("discount")) || 0;
-    return itemsTotal + freight - discount;
+    const taxes = Number(form.watch("taxes")) || 0;
+    return itemsTotal + freight + taxes - discount;
   };
 
   const calculateInstallmentsPreview = () => {
@@ -174,6 +177,7 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
       items,
       freight: values.freight,
       discount: values.discount,
+      taxes: values.taxes,
     });
 
     setOpen(false);
@@ -365,13 +369,27 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="freight"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Frete</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.01" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="taxes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Impostos</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.01" {...field} />
                     </FormControl>
