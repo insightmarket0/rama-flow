@@ -78,11 +78,13 @@ export type Database = {
           freight: number | null
           id: string
           items: Json | null
+          order_date: string | null
           order_number: string
           payment_condition_id: string
           status: string | null
           supplier_id: string
           total_value: number
+          taxes: number | null
           updated_at: string
           user_id: string
         }
@@ -92,11 +94,13 @@ export type Database = {
           freight?: number | null
           id?: string
           items?: Json | null
+          order_date?: string | null
           order_number: string
           payment_condition_id: string
           status?: string | null
           supplier_id: string
           total_value: number
+          taxes?: number | null
           updated_at?: string
           user_id: string
         }
@@ -106,11 +110,13 @@ export type Database = {
           freight?: number | null
           id?: string
           items?: Json | null
+          order_date?: string | null
           order_number?: string
           payment_condition_id?: string
           status?: string | null
           supplier_id?: string
           total_value?: number
+          taxes?: number | null
           updated_at?: string
           user_id?: string
         }
@@ -135,6 +141,7 @@ export type Database = {
         Row: {
           created_at: string
           down_payment_percent: number | null
+          due_days: number[] | null
           id: string
           installments: number
           interval_days: number
@@ -145,6 +152,7 @@ export type Database = {
         Insert: {
           created_at?: string
           down_payment_percent?: number | null
+          due_days?: number[] | null
           id?: string
           installments: number
           interval_days: number
@@ -155,12 +163,14 @@ export type Database = {
         Update: {
           created_at?: string
           down_payment_percent?: number | null
+          due_days?: number[] | null
           id?: string
           installments?: number
           interval_days?: number
           name?: string
           updated_at?: string
           user_id?: string
+        }
       }
       Relationships: []
     }
@@ -361,6 +371,7 @@ export type Database = {
           recurrence_type: string
           start_date: string
           supplier_id: string | null
+          tax_description: string | null
           updated_at: string | null
           user_id: string
         }
@@ -377,6 +388,7 @@ export type Database = {
           recurrence_type: string
           start_date: string
           supplier_id?: string | null
+          tax_description?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -393,6 +405,7 @@ export type Database = {
           recurrence_type?: string
           start_date?: string
           supplier_id?: string | null
+          tax_description?: string | null
           updated_at?: string | null
           user_id?: string
         }

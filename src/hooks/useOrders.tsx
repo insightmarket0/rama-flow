@@ -1,7 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Tables } from "@/integrations/supabase/types";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { generateInstallmentPlan } from "@/lib/installments";
 
 export interface OrderItem {
   sku: string;
@@ -19,6 +21,7 @@ export interface Order {
   freight: number;
   discount: number;
   taxes: number;
+  order_date: string | null;
   status: string;
   items: OrderItem[];
   created_at: string;
@@ -37,6 +40,7 @@ export interface CreateOrderData {
   freight: number;
   discount: number;
   taxes: number;
+  order_date: string;
 }
 
 export const useOrders = () => {
@@ -57,9 +61,14 @@ export const useOrders = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data.map((order) => ({
+      return (data ?? []).map((order) => ({
         ...order,
-        items: order.items as unknown as OrderItem[],
+        items: (order.items as unknown as OrderItem[]) ?? [],
+        freight: Number(order.freight ?? 0),
+        discount: Number(order.discount ?? 0),
+        taxes: Number((order as { taxes?: number | null }).taxes ?? 0),
+        total_value: Number(order.total_value ?? 0),
+        order_date: order.order_date ?? null,
       })) as Order[];
     },
   });
@@ -91,6 +100,7 @@ export const useOrders = () => {
           freight: orderData.freight,
           discount: orderData.discount,
           taxes: orderData.taxes,
+          order_date: orderData.order_date || null,
           items: orderData.items as any,
           status: "aberto",
         }])
@@ -108,47 +118,43 @@ export const useOrders = () => {
 
       if (pcError) throw pcError;
 
-      // Calculate installments
-      const installments = [];
-      const downPayment = (total_value * paymentCondition.down_payment_percent) / 100;
-      const remainingValue = total_value - downPayment;
-      const installmentValue = remainingValue / paymentCondition.installments;
+      const normalizedPaymentCondition = {
+        ...paymentCondition,
+        due_days: paymentCondition.due_days
+          ? paymentCondition.due_days.map((day: number) => Number(day))
+          : null,
+      } as Tables<"payment_conditions">;
 
-      // Add down payment if exists
-      if (downPayment > 0) {
-        installments.push({
+      const baseDate = orderData.order_date
+        ? new Date(`${orderData.order_date}T00:00:00`)
+        : new Date();
+      const plan = generateInstallmentPlan(
+        total_value,
+        normalizedPaymentCondition,
+        Number.isNaN(baseDate.getTime()) ? new Date() : baseDate,
+      );
+
+      const installments = plan
+        .filter((item) => item.value > 0)
+        .map((item) => ({
           user_id: user.id,
           order_id: order.id,
           supplier_id: orderData.supplier_id,
-          installment_number: 0,
-          value: downPayment,
-          due_date: new Date().toISOString().split("T")[0],
+          installment_number: item.installmentNumber,
+          value: item.value,
+          due_date: item.dueDate.toISOString().split("T")[0],
           status: "pendente",
-        });
+        }));
+
+      if (installments.length > 0) {
+        const { error: installmentsError } = await supabase
+          .from("installments")
+          .insert(installments);
+
+        if (installmentsError) throw installmentsError;
       }
 
-      // Add installments
-      for (let i = 1; i <= paymentCondition.installments; i++) {
-        const dueDate = new Date();
-        dueDate.setDate(dueDate.getDate() + i * paymentCondition.interval_days);
-
-        installments.push({
-          user_id: user.id,
-          order_id: order.id,
-          supplier_id: orderData.supplier_id,
-          installment_number: i,
-          value: installmentValue,
-          due_date: dueDate.toISOString().split("T")[0],
-          status: "pendente",
-        });
-      }
-
-      // Insert installments
-      const { error: installmentsError } = await supabase
-        .from("installments")
-        .insert(installments);
-
-      if (installmentsError) throw installmentsError;
+      // If there are no installments (e.g., 0 total), nothing else to insert.
 
       return order;
     },

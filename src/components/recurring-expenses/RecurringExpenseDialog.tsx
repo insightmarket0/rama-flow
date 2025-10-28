@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -22,6 +22,7 @@ import { ptBR } from "date-fns/locale";
 const formSchema = z.object({
   name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
   category: z.string().min(1, "Selecione uma categoria"),
+  tax_description: z.string().optional(),
   supplier_id: z.string().optional(),
   amount: z
     .string()
@@ -41,6 +42,15 @@ const formSchema = z.object({
   end_date: z.string().optional(),
   notes: z.string().optional(),
 }).superRefine((data, ctx) => {
+  if (data.category === "impostos") {
+    if (!data.tax_description || data.tax_description.trim().length < 2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["tax_description"],
+        message: "Informe qual imposto está sendo pago",
+      });
+    }
+  }
   if (data.end_date && new Date(data.end_date) < new Date(data.start_date)) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
@@ -83,6 +93,7 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
     defaultValues: {
       name: "",
       category: "",
+      tax_description: "",
       supplier_id: "",
       amount: "",
       recurrence_type: "mensal",
@@ -98,7 +109,7 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
       id: "basic",
       title: "Informações Básicas",
       description: "Defina nome, categoria e fornecedor.",
-      fields: ["name", "category", "supplier_id"],
+      fields: ["name", "category", "tax_description", "supplier_id"],
     },
     {
       id: "recurrence",
@@ -121,6 +132,13 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
   ];
 
   const values = form.watch();
+  const selectedCategory = values.category;
+
+  useEffect(() => {
+    if (selectedCategory !== "impostos" && form.getValues("tax_description")) {
+      form.setValue("tax_description", "", { shouldValidate: false });
+    }
+  }, [form, selectedCategory]);
 
   const upcomingDueDates = useMemo(() => {
     const results: Date[] = [];
@@ -185,9 +203,15 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
+      const taxDescription =
+        data.category === "impostos" && data.tax_description?.trim()
+          ? data.tax_description.trim()
+          : null;
+
       await createRecurringExpense.mutateAsync({
         name: data.name,
         category: data.category,
+        tax_description: taxDescription,
         amount: parseFloat(data.amount),
         recurrence_type: data.recurrence_type,
         due_day: parseInt(data.due_day),
@@ -211,6 +235,7 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
 
     form.setValue("name", template.name, { shouldValidate: true });
     form.setValue("category", template.category, { shouldValidate: true });
+    form.setValue("tax_description", template.category === "impostos" ? template.name : "", { shouldValidate: template.category === "impostos" });
     form.setValue("amount", template.amount.toString(), { shouldValidate: true });
     form.setValue("recurrence_type", template.recurrence_type, { shouldValidate: true });
     form.setValue("due_day", template.due_day.toString(), { shouldValidate: true });
@@ -333,11 +358,27 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
                           </Select>
                           <FormMessage />
                         </FormItem>
-                      )}
-                    />
+                    )}
+                  />
 
+                  {values.category === "impostos" && (
                     <FormField
                       control={form.control}
+                      name="tax_description"
+                      render={({ field }) => (
+                        <FormItem className="sm:col-span-2">
+                          <FormLabel>Tipo de imposto</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Ex: ICMS, ISS, FGTS..." {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+
+                  <FormField
+                    control={form.control}
                     name="supplier_id"
                     render={({ field }) => (
                       <FormItem>
@@ -486,6 +527,12 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
                           EXPENSE_CATEGORIES.find((category) => category.value === values.category)?.label || "—"
                         }
                       />
+                      {values.category === "impostos" && (
+                        <SummaryRow
+                          label="Imposto"
+                          value={values.tax_description || "—"}
+                        />
+                      )}
                       <SummaryRow
                         label="Fornecedor"
                         value={

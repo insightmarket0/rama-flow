@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { OPEN_PAYMENT_CONDITION_DIALOG_EVENT } from "@/lib/events";
 
 const paymentConditionSchema = z.object({
@@ -15,6 +15,7 @@ const paymentConditionSchema = z.object({
   installments: z.coerce.number().min(1, "Mínimo 1 parcela").max(100),
   interval_days: z.coerce.number().min(0, "Intervalo não pode ser negativo").max(365),
   down_payment_percent: z.coerce.number().min(0, "Mínimo 0%").max(100, "Máximo 100%").optional(),
+  customDays: z.string().optional(),
 });
 
 type PaymentConditionFormData = z.infer<typeof paymentConditionSchema>;
@@ -25,6 +26,40 @@ interface PaymentConditionDialogProps {
   listenForGlobalOpen?: boolean;
   onSuccess?: (condition: Tables<"payment_conditions">) => void;
 }
+
+const parseCustomDaysInput = (value?: string) => {
+  if (!value) {
+    return { days: [] as number[], invalidTokens: [] as string[] };
+  }
+
+  const tokens = value
+    .split(/[,;\s]+/)
+    .map((token) => token.trim())
+    .filter(Boolean);
+
+  const days: number[] = [];
+  const invalidTokens: string[] = [];
+  const seen = new Set<number>();
+
+  for (const token of tokens) {
+    if (!/^\d+$/.test(token)) {
+      invalidTokens.push(token);
+      continue;
+    }
+    const parsed = Number.parseInt(token, 10);
+    if (parsed < 0) {
+      invalidTokens.push(token);
+      continue;
+    }
+    if (!seen.has(parsed)) {
+      seen.add(parsed);
+      days.push(parsed);
+    }
+  }
+
+  days.sort((a, b) => a - b);
+  return { days, invalidTokens };
+};
 
 export const PaymentConditionDialog = ({
   condition,
@@ -42,8 +77,21 @@ export const PaymentConditionDialog = ({
       installments: condition?.installments || 1,
       interval_days: condition?.interval_days || 30,
       down_payment_percent: condition?.down_payment_percent || 0,
+      customDays: condition?.due_days?.join(", ") || "",
     },
   });
+
+  const customDaysValue = form.watch("customDays");
+  const parsedCustomDays = useMemo(
+    () => parseCustomDaysInput(customDaysValue),
+    [customDaysValue],
+  );
+
+  useEffect(() => {
+    if (parsedCustomDays.days.length > 0 && form.getValues("installments") !== parsedCustomDays.days.length) {
+      form.setValue("installments", parsedCustomDays.days.length, { shouldValidate: true });
+    }
+  }, [form, parsedCustomDays.days]);
 
   useEffect(() => {
     if (!listenForGlobalOpen || condition || typeof window === "undefined") {
@@ -56,6 +104,7 @@ export const PaymentConditionDialog = ({
         installments: 1,
         interval_days: 30,
         down_payment_percent: 0,
+        customDays: "",
       });
       setOpen(true);
     };
@@ -66,11 +115,27 @@ export const PaymentConditionDialog = ({
 
   const onSubmit = async (data: PaymentConditionFormData) => {
     try {
+      if (parsedCustomDays.invalidTokens.length > 0) {
+        form.setError("customDays", {
+          message: `Valores inválidos: ${parsedCustomDays.invalidTokens.join(", ")}`,
+        });
+        return;
+      }
+
+      if (data.customDays && parsedCustomDays.days.length === 0) {
+        form.setError("customDays", {
+          message: "Informe pelo menos um dia válido separado por vírgula.",
+        });
+        return;
+      }
+
+      const hasCustomDays = parsedCustomDays.days.length > 0;
       const conditionData = {
         name: data.name,
-        installments: data.installments,
+        installments: hasCustomDays ? parsedCustomDays.days.length : data.installments,
         interval_days: data.interval_days,
         down_payment_percent: data.down_payment_percent || 0,
+        due_days: hasCustomDays ? parsedCustomDays.days : null,
       };
 
       const savedCondition = condition
@@ -116,8 +181,34 @@ export const PaymentConditionDialog = ({
                 <FormItem>
                   <FormLabel>Número de Parcelas</FormLabel>
                   <FormControl>
-                    <Input {...field} type="number" min="1" />
+                    <Input
+                      {...field}
+                      type="number"
+                      min="1"
+                      disabled={parsedCustomDays.days.length > 0}
+                    />
                   </FormControl>
+                  <FormDescription>
+                    {parsedCustomDays.days.length > 0
+                      ? "Total de parcelas calculado a partir dos dias personalizados."
+                      : "Informe o número de parcelas quando não houver dias personalizados."}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="customDays"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Dias personalizados (opcional)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Ex: 15, 30, 45" />
+                  </FormControl>
+                  <FormDescription>
+                    Informe os dias após a data da compra para gerar cada parcela. Separe por vírgulas.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -129,8 +220,18 @@ export const PaymentConditionDialog = ({
                 <FormItem>
                   <FormLabel>Intervalo (dias)</FormLabel>
                   <FormControl>
-                    <Input {...field} type="number" min="0" />
+                    <Input
+                      {...field}
+                      type="number"
+                      min="0"
+                      disabled={parsedCustomDays.days.length > 0}
+                    />
                   </FormControl>
+                  <FormDescription>
+                    {parsedCustomDays.days.length > 0
+                      ? "Mantido apenas para referência; os dias personalizados prevalecem."
+                      : "Intervalo fixo entre cada parcela."}
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

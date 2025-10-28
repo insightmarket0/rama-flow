@@ -60,7 +60,7 @@ export const PaymentConditionsPanel = ({
         <TableRow>
           <TableHead>Nome</TableHead>
           <TableHead>Nº de Parcelas</TableHead>
-          <TableHead>Intervalo (dias)</TableHead>
+          <TableHead>Agenda (dias)</TableHead>
           <TableHead>Entrada (%)</TableHead>
           <TableHead className="text-right">Ações</TableHead>
         </TableRow>
@@ -79,7 +79,7 @@ export const PaymentConditionsPanel = ({
         <TableRow>
           <TableHead>Nome</TableHead>
           <TableHead>Nº de Parcelas</TableHead>
-          <TableHead>Intervalo (dias)</TableHead>
+          <TableHead>Agenda (dias)</TableHead>
           <TableHead>Entrada (%)</TableHead>
           <TableHead className="text-right">Ações</TableHead>
         </TableRow>
@@ -89,7 +89,11 @@ export const PaymentConditionsPanel = ({
           <TableRow key={condition.id}>
             <TableCell className="font-medium">{condition.name}</TableCell>
             <TableCell>{condition.installments}</TableCell>
-            <TableCell>{condition.interval_days}</TableCell>
+            <TableCell>
+              {condition.due_days && condition.due_days.length > 0
+                ? `${condition.due_days.join(" / ")} dias`
+                : `Cada ${condition.interval_days} dias`}
+            </TableCell>
             <TableCell>{condition.down_payment_percent || 0}%</TableCell>
             <TableCell className="text-right">
               <div className="flex gap-2 justify-end">

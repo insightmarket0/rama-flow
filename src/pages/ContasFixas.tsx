@@ -154,6 +154,11 @@ export default function ContasFixas() {
                           <p className="text-sm text-muted-foreground">
                             {getCategoryLabel(expense.category)} • Vence dia {expense.due_day} • {expense.recurrence_type}
                           </p>
+                          {expense.category === "impostos" && expense.tax_description && (
+                            <p className="text-xs text-muted-foreground">
+                              Imposto: {expense.tax_description}
+                            </p>
+                          )}
                           {expense.supplier && (
                             <p className="text-xs text-muted-foreground">
                               Fornecedor: {expense.supplier.name}

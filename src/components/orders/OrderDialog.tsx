@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -40,9 +40,21 @@ import {
 } from "@/components/ui/table";
 import { OPEN_ORDER_DIALOG_EVENT } from "@/lib/events";
 import { formatCurrencyBRL } from "@/lib/format";
+import { generateInstallmentPlan } from "@/lib/installments";
 import { PaymentConditionDialog } from "@/components/payment-conditions/PaymentConditionDialog";
 import { PaymentConditionsPanel } from "@/components/payment-conditions/PaymentConditionsPanel";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+
+const dateStringSchema = z
+  .string()
+  .min(1, "Selecione uma data")
+  .refine(
+    (value) => {
+      const parsed = new Date(`${value}T00:00:00`);
+      return !Number.isNaN(parsed.getTime());
+    },
+    { message: "Data inválida" },
+  );
 
 const orderSchema = z.object({
   supplier_id: z.string().min(1, "Selecione um fornecedor"),
@@ -50,6 +62,7 @@ const orderSchema = z.object({
   freight: z.number().or(z.string()).transform((val) => typeof val === 'string' ? parseFloat(val) || 0 : val),
   discount: z.number().or(z.string()).transform((val) => typeof val === 'string' ? parseFloat(val) || 0 : val),
   taxes: z.number().or(z.string()).transform((val) => typeof val === 'string' ? parseFloat(val) || 0 : val),
+  order_date: dateStringSchema,
 });
 
 interface OrderDialogProps {
@@ -71,15 +84,18 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
   const { suppliers } = useSuppliers();
   const { paymentConditions } = usePaymentConditions();
 
+  const getDefaultValues = useCallback(() => ({
+    supplier_id: "",
+    payment_condition_id: "",
+    freight: 0,
+    discount: 0,
+    taxes: 0,
+    order_date: new Date().toISOString().split("T")[0],
+  }), []);
+
   const form = useForm<z.infer<typeof orderSchema>>({
     resolver: zodResolver(orderSchema),
-    defaultValues: {
-      supplier_id: "",
-      payment_condition_id: "",
-      freight: 0,
-      discount: 0,
-      taxes: 0,
-    },
+    defaultValues: getDefaultValues(),
   });
 
   useEffect(() => {
@@ -88,12 +104,13 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
     }
 
     const handleOpen = () => {
+      form.reset(getDefaultValues());
       setOpen(true);
     };
 
     window.addEventListener(OPEN_ORDER_DIALOG_EVENT, handleOpen);
     return () => window.removeEventListener(OPEN_ORDER_DIALOG_EVENT, handleOpen);
-  }, [enableGlobalOpen]);
+  }, [enableGlobalOpen, form, getDefaultValues]);
 
   const addItem = () => {
     if (
@@ -134,33 +151,20 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
     const total = calculateTotal();
     const conditionId = form.watch("payment_condition_id");
     const condition = paymentConditions?.find((c) => c.id === conditionId);
+    const orderDateValue = form.watch("order_date");
+    const baseDate = orderDateValue
+      ? new Date(`${orderDateValue}T00:00:00`)
+      : new Date();
+    const effectiveBaseDate = Number.isNaN(baseDate.getTime()) ? new Date() : baseDate;
 
     if (!condition || total <= 0) return [];
 
-    const preview = [];
-    const downPayment = (total * condition.down_payment_percent) / 100;
-    const remainingValue = total - downPayment;
-    const installmentValue = remainingValue / condition.installments;
-
-    if (downPayment > 0) {
-      preview.push({
-        number: "Entrada",
-        value: downPayment,
-        date: new Date().toLocaleDateString("pt-BR"),
-      });
-    }
-
-    for (let i = 1; i <= condition.installments; i++) {
-      const dueDate = new Date();
-      dueDate.setDate(dueDate.getDate() + i * condition.interval_days);
-      preview.push({
-        number: i,
-        value: installmentValue,
-        date: dueDate.toLocaleDateString("pt-BR"),
-      });
-    }
-
-    return preview;
+    return generateInstallmentPlan(total, condition, effectiveBaseDate).map((item) => ({
+      label: item.installmentNumber === 0 ? "Entrada" : `Parcela ${item.installmentNumber}`,
+      value: item.value,
+      date: item.dueDate.toLocaleDateString("pt-BR"),
+      dueInDays: item.dueInDays,
+    }));
   };
 
   const onSubmit = async (values: z.infer<typeof orderSchema>) => {
@@ -178,12 +182,15 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
       freight: values.freight,
       discount: values.discount,
       taxes: values.taxes,
+      order_date: values.order_date,
     });
 
     setOpen(false);
-    form.reset();
+    form.reset(getDefaultValues());
     setItems([]);
   };
+
+  const installmentsPreview = calculateInstallmentsPreview();
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -194,7 +201,7 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="supplier_id"
@@ -278,6 +285,20 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
                         </SheetContent>
                       </Sheet>
                     </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="order_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Data da compra</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -420,16 +441,19 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
               </div>
             </div>
 
-            {calculateInstallmentsPreview().length > 0 && (
+            {installmentsPreview.length > 0 && (
               <div className="space-y-2">
                 <h3 className="font-semibold">Prévia das Parcelas</h3>
                 <div className="bg-muted p-4 rounded-lg space-y-2">
-                  {calculateInstallmentsPreview().map((inst, index) => (
-                    <div key={index} className="flex justify-between text-sm">
+                  {installmentsPreview.map((inst, index) => (
+                    <div
+                      key={`${inst.label}-${index}`}
+                      className="flex justify-between gap-4 text-sm"
+                    >
                       <span>
-                        {inst.number === "Entrada"
-                          ? "Entrada"
-                          : `Parcela ${inst.number}`}
+                        {inst.dueInDays > 0
+                          ? `${inst.label} (${inst.dueInDays} dias)`
+                          : inst.label}
                       </span>
                       <span>{formatCurrencyBRL(inst.value)}</span>
                       <span>{inst.date}</span>

@@ -19,7 +19,10 @@ export const usePaymentConditions = () => {
         .order("created_at", { ascending: false });
       
       if (error) throw error;
-      return data as PaymentCondition[];
+      return (data as PaymentCondition[]).map((condition) => ({
+        ...condition,
+        due_days: condition.due_days ? condition.due_days.map((day) => Number(day)) : null,
+      }));
     },
   });
 
