@@ -214,13 +214,12 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
   const installmentsPreview = calculateInstallmentsPreview();
 
   useEffect(() => {
-    if (installmentsPreview.length === 0) {
-      setCustomInstallments([]);
-      return;
-    }
+    setCustomInstallments((previous) => {
+      if (installmentsPreview.length === 0) {
+        return previous.length > 0 ? [] : previous;
+      }
 
-    setCustomInstallments((previous) =>
-      installmentsPreview.map((installment) => {
+      const mapped = installmentsPreview.map((installment) => {
         const existing = previous.find(
           (item) => item.installmentNumber === installment.installmentNumber,
         );
@@ -230,8 +229,23 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
           value: installment.value,
           isoDate: existing?.isoDate ?? installment.isoDate,
         };
-      }),
-    );
+      });
+
+      const hasChanges =
+        mapped.length !== previous.length ||
+        mapped.some((item, index) => {
+          const current = previous[index];
+          return (
+            !current ||
+            current.installmentNumber !== item.installmentNumber ||
+            current.label !== item.label ||
+            current.value !== item.value ||
+            current.isoDate !== item.isoDate
+          );
+        });
+
+      return hasChanges ? mapped : previous;
+    });
   }, [installmentsPreview]);
 
   const orderDateValue = form.watch("order_date");
