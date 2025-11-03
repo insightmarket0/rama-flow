@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -75,6 +75,30 @@ const orderSchema = z.object({
   order_date: dateStringSchema,
 });
 
+type InstallmentPreview = {
+  installmentNumber: number;
+  label: string;
+  value: number;
+  date: string;
+  isoDate: string;
+  dueInDays: number;
+};
+
+type CustomInstallment = {
+  installmentNumber: number;
+  label: string;
+  value: number;
+  isoDate: string;
+};
+
+const toISODateString = (date: Date) => date.toISOString().split("T")[0] ?? "";
+
+const formatISOToDisplay = (isoDate: string) => {
+  if (!isoDate) return "-";
+  const parsed = new Date(`${isoDate}T00:00:00`);
+  return Number.isNaN(parsed.getTime()) ? "-" : parsed.toLocaleDateString("pt-BR");
+};
+
 interface OrderDialogProps {
   children?: React.ReactNode;
   enableGlobalOpen?: boolean;
@@ -89,6 +113,7 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
     quantity: "",
     unit_price: "",
   });
+  const [customInstallments, setCustomInstallments] = useState<CustomInstallment[]>([]);
 
   const { createOrder } = useOrders();
   const { suppliers } = useSuppliers();
@@ -118,6 +143,8 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
     const handleOpen = () => {
       form.reset(getDefaultValues());
       setOpen(true);
+      setItems([]);
+      setCustomInstallments([]);
     };
 
     window.addEventListener(OPEN_ORDER_DIALOG_EVENT, handleOpen);
@@ -159,7 +186,7 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
     return itemsTotal + freight + taxes - discount;
   };
 
-  const calculateInstallmentsPreview = () => {
+  const calculateInstallmentsPreview = (): InstallmentPreview[] => {
     const total = calculateTotal();
     const conditionId = form.watch("payment_condition_id");
     const condition = paymentConditions?.find((c) => c.id === conditionId);
@@ -171,12 +198,94 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
 
     if (!condition || total <= 0) return [];
 
-    return generateInstallmentPlan(total, condition, effectiveBaseDate).map((item) => ({
-      label: item.installmentNumber === 0 ? "Entrada" : `Parcela ${item.installmentNumber}`,
-      value: item.value,
-      date: item.dueDate.toLocaleDateString("pt-BR"),
-      dueInDays: item.dueInDays,
-    }));
+    return generateInstallmentPlan(total, condition, effectiveBaseDate).map((item) => {
+      const isoDate = toISODateString(item.dueDate);
+      return {
+        installmentNumber: item.installmentNumber,
+        label: item.installmentNumber === 0 ? "Entrada" : `Parcela ${item.installmentNumber}`,
+        value: item.value,
+        date: item.dueDate.toLocaleDateString("pt-BR"),
+        isoDate,
+        dueInDays: item.dueInDays,
+      };
+    });
+  };
+
+  const installmentsPreview = calculateInstallmentsPreview();
+
+  useEffect(() => {
+    if (installmentsPreview.length === 0) {
+      setCustomInstallments([]);
+      return;
+    }
+
+    setCustomInstallments((previous) =>
+      installmentsPreview.map((installment) => {
+        const existing = previous.find(
+          (item) => item.installmentNumber === installment.installmentNumber,
+        );
+        return {
+          installmentNumber: installment.installmentNumber,
+          label: installment.label,
+          value: installment.value,
+          isoDate: existing?.isoDate ?? installment.isoDate,
+        };
+      }),
+    );
+  }, [installmentsPreview]);
+
+  const orderDateValue = form.watch("order_date");
+  const normalizedBaseOrderDate = useMemo(() => {
+    const baseOrderDate = orderDateValue
+      ? new Date(`${orderDateValue}T00:00:00`)
+      : new Date();
+    return Number.isNaN(baseOrderDate.getTime()) ? new Date() : baseOrderDate;
+  }, [orderDateValue]);
+
+  const displayedInstallments = useMemo(() => {
+    return installmentsPreview.map((installment) => {
+      const custom = customInstallments.find(
+        (item) => item.installmentNumber === installment.installmentNumber,
+      );
+      const isoDate = custom?.isoDate ?? installment.isoDate;
+      const dueDate = isoDate ? new Date(`${isoDate}T00:00:00`) : null;
+      const dueInDays =
+        dueDate && !Number.isNaN(dueDate.getTime())
+          ? Math.round((dueDate.getTime() - normalizedBaseOrderDate.getTime()) / (1000 * 60 * 60 * 24))
+          : installment.dueInDays;
+
+      return {
+        ...installment,
+        isoDate,
+        date: formatISOToDisplay(isoDate),
+        dueInDays,
+      };
+    });
+  }, [customInstallments, installmentsPreview, normalizedBaseOrderDate]);
+
+  const hasCompleteCustomInstallments =
+    customInstallments.length === installmentsPreview.length &&
+    customInstallments.every((installment) => installment.isoDate);
+
+  const handleInstallmentDateChange = (installmentNumber: number, value: string) => {
+    setCustomInstallments((previous) =>
+      previous.map((installment) =>
+        installment.installmentNumber === installmentNumber
+          ? { ...installment, isoDate: value }
+          : installment,
+      ),
+    );
+  };
+
+  const resetInstallmentDates = () => {
+    setCustomInstallments(
+      installmentsPreview.map((installment) => ({
+        installmentNumber: installment.installmentNumber,
+        label: installment.label,
+        value: installment.value,
+        isoDate: installment.isoDate,
+      })),
+    );
   };
 
   const onSubmit = async (values: z.infer<typeof orderSchema>) => {
@@ -186,6 +295,15 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
       });
       return;
     }
+
+    const installmentsOverride =
+      hasCompleteCustomInstallments && installmentsPreview.length > 0
+        ? customInstallments.map((installment) => ({
+            installmentNumber: installment.installmentNumber,
+            value: installment.value,
+            due_date: installment.isoDate,
+          }))
+        : undefined;
 
     await createOrder.mutateAsync({
       supplier_id: values.supplier_id,
@@ -197,14 +315,14 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
       discount: values.discount,
       taxes: values.taxes,
       order_date: values.order_date,
+      installments_override: installmentsOverride,
     });
 
     setOpen(false);
     form.reset(getDefaultValues());
     setItems([]);
+    setCustomInstallments([]);
   };
-
-  const installmentsPreview = calculateInstallmentsPreview();
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -484,21 +602,49 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
             </div>
 
             {installmentsPreview.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="font-semibold">Prévia das Parcelas</h3>
-                <div className="bg-muted p-4 rounded-lg space-y-2">
-                  {installmentsPreview.map((inst, index) => (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold">Vencimentos das Parcelas</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Ajuste manualmente as datas em que cada parcela deve vencer.
+                    </p>
+                  </div>
+                  <Button type="button" variant="ghost" size="sm" onClick={resetInstallmentDates}>
+                    Restaurar padrão
+                  </Button>
+                </div>
+                <div className="space-y-3">
+                  {displayedInstallments.map((installment) => (
                     <div
-                      key={`${inst.label}-${index}`}
-                      className="flex justify-between gap-4 text-sm"
+                      key={`installment-${installment.installmentNumber}`}
+                      className="flex flex-col gap-2 rounded-lg border border-muted p-3 sm:flex-row sm:items-center sm:justify-between"
                     >
-                      <span>
-                        {inst.dueInDays > 0
-                          ? `${inst.label} (${inst.dueInDays} dias)`
-                          : inst.label}
-                      </span>
-                      <span>{formatCurrencyBRL(inst.value)}</span>
-                      <span>{inst.date}</span>
+                      <div>
+                        <p className="font-medium">{installment.label}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {formatCurrencyBRL(installment.value)}
+                        </p>
+                      </div>
+                      <div className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-3">
+                        <Input
+                          type="date"
+                          value={installment.isoDate}
+                          onChange={(event) =>
+                            handleInstallmentDateChange(
+                              installment.installmentNumber,
+                              event.target.value,
+                            )
+                          }
+                        />
+                        <span className="text-sm text-muted-foreground">
+                          {installment.dueInDays > 0
+                            ? `${installment.dueInDays} dias após a compra`
+                            : installment.dueInDays === 0
+                              ? "Vence no dia da compra"
+                              : `${Math.abs(installment.dueInDays)} dias antes da compra`}
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>

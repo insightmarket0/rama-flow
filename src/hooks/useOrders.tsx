@@ -44,6 +44,11 @@ export interface CreateOrderData {
   discount: number;
   taxes: number;
   order_date: string;
+  installments_override?: {
+    installmentNumber: number;
+    value: number;
+    due_date: string;
+  }[];
 }
 
 export const useOrders = () => {
@@ -139,11 +144,20 @@ export const useOrders = () => {
       const baseDate = orderData.order_date
         ? new Date(`${orderData.order_date}T00:00:00`)
         : new Date();
-      const plan = generateInstallmentPlan(
-        total_value,
-        normalizedPaymentCondition,
-        Number.isNaN(baseDate.getTime()) ? new Date() : baseDate,
-      );
+      const normalizedBaseDate = Number.isNaN(baseDate.getTime()) ? new Date() : baseDate;
+      const plan =
+        orderData.installments_override && orderData.installments_override.length > 0
+          ? orderData.installments_override
+              .filter((item) => item.due_date)
+              .map((item) => {
+                const parsed = new Date(`${item.due_date}T00:00:00`);
+                return {
+                  installmentNumber: item.installmentNumber,
+                  value: item.value,
+                  dueDate: Number.isNaN(parsed.getTime()) ? normalizedBaseDate : parsed,
+                };
+              })
+          : generateInstallmentPlan(total_value, normalizedPaymentCondition, normalizedBaseDate);
 
       const installments = plan
         .filter((item) => item.value > 0)
