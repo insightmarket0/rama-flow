@@ -41,8 +41,18 @@ export const useQuotations = (filters?: QuotationFilters) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const friendly = (e: unknown) => {
-    const msg = typeof e === "object" && e && "message" in e ? String((e as any).message) : String(e);
+  const extractErrorMessage = (error: unknown): string => {
+    if (typeof error === "object" && error !== null && "message" in error) {
+      const value = (error as { message?: unknown }).message;
+      if (typeof value === "string") {
+        return value;
+      }
+    }
+    return String(error);
+  };
+
+  const friendly = (error: unknown) => {
+    const msg = extractErrorMessage(error);
     const normalized = msg.toLowerCase();
     // Falta de tabelas (variações comuns do PostgREST/Postgres)
     if (

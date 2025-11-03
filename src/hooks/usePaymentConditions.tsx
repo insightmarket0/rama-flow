@@ -7,6 +7,8 @@ type PaymentCondition = Tables<"payment_conditions">;
 type PaymentConditionInsert = TablesInsert<"payment_conditions">;
 type PaymentConditionUpdate = TablesUpdate<"payment_conditions">;
 
+const SCHEMA_CACHE_ERROR_FRAGMENT = "schema cache";
+
 export const usePaymentConditions = () => {
   const queryClient = useQueryClient();
 
@@ -26,17 +28,37 @@ export const usePaymentConditions = () => {
     },
   });
 
+  const waitForSchemaReload = async () =>
+    new Promise((resolve) => setTimeout(resolve, 400));
+
+  const refreshSchemaCache = async () => {
+    const { error } = await supabase.rpc("refresh_postgrest_schema");
+    if (error) {
+      // Schema refresh é tentativa; falhas não devem quebrar o fluxo.
+      console.warn("Não foi possível atualizar o cache do schema:", error);
+    }
+    await waitForSchemaReload();
+  };
+
   const createPaymentCondition = useMutation({
     mutationFn: async (condition: Omit<PaymentConditionInsert, "user_id">) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      const { data, error } = await supabase
-        .from("payment_conditions")
-        .insert({ ...condition, user_id: user.id })
-        .select()
-        .single();
-      
+      const performInsert = () =>
+        supabase
+          .from("payment_conditions")
+          .insert({ ...condition, user_id: user.id })
+          .select()
+          .single();
+
+      let { data, error } = await performInsert();
+
+      if (error && error.message?.toLowerCase().includes(SCHEMA_CACHE_ERROR_FRAGMENT)) {
+        await refreshSchemaCache();
+        ({ data, error } = await performInsert());
+      }
+
       if (error) throw error;
       return data;
     },
@@ -52,13 +74,21 @@ export const usePaymentConditions = () => {
 
   const updatePaymentCondition = useMutation({
     mutationFn: async ({ id, ...updates }: PaymentConditionUpdate & { id: string }) => {
-      const { data, error } = await supabase
-        .from("payment_conditions")
-        .update(updates)
-        .eq("id", id)
-        .select()
-        .single();
-      
+      const performUpdate = () =>
+        supabase
+          .from("payment_conditions")
+          .update(updates)
+          .eq("id", id)
+          .select()
+          .single();
+
+      let { data, error } = await performUpdate();
+
+      if (error && error.message?.toLowerCase().includes(SCHEMA_CACHE_ERROR_FRAGMENT)) {
+        await refreshSchemaCache();
+        ({ data, error } = await performUpdate());
+      }
+
       if (error) throw error;
       return data;
     },

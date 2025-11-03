@@ -58,6 +58,16 @@ const dateStringSchema = z
 
 const orderSchema = z.object({
   supplier_id: z.string().min(1, "Selecione um fornecedor"),
+  order_number: z
+    .string()
+    .max(100, "Máximo de 100 caracteres")
+    .optional()
+    .transform((value) => value?.trim() || undefined),
+  invoice_number: z
+    .string()
+    .max(100, "Máximo de 100 caracteres")
+    .optional()
+    .transform((value) => value?.trim() || undefined),
   payment_condition_id: z.string().min(1, "Selecione uma condição"),
   freight: z.number().or(z.string()).transform((val) => typeof val === 'string' ? parseFloat(val) || 0 : val),
   discount: z.number().or(z.string()).transform((val) => typeof val === 'string' ? parseFloat(val) || 0 : val),
@@ -86,6 +96,8 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
 
   const getDefaultValues = useCallback(() => ({
     supplier_id: "",
+    order_number: "",
+    invoice_number: "",
     payment_condition_id: "",
     freight: 0,
     discount: 0,
@@ -178,6 +190,8 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
     await createOrder.mutateAsync({
       supplier_id: values.supplier_id,
       payment_condition_id: values.payment_condition_id,
+      order_number: values.order_number,
+      invoice_number: values.invoice_number,
       items,
       freight: values.freight,
       discount: values.discount,
@@ -201,7 +215,7 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <FormField
                 control={form.control}
                 name="supplier_id"
@@ -232,59 +246,27 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
 
               <FormField
                 control={form.control}
-                name="payment_condition_id"
+                name="order_number"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Condição de Pagamento</FormLabel>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="min-w-[220px]">
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {paymentConditions?.map((condition) => (
-                            <SelectItem key={condition.id} value={condition.id}>
-                              {condition.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <PaymentConditionDialog
-                        onSuccess={(condition) => {
-                          form.setValue("payment_condition_id", condition.id, { shouldValidate: true });
-                        }}
-                        trigger={
-                          <Button type="button" variant="outline" size="sm">
-                            Nova
-                          </Button>
-                        }
-                      />
-                      <Sheet>
-                        <SheetTrigger asChild>
-                          <Button type="button" variant="outline" size="sm">
-                            Gerenciar
-                          </Button>
-                        </SheetTrigger>
-                        <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
-                          <SheetHeader>
-                            <SheetTitle>Condições de Pagamento</SheetTitle>
-                          </SheetHeader>
-                          <div className="mt-6">
-                            <PaymentConditionsPanel
-                              variant="flat"
-                              onCreateSuccess={(condition) => {
-                                form.setValue("payment_condition_id", condition.id, { shouldValidate: true });
-                              }}
-                            />
-                          </div>
-                        </SheetContent>
-                      </Sheet>
-                    </div>
+                    <FormLabel>Número do Pedido</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Digite o número (opcional)" {...field} value={field.value ?? ""} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="invoice_number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Número da Nota Fiscal</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Digite o número (opcional)" {...field} value={field.value ?? ""} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -433,6 +415,66 @@ export function OrderDialog({ children, enableGlobalOpen = false }: OrderDialogP
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="payment_condition_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Condição de Pagamento</FormLabel>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="min-w-[220px]">
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {paymentConditions?.map((condition) => (
+                          <SelectItem key={condition.id} value={condition.id}>
+                            {condition.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <PaymentConditionDialog
+                      onSuccess={(condition) => {
+                        form.setValue("payment_condition_id", condition.id, { shouldValidate: true });
+                      }}
+                      trigger={
+                        <Button type="button" variant="outline" size="sm">
+                          Nova
+                        </Button>
+                      }
+                    />
+                    <Sheet>
+                      <SheetTrigger asChild>
+                        <Button type="button" variant="outline" size="sm">
+                          Gerenciar
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+                        <SheetHeader>
+                          <SheetTitle>Condições de Pagamento</SheetTitle>
+                        </SheetHeader>
+                        <div className="mt-6">
+                          <PaymentConditionsPanel
+                            variant="flat"
+                            onCreateSuccess={(condition) => {
+                              form.setValue("payment_condition_id", condition.id, { shouldValidate: true });
+                            }}
+                          />
+                        </div>
+                      </SheetContent>
+                    </Sheet>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div className="bg-muted p-4 rounded-lg space-y-2">
               <div className="flex justify-between font-semibold">

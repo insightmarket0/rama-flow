@@ -78,6 +78,7 @@ export type Database = {
           freight: number | null
           id: string
           items: Json | null
+          invoice_number: string | null
           order_date: string | null
           order_number: string
           payment_condition_id: string
@@ -94,6 +95,7 @@ export type Database = {
           freight?: number | null
           id?: string
           items?: Json | null
+          invoice_number?: string | null
           order_date?: string | null
           order_number: string
           payment_condition_id: string
@@ -110,6 +112,7 @@ export type Database = {
           freight?: number | null
           id?: string
           items?: Json | null
+          invoice_number?: string | null
           order_date?: string | null
           order_number?: string
           payment_condition_id?: string
@@ -457,7 +460,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      refresh_postgrest_schema: {
+        Args: Record<string, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
@@ -589,4 +595,4 @@ export const Constants = {
   public: {
     Enums: {},
   },
-} as const
+} as const;

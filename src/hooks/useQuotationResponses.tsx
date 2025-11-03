@@ -14,8 +14,18 @@ export const useQuotationResponses = (quotationId: string | null) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const friendly = (e: unknown) => {
-    const msg = typeof e === "object" && e && "message" in e ? String((e as any).message) : String(e);
+  const extractErrorMessage = (error: unknown): string => {
+    if (typeof error === "object" && error !== null && "message" in error) {
+      const value = (error as { message?: unknown }).message;
+      if (typeof value === "string") {
+        return value;
+      }
+    }
+    return String(error);
+  };
+
+  const friendly = (error: unknown) => {
+    const msg = extractErrorMessage(error);
     if (msg.includes("Could not find the table 'public.quotation_responses'")) {
       return "Tabela de respostas não encontrada. Aplique as migrações e reabra o app.";
     }

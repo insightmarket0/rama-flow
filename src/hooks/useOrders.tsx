@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Tables } from "@/integrations/supabase/types";
+import { Json, Tables } from "@/integrations/supabase/types";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { generateInstallmentPlan } from "@/lib/installments";
@@ -15,6 +15,7 @@ export interface OrderItem {
 export interface Order {
   id: string;
   order_number: string;
+  invoice_number: string | null;
   supplier_id: string;
   payment_condition_id: string;
   total_value: number;
@@ -36,6 +37,8 @@ export interface Order {
 export interface CreateOrderData {
   supplier_id: string;
   payment_condition_id: string;
+  order_number?: string;
+  invoice_number?: string;
   items: OrderItem[];
   freight: number;
   discount: number;
@@ -69,6 +72,7 @@ export const useOrders = () => {
         taxes: Number((order as { taxes?: number | null }).taxes ?? 0),
         total_value: Number(order.total_value ?? 0),
         order_date: order.order_date ?? null,
+        invoice_number: (order as { invoice_number?: string | null }).invoice_number ?? null,
       })) as Order[];
     },
   });
@@ -86,7 +90,8 @@ export const useOrders = () => {
 
       // Generate order number
       const orderCount = orders?.length || 0;
-      const order_number = `#${String(orderCount + 1).padStart(3, "0")}`;
+      const fallbackOrderNumber = `#${String(orderCount + 1).padStart(3, "0")}`;
+      const order_number = orderData.order_number?.trim() || fallbackOrderNumber;
 
       // Create order
       const { data: order, error: orderError } = await supabase
@@ -94,6 +99,7 @@ export const useOrders = () => {
         .insert([{
           user_id: user.id,
           order_number,
+          invoice_number: orderData.invoice_number?.trim() || null,
           supplier_id: orderData.supplier_id,
           payment_condition_id: orderData.payment_condition_id,
           total_value,
@@ -101,7 +107,12 @@ export const useOrders = () => {
           discount: orderData.discount,
           taxes: orderData.taxes,
           order_date: orderData.order_date || null,
-          items: orderData.items as any,
+          items: orderData.items.map((item) => ({
+            sku: item.sku,
+            description: item.description,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+          })) as Json,
           status: "aberto",
         }])
         .select()

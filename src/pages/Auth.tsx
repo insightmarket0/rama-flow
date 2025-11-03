@@ -56,6 +56,16 @@ const Auth = () => {
     };
   }, [navigate]);
 
+  const extractErrorMessage = (error: unknown) => {
+    if (typeof error === "object" && error !== null && "message" in error) {
+      const message = (error as { message?: unknown }).message;
+      if (typeof message === "string") {
+        return message;
+      }
+    }
+    return "Ocorreu um erro. Tente novamente.";
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -87,10 +97,10 @@ const Auth = () => {
         });
         navigate("/dashboard");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Erro",
-        description: error.message,
+        description: extractErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -156,10 +166,10 @@ const Auth = () => {
         setIsLogin(true);
         setPassword("");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Erro",
-        description: error.message,
+        description: extractErrorMessage(error),
         variant: "destructive",
       });
     } finally {

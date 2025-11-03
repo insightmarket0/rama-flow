@@ -6,7 +6,7 @@ import { CommandMenu } from "./CommandMenu";
 import { GlobalShortcuts } from "./GlobalShortcuts";
 import { QuickCreateMenu } from "./QuickCreateMenu";
 import { GlobalAlerts } from "./GlobalAlerts";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -19,7 +19,21 @@ export function MainLayout({ children }: MainLayoutProps) {
   const { user } = useAuth();
   const [fullName, setFullName] = useState<string | null>(null);
   const [visible, setVisible] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  const safeMetadata = useMemo<Record<string, unknown>>(() => {
+    if (user?.user_metadata && typeof user.user_metadata === "object" && !Array.isArray(user.user_metadata)) {
+      return user.user_metadata as Record<string, unknown>;
+    }
+    return {};
+  }, [user?.user_metadata]);
+
+  const metadataString = useCallback(
+    (key: string) => {
+      const value = safeMetadata[key];
+      return typeof value === "string" ? value : undefined;
+    },
+    [safeMetadata],
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -39,14 +53,20 @@ export function MainLayout({ children }: MainLayoutProps) {
 
         if (!mounted) return;
 
+        const metadataFullName = metadataString("full_name");
+
         if (error) {
-          // fallback to user metadata
-          setFullName((user?.user_metadata as any)?.full_name ?? null);
-        } else {
-          setFullName((data as any)?.full_name ?? (user?.user_metadata as any)?.full_name ?? null);
+          setFullName(metadataFullName ?? null);
+          return;
         }
-      } catch (err) {
-        setFullName((user?.user_metadata as any)?.full_name ?? null);
+
+        const dbFullName =
+          data && typeof data === "object" && "full_name" in data && typeof (data as Record<string, unknown>).full_name === "string"
+            ? ((data as Record<string, unknown>).full_name as string)
+            : undefined;
+        setFullName(dbFullName ?? metadataFullName ?? null);
+      } catch {
+        setFullName(metadataString("full_name") ?? null);
       }
     };
 
@@ -55,7 +75,7 @@ export function MainLayout({ children }: MainLayoutProps) {
     return () => {
       mounted = false;
     };
-  }, [user]);
+  }, [metadataString, user]);
 
   useEffect(() => {
     // small delay to trigger animation
@@ -71,12 +91,14 @@ export function MainLayout({ children }: MainLayoutProps) {
   };
 
   const initials = () => {
-    const name = fullName ?? (user?.user_metadata as any)?.full_name ?? user?.email ?? "Usuário";
+    const name = fullName ?? metadataString("full_name") ?? user?.email ?? "Usuário";
     const parts = name.split(/\s+/).filter(Boolean);
     if (parts.length === 0) return "U";
     if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   };
+
+  const avatarUrl = metadataString("avatar_url");
 
   return (
     <SidebarProvider>
@@ -94,8 +116,8 @@ export function MainLayout({ children }: MainLayoutProps) {
                   visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1'
                 }`}>
                   <Avatar>
-                    { (user?.user_metadata as any)?.avatar_url ? (
-                      <AvatarImage src={(user?.user_metadata as any).avatar_url} alt={fullName ?? undefined} />
+                    { avatarUrl ? (
+                      <AvatarImage src={avatarUrl} alt={fullName ?? undefined} />
                     ) : (
                       <AvatarFallback>{initials()}</AvatarFallback>
                     )}
