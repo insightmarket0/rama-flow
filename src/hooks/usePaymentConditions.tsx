@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 import { toast } from "sonner";
+import type { PostgrestSingleResponse } from "@supabase/supabase-js";
 
 type PaymentCondition = Tables<"payment_conditions">;
 type PaymentConditionInsert = TablesInsert<"payment_conditions">;
@@ -19,7 +20,7 @@ export const usePaymentConditions = () => {
         .from("payment_conditions")
         .select("*")
         .order("created_at", { ascending: false });
-      
+
       if (error) throw error;
       return (data as PaymentCondition[]).map((condition) => ({
         ...condition,
@@ -29,17 +30,43 @@ export const usePaymentConditions = () => {
   });
 
   const waitForSchemaReload = async () =>
+<<<<<<< HEAD
     new Promise((resolve) => setTimeout(resolve, 400));
+=======
+    new Promise((resolve) => setTimeout(resolve, 1200));
+>>>>>>> 5623264 (Allow manual due dates in order dialog)
 
   const refreshSchemaCache = async () => {
     const { error } = await supabase.rpc("refresh_postgrest_schema");
     if (error) {
+<<<<<<< HEAD
       // Schema refresh é tentativa; falhas não devem quebrar o fluxo.
+=======
+>>>>>>> 5623264 (Allow manual due dates in order dialog)
       console.warn("Não foi possível atualizar o cache do schema:", error);
     }
     await waitForSchemaReload();
   };
 
+<<<<<<< HEAD
+=======
+  const executeWithSchemaRetry = async <T,>(
+    operation: () => Promise<PostgrestSingleResponse<T>>,
+    retries = 2,
+  ) => {
+    let attempts = 0;
+    let result = await operation();
+
+    while (result.error && result.error.message?.toLowerCase().includes(SCHEMA_CACHE_ERROR_FRAGMENT) && attempts < retries) {
+      attempts += 1;
+      await refreshSchemaCache();
+      result = await operation();
+    }
+
+    return result;
+  };
+
+>>>>>>> 5623264 (Allow manual due dates in order dialog)
   const createPaymentCondition = useMutation({
     mutationFn: async (condition: Omit<PaymentConditionInsert, "user_id">) => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -52,12 +79,16 @@ export const usePaymentConditions = () => {
           .select()
           .single();
 
+<<<<<<< HEAD
       let { data, error } = await performInsert();
 
       if (error && error.message?.toLowerCase().includes(SCHEMA_CACHE_ERROR_FRAGMENT)) {
         await refreshSchemaCache();
         ({ data, error } = await performInsert());
       }
+=======
+      const { data, error } = await executeWithSchemaRetry(performInsert);
+>>>>>>> 5623264 (Allow manual due dates in order dialog)
 
       if (error) throw error;
       return data;
@@ -82,12 +113,16 @@ export const usePaymentConditions = () => {
           .select()
           .single();
 
+<<<<<<< HEAD
       let { data, error } = await performUpdate();
 
       if (error && error.message?.toLowerCase().includes(SCHEMA_CACHE_ERROR_FRAGMENT)) {
         await refreshSchemaCache();
         ({ data, error } = await performUpdate());
       }
+=======
+      const { data, error } = await executeWithSchemaRetry(performUpdate);
+>>>>>>> 5623264 (Allow manual due dates in order dialog)
 
       if (error) throw error;
       return data;
@@ -108,7 +143,7 @@ export const usePaymentConditions = () => {
         .from("payment_conditions")
         .delete()
         .eq("id", id);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
