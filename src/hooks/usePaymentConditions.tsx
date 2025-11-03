@@ -30,26 +30,16 @@ export const usePaymentConditions = () => {
   });
 
   const waitForSchemaReload = async () =>
-<<<<<<< HEAD
-    new Promise((resolve) => setTimeout(resolve, 400));
-=======
     new Promise((resolve) => setTimeout(resolve, 1200));
->>>>>>> 5623264 (Allow manual due dates in order dialog)
 
   const refreshSchemaCache = async () => {
     const { error } = await supabase.rpc("refresh_postgrest_schema");
     if (error) {
-<<<<<<< HEAD
-      // Schema refresh é tentativa; falhas não devem quebrar o fluxo.
-=======
->>>>>>> 5623264 (Allow manual due dates in order dialog)
       console.warn("Não foi possível atualizar o cache do schema:", error);
     }
     await waitForSchemaReload();
   };
 
-<<<<<<< HEAD
-=======
   const executeWithSchemaRetry = async <T,>(
     operation: () => Promise<PostgrestSingleResponse<T>>,
     retries = 2,
@@ -66,7 +56,6 @@ export const usePaymentConditions = () => {
     return result;
   };
 
->>>>>>> 5623264 (Allow manual due dates in order dialog)
   const createPaymentCondition = useMutation({
     mutationFn: async (condition: Omit<PaymentConditionInsert, "user_id">) => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -79,16 +68,7 @@ export const usePaymentConditions = () => {
           .select()
           .single();
 
-<<<<<<< HEAD
-      let { data, error } = await performInsert();
-
-      if (error && error.message?.toLowerCase().includes(SCHEMA_CACHE_ERROR_FRAGMENT)) {
-        await refreshSchemaCache();
-        ({ data, error } = await performInsert());
-      }
-=======
       const { data, error } = await executeWithSchemaRetry(performInsert);
->>>>>>> 5623264 (Allow manual due dates in order dialog)
 
       if (error) throw error;
       return data;
@@ -113,16 +93,7 @@ export const usePaymentConditions = () => {
           .select()
           .single();
 
-<<<<<<< HEAD
-      let { data, error } = await performUpdate();
-
-      if (error && error.message?.toLowerCase().includes(SCHEMA_CACHE_ERROR_FRAGMENT)) {
-        await refreshSchemaCache();
-        ({ data, error } = await performUpdate());
-      }
-=======
       const { data, error } = await executeWithSchemaRetry(performUpdate);
->>>>>>> 5623264 (Allow manual due dates in order dialog)
 
       if (error) throw error;
       return data;
