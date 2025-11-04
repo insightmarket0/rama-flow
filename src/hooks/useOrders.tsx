@@ -4,6 +4,7 @@ import { Json, Tables } from "@/integrations/supabase/types";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { generateInstallmentPlan } from "@/lib/installments";
+import type { PostgrestError } from "@supabase/supabase-js";
 
 export interface OrderItem {
   sku: string;
@@ -93,37 +94,80 @@ export const useOrders = () => {
       );
       const total_value = itemsTotal + orderData.freight + orderData.taxes - orderData.discount;
 
-      // Generate order number
-      const orderCount = orders?.length || 0;
-      const fallbackOrderNumber = `#${String(orderCount + 1).padStart(3, "0")}`;
-      const order_number = orderData.order_number?.trim() || fallbackOrderNumber;
+      const manualOrderNumber = orderData.order_number?.trim() || null;
 
-      // Create order
-      const { data: order, error: orderError } = await supabase
-        .from("orders")
-        .insert([{
-          user_id: user.id,
-          order_number,
-          invoice_number: orderData.invoice_number?.trim() || null,
-          supplier_id: orderData.supplier_id,
-          payment_condition_id: orderData.payment_condition_id,
-          total_value,
-          freight: orderData.freight,
-          discount: orderData.discount,
-          taxes: orderData.taxes,
-          order_date: orderData.order_date || null,
-          items: orderData.items.map((item) => ({
-            sku: item.sku,
-            description: item.description,
-            quantity: item.quantity,
-            unit_price: item.unit_price,
-          })) as Json,
-          status: "aberto",
-        }])
-        .select()
-        .single();
+      const getNextOrderNumber = async () => {
+        const { data, error } = await supabase
+          .from("orders")
+          .select("order_number")
+          .eq("user_id", user.id)
+          .ilike("order_number", "#%")
+          .order("order_number", { ascending: false })
+          .limit(1);
 
-      if (orderError) throw orderError;
+        if (error) throw error;
+
+        const latest = data?.[0]?.order_number ?? null;
+        const numericMatch = latest?.match(/\d+/g);
+        const numericString = numericMatch ? numericMatch[numericMatch.length - 1] : null;
+        const numericValue = numericString ? parseInt(numericString, 10) : NaN;
+        const nextValue = Number.isNaN(numericValue) ? 1 : numericValue + 1;
+
+        return `#${String(nextValue).padStart(3, "0")}`;
+      };
+
+      let orderNumberToUse = manualOrderNumber || (await getNextOrderNumber());
+      let createdOrder: Tables<"orders"> | null = null;
+      let lastError: PostgrestError | null = null;
+
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const { data, error: orderError } = await supabase
+          .from("orders")
+          .insert([{
+            user_id: user.id,
+            order_number: orderNumberToUse,
+            invoice_number: orderData.invoice_number?.trim() || null,
+            supplier_id: orderData.supplier_id,
+            payment_condition_id: orderData.payment_condition_id,
+            total_value,
+            freight: orderData.freight,
+            discount: orderData.discount,
+            taxes: orderData.taxes,
+            order_date: orderData.order_date || null,
+            items: orderData.items.map((item) => ({
+              sku: item.sku,
+              description: item.description,
+              quantity: item.quantity,
+              unit_price: item.unit_price,
+            })) as Json,
+            status: "aberto",
+          }])
+          .select()
+          .single();
+
+        if (!orderError) {
+          createdOrder = data;
+          break;
+        }
+
+        lastError = orderError;
+
+        if (orderError.code === "23505" && !manualOrderNumber) {
+          orderNumberToUse = await getNextOrderNumber();
+          continue;
+        }
+
+        throw orderError;
+      }
+
+      if (!createdOrder) {
+        if (lastError) {
+          throw lastError;
+        }
+        throw new Error("Não foi possível gerar um número de pedido único automaticamente.");
+      }
+
+      const order = createdOrder;
 
       // Get payment condition details
       const { data: paymentCondition, error: pcError } = await supabase
