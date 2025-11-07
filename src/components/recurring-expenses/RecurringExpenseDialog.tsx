@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,7 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { format, setDate } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { FEATURE_TAX_DESCRIPTION } from "@/lib/features";
 
 const formSchema = z.object({
   name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
@@ -42,7 +43,7 @@ const formSchema = z.object({
   end_date: z.string().optional(),
   notes: z.string().optional(),
 }).superRefine((data, ctx) => {
-  if (data.category === "impostos") {
+  if (FEATURE_TAX_DESCRIPTION && data.category === "impostos") {
     if (!data.tax_description || data.tax_description.trim().length < 2) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -109,7 +110,9 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
       id: "basic",
       title: "Informações Básicas",
       description: "Defina nome, categoria e fornecedor.",
-      fields: ["name", "category", "tax_description", "supplier_id"],
+      fields: FEATURE_TAX_DESCRIPTION
+        ? ["name", "category", "tax_description", "supplier_id"]
+        : ["name", "category", "supplier_id"],
     },
     {
       id: "recurrence",
@@ -135,7 +138,7 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
   const selectedCategory = values.category;
 
   useEffect(() => {
-    if (selectedCategory !== "impostos" && form.getValues("tax_description")) {
+    if (FEATURE_TAX_DESCRIPTION && selectedCategory !== "impostos" && form.getValues("tax_description")) {
       form.setValue("tax_description", "", { shouldValidate: false });
     }
   }, [form, selectedCategory]);
@@ -204,14 +207,14 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
     setIsSubmitting(true);
     try {
       const taxDescription =
-        data.category === "impostos" && data.tax_description?.trim()
+        FEATURE_TAX_DESCRIPTION && data.category === "impostos" && data.tax_description?.trim()
           ? data.tax_description.trim()
           : null;
 
       await createRecurringExpense.mutateAsync({
         name: data.name,
         category: data.category,
-        tax_description: taxDescription,
+        ...(FEATURE_TAX_DESCRIPTION ? { tax_description: taxDescription } : {}),
         amount: parseFloat(data.amount),
         recurrence_type: data.recurrence_type,
         due_day: parseInt(data.due_day),
@@ -235,7 +238,11 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
 
     form.setValue("name", template.name, { shouldValidate: true });
     form.setValue("category", template.category, { shouldValidate: true });
-    form.setValue("tax_description", template.category === "impostos" ? template.name : "", { shouldValidate: template.category === "impostos" });
+    if (FEATURE_TAX_DESCRIPTION) {
+      form.setValue("tax_description", template.category === "impostos" ? template.name : "", {
+        shouldValidate: template.category === "impostos",
+      });
+    }
     form.setValue("amount", template.amount.toString(), { shouldValidate: true });
     form.setValue("recurrence_type", template.recurrence_type, { shouldValidate: true });
     form.setValue("due_day", template.due_day.toString(), { shouldValidate: true });
@@ -252,6 +259,7 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nova Conta Fixa</DialogTitle>
+          <DialogDescription>Cadastre despesas recorrentes para acompanhar seus próximos vencimentos.</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -361,7 +369,7 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
                     )}
                   />
 
-                  {values.category === "impostos" && (
+                  {FEATURE_TAX_DESCRIPTION && values.category === "impostos" && (
                     <FormField
                       control={form.control}
                       name="tax_description"
@@ -527,7 +535,7 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
                           EXPENSE_CATEGORIES.find((category) => category.value === values.category)?.label || "—"
                         }
                       />
-                      {values.category === "impostos" && (
+                      {FEATURE_TAX_DESCRIPTION && values.category === "impostos" && (
                         <SummaryRow
                           label="Imposto"
                           value={values.tax_description || "—"}
@@ -589,16 +597,20 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
                     Voltar
                   </Button>
                 )}
-                {!isLastStep ? (
-                  <Button type="button" onClick={nextStep}>
-                    Avançar
-                  </Button>
-                ) : (
-                  <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Confirmar e criar
-                  </Button>
-                )}
+                <Button
+                  type="button"
+                  disabled={isLastStep && isSubmitting}
+                  onClick={isLastStep ? form.handleSubmit(onSubmit) : nextStep}
+                >
+                  {isLastStep ? (
+                    <>
+                      {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Confirmar e criar
+                    </>
+                  ) : (
+                    "Avançar"
+                  )}
+                </Button>
               </div>
             </div>
           </form>

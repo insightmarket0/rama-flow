@@ -8,6 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { MainLayout } from "./components/layout/MainLayout";
 import { ProtectedRoute } from "./components/layout/ProtectedRoute";
 
+const DashboardFinanceiro = lazy(() => import("./pages/DashboardFinanceiro"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Pedidos = lazy(() => import("./pages/Pedidos"));
 const Condicoes = lazy(() => import("./pages/Condicoes"));
@@ -40,7 +41,17 @@ const App = () => (
         >
           <Routes>
             <Route path="/auth" element={<Auth />} />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<Navigate to="/dashboard-financeiro" replace />} />
+            <Route
+              path="/dashboard-financeiro"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <DashboardFinanceiro />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/dashboard"
               element={

@@ -1,8 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
-import type { PostgrestSingleResponse } from "@supabase/supabase-js";
+import type { PostgrestSingleResponse, PostgrestResponse } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import { FEATURE_TAX_DESCRIPTION } from "@/lib/features";
 
 type RecurringExpense = Tables<"recurring_expenses"> & {
   supplier?: { id: string; name: string } | null;
@@ -23,8 +24,10 @@ const refreshSchemaCache = async () => {
   await waitForSchemaReload();
 };
 
+type SchemaAwareResponse<T> = PostgrestSingleResponse<T> | PostgrestResponse<T>;
+
 const executeWithSchemaRetry = async <T,>(
-  operation: () => Promise<PostgrestSingleResponse<T>>,
+  operation: () => Promise<SchemaAwareResponse<T>>,
   retries = 2,
 ) => {
   let attempts = 0;
@@ -49,16 +52,19 @@ export const useRecurringExpenses = () => {
   const { data: recurringExpenses, isLoading } = useQuery({
     queryKey: ["recurring-expenses"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("recurring_expenses")
-        .select(`
-          *,
-          supplier:suppliers(id, name)
-        `)
-        .order("created_at", { ascending: false });
+      const performSelect = () =>
+        supabase
+          .from("recurring_expenses")
+          .select(`
+            *,
+            supplier:suppliers(id, name)
+          `)
+          .order("created_at", { ascending: false });
       
+      const { data, error } = await executeWithSchemaRetry<RecurringExpense[]>(performSelect);
+
       if (error) throw error;
-      return data as RecurringExpense[];
+      return (data ?? []) as RecurringExpense[];
     },
   });
 
@@ -67,10 +73,15 @@ export const useRecurringExpenses = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
+      const { tax_description, ...restExpense } = expense;
+      const payload: Omit<RecurringExpenseInsert, "user_id"> = FEATURE_TAX_DESCRIPTION
+        ? expense
+        : restExpense;
+
       const performInsert = () =>
         supabase
           .from("recurring_expenses")
-          .insert({ ...expense, user_id: user.id })
+          .insert({ ...payload, user_id: user.id })
           .select()
           .single();
 
@@ -109,10 +120,15 @@ export const useRecurringExpenses = () => {
 
   const updateRecurringExpense = useMutation({
     mutationFn: async ({ id, ...updates }: RecurringExpenseUpdate & { id: string }) => {
+      const { tax_description, ...restUpdates } = updates;
+      const sanitizedUpdates: RecurringExpenseUpdate = FEATURE_TAX_DESCRIPTION
+        ? updates
+        : (restUpdates as RecurringExpenseUpdate);
+
       const performUpdate = () =>
         supabase
           .from("recurring_expenses")
-          .update(updates)
+          .update(sanitizedUpdates)
           .eq("id", id)
           .select()
           .single();
