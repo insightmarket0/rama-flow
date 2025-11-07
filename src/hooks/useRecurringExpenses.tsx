@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
+import type { PostgrestSingleResponse } from "@supabase/supabase-js";
 import { toast } from "sonner";
 
 type RecurringExpense = Tables<"recurring_expenses"> & {
@@ -8,6 +9,39 @@ type RecurringExpense = Tables<"recurring_expenses"> & {
 };
 type RecurringExpenseInsert = TablesInsert<"recurring_expenses">;
 type RecurringExpenseUpdate = TablesUpdate<"recurring_expenses">;
+
+const SCHEMA_CACHE_ERROR_FRAGMENT = "schema cache";
+
+const waitForSchemaReload = async () =>
+  new Promise((resolve) => setTimeout(resolve, 1200));
+
+const refreshSchemaCache = async () => {
+  const { error } = await supabase.rpc("refresh_postgrest_schema");
+  if (error) {
+    console.warn("Falha ao atualizar cache do schema do PostgREST:", error);
+  }
+  await waitForSchemaReload();
+};
+
+const executeWithSchemaRetry = async <T,>(
+  operation: () => Promise<PostgrestSingleResponse<T>>,
+  retries = 2,
+) => {
+  let attempts = 0;
+  let result = await operation();
+
+  while (
+    result.error &&
+    result.error.message?.toLowerCase().includes(SCHEMA_CACHE_ERROR_FRAGMENT) &&
+    attempts < retries
+  ) {
+    attempts += 1;
+    await refreshSchemaCache();
+    result = await operation();
+  }
+
+  return result;
+};
 
 export const useRecurringExpenses = () => {
   const queryClient = useQueryClient();
@@ -33,11 +67,14 @@ export const useRecurringExpenses = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      const { data, error } = await supabase
-        .from("recurring_expenses")
-        .insert({ ...expense, user_id: user.id })
-        .select()
-        .single();
+      const performInsert = () =>
+        supabase
+          .from("recurring_expenses")
+          .insert({ ...expense, user_id: user.id })
+          .select()
+          .single();
+
+      const { data, error } = await executeWithSchemaRetry(performInsert);
 
       if (error) throw error;
 
@@ -72,12 +109,15 @@ export const useRecurringExpenses = () => {
 
   const updateRecurringExpense = useMutation({
     mutationFn: async ({ id, ...updates }: RecurringExpenseUpdate & { id: string }) => {
-      const { data, error } = await supabase
-        .from("recurring_expenses")
-        .update(updates)
-        .eq("id", id)
-        .select()
-        .single();
+      const performUpdate = () =>
+        supabase
+          .from("recurring_expenses")
+          .update(updates)
+          .eq("id", id)
+          .select()
+          .single();
+
+      const { data, error } = await executeWithSchemaRetry(performUpdate);
       
       if (error) throw error;
       if (data?.id) {
