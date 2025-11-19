@@ -10,6 +10,16 @@ import { useRecurringExpenseInstallments } from "@/hooks/useRecurringExpenseInst
 import { formatCurrencyBRL } from "@/lib/format";
 import { FEATURE_TAX_DESCRIPTION } from "@/lib/features";
 import { EXPENSE_CATEGORIES } from "@/lib/recurring-expense-categories";
+import { Tables } from "@/integrations/supabase/types";
+
+type RecurringExpenseItem = Tables<"recurring_expenses"> & {
+  supplier?: { id: string; name: string } | null;
+};
+
+type RecurringExpenseInstallmentItem = Tables<"recurring_expense_installments"> & {
+  recurring_expense?: { name: string; category: string } | null;
+  supplier?: { name: string } | null;
+};
 import { 
   Plus, 
   Calendar, 
@@ -19,7 +29,8 @@ import {
   Play,
   CheckCircle2,
   Clock,
-  AlertCircle
+  AlertCircle,
+  FileQuestion
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import * as LucideIcons from "lucide-react";
@@ -42,18 +53,46 @@ export default function ContasFixas() {
     return EXPENSE_CATEGORIES.find((c) => c.value === category)?.label || category;
   };
 
+  const getDueRuleDescription = (expense: RecurringExpenseItem) => {
+    const ruleType = expense.due_rule_type ?? "specific_day";
+    if (ruleType === "days_after_start") {
+      const offset = expense.due_day_offset ?? 0;
+      return `${offset} dia${offset === 1 ? "" : "s"} após o início do mês`;
+    }
+    if (expense.due_day) {
+      return `Vence dia ${expense.due_day}`;
+    }
+    return "Regra de vencimento não informada";
+  };
+
+  const getValueDisplay = (expense: RecurringExpenseItem) => {
+    const isVariable = (expense.value_type ?? "fixed") === "variable";
+    if (isVariable) {
+      if (typeof expense.amount === "number" && expense.amount > 0) {
+        return `${formatCurrencyBRL(Number(expense.amount))} estimado`;
+      }
+      return "Valor definido quando a fatura chegar";
+    }
+    const amount = typeof expense.amount === "number" ? Number(expense.amount) : 0;
+    return formatCurrencyBRL(amount);
+  };
+
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, { variant: "default" | "secondary" | "destructive"; icon: LucideIcon }> = {
-      pendente: { variant: "secondary", icon: Clock },
-      atrasado: { variant: "destructive", icon: AlertCircle },
-      pago: { variant: "default", icon: CheckCircle2 },
+    const variants: Record<
+      string,
+      { variant: "default" | "secondary" | "destructive" | "outline"; icon: LucideIcon; label: string }
+    > = {
+      pendente: { variant: "secondary", icon: Clock, label: "Pendente" },
+      aguardando_valor: { variant: "outline", icon: FileQuestion, label: "Aguardando valor" },
+      atrasado: { variant: "destructive", icon: AlertCircle, label: "Atrasado" },
+      pago: { variant: "default", icon: CheckCircle2, label: "Pago" },
     };
     const config = variants[status] || variants.pendente;
     const Icon = config.icon;
     return (
       <Badge variant={config.variant} className="gap-1">
         <Icon className="h-3 w-3" />
-        {status.charAt(0).toUpperCase() + status.slice(1)}
+        {config.label}
       </Badge>
     );
   };
@@ -71,7 +110,11 @@ export default function ContasFixas() {
     }
   };
 
-  const totalUpcoming = upcomingInstallments?.reduce((sum, inst) => sum + Number(inst.value), 0) || 0;
+  const totalUpcoming =
+    upcomingInstallments?.reduce((sum, inst) => {
+      const value = typeof inst.value === "number" ? inst.value : 0;
+      return value > 0 ? sum + value : sum;
+    }, 0) ?? 0;
   const formatInstallmentDueDate = (value?: string | null) => {
     if (!value) {
       return "Data não informada";
@@ -146,14 +189,17 @@ export default function ContasFixas() {
                           {getCategoryIcon(expense.category)}
                         </div>
                         <div className="flex-1 space-y-1">
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <h3 className="font-semibold">{expense.name}</h3>
                             {!expense.is_active && (
                               <Badge variant="outline">Pausada</Badge>
                             )}
+                            {(expense.value_type ?? "fixed") === "variable" && (
+                              <Badge variant="outline">Valor variável</Badge>
+                            )}
                           </div>
                           <p className="text-sm text-muted-foreground">
-                            {getCategoryLabel(expense.category)} • Vence dia {expense.due_day} • {expense.recurrence_type}
+                            {getCategoryLabel(expense.category)} • {getDueRuleDescription(expense)} • {expense.recurrence_type}
                           </p>
                           {FEATURE_TAX_DESCRIPTION && expense.category === "impostos" && expense.tax_description && (
                             <p className="text-xs text-muted-foreground">
@@ -167,7 +213,7 @@ export default function ContasFixas() {
                           )}
                         </div>
                         <div className="text-right space-y-2">
-                          <p className="text-lg font-bold">{formatCurrencyBRL(Number(expense.amount))}</p>
+                          <p className="text-lg font-bold">{getValueDisplay(expense)}</p>
                           <div className="flex gap-2">
                             <Button
                               size="sm"
@@ -225,37 +271,54 @@ export default function ContasFixas() {
                     </div>
 
                     <div className="space-y-3">
-                      {upcomingInstallments.map((inst) => (
-                        <div
-                          key={inst.id}
-                          className="p-3 border rounded-lg space-y-2 hover:shadow-sm transition-shadow"
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1">
-                              <p className="font-medium text-sm">
-                                {inst.recurring_expense?.name || "Despesa"}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {formatInstallmentDueDate(inst.due_date)}
-                              </p>
+                      {upcomingInstallments.map((inst) => {
+                        const rawValue = typeof inst.value === "number" ? inst.value : null;
+                        const hasValue = rawValue !== null && rawValue > 0;
+                        const awaitingValue = inst.status === "aguardando_valor";
+                        const canMarkAsPaid = inst.status !== "pago" && hasValue;
+
+                        return (
+                          <div
+                            key={inst.id}
+                            className="p-3 border rounded-lg space-y-2 hover:shadow-sm transition-shadow"
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1">
+                                <p className="font-medium text-sm">
+                                  {inst.recurring_expense?.name || "Despesa"}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {formatInstallmentDueDate(inst.due_date)}
+                                </p>
+                              </div>
+                              {getStatusBadge(inst.status || "pendente")}
                             </div>
-                            {getStatusBadge(inst.status || "pendente")}
+                            <div className="flex items-center justify-between gap-3">
+                              <p className={`font-bold ${hasValue ? "text-accent" : "text-muted-foreground"}`}>
+                                {hasValue ? formatCurrencyBRL(rawValue ?? 0) : "Valor pendente"}
+                              </p>
+                              {canMarkAsPaid ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => markAsPaid.mutateAsync(inst.id)}
+                                >
+                                  <CheckCircle2 className="mr-1 h-3 w-3" />
+                                  Pagar
+                                </Button>
+                              ) : awaitingValue ? (
+                                <span className="text-xs text-muted-foreground text-right">
+                                  Informe o valor quando a fatura chegar
+                                </span>
+                              ) : inst.status !== "pago" ? (
+                                <span className="text-xs text-muted-foreground text-right">
+                                  Defina um valor antes de marcar como pago
+                                </span>
+                              ) : null}
+                            </div>
                           </div>
-                          <div className="flex items-center justify-between">
-                            <p className="font-bold text-accent">{formatCurrencyBRL(Number(inst.value))}</p>
-                            {inst.status !== "pago" && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => markAsPaid.mutateAsync(inst.id)}
-                              >
-                                <CheckCircle2 className="mr-1 h-3 w-3" />
-                                Pagar
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </>
                 )}
