@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +24,9 @@ import {
   Clock,
   AlertCircle,
   FileQuestion,
-  Loader2
+  Loader2,
+  Check,
+  X
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import * as LucideIcons from "lucide-react";
@@ -49,6 +51,10 @@ export default function ContasFixas() {
   const [valueInput, setValueInput] = useState("");
   const [valueError, setValueError] = useState<string | null>(null);
   const [isSubmittingValue, setIsSubmittingValue] = useState(false);
+  const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
+  const [editingError, setEditingError] = useState<string | null>(null);
+  const [isSavingName, setIsSavingName] = useState(false);
 
   const getCategoryIcon = (category: string) => {
     const cat = EXPENSE_CATEGORIES.find((c) => c.value === category);
@@ -143,6 +149,46 @@ export default function ContasFixas() {
     markAsPaid.mutateAsync({ id: installment.id });
   };
 
+  const startEditingName = (expense: RecurringExpenseItem) => {
+    setEditingExpenseId(expense.id);
+    setEditingName(expense.name);
+    setEditingError(null);
+  };
+
+  const cancelEditingName = () => {
+    setEditingExpenseId(null);
+    setEditingName("");
+    setEditingError(null);
+  };
+
+  const saveEditingName = async () => {
+    if (!editingExpenseId) return;
+    const trimmed = editingName.trim();
+    if (trimmed.length < 3) {
+      setEditingError("Informe pelo menos 3 caracteres");
+      return;
+    }
+
+    try {
+      setIsSavingName(true);
+      await updateRecurringExpense.mutateAsync({ id: editingExpenseId, name: trimmed });
+      cancelEditingName();
+    } finally {
+      setIsSavingName(false);
+    }
+  };
+
+  const handleNameKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      saveEditingName();
+    }
+    if (event.key === "Escape") {
+      event.preventDefault();
+      cancelEditingName();
+    }
+  };
+
   const openValueDialog = (installment: RecurringExpenseInstallmentItem) => {
     setSelectedInstallment(installment);
     setValueInput(installment.value ? installment.value.toString() : "");
@@ -235,13 +281,59 @@ export default function ContasFixas() {
                           {getCategoryIcon(expense.category)}
                         </div>
                         <div className="flex-1 space-y-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="font-semibold">{expense.name}</h3>
-                            {!expense.is_active && (
-                              <Badge variant="outline">Pausada</Badge>
-                            )}
-                            {(expense.value_type ?? "fixed") === "variable" && (
-                              <Badge variant="outline">Valor variável</Badge>
+                          <div className="flex flex-col gap-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              {editingExpenseId === expense.id ? (
+                                <>
+                                  <Input
+                                    value={editingName}
+                                    onChange={(event) => {
+                                      setEditingName(event.target.value);
+                                      if (editingError) setEditingError(null);
+                                    }}
+                                    onKeyDown={handleNameKeyDown}
+                                    autoFocus
+                                    className="h-9 w-full sm:w-64"
+                                  />
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={saveEditingName}
+                                    disabled={isSavingName}
+                                  >
+                                    {isSavingName ? (
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                      <Check className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={cancelEditingName}
+                                    disabled={isSavingName}
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => startEditingName(expense)}
+                                  className="font-semibold hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring"
+                                >
+                                  {expense.name}
+                                </button>
+                              )}
+                              {!expense.is_active && (
+                                <Badge variant="outline">Pausada</Badge>
+                              )}
+                              {(expense.value_type ?? "fixed") === "variable" && (
+                                <Badge variant="outline">Valor variável</Badge>
+                              )}
+                            </div>
+                            {editingExpenseId === expense.id && editingError && (
+                              <p className="text-xs text-destructive">{editingError}</p>
                             )}
                           </div>
                           <p className="text-sm text-muted-foreground">
