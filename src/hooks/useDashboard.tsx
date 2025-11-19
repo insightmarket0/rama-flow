@@ -93,7 +93,7 @@ export const useDashboard = () => {
           updated_at: new Date().toISOString(),
         })
         .lt("due_date", todayISO)
-        .eq("status", "pendente");
+        .in("status", ["pendente", "aguardando_valor"]);
 
       if (overdueRecurringError) {
         throw overdueRecurringError;
