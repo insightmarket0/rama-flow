@@ -472,7 +472,7 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
                     control={form.control}
                     name="supplier_id"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col justify-end">
                         <FormLabel>Fornecedor (Opcional)</FormLabel>
                         <Select
                           onValueChange={(value) => field.onChange(value === "__none__" ? "" : value)}
@@ -562,11 +562,11 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
                     control={form.control}
                     name="amount"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col justify-end">
                         <FormLabel>{isVariableValue ? "Valor estimado (opcional)" : "Valor da recorrência (R$)"}</FormLabel>
                         <FormDescription>
                           {isVariableValue
-                            ? "O lançamento mensal será criado sem valor. Use esse campo apenas como referência."
+                            ? "O lançamento mensal será criado sem valor."
                             : "Esse valor será preenchido automaticamente em cada lançamento."}
                         </FormDescription>
                         <FormControl>
@@ -587,7 +587,7 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
                     control={form.control}
                     name="recurrence_type"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col justify-end">
                         <FormLabel>Recorrência</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>

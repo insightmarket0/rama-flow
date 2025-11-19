@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, ShoppingCart } from "lucide-react";
@@ -27,9 +28,15 @@ import { dispatchAppEvent, OPEN_ORDER_DIALOG_EVENT } from "@/lib/events";
 import { formatCurrencyBRL } from "@/lib/format";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { PaymentConditionsPanel } from "@/components/payment-conditions/PaymentConditionsPanel";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 
 const Pedidos = () => {
   const { orders, isLoading, deleteOrder, updateOrderStatus } = useOrders();
+  const [supplierFilter, setSupplierFilter] = useState<string>("todos");
+  const [statusFilter, setStatusFilter] = useState<string>("todos");
+  const [periodFilter, setPeriodFilter] = useState<"todos" | "mesAtual">("todos");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const getStatusVariant = (status: string) => {
     switch (status.toLowerCase()) {
@@ -41,6 +48,52 @@ const Pedidos = () => {
         return "outline";
     }
   };
+
+  const supplierOptions = useMemo(() => {
+    if (!orders) return [];
+    const unique = Array.from(
+      new Map(
+        orders
+          .filter((order) => order.supplier_id && order.supplier?.name)
+          .map((order) => [order.supplier_id, order.supplier?.name || "Fornecedor"])
+      ).entries(),
+    );
+    return unique.map(([id, name]) => ({ id, name: name as string }));
+  }, [orders]);
+
+  const filteredOrders = useMemo(() => {
+    if (!orders) return [];
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+
+    return orders.filter((order) => {
+      const matchesSupplier =
+        supplierFilter === "todos" || order.supplier_id === supplierFilter;
+
+      const matchesStatus =
+        statusFilter === "todos" || order.status === statusFilter;
+
+      const matchesSearch =
+        searchTerm.trim().length === 0 ||
+        order.order_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.supplier?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      let matchesPeriod = true;
+      if (periodFilter === "mesAtual") {
+        const orderDate = order.order_date ? new Date(order.order_date) : null;
+        if (!orderDate || Number.isNaN(orderDate.getTime())) {
+          matchesPeriod = false;
+        } else {
+          matchesPeriod =
+            orderDate.getMonth() === currentMonth &&
+            orderDate.getFullYear() === currentYear;
+        }
+      }
+
+      return matchesSupplier && matchesStatus && matchesSearch && matchesPeriod;
+    });
+  }, [orders, supplierFilter, statusFilter, searchTerm, periodFilter]);
 
   return (
     <div className="space-y-6">
@@ -62,7 +115,58 @@ const Pedidos = () => {
         <CardHeader>
           <CardTitle>Lista de Pedidos</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Buscar</label>
+              <Input
+                placeholder="Pedido, fornecedor..."
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Fornecedor</label>
+              <Select value={supplierFilter} onValueChange={setSupplierFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos</SelectItem>
+                  {supplierOptions.map((supplier) => (
+                    <SelectItem key={supplier.id} value={supplier.id}>
+                      {supplier.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Status</label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos</SelectItem>
+                  <SelectItem value="aberto">Aberto</SelectItem>
+                  <SelectItem value="faturado">Faturado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Período</label>
+              <Select value={periodFilter} onValueChange={(value) => setPeriodFilter(value as "todos" | "mesAtual")}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos os períodos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos os períodos</SelectItem>
+                  <SelectItem value="mesAtual">Somente mês atual</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           {isLoading ? (
             <Table>
               <TableHeader>
@@ -88,7 +192,7 @@ const Pedidos = () => {
                 ))}
               </TableBody>
             </Table>
-          ) : orders && orders.length > 0 ? (
+          ) : filteredOrders.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -101,7 +205,7 @@ const Pedidos = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.map((order) => (
+                {filteredOrders.map((order) => (
                   <TableRow key={order.id}>
                     <TableCell className="font-medium">{order.order_number}</TableCell>
                     <TableCell>{order.supplier?.name || "N/A"}</TableCell>
@@ -155,6 +259,22 @@ const Pedidos = () => {
                 ))}
               </TableBody>
             </Table>
+          ) : orders && orders.length > 0 ? (
+            <EmptyState
+              icon={<ShoppingCart className="h-6 w-6" />}
+              title="Nenhum pedido encontrado"
+              description="Ajuste os filtros para ver outros pedidos."
+              action={
+                <Button variant="outline" onClick={() => {
+                  setSupplierFilter("todos");
+                  setStatusFilter("todos");
+                  setPeriodFilter("todos");
+                  setSearchTerm("");
+                }}>
+                  Limpar filtros
+                </Button>
+              }
+            />
           ) : (
             <EmptyState
               icon={<ShoppingCart className="h-6 w-6" />}
