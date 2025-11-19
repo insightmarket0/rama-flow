@@ -36,13 +36,19 @@ export const useRecurringExpenseInstallments = () => {
   });
 
   const markAsPaid = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({ id, value }: { id: string; value?: number }) => {
+      const updatePayload: Record<string, unknown> = {
+        status: "pago",
+        paid_at: new Date().toISOString(),
+      };
+
+      if (typeof value === "number") {
+        updatePayload.value = value;
+      }
+
       const { data, error } = await supabase
         .from("recurring_expense_installments")
-        .update({
-          status: "pago",
-          paid_at: new Date().toISOString(),
-        })
+        .update(updatePayload)
         .eq("id", id)
         .select()
         .single();

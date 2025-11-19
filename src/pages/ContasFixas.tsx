@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { EmptyState } from "@/components/layout/EmptyState";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { RecurringExpenseDialog } from "@/components/recurring-expenses/RecurringExpenseDialog";
 import { useRecurringExpenses } from "@/hooks/useRecurringExpenses";
 import { useRecurringExpenseInstallments } from "@/hooks/useRecurringExpenseInstallments";
@@ -11,15 +13,6 @@ import { formatCurrencyBRL } from "@/lib/format";
 import { FEATURE_TAX_DESCRIPTION } from "@/lib/features";
 import { EXPENSE_CATEGORIES } from "@/lib/recurring-expense-categories";
 import { Tables } from "@/integrations/supabase/types";
-
-type RecurringExpenseItem = Tables<"recurring_expenses"> & {
-  supplier?: { id: string; name: string } | null;
-};
-
-type RecurringExpenseInstallmentItem = Tables<"recurring_expense_installments"> & {
-  recurring_expense?: { name: string; category: string } | null;
-  supplier?: { name: string } | null;
-};
 import { 
   Plus, 
   Calendar, 
@@ -30,17 +23,32 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
-  FileQuestion
+  FileQuestion,
+  Loader2
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+type RecurringExpenseItem = Tables<"recurring_expenses"> & {
+  supplier?: { id: string; name: string } | null;
+};
+
+type RecurringExpenseInstallmentItem = Tables<"recurring_expense_installments"> & {
+  recurring_expense?: { name: string; category: string } | null;
+  supplier?: { name: string } | null;
+};
+
 export default function ContasFixas() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { recurringExpenses, isLoading: loadingExpenses, deleteRecurringExpense, updateRecurringExpense } = useRecurringExpenses();
   const { upcomingInstallments, isLoading: loadingInstallments, markAsPaid } = useRecurringExpenseInstallments();
+  const [valueDialogOpen, setValueDialogOpen] = useState(false);
+  const [selectedInstallment, setSelectedInstallment] = useState<RecurringExpenseInstallmentItem | null>(null);
+  const [valueInput, setValueInput] = useState("");
+  const [valueError, setValueError] = useState<string | null>(null);
+  const [isSubmittingValue, setIsSubmittingValue] = useState(false);
 
   const getCategoryIcon = (category: string) => {
     const cat = EXPENSE_CATEGORIES.find((c) => c.value === category);
@@ -126,6 +134,44 @@ export default function ContasFixas() {
     }
 
     return format(parsed, "dd 'de' MMMM", { locale: ptBR });
+  };
+  const handlePayClick = (installment: RecurringExpenseInstallmentItem, needsValue: boolean) => {
+    if (needsValue) {
+      openValueDialog(installment);
+      return;
+    }
+    markAsPaid.mutateAsync({ id: installment.id });
+  };
+
+  const openValueDialog = (installment: RecurringExpenseInstallmentItem) => {
+    setSelectedInstallment(installment);
+    setValueInput(installment.value ? installment.value.toString() : "");
+    setValueError(null);
+    setValueDialogOpen(true);
+  };
+
+  const closeValueDialog = () => {
+    setValueDialogOpen(false);
+    setSelectedInstallment(null);
+    setValueInput("");
+    setValueError(null);
+  };
+
+  const handlePaymentWithValue = async () => {
+    if (!selectedInstallment) return;
+    const parsedValue = Number(valueInput);
+    if (!Number.isFinite(parsedValue) || parsedValue <= 0) {
+      setValueError("Informe um valor maior que zero");
+      return;
+    }
+
+    try {
+      setIsSubmittingValue(true);
+      await markAsPaid.mutateAsync({ id: selectedInstallment.id, value: parsedValue });
+      closeValueDialog();
+    } finally {
+      setIsSubmittingValue(false);
+    }
   };
 
   return (
@@ -275,7 +321,10 @@ export default function ContasFixas() {
                         const rawValue = typeof inst.value === "number" ? inst.value : null;
                         const hasValue = rawValue !== null && rawValue > 0;
                         const awaitingValue = inst.status === "aguardando_valor";
-                        const canMarkAsPaid = inst.status !== "pago" && hasValue;
+                        const needsValueBeforePayment = awaitingValue || !hasValue;
+                        const isProcessing =
+                          markAsPaid.isPending &&
+                          ((markAsPaid.variables as { id: string } | undefined)?.id === inst.id);
 
                         return (
                           <div
@@ -297,25 +346,27 @@ export default function ContasFixas() {
                               <p className={`font-bold ${hasValue ? "text-accent" : "text-muted-foreground"}`}>
                                 {hasValue ? formatCurrencyBRL(rawValue ?? 0) : "Valor pendente"}
                               </p>
-                              {canMarkAsPaid ? (
+                              {inst.status !== "pago" && (
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() => markAsPaid.mutateAsync(inst.id)}
+                                  onClick={() => handlePayClick(inst, needsValueBeforePayment)}
+                                  disabled={isProcessing}
                                 >
-                                  <CheckCircle2 className="mr-1 h-3 w-3" />
-                                  Pagar
+                                  {isProcessing ? (
+                                    <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                                  ) : (
+                                    <CheckCircle2 className="mr-1 h-3 w-3" />
+                                  )}
+                                  {needsValueBeforePayment ? "Informar e pagar" : "Pagar"}
                                 </Button>
-                              ) : awaitingValue ? (
-                                <span className="text-xs text-muted-foreground text-right">
-                                  Informe o valor quando a fatura chegar
-                                </span>
-                              ) : inst.status !== "pago" ? (
-                                <span className="text-xs text-muted-foreground text-right">
-                                  Defina um valor antes de marcar como pago
-                                </span>
-                              ) : null}
+                              )}
                             </div>
+                            {needsValueBeforePayment && inst.status !== "pago" && (
+                              <p className="text-xs text-muted-foreground">
+                                Informe o valor real da fatura para concluir o pagamento.
+                              </p>
+                            )}
                           </div>
                         );
                       })}
@@ -329,6 +380,54 @@ export default function ContasFixas() {
       </div>
 
       <RecurringExpenseDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+
+      <Dialog
+        open={valueDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeValueDialog();
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Informar valor da conta</DialogTitle>
+            <DialogDescription>Preencha o valor cobrado antes de confirmar o pagamento.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <p className="font-semibold">
+                {selectedInstallment?.recurring_expense?.name || "Despesa"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Vencimento {formatInstallmentDueDate(selectedInstallment?.due_date)}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="installment-value">Valor pago</Label>
+              <Input
+                id="installment-value"
+                type="number"
+                step="0.01"
+                min="0.01"
+                placeholder="0,00"
+                value={valueInput}
+                onChange={(event) => setValueInput(event.target.value)}
+              />
+              {valueError && <p className="text-sm text-destructive">{valueError}</p>}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={closeValueDialog}>
+              Cancelar
+            </Button>
+            <Button onClick={handlePaymentWithValue} disabled={isSubmittingValue}>
+              {isSubmittingValue && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Salvar e pagar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
