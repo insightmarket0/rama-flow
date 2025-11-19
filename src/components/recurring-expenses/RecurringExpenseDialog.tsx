@@ -4,10 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useRecurringExpenses } from "@/hooks/useRecurringExpenses";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { EXPENSE_CATEGORIES, RECURRENCE_TYPES } from "@/lib/recurring-expense-categories";
@@ -16,50 +17,97 @@ import { formatCurrencyBRL } from "@/lib/format";
 import { Loader2, Check, ChevronRight, Sparkles } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { format, setDate } from "date-fns";
+import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { FEATURE_TAX_DESCRIPTION } from "@/lib/features";
 
-const formSchema = z.object({
-  name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
-  category: z.string().min(1, "Selecione uma categoria"),
-  tax_description: z.string().optional(),
-  supplier_id: z.string().optional(),
-  amount: z
-    .string()
-    .min(1, "Informe o valor")
-    .refine((value) => Number(value) > 0, "Valor deve ser maior que zero"),
-  recurrence_type: z.enum(["mensal", "bimestral", "trimestral", "semestral", "anual"], {
-    errorMap: () => ({ message: "Selecione a recorrência" }),
-  }),
-  due_day: z
-    .string()
-    .min(1, "Informe o dia de vencimento")
-    .refine((value) => {
-      const day = Number(value);
-      return Number.isInteger(day) && day >= 1 && day <= 31;
-    }, "Dia deve estar entre 1 e 31"),
-  start_date: z.string().min(1, "Informe a data de início"),
-  end_date: z.string().optional(),
-  notes: z.string().optional(),
-}).superRefine((data, ctx) => {
-  if (FEATURE_TAX_DESCRIPTION && data.category === "impostos") {
-    if (!data.tax_description || data.tax_description.trim().length < 2) {
+const formSchema = z
+  .object({
+    name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
+    category: z.string().min(1, "Selecione uma categoria"),
+    tax_description: z.string().optional(),
+    supplier_id: z.string().optional(),
+    value_type: z.enum(["fixed", "variable"]),
+    amount: z.string().optional(),
+    recurrence_type: z.enum(["mensal", "bimestral", "trimestral", "semestral", "anual"], {
+      errorMap: () => ({ message: "Selecione a recorrência" }),
+    }),
+    due_rule_type: z.enum(["specific_day", "days_after_start"]),
+    due_day: z.string().optional(),
+    due_day_offset: z.string().optional(),
+    start_date: z.string().min(1, "Informe a data de início"),
+    end_date: z.string().optional(),
+    notes: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (FEATURE_TAX_DESCRIPTION && data.category === "impostos") {
+      if (!data.tax_description || data.tax_description.trim().length < 2) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["tax_description"],
+          message: "Informe qual imposto está sendo pago",
+        });
+      }
+    }
+
+    if (data.value_type === "fixed") {
+      if (!data.amount || Number(data.amount) <= 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["amount"],
+          message: "Informe um valor maior que zero",
+        });
+      }
+    } else if (data.amount && Number(data.amount) <= 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["tax_description"],
-        message: "Informe qual imposto está sendo pago",
+        path: ["amount"],
+        message: "Use apenas valores positivos",
       });
     }
-  }
-  if (data.end_date && new Date(data.end_date) < new Date(data.start_date)) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["end_date"],
-      message: "Data de fim não pode ser anterior à data de início",
-    });
-  }
-});
+
+    if (data.due_rule_type === "specific_day") {
+      if (!data.due_day || data.due_day.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["due_day"],
+          message: "Informe o dia de vencimento",
+        });
+      } else {
+        const day = Number(data.due_day);
+        if (!Number.isInteger(day) || day < 1 || day > 31) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["due_day"],
+            message: "Dia deve estar entre 1 e 31",
+          });
+        }
+      }
+    } else if (!data.due_day_offset || data.due_day_offset.trim().length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["due_day_offset"],
+        message: "Informe quantos dias após o início do mês",
+      });
+    } else {
+      const offset = Number(data.due_day_offset);
+      if (!Number.isInteger(offset) || offset < 0 || offset > 31) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["due_day_offset"],
+          message: "Use valores entre 0 e 31 dias",
+        });
+      }
+    }
+
+    if (data.end_date && new Date(data.end_date) < new Date(data.start_date)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["end_date"],
+        message: "Data de fim não pode ser anterior à data de início",
+      });
+    }
+  });
 
 type FormData = z.infer<typeof formSchema>;
 
@@ -96,9 +144,12 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
       category: "",
       tax_description: "",
       supplier_id: "",
+      value_type: "fixed",
       amount: "",
       recurrence_type: "mensal",
+      due_rule_type: "specific_day",
       due_day: "10",
+      due_day_offset: "5",
       start_date: new Date().toISOString().split("T")[0],
       end_date: "",
       notes: "",
@@ -111,14 +162,14 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
       title: "Informações Básicas",
       description: "Defina nome, categoria e fornecedor.",
       fields: FEATURE_TAX_DESCRIPTION
-        ? ["name", "category", "tax_description", "supplier_id"]
-        : ["name", "category", "supplier_id"],
+        ? ["name", "category", "tax_description", "supplier_id", "value_type"]
+        : ["name", "category", "supplier_id", "value_type"],
     },
     {
       id: "recurrence",
       title: "Valor e Recorrência",
       description: "Configure o valor, a frequência e o vencimento.",
-      fields: ["amount", "recurrence_type", "due_day"],
+      fields: ["amount", "recurrence_type", "due_rule_type", "due_day", "due_day_offset"],
     },
     {
       id: "period",
@@ -136,6 +187,10 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
 
   const values = form.watch();
   const selectedCategory = values.category;
+  const selectedValueType = values.value_type;
+  const selectedDueRule = values.due_rule_type;
+  const isVariableValue = selectedValueType === "variable";
+  const usesDayOffset = selectedDueRule === "days_after_start";
 
   useEffect(() => {
     if (FEATURE_TAX_DESCRIPTION && selectedCategory !== "impostos" && form.getValues("tax_description")) {
@@ -145,7 +200,7 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
 
   const upcomingDueDates = useMemo(() => {
     const results: Date[] = [];
-    if (!values.start_date || !values.recurrence_type || !values.due_day) {
+    if (!values.start_date || !values.recurrence_type) {
       return results;
     }
 
@@ -164,17 +219,21 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
       return results;
     }
 
-    const dueDay = Number(values.due_day);
+    const dueRuleType = values.due_rule_type;
+    const dueDay = values.due_day ? Number(values.due_day) : null;
+    const dueDayOffset = values.due_day_offset ? Number(values.due_day_offset) : null;
 
-    if (!Number.isFinite(dueDay) || dueDay < 1 || dueDay > 31) {
+    if (
+      (dueRuleType === "specific_day" && (!Number.isFinite(dueDay) || (dueDay ?? 0) < 1 || (dueDay ?? 0) > 31)) ||
+      (dueRuleType === "days_after_start" && (!Number.isFinite(dueDayOffset) || (dueDayOffset ?? 0) < 0))
+    ) {
       return results;
     }
 
-    const normalized = setDate(startDate, Math.min(dueDay, daysInMonth(startDate)));
-    let current = normalized;
+    let current = getDueDateForRule(startDate, dueRuleType, dueDay, dueDayOffset);
 
     if (current < startDate) {
-      current = addMonthsRespectingDay(current, monthsToAdd, dueDay);
+      current = addMonthsRespectingRule(current, monthsToAdd, dueRuleType, dueDay, dueDayOffset);
     }
 
     while (results.length < 4) {
@@ -182,11 +241,18 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
         break;
       }
       results.push(current);
-      current = addMonthsRespectingDay(current, monthsToAdd, dueDay);
+      current = addMonthsRespectingRule(current, monthsToAdd, dueRuleType, dueDay, dueDayOffset);
     }
 
     return results;
-  }, [values.start_date, values.end_date, values.recurrence_type, values.due_day]);
+  }, [
+    values.start_date,
+    values.end_date,
+    values.recurrence_type,
+    values.due_rule_type,
+    values.due_day,
+    values.due_day_offset,
+  ]);
 
   const nextStep = async () => {
     const step = steps[currentStep];
@@ -211,13 +277,27 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
           ? data.tax_description.trim()
           : null;
 
+      const parsedAmount =
+        data.amount && data.amount.trim().length > 0 ? parseFloat(data.amount) : null;
+      const parsedDueDay =
+        data.due_rule_type === "specific_day" && data.due_day
+          ? parseInt(data.due_day, 10)
+          : null;
+      const parsedDueDayOffset =
+        data.due_rule_type === "days_after_start" && data.due_day_offset
+          ? parseInt(data.due_day_offset, 10)
+          : null;
+
       await createRecurringExpense.mutateAsync({
         name: data.name,
         category: data.category,
         ...(FEATURE_TAX_DESCRIPTION ? { tax_description: taxDescription } : {}),
-        amount: parseFloat(data.amount),
+        amount: parsedAmount,
+        value_type: data.value_type,
         recurrence_type: data.recurrence_type,
-        due_day: parseInt(data.due_day),
+        due_rule_type: data.due_rule_type,
+        due_day: parsedDueDay,
+        due_day_offset: parsedDueDayOffset,
         start_date: data.start_date,
         end_date: data.end_date || null,
         supplier_id: data.supplier_id || null,
@@ -246,6 +326,9 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
     form.setValue("amount", template.amount.toString(), { shouldValidate: true });
     form.setValue("recurrence_type", template.recurrence_type, { shouldValidate: true });
     form.setValue("due_day", template.due_day.toString(), { shouldValidate: true });
+    form.setValue("value_type", "fixed", { shouldValidate: true });
+    form.setValue("due_rule_type", "specific_day", { shouldValidate: true });
+    form.setValue("due_day_offset", "", { shouldValidate: false });
     if (template.notes) {
       form.setValue("notes", template.notes, { shouldValidate: false });
     }
@@ -407,15 +490,71 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
                                 {supplier.name}
                               </SelectItem>
                             ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="value_type"
+                    render={({ field }) => (
+                      <FormItem className="sm:col-span-2">
+                        <FormLabel>Tipo de valor</FormLabel>
+                        <FormDescription>Escolha se essa conta tem um valor fixo ou se o valor varia mês a mês.</FormDescription>
+                        <FormControl>
+                          <RadioGroup
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            className="grid gap-3 sm:grid-cols-2"
+                          >
+                            <div
+                              className={cn(
+                                "flex gap-3 rounded-lg border p-3",
+                                field.value === "fixed"
+                                  ? "border-primary bg-primary/10"
+                                  : "border-border hover:border-primary/50",
+                              )}
+                            >
+                              <RadioGroupItem value="fixed" id="value-type-fixed" className="mt-1" />
+                              <div>
+                                <p className="font-semibold">Valor fixo</p>
+                                <p className="text-sm text-muted-foreground">
+                                  Usaremos o mesmo valor automaticamente em cada lançamento.
+                                </p>
+                              </div>
+                            </div>
+                            <div
+                              className={cn(
+                                "flex gap-3 rounded-lg border p-3",
+                                field.value === "variable"
+                                  ? "border-primary bg-primary/10"
+                                  : "border-border hover:border-primary/50",
+                              )}
+                            >
+                              <RadioGroupItem value="variable" id="value-type-variable" className="mt-1" />
+                              <div>
+                                <p className="font-semibold">Valor variável</p>
+                                <p className="text-sm text-muted-foreground">
+                                  Geramos o lembrete todo mês e você informa o valor quando a fatura chegar.
+                                </p>
+                              </div>
+                            </div>
+                          </RadioGroup>
+                        </FormControl>
+                        {field.value === "variable" && (
+                          <p className="text-xs text-muted-foreground">
+                            O valor será preenchido todo mês quando a fatura chegar. Vamos criar apenas o lembrete em Contas a Pagar.
+                          </p>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
-              )}
+              </div>
+            )}
 
               {currentStep === 1 && (
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -424,23 +563,20 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
                     name="amount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Valor (R$)</FormLabel>
+                        <FormLabel>{isVariableValue ? "Valor estimado (opcional)" : "Valor da recorrência (R$)"}</FormLabel>
+                        <FormDescription>
+                          {isVariableValue
+                            ? "O lançamento mensal será criado sem valor. Use esse campo apenas como referência."
+                            : "Esse valor será preenchido automaticamente em cada lançamento."}
+                        </FormDescription>
                         <FormControl>
-                          <Input type="number" step="0.01" min="0.01" placeholder="0,00" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="due_day"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Dia de Vencimento</FormLabel>
-                        <FormControl>
-                          <Input type="number" min="1" max="31" placeholder="10" {...field} />
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min={isVariableValue ? "0" : "0.01"}
+                            placeholder={isVariableValue ? "0,00 (opcional)" : "0,00"}
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -451,7 +587,7 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
                     control={form.control}
                     name="recurrence_type"
                     render={({ field }) => (
-                      <FormItem className="sm:col-span-2">
+                      <FormItem>
                         <FormLabel>Recorrência</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
@@ -474,6 +610,71 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
                       </FormItem>
                     )}
                   />
+
+                  <FormField
+                    control={form.control}
+                    name="due_rule_type"
+                    render={({ field }) => (
+                      <FormItem className="sm:col-span-2">
+                        <FormLabel>Regra de vencimento</FormLabel>
+                        <FormDescription>Escolha se o vencimento é um dia fixo ou alguns dias após o início do mês.</FormDescription>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="specific_day">
+                              <div className="flex flex-col">
+                                <span>Dia fixo</span>
+                                <span className="text-xs text-muted-foreground">Ex: todo dia 10</span>
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="days_after_start">
+                              <div className="flex flex-col">
+                                <span>Dias após início do mês</span>
+                                <span className="text-xs text-muted-foreground">Ex: 5 dias após o dia 1</span>
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {usesDayOffset ? (
+                    <FormField
+                      control={form.control}
+                      name="due_day_offset"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Dias após o início do mês</FormLabel>
+                          <FormDescription>Informe quantos dias após o dia 1 devemos gerar o vencimento.</FormDescription>
+                          <FormControl>
+                            <Input type="number" min="0" max="31" placeholder="5" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ) : (
+                    <FormField
+                      control={form.control}
+                      name="due_day"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Dia de vencimento</FormLabel>
+                          <FormDescription>Esse será o dia utilizado todos os meses.</FormDescription>
+                          <FormControl>
+                            <Input type="number" min="1" max="31" placeholder="10" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </div>
               )}
 
@@ -547,14 +748,27 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
                           suppliers?.find((supplier) => supplier.id === values.supplier_id)?.name || "Não informado"
                         }
                       />
-                      <SummaryRow label="Valor" value={values.amount ? formatCurrencyBRL(Number(values.amount)) : "—"} />
+                      <SummaryRow label="Tipo de valor" value={getValueTypeLabel(values.value_type)} />
+                      <SummaryRow
+                        label={values.value_type === "variable" ? "Valor estimado" : "Valor"}
+                        value={
+                          values.amount && values.amount.length > 0
+                            ? formatCurrencyBRL(Number(values.amount))
+                            : values.value_type === "variable"
+                              ? "Definido quando a fatura chegar"
+                              : "—"
+                        }
+                      />
                       <SummaryRow
                         label="Recorrência"
                         value={
                           RECURRENCE_TYPES.find((type) => type.value === values.recurrence_type)?.description || "—"
                         }
                       />
-                      <SummaryRow label="Dia de vencimento" value={values.due_day || "—"} />
+                      <SummaryRow
+                        label="Regra de vencimento"
+                        value={getDueRuleLabel(values.due_rule_type, values.due_day, values.due_day_offset)}
+                      />
                       <SummaryRow
                         label="Período"
                         value={getPeriodLabel(values.start_date, values.end_date)}
@@ -624,11 +838,37 @@ function daysInMonth(date: Date) {
   return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
 }
 
-function addMonthsRespectingDay(base: Date, monthsToAdd: number, desiredDay: number) {
-  const next = new Date(base);
-  next.setMonth(next.getMonth() + monthsToAdd);
-  next.setDate(Math.min(desiredDay, daysInMonth(next)));
-  return next;
+function getDueDateForRule(
+  baseDate: Date,
+  ruleType: FormData["due_rule_type"],
+  dueDay?: number | null,
+  dueDayOffset?: number | null,
+) {
+  const working = new Date(baseDate);
+  working.setDate(1);
+  const limit = daysInMonth(working);
+
+  if (ruleType === "days_after_start") {
+    const safeOffset = Math.max(0, Math.min(dueDayOffset ?? 0, limit - 1));
+    working.setDate(1 + safeOffset);
+    return working;
+  }
+
+  const safeDay = Math.max(1, Math.min(dueDay ?? 1, limit));
+  working.setDate(safeDay);
+  return working;
+}
+
+function addMonthsRespectingRule(
+  current: Date,
+  monthsToAdd: number,
+  ruleType: FormData["due_rule_type"],
+  dueDay?: number | null,
+  dueDayOffset?: number | null,
+) {
+  const reference = new Date(current);
+  reference.setMonth(reference.getMonth() + monthsToAdd);
+  return getDueDateForRule(reference, ruleType, dueDay, dueDayOffset);
 }
 
 interface SummaryRowProps {
@@ -660,4 +900,28 @@ function getPeriodLabel(start?: string | null, end?: string | null) {
 
   const endLabel = formatDateString(end);
   return endLabel ? `${startLabel} até ${endLabel}` : `${startLabel} em diante`;
+}
+
+function getValueTypeLabel(valueType: FormData["value_type"]) {
+  return valueType === "variable" ? "Valor variável" : "Valor fixo";
+}
+
+function getDueRuleLabel(
+  ruleType: FormData["due_rule_type"],
+  dueDay?: string | null,
+  dueDayOffset?: string | null,
+) {
+  if (ruleType === "days_after_start") {
+    const offset = dueDayOffset && dueDayOffset.length > 0 ? Number(dueDayOffset) : null;
+    if (typeof offset === "number" && !Number.isNaN(offset)) {
+      return `${offset} dia${offset === 1 ? "" : "s"} após o início do mês`;
+    }
+    return "Dias após o início do mês";
+  }
+
+  if (dueDay && dueDay.length > 0) {
+    return `Todo dia ${dueDay}`;
+  }
+
+  return "Dia fixo do mês";
 }
