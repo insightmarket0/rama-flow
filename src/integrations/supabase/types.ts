@@ -26,7 +26,7 @@ export type Database = {
           supplier_id: string
           updated_at: string
           user_id: string
-          value: number | null
+          value: number
         }
         Insert: {
           created_at?: string
@@ -39,7 +39,7 @@ export type Database = {
           supplier_id: string
           updated_at?: string
           user_id: string
-          value?: number | null
+          value: number
         }
         Update: {
           created_at?: string
@@ -52,7 +52,7 @@ export type Database = {
           supplier_id?: string
           updated_at?: string
           user_id?: string
-          value?: number | null
+          value?: number
         }
         Relationships: [
           {
@@ -362,12 +362,10 @@ export type Database = {
       }
       recurring_expenses: {
         Row: {
-          amount: number | null
+          amount: number
           category: string
           created_at: string | null
-          due_day: number | null
-          due_day_offset: number | null
-          due_rule_type: string
+          due_day: number
           end_date: string | null
           id: string
           is_active: boolean | null
@@ -379,15 +377,12 @@ export type Database = {
           tax_description: string | null
           updated_at: string | null
           user_id: string
-          value_type: string
         }
         Insert: {
-          amount?: number | null
+          amount: number
           category: string
           created_at?: string | null
-          due_day?: number | null
-          due_day_offset?: number | null
-          due_rule_type?: string
+          due_day: number
           end_date?: string | null
           id?: string
           is_active?: boolean | null
@@ -399,15 +394,12 @@ export type Database = {
           tax_description?: string | null
           updated_at?: string | null
           user_id: string
-          value_type?: string
         }
         Update: {
-          amount?: number | null
+          amount?: number
           category?: string
           created_at?: string | null
-          due_day?: number | null
-          due_day_offset?: number | null
-          due_rule_type?: string
+          due_day?: number
           end_date?: string | null
           id?: string
           is_active?: boolean | null
@@ -419,7 +411,6 @@ export type Database = {
           tax_description?: string | null
           updated_at?: string | null
           user_id?: string
-          value_type?: string
         }
         Relationships: [
           {

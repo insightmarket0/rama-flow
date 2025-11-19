@@ -6,27 +6,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const getDaysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-
-const getDueDateForExpense = (referenceDate: Date, expense: Record<string, unknown>) => {
-  const rule = (expense.due_rule_type as string) ?? 'specific_day';
-  const base = new Date(referenceDate);
-  base.setDate(1);
-  const daysInMonth = getDaysInMonth(base);
-
-  if (rule === 'days_after_start') {
-    const offsetRaw = typeof expense.due_day_offset === 'number' ? expense.due_day_offset : 0;
-    const safeOffset = Math.max(0, Math.min(offsetRaw, daysInMonth - 1));
-    base.setDate(1 + safeOffset);
-    return base;
-  }
-
-  const desiredDayRaw = typeof expense.due_day === 'number' ? expense.due_day : 1;
-  const safeDay = Math.max(1, Math.min(desiredDayRaw, daysInMonth));
-  base.setDate(safeDay);
-  return base;
-};
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -151,8 +130,9 @@ serve(async (req) => {
           continue;
         }
         
-        // Calculate due date following the configured rule
-        const dueDate = getDueDateForExpense(referenceDate, expense);
+        // Calculate due date
+        const dueDate = new Date(referenceDate);
+        dueDate.setDate(Math.min(expense.due_day, new Date(dueDate.getFullYear(), dueDate.getMonth() + 1, 0).getDate()));
         
         // Check if it's before start_date or after end_date
         if (dueDate < new Date(expense.start_date)) {
@@ -165,17 +145,14 @@ serve(async (req) => {
           continue;
         }
         
-        const isVariableValue = (expense.value_type as string) === 'variable';
-        const baseAmount = typeof expense.amount === 'number' ? Number(expense.amount) : null;
-
         installmentsToCreate.push({
           user_id: expense.user_id,
           recurring_expense_id: expense.id,
           supplier_id: expense.supplier_id,
           reference_month: referenceMonth,
-          value: isVariableValue ? null : baseAmount,
+          value: expense.amount,
           due_date: dueDate.toISOString().split('T')[0],
-          status: isVariableValue ? 'aguardando_valor' : 'pendente',
+          status: 'pendente',
         });
       }
     }
