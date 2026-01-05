@@ -29,7 +29,7 @@ const formSchema = z
     supplier_id: z.string().optional(),
     value_type: z.enum(["fixed", "variable"]),
     amount: z.string().optional(),
-    recurrence_type: z.enum(["mensal", "bimestral", "trimestral", "semestral", "anual"], {
+    recurrence_type: z.enum(["semanal", "quinzenal", "mensal", "bimestral", "trimestral", "semestral", "anual"], {
       errorMap: () => ({ message: "Selecione a recorrência" }),
     }),
     due_rule_type: z.enum(["specific_day", "days_after_start"]),
@@ -118,12 +118,17 @@ type WizardStep = {
   fields: (keyof FormData)[];
 };
 
-const RECURRENCE_MONTHS: Record<FormData["recurrence_type"], number> = {
-  mensal: 1,
-  bimestral: 2,
-  trimestral: 3,
-  semestral: 6,
-  anual: 12,
+const RECURRENCE_INTERVALS: Record<
+  FormData["recurrence_type"],
+  { unit: "months" | "days"; value: number }
+> = {
+  semanal: { unit: "days", value: 7 },
+  quinzenal: { unit: "days", value: 15 },
+  mensal: { unit: "months", value: 1 },
+  bimestral: { unit: "months", value: 2 },
+  trimestral: { unit: "months", value: 3 },
+  semestral: { unit: "months", value: 6 },
+  anual: { unit: "months", value: 12 },
 };
 
 interface RecurringExpenseDialogProps {
@@ -209,8 +214,8 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
       return results;
     }
 
-    const monthsToAdd = RECURRENCE_MONTHS[values.recurrence_type];
-    if (!Number.isFinite(monthsToAdd) || monthsToAdd <= 0) {
+    const interval = RECURRENCE_INTERVALS[values.recurrence_type];
+    if (!interval || interval.value <= 0) {
       return results;
     }
 
@@ -233,7 +238,11 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
     let current = getDueDateForRule(startDate, dueRuleType, dueDay, dueDayOffset);
 
     if (current < startDate) {
-      current = addMonthsRespectingRule(current, monthsToAdd, dueRuleType, dueDay, dueDayOffset);
+      if (interval.unit === "months") {
+        current = addMonthsRespectingRule(current, interval.value, dueRuleType, dueDay, dueDayOffset);
+      } else {
+        current = addDaysRespectingRule(current, interval.value);
+      }
     }
 
     while (results.length < 4) {
@@ -241,7 +250,11 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
         break;
       }
       results.push(current);
-      current = addMonthsRespectingRule(current, monthsToAdd, dueRuleType, dueDay, dueDayOffset);
+      if (interval.unit === "months") {
+        current = addMonthsRespectingRule(current, interval.value, dueRuleType, dueDay, dueDayOffset);
+      } else {
+        current = addDaysRespectingRule(current, interval.value);
+      }
     }
 
     return results;
@@ -869,6 +882,12 @@ function addMonthsRespectingRule(
   const reference = new Date(current);
   reference.setMonth(reference.getMonth() + monthsToAdd);
   return getDueDateForRule(reference, ruleType, dueDay, dueDayOffset);
+}
+
+function addDaysRespectingRule(current: Date, daysToAdd: number) {
+  const next = new Date(current);
+  next.setDate(next.getDate() + daysToAdd);
+  return next;
 }
 
 interface SummaryRowProps {

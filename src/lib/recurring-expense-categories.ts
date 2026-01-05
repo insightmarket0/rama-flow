@@ -13,6 +13,8 @@ export const EXPENSE_CATEGORIES = [
 ] as const;
 
 export const RECURRENCE_TYPES = [
+  { value: "semanal", label: "Semanal", description: "A cada 7 dias" },
+  { value: "quinzenal", label: "Quinzenal", description: "A cada 15 dias" },
   { value: "mensal", label: "Mensal", description: "A cada 1 mês" },
   { value: "bimestral", label: "Bimestral", description: "A cada 2 meses" },
   { value: "trimestral", label: "Trimestral", description: "A cada 3 meses" },
