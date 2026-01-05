@@ -4,7 +4,7 @@ export type RecurringExpenseTemplate = {
   description: string;
   category: string;
   amount: number;
-  recurrence_type: "mensal" | "bimestral" | "trimestral" | "semestral" | "anual";
+  recurrence_type: "semanal" | "quinzenal" | "mensal" | "bimestral" | "trimestral" | "semestral" | "anual";
   due_day: number;
   notes?: string;
 };
