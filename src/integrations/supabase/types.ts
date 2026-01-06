@@ -366,6 +366,7 @@ export type Database = {
           category: string
           created_at: string | null
           due_day: number | null
+          due_days?: number[] | null
           due_day_offset: number | null
           due_rule_type: string
           end_date: string | null
@@ -386,6 +387,7 @@ export type Database = {
           category: string
           created_at?: string | null
           due_day?: number | null
+          due_days?: number[] | null
           due_day_offset?: number | null
           due_rule_type?: string
           end_date?: string | null
@@ -406,6 +408,7 @@ export type Database = {
           category?: string
           created_at?: string | null
           due_day?: number | null
+          due_days?: number[] | null
           due_day_offset?: number | null
           due_rule_type?: string
           end_date?: string | null

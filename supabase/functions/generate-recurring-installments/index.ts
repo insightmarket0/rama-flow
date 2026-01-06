@@ -138,45 +138,97 @@ serve(async (req) => {
         
         const referenceMonth = referenceDate.toISOString().split('T')[0];
         
-        // Check if installment already exists
-        const { data: existing } = await supabase
-          .from('recurring_expense_installments')
-          .select('id')
-          .eq('recurring_expense_id', expense.id)
-          .eq('reference_month', referenceMonth)
-          .maybeSingle();
-        
-        if (existing) {
-          console.log(`Installment already exists for ${expense.name} - ${referenceMonth}`);
-          continue;
-        }
-        
-        // Calculate due date following the configured rule
-        const dueDate = getDueDateForExpense(referenceDate, expense);
-        
-        // Check if it's before start_date or after end_date
-        if (dueDate < new Date(expense.start_date)) {
-          console.log(`Due date ${dueDate.toISOString()} is before start date ${expense.start_date}`);
-          continue;
-        }
-        
-        if (expense.end_date && dueDate > new Date(expense.end_date)) {
-          console.log(`Due date ${dueDate.toISOString()} is after end date ${expense.end_date}`);
-          continue;
-        }
-        
+        // Support multiple due days (expense.due_days as array)
         const isVariableValue = (expense.value_type as string) === 'variable';
         const baseAmount = typeof expense.amount === 'number' ? Number(expense.amount) : null;
 
-        installmentsToCreate.push({
-          user_id: expense.user_id,
-          recurring_expense_id: expense.id,
-          supplier_id: expense.supplier_id,
-          reference_month: referenceMonth,
-          value: isVariableValue ? null : baseAmount,
-          due_date: dueDate.toISOString().split('T')[0],
-          status: isVariableValue ? 'aguardando_valor' : 'pendente',
-        });
+        const dueDaysArray = Array.isArray(expense.due_days) && expense.due_days.length > 0
+          ? expense.due_days.map((d: unknown) => Number(d)).filter((n) => Number.isInteger(n) && n >= 1 && n <= getDaysInMonth(referenceDate))
+          : null;
+
+        if (dueDaysArray && dueDaysArray.length > 0) {
+          for (const desiredDay of dueDaysArray) {
+            const candidate = new Date(referenceDate);
+            const safeDay = Math.max(1, Math.min(desiredDay, getDaysInMonth(candidate)));
+            candidate.setDate(safeDay);
+
+            // Check if it's before start_date or after end_date
+            if (candidate < new Date(expense.start_date)) {
+              console.log(`Due date ${candidate.toISOString()} is before start date ${expense.start_date}`);
+              continue;
+            }
+            if (expense.end_date && candidate > new Date(expense.end_date)) {
+              console.log(`Due date ${candidate.toISOString()} is after end date ${expense.end_date}`);
+              continue;
+            }
+
+            const dueDateISO = candidate.toISOString().split('T')[0];
+
+            // Check if installment already exists for this specific due date
+            const { data: existingForDay } = await supabase
+              .from('recurring_expense_installments')
+              .select('id')
+              .eq('recurring_expense_id', expense.id)
+              .eq('reference_month', referenceMonth)
+              .eq('due_date', dueDateISO)
+              .maybeSingle();
+
+            if (existingForDay) {
+              console.log(`Installment already exists for ${expense.name} - ${referenceMonth} - ${dueDateISO}`);
+              continue;
+            }
+
+            installmentsToCreate.push({
+              user_id: expense.user_id,
+              recurring_expense_id: expense.id,
+              supplier_id: expense.supplier_id,
+              reference_month: referenceMonth,
+              value: isVariableValue ? null : baseAmount,
+              due_date: dueDateISO,
+              status: isVariableValue ? 'aguardando_valor' : 'pendente',
+            });
+          }
+        } else {
+          // Calculate due date following the configured rule
+          const dueDate = getDueDateForExpense(referenceDate, expense);
+
+          // Check if it's before start_date or after end_date
+          if (dueDate < new Date(expense.start_date)) {
+            console.log(`Due date ${dueDate.toISOString()} is before start date ${expense.start_date}`);
+            continue;
+          }
+
+          if (expense.end_date && dueDate > new Date(expense.end_date)) {
+            console.log(`Due date ${dueDate.toISOString()} is after end date ${expense.end_date}`);
+            continue;
+          }
+
+          const dueDateISO = dueDate.toISOString().split('T')[0];
+
+          // Check if installment already exists for this specific due date
+          const { data: existingForDay } = await supabase
+            .from('recurring_expense_installments')
+            .select('id')
+            .eq('recurring_expense_id', expense.id)
+            .eq('reference_month', referenceMonth)
+            .eq('due_date', dueDateISO)
+            .maybeSingle();
+
+          if (existingForDay) {
+            console.log(`Installment already exists for ${expense.name} - ${referenceMonth} - ${dueDateISO}`);
+            continue;
+          }
+
+          installmentsToCreate.push({
+            user_id: expense.user_id,
+            recurring_expense_id: expense.id,
+            supplier_id: expense.supplier_id,
+            reference_month: referenceMonth,
+            value: isVariableValue ? null : baseAmount,
+            due_date: dueDateISO,
+            status: isVariableValue ? 'aguardando_valor' : 'pendente',
+          });
+        }
       }
     }
 

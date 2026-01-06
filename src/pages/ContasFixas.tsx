@@ -73,6 +73,10 @@ export default function ContasFixas() {
       const offset = expense.due_day_offset ?? 0;
       return `${offset} dia${offset === 1 ? "" : "s"} após o início do mês`;
     }
+    if (Array.isArray(expense.due_days) && expense.due_days.length > 0) {
+      if (expense.due_days.length === 1) return `Vence dia ${expense.due_days[0]}`;
+      return `Vence dia ${expense.due_days.join(", ")}`;
+    }
     if (expense.due_day) {
       return `Vence dia ${expense.due_day}`;
     }

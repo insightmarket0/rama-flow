@@ -34,6 +34,7 @@ const formSchema = z
     }),
     due_rule_type: z.enum(["specific_day", "days_after_start"]),
     due_day: z.string().optional(),
+    due_days: z.string().optional(),
     due_day_offset: z.string().optional(),
     start_date: z.string().min(1, "Informe a data de início"),
     end_date: z.string().optional(),
@@ -67,20 +68,37 @@ const formSchema = z
     }
 
     if (data.due_rule_type === "specific_day") {
-      if (!data.due_day || data.due_day.trim().length === 0) {
+      const raw = data.due_days ?? data.due_day ?? "";
+      if (!raw || raw.toString().trim().length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["due_day"],
-          message: "Informe o dia de vencimento",
+          path: ["due_days"],
+          message: "Informe o(s) dia(s) de vencimento",
         });
       } else {
-        const day = Number(data.due_day);
-        if (!Number.isInteger(day) || day < 1 || day > 31) {
+        const parts = raw
+          .toString()
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+        if (parts.length === 0) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            path: ["due_day"],
-            message: "Dia deve estar entre 1 e 31",
+            path: ["due_days"],
+            message: "Informe o(s) dia(s) de vencimento",
           });
+        } else {
+          for (const p of parts) {
+            const day = Number(p);
+            if (!Number.isInteger(day) || day < 1 || day > 31) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ["due_days"],
+                message: "Cada dia deve estar entre 1 e 31",
+              });
+              break;
+            }
+          }
         }
       }
     } else if (!data.due_day_offset || data.due_day_offset.trim().length === 0) {
@@ -154,6 +172,7 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
       recurrence_type: "mensal",
       due_rule_type: "specific_day",
       due_day: "10",
+      due_days: "",
       due_day_offset: "5",
       start_date: new Date().toISOString().split("T")[0],
       end_date: "",
@@ -226,6 +245,7 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
 
     const dueRuleType = values.due_rule_type;
     const dueDay = values.due_day ? Number(values.due_day) : null;
+    const dueDaysRaw = values.due_days ? values.due_days.toString() : "";
     const dueDayOffset = values.due_day_offset ? Number(values.due_day_offset) : null;
 
     if (
@@ -235,25 +255,43 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
       return results;
     }
 
-    let current = getDueDateForRule(startDate, dueRuleType, dueDay, dueDayOffset);
+    const parsedDueDays = dueDaysRaw
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((s) => Number(s))
+      .filter((n) => Number.isInteger(n) && n >= 1 && n <= 31);
 
-    if (current < startDate) {
-      if (interval.unit === "months") {
-        current = addMonthsRespectingRule(current, interval.value, dueRuleType, dueDay, dueDayOffset);
-      } else {
-        current = addDaysRespectingRule(current, interval.value);
-      }
-    }
-
+    let currentMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+    // Collect up to 4 upcoming dates
     while (results.length < 4) {
-      if (endDate && current > endDate) {
-        break;
-      }
-      results.push(current);
-      if (interval.unit === "months") {
-        current = addMonthsRespectingRule(current, interval.value, dueRuleType, dueDay, dueDayOffset);
+      if (endDate && currentMonth > endDate) break;
+
+      if (dueRuleType === "specific_day" && parsedDueDays.length > 0) {
+        for (const day of parsedDueDays) {
+          const candidate = getDueDateForRule(currentMonth, dueRuleType, day, dueDayOffset);
+          if (candidate >= startDate && !(endDate && candidate > endDate)) {
+            results.push(candidate);
+            if (results.length >= 4) break;
+          }
+        }
       } else {
-        current = addDaysRespectingRule(current, interval.value);
+        const candidate = getDueDateForRule(currentMonth, dueRuleType, dueDay, dueDayOffset);
+        if (candidate >= startDate && !(endDate && candidate > endDate)) {
+          results.push(candidate);
+        }
+      }
+
+      if (interval.unit === "months") {
+        currentMonth = addMonthsRespectingRule(currentMonth, interval.value, dueRuleType, dueDay, dueDayOffset);
+      } else {
+        // If specific fixed days are configured (e.g. 5,15), advance by months
+        // so we generate those days every month rather than repeating within the same month.
+        if (dueRuleType === "specific_day" && parsedDueDays.length > 0) {
+          currentMonth = addMonthsRespectingRule(currentMonth, 1, dueRuleType, dueDay, dueDayOffset);
+        } else {
+          currentMonth = addDaysRespectingRule(currentMonth, interval.value);
+        }
       }
     }
 
@@ -265,6 +303,7 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
     values.due_rule_type,
     values.due_day,
     values.due_day_offset,
+    values.due_days,
   ]);
 
   const nextStep = async () => {
@@ -296,6 +335,15 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
         data.due_rule_type === "specific_day" && data.due_day
           ? parseInt(data.due_day, 10)
           : null;
+      const parsedDueDays =
+        data.due_rule_type === "specific_day" && data.due_days
+          ? data.due_days
+              .toString()
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+              .map((s) => parseInt(s, 10))
+          : null;
       const parsedDueDayOffset =
         data.due_rule_type === "days_after_start" && data.due_day_offset
           ? parseInt(data.due_day_offset, 10)
@@ -310,6 +358,7 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
         recurrence_type: data.recurrence_type,
         due_rule_type: data.due_rule_type,
         due_day: parsedDueDay,
+        due_days: parsedDueDays,
         due_day_offset: parsedDueDayOffset,
         start_date: data.start_date,
         end_date: data.end_date || null,
@@ -339,6 +388,7 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
     form.setValue("amount", template.amount.toString(), { shouldValidate: true });
     form.setValue("recurrence_type", template.recurrence_type, { shouldValidate: true });
     form.setValue("due_day", template.due_day.toString(), { shouldValidate: true });
+    form.setValue("due_days", template.due_day.toString(), { shouldValidate: true });
     form.setValue("value_type", "fixed", { shouldValidate: true });
     form.setValue("due_rule_type", "specific_day", { shouldValidate: true });
     form.setValue("due_day_offset", "", { shouldValidate: false });
@@ -675,13 +725,13 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
                   ) : (
                     <FormField
                       control={form.control}
-                      name="due_day"
+                      name="due_days"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Dia de vencimento</FormLabel>
-                          <FormDescription>Esse será o dia utilizado todos os meses.</FormDescription>
+                          <FormLabel>Dias de vencimento</FormLabel>
+                          <FormDescription>Informe os dias do mês separados por vírgula. Ex: 5,15</FormDescription>
                           <FormControl>
-                            <Input type="number" min="1" max="31" placeholder="10" {...field} />
+                            <Input type="text" placeholder="5,15" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -780,7 +830,7 @@ export function RecurringExpenseDialog({ open, onOpenChange }: RecurringExpenseD
                       />
                       <SummaryRow
                         label="Regra de vencimento"
-                        value={getDueRuleLabel(values.due_rule_type, values.due_day, values.due_day_offset)}
+                        value={getDueRuleLabel(values.due_rule_type, values.due_day, values.due_day_offset, values.due_days)}
                       />
                       <SummaryRow
                         label="Período"
@@ -929,6 +979,7 @@ function getDueRuleLabel(
   ruleType: FormData["due_rule_type"],
   dueDay?: string | null,
   dueDayOffset?: string | null,
+  dueDays?: string | null,
 ) {
   if (ruleType === "days_after_start") {
     const offset = dueDayOffset && dueDayOffset.length > 0 ? Number(dueDayOffset) : null;
@@ -938,8 +989,19 @@ function getDueRuleLabel(
     return "Dias após o início do mês";
   }
 
-  if (dueDay && dueDay.length > 0) {
-    return `Todo dia ${dueDay}`;
+  const daysRaw = dueDays ?? dueDay ?? "";
+  if (daysRaw && daysRaw.length > 0) {
+    const parts = daysRaw
+      .toString()
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (parts.length === 1) {
+      return `Todo dia ${parts[0]}`;
+    }
+    if (parts.length > 1) {
+      return `Todo dia ${parts.join(", ")}`;
+    }
   }
 
   return "Dia fixo do mês";
