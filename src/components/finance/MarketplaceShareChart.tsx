@@ -56,8 +56,8 @@ export const MarketplaceShareChart = ({ data }: MarketplaceShareChartProps) => {
                                 data={chartData.data}
                                 cx="50%"
                                 cy="50%"
-                                innerRadius={85}
-                                outerRadius={105}
+                                innerRadius={75}
+                                outerRadius={95}
                                 paddingAngle={2}
                                 dataKey="value"
                                 stroke="none"
