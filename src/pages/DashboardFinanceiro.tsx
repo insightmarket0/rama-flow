@@ -168,7 +168,6 @@ const DashboardFinanceiro = () => {
 
       <div className="grid gap-6 md:grid-cols-7">
         <RevenueChart data={closings} />
-        {/* MarketplaceShareChart needs refactoring or props to handle dynamic colors/labels */}
         <MarketplaceShareChart data={closings} />
       </div>
 

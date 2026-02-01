@@ -37,10 +37,10 @@ interface PresetConfig {
 }
 
 const PRESETS: PresetConfig[] = [
-    { label: "Mercado Livre", color: "#ffe600", logo: "/logos/mercadolivre.png" },
-    { label: "Shopee", color: "#ee4d2d", logo: "/logos/shopee.png" },
-    { label: "Amazon", color: "#232f3e", logo: "/logos/amazon.png" },
-    { label: "Magalu", color: "#0086ff", logo: "/logos/magalu.png" },
+    { label: "Mercado Livre", color: "#FFE600", logo: "/logos/mercadolivre.png" },
+    { label: "Shopee", color: "#FF5722", logo: "/logos/shopee.png" },
+    { label: "Amazon", color: "#F2F2F2", logo: "/logos/amazon.png" },
+    { label: "Magalu", color: "#0086FF", logo: "/logos/magalu.png" },
     { label: "TikTok Shop", color: "#000000", logo: "/logos/tiktok.png" },
 ];
 
