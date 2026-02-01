@@ -105,17 +105,17 @@ export const ClosingFormDialog = ({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px] border-l-4 border-l-primary">
-                <DialogHeader>
-                    <div className="flex items-center gap-2">
-                        <div className="p-2 bg-primary/10 rounded-full">
-                            <Calendar className="h-5 w-5 text-primary" />
+            <DialogContent className="sm:max-w-[500px] bg-[#0A0A0A] border-[#1F1F1F] shadow-2xl">
+                <DialogHeader className="border-b border-[#1F1F1F] pb-4">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-gradient-to-br from-green-500/20 to-green-500/5 rounded-xl border border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.1)]">
+                            <Calendar className="h-5 w-5 text-green-500" />
                         </div>
                         <div>
-                            <DialogTitle className="text-xl">
-                                {isEditing ? "Editar Fechamento" : "Novo Fechamento Mensal"}
+                            <DialogTitle className="text-xl font-bold text-white">
+                                {isEditing ? "Editar Fechamento" : "Novo Fechamento"}
                             </DialogTitle>
-                            <DialogDescription>
+                            <DialogDescription className="text-gray-400">
                                 Preencha os valores brutos faturados para o período.
                             </DialogDescription>
                         </div>
@@ -124,28 +124,27 @@ export const ClosingFormDialog = ({
 
                 {loadingMarketplaces ? (
                     <div className="flex justify-center p-8">
-                        <Loader2 className="h-6 w-6 animate-spin" />
+                        <Loader2 className="h-8 w-8 animate-spin text-green-500" />
                     </div>
                 ) : (
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4">
                             <FormField
                                 control={form.control}
                                 name="month"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-base font-semibold">
+                                        <FormLabel className="text-sm font-medium text-gray-300">
                                             Mês de Referência
                                         </FormLabel>
                                         <FormControl>
-                                            <div className="relative">
+                                            <div className="relative group">
                                                 <Input
                                                     type="month"
-                                                    className="pl-10 h-10 text-base"
-                                                    disabled={isEditing}
+                                                    className="pl-10 h-11 bg-[#121212] border-[#2A2A2A] text-white focus:border-green-500/50 transition-all rounded-lg"
                                                     {...field}
                                                 />
-                                                <Calendar className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground pointer-events-none" />
+                                                <Calendar className="absolute left-3 top-3 h-5 w-5 text-gray-500 group-hover:text-green-500 transition-colors pointer-events-none" />
                                             </div>
                                         </FormControl>
                                         <FormMessage />
@@ -153,17 +152,17 @@ export const ClosingFormDialog = ({
                                 )}
                             />
 
-                            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+                            <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
                                 {marketplaces.map((market) => (
                                     <FormField
                                         key={market.id}
                                         control={form.control}
                                         name={market.id} // Name matches the key in Zod schema
                                         render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="flex items-center gap-3 font-medium mb-2">
+                                            <FormItem className="space-y-1.5 p-3 rounded-xl bg-[#121212] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors">
+                                                <FormLabel className="flex items-center gap-3 font-medium mb-1 cursor-pointer">
                                                     {market.logo_url ? (
-                                                        <div className="w-8 h-8 flex items-center justify-center bg-white rounded-md p-1 shadow-sm shrink-0">
+                                                        <div className="w-8 h-8 flex items-center justify-center bg-white rounded-lg p-1 shadow-sm shrink-0">
                                                             <img
                                                                 src={market.logo_url}
                                                                 alt={market.label}
@@ -172,22 +171,24 @@ export const ClosingFormDialog = ({
                                                         </div>
                                                     ) : (
                                                         <div
-                                                            className="h-4 w-4 rounded-full shrink-0"
+                                                            className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0 shadow-md"
                                                             style={{ backgroundColor: market.color }}
-                                                        />
+                                                        >
+                                                            <DollarSign className="h-4 w-4 text-white opacity-80" />
+                                                        </div>
                                                     )}
-                                                    <span className="text-base">{market.label}</span>
+                                                    <span className="text-base text-gray-200">{market.label}</span>
                                                 </FormLabel>
                                                 <FormControl>
                                                     <div className="relative">
                                                         <Input
                                                             type="number"
                                                             step="0.01"
-                                                            className="pl-10 h-11 text-lg font-mono"
+                                                            className="pl-10 h-10 bg-[#0A0A0A] border-[#2A2A2A] text-white font-mono focus:border-green-500/30 rounded-lg text-right pr-4"
                                                             placeholder="0,00"
                                                             {...field}
                                                         />
-                                                        <DollarSign className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+                                                        <DollarSign className="absolute left-3 top-3 h-4 w-4 text-gray-600 pointer-events-none" />
                                                     </div>
                                                 </FormControl>
                                                 <FormMessage />
@@ -196,20 +197,22 @@ export const ClosingFormDialog = ({
                                     />
                                 ))}
                                 {marketplaces.length === 0 && (
-                                    <p className="text-center text-muted-foreground text-sm py-4">
-                                        Nenhum canal cadastrado. Adicione canais em "Gerenciar Canais".
-                                    </p>
+                                    <div className="text-center p-6 border border-dashed border-[#2A2A2A] rounded-xl">
+                                        <p className="text-gray-500 text-sm">
+                                            Nenhum canal cadastrado. <br /> Adicione canais em "Gerenciar Canais".
+                                        </p>
+                                    </div>
                                 )}
                             </div>
 
                             <DialogFooter>
                                 <Button
                                     type="submit"
-                                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold h-11 uppercase tracking-wider"
+                                    className="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-bold h-11 rounded-lg uppercase tracking-wide shadow-lg shadow-green-900/20 transition-all active:scale-[0.98]"
                                     disabled={marketplaces.length === 0}
                                 >
                                     <Check className="mr-2 h-5 w-5" />
-                                    {isEditing ? "Salvar Alterações" : "Salvar Fechamento"}
+                                    {isEditing ? "Salvar Alterações" : "Confirmar Fechamento"}
                                 </Button>
                             </DialogFooter>
                         </form>

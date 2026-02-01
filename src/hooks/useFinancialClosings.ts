@@ -96,8 +96,9 @@ export const useFinancialClosings = () => {
             const { error } = await supabase
                 .from("financial_closings")
                 .update({
-                    revenues: data.revenues, // Update JSONB directly
-                })
+                    month: data.month,
+                    revenues: data.revenues,
+                } as any)
                 .eq("id", data.id);
 
             if (error) throw error;
