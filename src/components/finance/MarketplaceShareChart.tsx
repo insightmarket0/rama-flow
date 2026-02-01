@@ -69,7 +69,7 @@ export const MarketplaceShareChart = ({ data }: MarketplaceShareChartProps) => {
                                     const market = marketplaces.find(m => m.label === chartData.data[index].name);
                                     const Icon = market?.icon;
 
-                                    if (percent < 0.05) return null;
+                                    if (percent < 0.01) return null;
 
                                     return (
                                         <g>

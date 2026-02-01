@@ -132,23 +132,28 @@ const DashboardFinanceiro = () => {
 
       {/* Ambient Light */}
       <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-white/5 to-transparent pointer-events-none opacity-50" />
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-white/10 relative z-10">
+        <div className="space-y-0.5">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
             Dashboard Financeiro
           </h1>
-          <p className="text-muted-foreground mt-1">
-            Gestão de receitas por marketplace
+          <p className="text-sm text-muted-foreground font-medium flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            Gestão de receitas em tempo real
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <HistoricalDataDialog />
+
+        <div className="flex items-center gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+          <div className="flex items-center gap-1 border-r border-white/10 pr-3 mr-1">
+            <HistoricalDataDialog />
+          </div>
+
           {/* Access Control: Only specific user can edit */}
           {user?.email === "livia@hotmail.com" && (
             <>
               <MarketplacesDialog />
               <Button
-                className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+                className="bg-[#FFE600] hover:bg-[#FFE600]/90 text-black font-bold shadow-[0_0_20px_rgba(255,230,0,0.3)] transition-all duration-300 hover:scale-105"
                 onClick={handleCreateNew}
               >
                 <Plus className="mr-2 h-4 w-4" />
