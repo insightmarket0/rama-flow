@@ -61,6 +61,29 @@ export const MarketplaceShareChart = ({ data }: MarketplaceShareChartProps) => {
                                 paddingAngle={2}
                                 dataKey="value"
                                 stroke="none"
+                                label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
+                                    const RADIAN = Math.PI / 180;
+                                    const radius = 25 + innerRadius + (outerRadius - innerRadius);
+                                    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                                    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                                    const market = marketplaces.find(m => m.label === chartData.data[index].name);
+                                    const Icon = market?.icon;
+
+                                    if (percent < 0.05) return null;
+
+                                    return (
+                                        <g>
+                                            <foreignObject x={x - 20} y={y - 12} width={40} height={24}>
+                                                <div className="flex items-center justify-center gap-1 bg-[#121212]/80 backdrop-blur-sm rounded-md border border-white/10 px-1 py-0.5 shadow-sm">
+                                                    {Icon && <Icon className="h-3 w-3" style={{ color: chartData.data[index].color }} />}
+                                                    <span className="text-[10px] font-bold text-white">
+                                                        {`${(percent * 100).toFixed(0)}%`}
+                                                    </span>
+                                                </div>
+                                            </foreignObject>
+                                        </g>
+                                    );
+                                }}
                             >
                                 {chartData.data.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={entry.color} />

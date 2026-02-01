@@ -93,22 +93,31 @@ export const RevenueChart = ({ data }: RevenueChartProps) => {
                                                     </p>
                                                 </div>
                                                 <div className="space-y-1.5">
-                                                    {payload.map((entry: any, index: number) => (
-                                                        <div key={index} className="flex items-center justify-between text-xs">
-                                                            <div className="flex items-center gap-2">
-                                                                <div
-                                                                    className="h-2.5 w-2.5 rounded-full"
-                                                                    style={{ backgroundColor: entry.color }}
-                                                                />
-                                                                <span className="text-gray-300">
-                                                                    {entry.name}
+                                                    {payload.map((entry: any, index: number) => {
+                                                        const market = marketplaces.find(m => m.id === entry.dataKey);
+                                                        const Icon = market?.icon;
+
+                                                        return (
+                                                            <div key={index} className="flex items-center justify-between text-xs">
+                                                                <div className="flex items-center gap-2">
+                                                                    {Icon ? (
+                                                                        <Icon className="h-3 w-3" style={{ color: entry.color }} />
+                                                                    ) : (
+                                                                        <div
+                                                                            className="h-2.5 w-2.5 rounded-full"
+                                                                            style={{ backgroundColor: entry.color }}
+                                                                        />
+                                                                    )}
+                                                                    <span className="text-gray-300">
+                                                                        {entry.name}
+                                                                    </span>
+                                                                </div>
+                                                                <span className="font-medium text-white">
+                                                                    {formatCurrency(entry.value as number)}
                                                                 </span>
                                                             </div>
-                                                            <span className="font-medium text-white">
-                                                                {formatCurrency(entry.value as number)}
-                                                            </span>
-                                                        </div>
-                                                    ))}
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
                                         );

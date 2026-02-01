@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { MARKETPLACES } from "@/config/marketplaces";
 import { toast } from "sonner";
 
 export interface Marketplace {
@@ -8,6 +9,7 @@ export interface Marketplace {
     color: string;
     is_active: boolean;
     logo_url?: string | null;
+    icon?: (props: any) => JSX.Element;
 }
 
 export type NewMarketplace = Omit<Marketplace, "id" | "is_active">;
@@ -24,7 +26,17 @@ export const useMarketplaces = () => {
                 .order("created_at", { ascending: true });
 
             if (error) throw error;
-            return data as Marketplace[];
+
+            // Map icons from config
+            const marketplacesWithIcons = (data as Marketplace[]).map(m => {
+                const config = MARKETPLACES.find(c => c.label === m.label);
+                return {
+                    ...m,
+                    icon: config?.icon
+                };
+            });
+
+            return marketplacesWithIcons;
         },
     });
 

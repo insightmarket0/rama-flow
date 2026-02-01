@@ -125,7 +125,13 @@ const DashboardFinanceiro = () => {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in pb-10">
+    <div className="min-h-screen bg-black text-white p-8 space-y-8 relative overflow-hidden animate-fade-in pb-10">
+      {/* Premium Background Effects */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-green-500/5 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,_#000000_0%,_#050505_100%)] -z-10" />
+
+      {/* Ambient Light */}
+      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-white/5 to-transparent pointer-events-none opacity-50" />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">

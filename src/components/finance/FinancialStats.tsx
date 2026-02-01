@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardStats } from "@/types/finance";
 import { DollarSign, TrendingUp, Trophy, Calendar } from "lucide-react";
+import { MARKETPLACES } from "@/config/marketplaces";
 
 interface FinancialStatsProps {
     stats: DashboardStats;
@@ -53,7 +54,25 @@ export const FinancialStats = ({ stats }: FinancialStatsProps) => {
                     <Trophy className="h-6 w-6 text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]" />
                 </CardHeader>
                 <CardContent className="relative z-10">
-                    <div className="text-3xl font-extrabold text-white capitalize mt-1 truncate">{stats.bestChannel.name}</div>
+                    <div className="flex items-center gap-3 mt-1">
+                        {(() => {
+                            const market = MARKETPLACES.find(m => m.label === stats.bestChannel.name);
+                            if (market) {
+                                const Icon = market.icon;
+                                return (
+                                    <div className="p-1.5 rounded-lg bg-white/5 border border-white/10">
+                                        <Icon className="h-8 w-8 text-yellow-500" />
+                                    </div>
+                                );
+                            }
+                            return null;
+                        })()}
+                        <div className="flex flex-col overflow-hidden">
+                            <div className="text-2xl font-extrabold text-white capitalize truncate leading-tight" title={stats.bestChannel.name}>
+                                {stats.bestChannel.name}
+                            </div>
+                        </div>
+                    </div>
                     <p className="text-xs text-muted-foreground mt-2">
                         <span className="text-white font-medium">{formatCurrency(stats.bestChannel.value)}</span> neste canal
                     </p>
