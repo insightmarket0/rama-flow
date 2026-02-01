@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      marketplaces: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+          user_id: string
+          logo_url: string | null
+        }
+        Insert: {
+          color: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          user_id: string
+          logo_url?: string | null
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          user_id?: string
+          logo_url?: string | null
+        }
+        Relationships: []
+      }
       installments: {
         Row: {
           created_at: string
@@ -177,313 +207,313 @@ export type Database = {
       }
       Relationships: []
     }
-      quotation_responses: {
-        Row: {
-          condicao_pagamento: string | null
-          created_at: string
-          fornecedor_id: string
-          id: string
-          observacao: string | null
-          prazo_dias: number
-          quotation_id: string
-          status: string
-          updated_at: string
-          user_id: string
-          valor_total: number
-        }
-        Insert: {
-          condicao_pagamento?: string | null
-          created_at?: string
-          fornecedor_id: string
-          id?: string
-          observacao?: string | null
-          prazo_dias?: number
-          quotation_id: string
-          status?: string
-          updated_at?: string
-          user_id: string
-          valor_total: number
-        }
-        Update: {
-          condicao_pagamento?: string | null
-          created_at?: string
-          fornecedor_id?: string
-          id?: string
-          observacao?: string | null
-          prazo_dias?: number
-          quotation_id?: string
-          status?: string
-          updated_at?: string
-          user_id?: string
-          valor_total?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "quotation_responses_fornecedor_id_fkey"
-            columns: ["fornecedor_id"]
-            isOneToOne: false
-            referencedRelation: "suppliers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "quotation_responses_quotation_id_fkey"
-            columns: ["quotation_id"]
-            isOneToOne: false
-            referencedRelation: "quotations"
-            referencedColumns: ["id"]
-          },
-        ]
+    quotation_responses: {
+      Row: {
+        condicao_pagamento: string | null
+        created_at: string
+        fornecedor_id: string
+        id: string
+        observacao: string | null
+        prazo_dias: number
+        quotation_id: string
+        status: string
+        updated_at: string
+        user_id: string
+        valor_total: number
       }
-      quotations: {
-        Row: {
-          created_at: string
-          data_limite: string | null
-          descricao: string | null
-          id: string
-          organization_id: string | null
-          status: string
-          titulo: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          data_limite?: string | null
-          descricao?: string | null
-          id?: string
-          organization_id?: string | null
-          status?: string
-          titulo: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          data_limite?: string | null
-          descricao?: string | null
-          id?: string
-          organization_id?: string | null
-          status?: string
-          titulo?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
+      Insert: {
+        condicao_pagamento?: string | null
+        created_at?: string
+        fornecedor_id: string
+        id?: string
+        observacao?: string | null
+        prazo_dias?: number
+        quotation_id: string
+        status?: string
+        updated_at?: string
+        user_id: string
+        valor_total: number
       }
-      profiles: {
-        Row: {
-          created_at: string
-          full_name: string | null
-          id: string
-          role: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          full_name?: string | null
-          id?: string
-          role?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          full_name?: string | null
-          id?: string
-          role?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
+      Update: {
+        condicao_pagamento?: string | null
+        created_at?: string
+        fornecedor_id?: string
+        id?: string
+        observacao?: string | null
+        prazo_dias?: number
+        quotation_id?: string
+        status?: string
+        updated_at?: string
+        user_id?: string
+        valor_total?: number
       }
-      recurring_expense_installments: {
-        Row: {
-          created_at: string | null
-          due_date: string
-          id: string
-          notes: string | null
-          paid_at: string | null
-          payment_proof: string | null
-          recurring_expense_id: string
-          reference_month: string
-          status: string | null
-          supplier_id: string | null
-          updated_at: string | null
-          user_id: string
-          value: number
-        }
-        Insert: {
-          created_at?: string | null
-          due_date: string
-          id?: string
-          notes?: string | null
-          paid_at?: string | null
-          payment_proof?: string | null
-          recurring_expense_id: string
-          reference_month: string
-          status?: string | null
-          supplier_id?: string | null
-          updated_at?: string | null
-          user_id: string
-          value: number
-        }
-        Update: {
-          created_at?: string | null
-          due_date?: string
-          id?: string
-          notes?: string | null
-          paid_at?: string | null
-          payment_proof?: string | null
-          recurring_expense_id?: string
-          reference_month?: string
-          status?: string | null
-          supplier_id?: string | null
-          updated_at?: string | null
-          user_id?: string
-          value?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "recurring_expense_installments_recurring_expense_id_fkey"
-            columns: ["recurring_expense_id"]
-            isOneToOne: false
-            referencedRelation: "recurring_expenses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "recurring_expense_installments_supplier_id_fkey"
-            columns: ["supplier_id"]
-            isOneToOne: false
-            referencedRelation: "suppliers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      recurring_expenses: {
-        Row: {
-          amount: number | null
-          category: string
-          created_at: string | null
-          due_day: number | null
-          due_days?: number[] | null
-          due_day_offset: number | null
-          due_rule_type: string
-          end_date: string | null
-          id: string
-          is_active: boolean | null
-          name: string
-          notes: string | null
-          recurrence_type: string
-          start_date: string
-          supplier_id: string | null
-          tax_description: string | null
-          updated_at: string | null
-          user_id: string
-          value_type: string
-        }
-        Insert: {
-          amount?: number | null
-          category: string
-          created_at?: string | null
-          due_day?: number | null
-          due_days?: number[] | null
-          due_day_offset?: number | null
-          due_rule_type?: string
-          end_date?: string | null
-          id?: string
-          is_active?: boolean | null
-          name: string
-          notes?: string | null
-          recurrence_type: string
-          start_date: string
-          supplier_id?: string | null
-          tax_description?: string | null
-          updated_at?: string | null
-          user_id: string
-          value_type?: string
-        }
-        Update: {
-          amount?: number | null
-          category?: string
-          created_at?: string | null
-          due_day?: number | null
-          due_days?: number[] | null
-          due_day_offset?: number | null
-          due_rule_type?: string
-          end_date?: string | null
-          id?: string
-          is_active?: boolean | null
-          name?: string
-          notes?: string | null
-          recurrence_type?: string
-          start_date?: string
-          supplier_id?: string | null
-          tax_description?: string | null
-          updated_at?: string | null
-          user_id?: string
-          value_type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "recurring_expenses_supplier_id_fkey"
-            columns: ["supplier_id"]
-            isOneToOne: false
-            referencedRelation: "suppliers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      suppliers: {
-        Row: {
-          cnpj: string
-          created_at: string
-          email: string | null
-          id: string
-          name: string
-          phone: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          cnpj: string
-          created_at?: string
-          email?: string | null
-          id?: string
-          name: string
-          phone?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          cnpj?: string
-          created_at?: string
-          email?: string | null
-          id?: string
-          name?: string
-          phone?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+      Relationships: [
+        {
+          foreignKeyName: "quotation_responses_fornecedor_id_fkey"
+          columns: ["fornecedor_id"]
+          isOneToOne: false
+          referencedRelation: "suppliers"
+          referencedColumns: ["id"]
+        },
+        {
+          foreignKeyName: "quotation_responses_quotation_id_fkey"
+          columns: ["quotation_id"]
+          isOneToOne: false
+          referencedRelation: "quotations"
+          referencedColumns: ["id"]
+        },
+      ]
     }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      refresh_postgrest_schema: {
-        Args: Record<string, never>
-        Returns: undefined
+    quotations: {
+      Row: {
+        created_at: string
+        data_limite: string | null
+        descricao: string | null
+        id: string
+        organization_id: string | null
+        status: string
+        titulo: string
+        updated_at: string
+        user_id: string
       }
+      Insert: {
+        created_at?: string
+        data_limite?: string | null
+        descricao?: string | null
+        id?: string
+        organization_id?: string | null
+        status?: string
+        titulo: string
+        updated_at?: string
+        user_id: string
+      }
+      Update: {
+        created_at?: string
+        data_limite?: string | null
+        descricao?: string | null
+        id?: string
+        organization_id?: string | null
+        status?: string
+        titulo?: string
+        updated_at?: string
+        user_id?: string
+      }
+      Relationships: []
     }
-    Enums: {
-      [_ in never]: never
+    profiles: {
+      Row: {
+        created_at: string
+        full_name: string | null
+        id: string
+        role: string | null
+        updated_at: string
+        user_id: string
+      }
+      Insert: {
+        created_at?: string
+        full_name?: string | null
+        id?: string
+        role?: string | null
+        updated_at?: string
+        user_id: string
+      }
+      Update: {
+        created_at?: string
+        full_name?: string | null
+        id?: string
+        role?: string | null
+        updated_at?: string
+        user_id?: string
+      }
+      Relationships: []
     }
-    CompositeTypes: {
-      [_ in never]: never
+    recurring_expense_installments: {
+      Row: {
+        created_at: string | null
+        due_date: string
+        id: string
+        notes: string | null
+        paid_at: string | null
+        payment_proof: string | null
+        recurring_expense_id: string
+        reference_month: string
+        status: string | null
+        supplier_id: string | null
+        updated_at: string | null
+        user_id: string
+        value: number
+      }
+      Insert: {
+        created_at?: string | null
+        due_date: string
+        id?: string
+        notes?: string | null
+        paid_at?: string | null
+        payment_proof?: string | null
+        recurring_expense_id: string
+        reference_month: string
+        status?: string | null
+        supplier_id?: string | null
+        updated_at?: string | null
+        user_id: string
+        value: number
+      }
+      Update: {
+        created_at?: string | null
+        due_date?: string
+        id?: string
+        notes?: string | null
+        paid_at?: string | null
+        payment_proof?: string | null
+        recurring_expense_id?: string
+        reference_month?: string
+        status?: string | null
+        supplier_id?: string | null
+        updated_at?: string | null
+        user_id?: string
+        value?: number
+      }
+      Relationships: [
+        {
+          foreignKeyName: "recurring_expense_installments_recurring_expense_id_fkey"
+          columns: ["recurring_expense_id"]
+          isOneToOne: false
+          referencedRelation: "recurring_expenses"
+          referencedColumns: ["id"]
+        },
+        {
+          foreignKeyName: "recurring_expense_installments_supplier_id_fkey"
+          columns: ["supplier_id"]
+          isOneToOne: false
+          referencedRelation: "suppliers"
+          referencedColumns: ["id"]
+        },
+      ]
+    }
+    recurring_expenses: {
+      Row: {
+        amount: number | null
+        category: string
+        created_at: string | null
+        due_day: number | null
+        due_days?: number[] | null
+        due_day_offset: number | null
+        due_rule_type: string
+        end_date: string | null
+        id: string
+        is_active: boolean | null
+        name: string
+        notes: string | null
+        recurrence_type: string
+        start_date: string
+        supplier_id: string | null
+        tax_description: string | null
+        updated_at: string | null
+        user_id: string
+        value_type: string
+      }
+      Insert: {
+        amount?: number | null
+        category: string
+        created_at?: string | null
+        due_day?: number | null
+        due_days?: number[] | null
+        due_day_offset?: number | null
+        due_rule_type?: string
+        end_date?: string | null
+        id?: string
+        is_active?: boolean | null
+        name: string
+        notes?: string | null
+        recurrence_type: string
+        start_date: string
+        supplier_id?: string | null
+        tax_description?: string | null
+        updated_at?: string | null
+        user_id: string
+        value_type?: string
+      }
+      Update: {
+        amount?: number | null
+        category?: string
+        created_at?: string | null
+        due_day?: number | null
+        due_days?: number[] | null
+        due_day_offset?: number | null
+        due_rule_type?: string
+        end_date?: string | null
+        id?: string
+        is_active?: boolean | null
+        name?: string
+        notes?: string | null
+        recurrence_type?: string
+        start_date?: string
+        supplier_id?: string | null
+        tax_description?: string | null
+        updated_at?: string | null
+        user_id?: string
+        value_type?: string
+      }
+      Relationships: [
+        {
+          foreignKeyName: "recurring_expenses_supplier_id_fkey"
+          columns: ["supplier_id"]
+          isOneToOne: false
+          referencedRelation: "suppliers"
+          referencedColumns: ["id"]
+        },
+      ]
+    }
+    suppliers: {
+      Row: {
+        cnpj: string
+        created_at: string
+        email: string | null
+        id: string
+        name: string
+        phone: string | null
+        updated_at: string
+        user_id: string
+      }
+      Insert: {
+        cnpj: string
+        created_at?: string
+        email?: string | null
+        id?: string
+        name: string
+        phone?: string | null
+        updated_at?: string
+        user_id: string
+      }
+      Update: {
+        cnpj?: string
+        created_at?: string
+        email?: string | null
+        id?: string
+        name?: string
+        phone?: string | null
+        updated_at?: string
+        user_id?: string
+      }
+      Relationships: []
     }
   }
+  Views: {
+    [_ in never]: never
+  }
+  Functions: {
+    refresh_postgrest_schema: {
+      Args: Record<string, never>
+      Returns: undefined
+    }
+  }
+  Enums: {
+    [_ in never]: never
+  }
+  CompositeTypes: {
+    [_ in never]: never
+  }
+}
 }
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
@@ -492,116 +522,116 @@ type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+  ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
-    ? R
-    : never
+  ? R
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
+    DefaultSchema["Views"])
+  ? (DefaultSchema["Tables"] &
+    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+      Row: infer R
+    }
+  ? R
+  : never
+  : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
+    Insert: infer I
+  }
+  ? I
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Insert: infer I
+  }
+  ? I
+  : never
+  : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
+    Update: infer U
+  }
+  ? U
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Update: infer U
+  }
+  ? U
+  : never
+  : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Enums"]
+  | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+  : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+  : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["CompositeTypes"]
+  | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+  : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : never
 
 export const Constants = {
   public: {
