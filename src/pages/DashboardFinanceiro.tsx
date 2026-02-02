@@ -12,6 +12,7 @@ import { Loader2, Plus, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { HistoricalDataDialog } from "@/components/finance/HistoricalDataDialog";
+import { NewFeatureModal } from "@/components/NewFeatureModal";
 
 import { useAuth } from "@/hooks/useAuth";
 
@@ -194,6 +195,8 @@ const DashboardFinanceiro = () => {
         initialData={editingClosing}
         onSave={handleSaveClosing}
       />
+
+      <NewFeatureModal />
     </div>
   );
 };
