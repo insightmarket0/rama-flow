@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, ShoppingCart } from "lucide-react";
+import { Plus, Trash2, ShoppingCart, Edit } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -30,6 +30,8 @@ import { EmptyState } from "@/components/layout/EmptyState";
 import { PaymentConditionsPanel } from "@/components/payment-conditions/PaymentConditionsPanel";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { EditOrderDialog } from "@/components/orders/EditOrderDialog";
+import { Order } from "@/hooks/useOrders";
 
 const Pedidos = () => {
   const { orders, isLoading, deleteOrder, updateOrderStatus } = useOrders();
@@ -37,6 +39,7 @@ const Pedidos = () => {
   const [statusFilter, setStatusFilter] = useState<string>("todos");
   const [periodFilter, setPeriodFilter] = useState<"todos" | "mesAtual">("todos");
   const [searchTerm, setSearchTerm] = useState("");
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
 
   const getStatusVariant = (status: string) => {
     switch (status.toLowerCase()) {
@@ -232,6 +235,9 @@ const Pedidos = () => {
                             Faturar
                           </Button>
                         )}
+                        <Button variant="ghost" size="icon" onClick={() => setEditingOrder(order)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button variant="ghost" size="icon">
@@ -292,6 +298,14 @@ const Pedidos = () => {
       </Card>
 
       <PaymentConditionsPanel className="card-shadow" title="Condições de Pagamento" />
+
+      {editingOrder && (
+        <EditOrderDialog
+          order={editingOrder}
+          open={!!editingOrder}
+          onOpenChange={(open) => !open && setEditingOrder(null)}
+        />
+      )}
     </div>
   );
 };

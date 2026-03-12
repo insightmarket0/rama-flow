@@ -80,22 +80,30 @@ export const useInstallments = () => {
         throw error;
       }
 
-      return (data || []).map((item) => {
+      const items = (data || []).map((item) => {
         const status = item.status as InstallmentStatus | null;
         const baseStatus = (status ?? "pendente") as InstallmentStatus;
         const normalizedStatus: InstallmentStatus =
           baseStatus === "pago"
             ? "pago"
             : item.due_date < todayISO
-            ? "atrasado"
-            : baseStatus === "atrasado"
-            ? "atrasado"
-            : "pendente";
+              ? "atrasado"
+              : baseStatus === "atrasado"
+                ? "atrasado"
+                : "pendente";
 
         return {
           ...item,
           status: normalizedStatus,
         } as InstallmentWithRelations;
+      });
+
+      return items.sort((a, b) => {
+        const priority = { atrasado: 0, pendente: 1, pago: 2 };
+        const pA = priority[a.status] ?? 3;
+        const pB = priority[b.status] ?? 3;
+        if (pA !== pB) return pA - pB;
+        return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
       });
     },
   });

@@ -35,6 +35,10 @@ export interface Order {
   };
 }
 
+export interface UpdateOrderData extends Partial<CreateOrderData> {
+  id: string;
+}
+
 export interface CreateOrderData {
   supplier_id: string;
   payment_condition_id: string;
@@ -192,15 +196,15 @@ export const useOrders = () => {
       const plan =
         orderData.installments_override && orderData.installments_override.length > 0
           ? orderData.installments_override
-              .filter((item) => item.due_date)
-              .map((item) => {
-                const parsed = new Date(`${item.due_date}T00:00:00`);
-                return {
-                  installmentNumber: item.installmentNumber,
-                  value: item.value,
-                  dueDate: Number.isNaN(parsed.getTime()) ? normalizedBaseDate : parsed,
-                };
-              })
+            .filter((item) => item.due_date)
+            .map((item) => {
+              const parsed = new Date(`${item.due_date}T00:00:00`);
+              return {
+                installmentNumber: item.installmentNumber,
+                value: item.value,
+                dueDate: Number.isNaN(parsed.getTime()) ? normalizedBaseDate : parsed,
+              };
+            })
           : generateInstallmentPlan(total_value, normalizedPaymentCondition, normalizedBaseDate);
 
       const installments = plan
@@ -301,10 +305,76 @@ export const useOrders = () => {
     },
   });
 
+  const updateOrder = useMutation({
+    mutationFn: async (orderData: UpdateOrderData) => {
+      if (!user) throw new Error("Usuário não autenticado");
+
+      // We need to fetch the existing order to compare, or just recreate installments if items/condition changed.
+      // For simplicity, let's update the order fields.
+      const updatePayload: any = {};
+      if (orderData.supplier_id !== undefined) updatePayload.supplier_id = orderData.supplier_id;
+      if (orderData.payment_condition_id !== undefined) updatePayload.payment_condition_id = orderData.payment_condition_id;
+      if (orderData.order_number !== undefined) updatePayload.order_number = orderData.order_number;
+      if (orderData.invoice_number !== undefined) updatePayload.invoice_number = orderData.invoice_number;
+      if (orderData.freight !== undefined) updatePayload.freight = orderData.freight;
+      if (orderData.discount !== undefined) updatePayload.discount = orderData.discount;
+      if (orderData.taxes !== undefined) updatePayload.taxes = orderData.taxes;
+      if (orderData.order_date !== undefined) updatePayload.order_date = orderData.order_date;
+
+      let total_value = undefined;
+      if (orderData.items) {
+        updatePayload.items = orderData.items.map((item) => ({
+          sku: item.sku,
+          description: item.description,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+        })) as Json;
+
+        const itemsTotal = orderData.items.reduce(
+          (sum, item) => sum + item.quantity * item.unit_price,
+          0
+        );
+        total_value = itemsTotal + (orderData.freight || 0) + (orderData.taxes || 0) - (orderData.discount || 0);
+        updatePayload.total_value = total_value;
+      }
+
+      const { data, error } = await supabase
+        .from("orders")
+        .update(updatePayload)
+        .eq("id", orderData.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      const order = data;
+
+      // Note: Recreating installments on edit is complex because some might be paid. 
+      // We will only update the order details here, unless we handle full installment recreation elsewhere.
+      // A more complete edit would delete/recreate 'pendente' installments, but we'll stick to basic order update to avoid data loss on paid installments.
+
+      return order;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["installments"] });
+      toast({
+        title: "Pedido atualizado!",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro ao atualizar pedido",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   return {
     orders,
     isLoading,
     createOrder,
+    updateOrder,
     deleteOrder,
     updateOrderStatus,
   };
