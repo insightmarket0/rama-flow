@@ -26,15 +26,17 @@ const DashboardFinanceiro = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClosing, setEditingClosing] = useState<MonthlyClosing | null>(null);
 
-  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(() => sessionStorage.getItem("financeiro_unlocked") === "true");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
+  const [showContent, setShowContent] = useState(false);
 
   useEffect(() => {
-    if (sessionStorage.getItem("financeiro_unlocked") === "true") {
-      setIsUnlocked(true);
+    if (isUnlocked && !loadingClosings && !loadingMarketplaces) {
+      const t = setTimeout(() => setShowContent(true), 150);
+      return () => clearTimeout(t);
     }
-  }, []);
+  }, [isUnlocked, loadingClosings, loadingMarketplaces]);
 
   const handleUnlock = (e: React.FormEvent) => {
     e.preventDefault();
@@ -258,18 +260,29 @@ const DashboardFinanceiro = () => {
         </Alert>
       )}
 
-      <FinancialStats stats={stats} />
+      {showContent ? (
+        <>
+          <FinancialStats stats={stats} />
 
-      <div className="grid gap-5 md:grid-cols-7">
-        <RevenueChart data={closings} />
-        <MarketplaceShareChart data={closings} />
-      </div>
+          <div className="grid gap-5 md:grid-cols-7 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <RevenueChart data={closings} />
+            <MarketplaceShareChart data={closings} />
+          </div>
 
-      <RecentClosingsTable
-        data={closings}
-        onDelete={handleDeleteClosing}
-        onEdit={handleEditClosing}
-      />
+          <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+            <RecentClosingsTable
+              data={closings}
+              onDelete={handleDeleteClosing}
+              onEdit={handleEditClosing}
+            />
+          </div>
+        </>
+      ) : (
+        <div className="flex flex-col items-center justify-center h-64 opacity-50">
+          <Loader2 className="h-8 w-8 animate-spin text-[#00FF00]" />
+          <p className="text-gray-500 mt-4 text-sm font-medium">Renderizando painel...</p>
+        </div>
+      )}
 
       <ClosingFormDialog
         open={isDialogOpen}

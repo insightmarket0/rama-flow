@@ -9,6 +9,7 @@ import {
   Target,
   AlertTriangle
 } from "lucide-react";
+import { IntegrationFlowMap } from "@/components/ui/IntegrationFlowMap";
 
 // ---- MOCKS PARA O LEADERBOARD E ATIVIDADES ----
 const MOCK_LEADERBOARD = [
@@ -54,13 +55,31 @@ export default function RankingEquipe() {
       
       {/* Header */}
       <div className="mb-8 border-b border-white/5 pb-6">
-        <h2 className="text-3xl font-bold tracking-tight flex items-center gap-3 text-white">
-          <Trophy className="h-8 w-8 text-yellow-500" />
-          Ranking da Equipe
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-3 h-3 rounded-full bg-[#00FF00] shadow-[0_0_10px_#00FF00] animate-pulse" />
+          <span className="text-[#00FF00] text-[10px] font-bold tracking-[0.2em] uppercase opacity-80">
+            Monitoramento Global
+          </span>
+        </div>
+        <h2 className="text-4xl md:text-5xl font-light text-white tracking-tight leading-none">
+          Radar da <span className="font-medium text-[#00FF00]">Equipe</span>
         </h2>
-        <p className="text-gray-400 mt-2 text-lg">
-          Auditoria de performance, SLA de comunicação e gamificação operacional.
+        <p className="text-gray-500 mt-4 text-sm max-w-2xl">
+          Acompanhe o fluxo de tarefas, resoluções e o desempenho operacional dos membros chave da sua operação em tempo real.
         </p>
+      </div>
+
+      {/* Radar (Mapa de Integrações) */}
+      <div className="mb-12 h-[500px] bg-[#111315]/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden shadow-lg">
+        <div className="p-6 border-b border-white/5 bg-[#111315]/80 flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-[#00FF00] shadow-[0_0_10px_#00FF00] animate-pulse" />
+          <h3 className="text-[#00FF00] text-[10px] font-bold tracking-[0.2em] uppercase opacity-80">
+            Monitoramento Global de Processos
+          </h3>
+        </div>
+        <div className="h-[calc(100%-60px)]">
+          <IntegrationFlowMap />
+        </div>
       </div>
 
       {/* Resumo da Semana (KPIs Globais) */}

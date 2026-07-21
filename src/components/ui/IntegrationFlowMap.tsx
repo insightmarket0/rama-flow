@@ -2,10 +2,10 @@ import React from "react";
 import { Globe, Layout, Briefcase, CreditCard, User, Mail, Sparkles, Bell } from "lucide-react";
 
 const TEAM_MEMBERS = [
-  { id: 1, role: "Estratégia", name: "Anderson", icon: User, desc: "Gestão • Expansão • Processos" },
-  { id: 2, role: "Operação", name: "Lucas", icon: Layout, desc: "Suporte • Ajustes • Plataforma" },
-  { id: 3, role: "Gestão", name: "Lívia", icon: Briefcase, desc: "Coordenação • Análise • Fluxo" },
-  { id: 4, role: "Equipe Geral", name: "Staff", icon: Sparkles, desc: "Apoio • Execução • Repasse" }
+  { id: 1, role: "Direção", name: "Anderson", icon: User, desc: "Gestão • Estratégia • Processos" },
+  { id: 2, role: "Comercial", name: "Will Mendes", icon: Layout, desc: "Marketplaces • Vendas • Anúncios" },
+  { id: 3, role: "Operação", name: "Rogério", icon: Briefcase, desc: "Logística • Expedição • Suporte" },
+  { id: 4, role: "Design", name: "Alyson", icon: Sparkles, desc: "Criativos • Identidade • Mídia" }
 ];
 
 export const IntegrationFlowMap = () => {
@@ -106,7 +106,7 @@ export const IntegrationFlowMap = () => {
           </div>
 
           <div className="mt-6 border border-red-500/10 bg-red-500/5 rounded-xl p-3 text-sm font-medium text-red-200/80">
-            Lucas tem 4 urgências pendentes de resolução na plataforma.
+            Will Mendes tem 4 urgências pendentes de resolução na plataforma.
           </div>
 
           <div className="flex items-center justify-between mt-4">

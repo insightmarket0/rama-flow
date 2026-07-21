@@ -8,12 +8,51 @@ import {
   AlertTriangle,
   CalendarDays,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Handshake
 } from "lucide-react";
 import { parseISO, isBefore, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 import { RAP_QUOTES } from "@/lib/quotes";
+import { SiMercadopago, SiShopee } from "react-icons/si";
+import { FaAmazon } from "react-icons/fa";
+
+const getMarketplaceLogo = (marketplace?: string) => {
+  if (!marketplace) return <Store className="h-3.5 w-3.5 opacity-70 shrink-0" />;
+  const m = marketplace.toLowerCase();
+  
+  if (m === 'mercado livre') {
+    return <SiMercadopago className="h-4 w-4 text-[#FFE600] shrink-0 drop-shadow-[0_0_2px_rgba(255,230,0,0.5)]" />;
+  }
+  if (m === 'shopee') {
+    return <SiShopee className="h-4 w-4 text-[#EE4D2D] shrink-0 drop-shadow-[0_0_2px_rgba(238,77,45,0.5)]" />;
+  }
+  if (m === 'amazon') {
+    return <FaAmazon className="h-4 w-4 text-white shrink-0 drop-shadow-[0_0_2px_rgba(255,255,255,0.5)]" />;
+  }
+  if (m === 'magalu' || m === 'magazine luiza') {
+    return (
+      <div className="h-4 w-4 rounded-sm bg-[#0086FF] flex items-center justify-center shrink-0">
+        <span className="text-white text-[10px] font-bold leading-none -mt-[1px]">m</span>
+      </div>
+    );
+  }
+  
+  return <Store className="h-3.5 w-3.5 opacity-70 shrink-0" />;
+};
+
+const getMarketplaceStyle = (marketplace: string) => {
+  switch (marketplace.toLowerCase()) {
+    case 'mercado livre': return "bg-[#FFE600]/10 text-[#FFE600] border-[#FFE600]/20";
+    case 'shopee': return "bg-[#EE4D2D]/10 text-[#EE4D2D] border-[#EE4D2D]/20";
+    case 'magalu':
+    case 'magazine luiza': return "bg-[#0086FF]/10 text-[#0086FF] border-[#0086FF]/20";
+    case 'amazon': return "bg-white/10 text-white border-white/20";
+    default: return "bg-white/5 text-gray-400 border-white/10";
+  }
+};
 
 // ---- MOCKS AGREGADOS PARA DEMONSTRAÇÃO ----
 
@@ -72,6 +111,7 @@ const getQuoteOfTheDay = () => {
 
 export default function MeuDia() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   
   // Extrai e formata o nome do usuário logado
   const rawName = user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Equipe";
@@ -138,14 +178,14 @@ export default function MeuDia() {
             <div className="hover:text-white transition-colors cursor-pointer flex items-center group">
               Urgências <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">{reminders.length}</span>
             </div>
-            <div className="hover:text-white transition-colors cursor-pointer flex items-center group">
-              Avisos <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">{announcements.length}</span>
+            <div onClick={() => navigate('/lembretes')} className="hover:text-white transition-colors cursor-pointer flex items-center group">
+              Workspace <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">Ir</span>
             </div>
-            <div className="hover:text-white transition-colors cursor-pointer flex items-center group">
+            <div onClick={() => navigate('/mural-ajustes')} className="hover:text-white transition-colors cursor-pointer flex items-center group">
               Ajustes <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">{adjustments.length}</span>
             </div>
-            <div className="hover:text-white transition-colors cursor-pointer">
-              Desempenho
+            <div onClick={() => navigate('/mural-alinhamento')} className="hover:text-white transition-colors cursor-pointer flex items-center group">
+              Alinhamento <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">2</span>
             </div>
           </div>
         </div>
@@ -247,8 +287,9 @@ export default function MeuDia() {
           <div key={ticket.id} className="col-span-1 rounded-2xl p-5 flex flex-col justify-between bg-gradient-to-b from-[#18181A] to-[#111111] border border-white/5 shadow-xl relative group">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <span className="bg-white text-black px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest flex items-center gap-1">
-                  <Store className="h-2.5 w-2.5" /> {ticket.marketplace}
+                <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border flex items-center gap-1.5 ${getMarketplaceStyle(ticket.marketplace)}`}>
+                  {getMarketplaceLogo(ticket.marketplace)}
+                  {ticket.marketplace}
                 </span>
                 <span className="text-gray-500 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1">
                   <Tag className="h-2.5 w-2.5" /> {ticket.sku}

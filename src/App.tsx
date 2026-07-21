@@ -11,7 +11,6 @@ import { ProtectedRoute } from "./components/layout/ProtectedRoute";
 const DashboardFinanceiro = lazy(() => import("./pages/DashboardFinanceiro"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const MeuDia = lazy(() => import("./pages/MeuDia"));
-const Ecossistema = lazy(() => import("./pages/Ecossistema"));
 const RankingEquipe = lazy(() => import("./pages/RankingEquipe"));
 const Equipe = lazy(() => import("./pages/Equipe"));
 const PortalExpedicao = lazy(() => import("./pages/PortalExpedicao"));
@@ -53,7 +52,7 @@ const App = () => (
         >
           <Routes>
             <Route path="/auth" element={<Auth />} />
-            <Route path="/" element={<Navigate to="/dashboard-financeiro" replace />} />
+            <Route path="/" element={<Navigate to="/meu-dia" replace />} />
             <Route
               path="/dashboard-financeiro"
               element={
@@ -80,16 +79,6 @@ const App = () => (
                 <ProtectedRoute>
                   <MainLayout>
                     <MeuDia />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ecossistema"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <Ecossistema />
                   </MainLayout>
                 </ProtectedRoute>
               }

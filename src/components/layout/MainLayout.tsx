@@ -34,6 +34,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [editName, setEditName] = useState("");
+  const [editRole, setEditRole] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   
   const location = useLocation();
@@ -91,8 +92,8 @@ export function MainLayout({ children }: MainLayoutProps) {
             ? ((data as Record<string, unknown>).role as string)
             : undefined;
 
-        setFullName(dbFullName ?? metadataFullName ?? null);
-        setRole(dbRole ?? metadataRole ?? null);
+        setFullName(metadataFullName ?? dbFullName ?? null);
+        setRole(metadataRole ?? dbRole ?? null);
       } catch {
         setFullName(metadataString("full_name") ?? null);
         setRole(metadataString("role") ?? null);
@@ -121,6 +122,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 
   const handleOpenProfile = () => {
     setEditName(fullName || user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || "");
+    setEditRole(role || metadataString("role") || "");
     setIsProfileOpen(true);
   };
 
@@ -129,7 +131,7 @@ export function MainLayout({ children }: MainLayoutProps) {
     setIsSaving(true);
     try {
       const { error: authError } = await supabase.auth.updateUser({
-        data: { full_name: editName, name: editName }
+        data: { full_name: editName, name: editName, role: editRole }
       });
       if (authError) throw authError;
 
@@ -138,9 +140,12 @@ export function MainLayout({ children }: MainLayoutProps) {
         .update({ full_name: editName })
         .eq('user_id', user.id);
         
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.warn("Erro ao atualizar profiles (ignorando):", dbError);
+      }
       
       setFullName(editName);
+      setRole(editRole);
       setIsProfileOpen(false);
       toast.success("Perfil atualizado com sucesso!");
     } catch (error: any) {
@@ -219,7 +224,7 @@ export function MainLayout({ children }: MainLayoutProps) {
             </div>
           )}
           <main className="flex-1 p-6">
-            <div className="space-y-6">
+            <div key={location.pathname} className="space-y-6 animate-in fade-in slide-in-from-bottom-4 zoom-in-95 duration-300 ease-out">
               <GlobalAlerts />
               {children}
             </div>
@@ -243,6 +248,15 @@ export function MainLayout({ children }: MainLayoutProps) {
                 onChange={(e) => setEditName(e.target.value)} 
                 className="bg-[#111111] border-white/10 focus-visible:ring-[#00FF00] h-12 text-lg"
                 placeholder="Ex: Anderson"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-gray-500">Profissão / Cargo</label>
+              <Input 
+                value={editRole} 
+                onChange={(e) => setEditRole(e.target.value)} 
+                className="bg-[#111111] border-white/10 focus-visible:ring-[#00FF00] h-12 text-lg"
+                placeholder="Ex: Estratégia, Admin, Diretor..."
               />
             </div>
             <div className="flex flex-col gap-2">

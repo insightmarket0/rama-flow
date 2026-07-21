@@ -48,7 +48,7 @@ const NAV_GROUPS = [
     subItems: [
       { title: "Mural de Ajustes", url: "/mural-ajustes", icon: ClipboardList },
       { title: "Mural de Alinhamento", url: "/mural-alinhamento", icon: Megaphone },
-      { title: "Central de Lembretes", url: "/lembretes", icon: CheckSquare },
+      { title: "Workspace Pessoal", url: "/lembretes", icon: CheckSquare },
     ]
   },
   {
@@ -56,8 +56,8 @@ const NAV_GROUPS = [
     icon: Users,
     title: "Equipe",
     subItems: [
-      { title: "Radar da Equipe", url: "/ecossistema", icon: Sparkles },
-      { title: "Ranking da Equipe", url: "/ranking-equipe", icon: Trophy },
+      // Menu unificado
+      { title: "Radar & Ranking", url: "/ranking-equipe", icon: Trophy },
       { title: "Gestão de Equipe", url: "/equipe", icon: Users },
       { title: "Playbooks (SOPs)", url: "/playbooks", icon: BookOpen },
     ]

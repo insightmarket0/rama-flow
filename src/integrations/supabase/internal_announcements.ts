@@ -10,6 +10,7 @@ export type InternalAnnouncement = {
   // Campos populados pelo JOIN
   creator?: { full_name: string; avatar_url: string };
   acknowledgments?: AnnouncementAcknowledgment[];
+  comments?: any[];
 };
 
 export type AnnouncementAcknowledgment = {

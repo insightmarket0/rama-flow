@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   Mic, 
   Paperclip, 
@@ -116,34 +116,155 @@ const MEMBERS = [
 
 const AudioBubble = ({ msg }: { msg: any }) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  
+  const [currentTime, setCurrentTime] = useState(0);
+  const [totalSeconds, setTotalSeconds] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (msg.audioUrl) {
+      const audio = new Audio(msg.audioUrl);
+      audioRef.current = audio;
+      
+      audio.onloadedmetadata = () => {
+        if (audio.duration && audio.duration !== Infinity) {
+          setTotalSeconds(audio.duration);
+        } else {
+           const durationParts = (msg.duration || "0:03").split(":");
+           setTotalSeconds(parseInt(durationParts[0] || "0") * 60 + parseInt(durationParts[1] || "3"));
+        }
+      };
+      
+      audio.ontimeupdate = () => setCurrentTime(audio.currentTime);
+      audio.onended = () => {
+        setIsPlaying(false);
+        setCurrentTime(0);
+      };
+    } else {
+      const durationParts = (msg.duration || "0:03").split(":");
+      setTotalSeconds(parseInt(durationParts[0] || "0") * 60 + parseInt(durationParts[1] || "3"));
+    }
+    
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+  }, [msg.audioUrl, msg.duration]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isPlaying && !msg.audioUrl) {
+      interval = setInterval(() => {
+        setCurrentTime((prev) => {
+          if (prev >= totalSeconds - 1) {
+            setIsPlaying(false);
+            return 0; // reseta ao final
+          }
+          return prev + 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isPlaying, totalSeconds, msg.audioUrl]);
+
+  const togglePlay = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+    } else {
+      if (!isPlaying && currentTime >= totalSeconds) {
+        setCurrentTime(0);
+      }
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const bars = [2, 3, 2, 4, 5, 3, 2, 1, 3, 4, 2, 3, 2, 4, 3];
+  const progressRatio = totalSeconds > 0 ? currentTime / totalSeconds : 0;
+
   return (
-    <div className="bg-[#1a1a1a] border border-white/5 rounded-xl rounded-tl-sm px-4 py-3 flex items-center gap-4 shadow-md w-64">
+    <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-3 shadow-md min-w-[220px]">
       <button 
-        onClick={() => setIsPlaying(!isPlaying)}
-        className="w-10 h-10 rounded-full bg-[#111] border border-[#00FF00]/30 flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(0,255,0,0.1)] hover:border-[#00FF00]/60 transition-colors">
+        onClick={togglePlay}
+        className="w-10 h-10 rounded-full bg-[#111] border border-[#00FF00]/30 flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(0,255,0,0.1)] hover:border-[#00FF00]/60 hover:bg-[#00FF00]/10 transition-all">
         {isPlaying ? (
           <Pause className="w-4 h-4 text-[#00FF00] fill-[#00FF00]" />
         ) : (
           <Play className="w-4 h-4 text-[#00FF00] ml-0.5 fill-[#00FF00]" />
         )}
       </button>
-      <div className="flex-1 flex items-center gap-1">
-        {[1, 2, 3, 2, 4, 5, 3, 2, 1, 3, 4, 2].map((h, i) => (
-          <div 
-            key={i} 
-            className={`w-1 rounded-full transition-all duration-300 ${isPlaying ? 'bg-[#00FF00] animate-pulse' : 'bg-[#00FF00]/50'}`} 
-            style={{ 
-              height: `${isPlaying ? (Math.random() * 4 + 2) * 4 : h * 4}px`,
-              animationDelay: isPlaying ? `${i * 100}ms` : '0ms'
-            }} 
-          />
-        ))}
+      
+      <div className="flex-1 flex items-center gap-1 px-1">
+        {bars.map((h, i) => {
+          const isPassed = (i / bars.length) <= progressRatio;
+          return (
+            <div 
+              key={i} 
+              className={`w-1 rounded-full transition-all duration-300 ${
+                isPassed ? 'bg-[#00FF00]' : 'bg-[#00FF00]/30'
+              } ${isPlaying && isPassed ? 'animate-pulse' : ''}`} 
+              style={{ 
+                height: `${isPlaying && !isPassed ? (Math.random() * 2 + 2) * 3 : h * 3.5}px`,
+                animationDelay: `${i * 50}ms`
+              }} 
+            />
+          );
+        })}
       </div>
-      <span className="text-[11px] font-bold text-gray-500">{msg.duration}</span>
+      
+      <span className="text-[11px] font-bold text-gray-400 min-w-[28px] text-right">
+        {isPlaying || currentTime > 0 ? formatTime(currentTime) : (msg.duration || "0:03")}
+      </span>
     </div>
   );
 };
+
+interface Topic {
+  id: string;
+  name: string;
+  initialMessage: string;
+  creator: string;
+  creatorInitials: string;
+  priority: string;
+  department: string;
+  replies: any[];
+}
+
+const INITIAL_TOPICS: Topic[] = [
+  {
+    id: "t1",
+    name: "Reclamação Mercado Livre",
+    initialMessage: "Pode deixar, vou reportar isso no painel de divergências agora mesmo e pedir o reembolso pelo portal deles.",
+    creator: "Anderson",
+    creatorInitials: "AN",
+    priority: "Alta",
+    department: "Atendimento",
+    replies: [
+      { sender: "Alyson", initials: "AL", color: "bg-purple-500/20 text-purple-500", time: "Hoje às 09:37", text: "Maravilha! Assim que sair o protocolo me envia aqui para eu atualizar a planilha." }
+    ]
+  },
+  {
+    id: "t2",
+    name: "Coletas Flex (ML)",
+    initialMessage: "Pessoal! O flex do Mercado Livre acabou de chegar pra coleta.",
+    creator: "Rogério",
+    creatorInitials: "RO",
+    priority: "Normal",
+    department: "Expedição",
+    replies: [
+       { sender: "Rogério", initials: "RO", color: "bg-blue-500/20 text-blue-500", time: "Hoje às 09:41", text: "Boa Anderson, qualquer coisa me avisa." }
+    ]
+  }
+];
 
 export default function ChatPage() {
   const [message, setMessage] = useState("");
@@ -151,19 +272,157 @@ export default function ChatPage() {
   const [activeTopic, setActiveTopic] = useState<string | null>(null);
   const [topicReply, setTopicReply] = useState("");
   const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   const [activeChatId, setActiveChatId] = useState("c1");
   const [chatMessages, setChatMessages] = useState<Record<string, any[]>>({});
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isMessageSearchOpen, setIsMessageSearchOpen] = useState(false);
+  const [messageSearchQuery, setMessageSearchQuery] = useState("");
+
+  const [topics, setTopics] = useState<Topic[]>(INITIAL_TOPICS);
+  const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
+  const [newTopicName, setNewTopicName] = useState("");
+  const [newTopicMessage, setNewTopicMessage] = useState("");
+  const [newTopicPriority, setNewTopicPriority] = useState("Normal");
+  const [newTopicDepartment, setNewTopicDepartment] = useState("Geral");
+
+  const handleCreateTopic = () => {
+    if (!newTopicName.trim() || !newTopicMessage.trim()) return;
+    const newTopic: Topic = {
+      id: "t" + Date.now(),
+      name: newTopicName,
+      initialMessage: newTopicMessage,
+      creator: "Anderson",
+      creatorInitials: "AN",
+      priority: newTopicPriority,
+      department: newTopicDepartment,
+      replies: []
+    };
+    setTopics(prev => [newTopic, ...prev]);
+    setIsTopicModalOpen(false);
+    setActiveTopic(newTopic.id);
+    setNewTopicName("");
+    setNewTopicMessage("");
+    setNewTopicPriority("Normal");
+    setNewTopicDepartment("Geral");
+  };
+
+  const handleReplyTopic = () => {
+    if (!topicReply.trim() || !activeTopic) return;
+    setTopics(prev => prev.map(t => {
+      if (t.id === activeTopic) {
+        return {
+          ...t,
+          replies: [...t.replies, {
+            sender: "Anderson (Você)",
+            initials: "AN",
+            color: "bg-gray-500/20 text-gray-400",
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            text: topicReply
+          }]
+        };
+      }
+      return t;
+    }));
+    setTopicReply("");
+  };
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isRecording) {
+      setRecordingTime(0);
+      interval = setInterval(() => {
+        setRecordingTime((prev) => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isRecording]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setSelectedImage(url);
+    }
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+      
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data);
+      };
+      
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      console.error("Erro ao acessar microfone", err);
+    }
+  };
+
+  const cancelRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      setIsRecording(false);
+    }
+  };
 
   const handleSendMessage = () => {
-    if (!message.trim() && !isRecording) return;
+    if (isRecording) {
+      if (mediaRecorderRef.current) {
+        mediaRecorderRef.current.onstop = () => {
+          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          
+          const newMessage = {
+            id: Date.now(),
+            sender: "Anderson (Você)",
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            text: "",
+            type: "audio",
+            audioUrl: audioUrl,
+            duration: formatTime(recordingTime),
+            isMe: true,
+            initials: "AN"
+          };
+
+          setChatMessages(prev => ({
+            ...prev,
+            [activeChatId]: [...(prev[activeChatId] || []), newMessage]
+          }));
+          setIsRecording(false);
+        };
+        mediaRecorderRef.current.stop();
+        mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      }
+      return;
+    }
+
+    if (!message.trim() && !selectedImage) return;
+    
+    const isImage = !!selectedImage;
     
     const newMessage = {
       id: Date.now(),
       sender: "Anderson (Você)",
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      text: isRecording ? "" : message,
-      type: isRecording ? "audio" : "text",
-      duration: isRecording ? "0:03" : undefined,
+      text: message,
+      type: isImage ? "image" : "text",
+      image: isImage ? selectedImage : undefined,
       isMe: true,
       initials: "AN"
     };
@@ -173,7 +432,7 @@ export default function ChatPage() {
       [activeChatId]: [...(prev[activeChatId] || []), newMessage]
     }));
     setMessage("");
-    setIsRecording(false);
+    setSelectedImage(null);
   };
 
   const totalMessages = Object.values(chatMessages).reduce((acc, msgs) => acc + msgs.length, 0);
@@ -275,22 +534,47 @@ export default function ChatPage() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#00FF00]/5 rounded-full blur-[120px] pointer-events-none" />
         
         {/* Header */}
-        <div className="h-16 px-6 flex items-center justify-between shrink-0 z-10 bg-transparent pt-4">
-          <div>
-            <h2 className="text-lg font-bold text-gray-100 tracking-tight">
-              {CHAT_LIST.find(c => c.id === activeChatId)?.name || "Chat"}
-            </h2>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <button className="w-8 h-8 rounded-lg bg-transparent hover:bg-white/10 border border-transparent hover:border-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+        <div key={`header-${activeChatId}`} className="h-16 px-6 flex items-center justify-between shrink-0 z-10 bg-transparent pt-4 animate-in fade-in duration-500">
+          {isMessageSearchOpen ? (
+            <div className="flex-1 flex items-center bg-[#1a1a1a] border border-[#00FF00]/30 rounded-xl px-4 py-2 mr-4 animate-in fade-in slide-in-from-right-4">
+              <Search className="w-4 h-4 text-[#00FF00] mr-2 shrink-0" />
+              <input 
+                autoFocus
+                type="text"
+                placeholder="Buscar nas mensagens..."
+                value={messageSearchQuery}
+                onChange={(e) => setMessageSearchQuery(e.target.value)}
+                className="flex-1 bg-transparent border-none focus:outline-none text-sm text-white placeholder:text-gray-500"
+              />
+            </div>
+          ) : (
+            <div>
+              <h2 className="text-lg font-bold text-gray-100 tracking-tight">
+                {CHAT_LIST.find(c => c.id === activeChatId)?.name || "Chat"}
+              </h2>
+            </div>
+          )}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button 
+              onClick={() => {
+                setIsMessageSearchOpen(!isMessageSearchOpen);
+                if (isMessageSearchOpen) setMessageSearchQuery("");
+              }}
+              className={`w-8 h-8 rounded-lg border flex items-center justify-center transition-colors ${isMessageSearchOpen ? 'bg-[#00FF00]/10 border-[#00FF00]/30 text-[#00FF00]' : 'bg-transparent hover:bg-white/10 border-transparent hover:border-white/5 text-gray-400 hover:text-white'}`}>
               <Search className="w-4 h-4" />
             </button>
           </div>
         </div>
 
         {/* Messages Feed */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6 relative z-10">
-          {(chatMessages[activeChatId] || []).length > 0 ? chatMessages[activeChatId].map((msg) => (
+        <div key={`feed-${activeChatId}`} className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6 relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-500">
+          {(() => {
+            const filteredMessages = (chatMessages[activeChatId] || []).filter(msg => 
+              !messageSearchQuery.trim() || 
+              (msg.text && msg.text.toLowerCase().includes(messageSearchQuery.toLowerCase()))
+            );
+            
+            return filteredMessages.length > 0 ? filteredMessages.map((msg) => (
             <div key={msg.id} className={`flex ${msg.isMe ? 'justify-end' : 'justify-start'} w-full relative group/msg`}>
               {!msg.isMe && (
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-extrabold text-sm border border-white/10 mr-4 mt-1 shrink-0 shadow-sm ${msg.color || 'bg-gray-500/20 text-gray-500'}`}>
@@ -316,7 +600,7 @@ export default function ChatPage() {
                 )}
                 
                 {/* Bubble Text */}
-                {msg.text && !msg.type && (
+                {msg.text && (!msg.type || msg.type === "text") && (
                   <div className={`px-5 py-3 rounded-xl text-[14px] leading-relaxed shadow-md ${
                     msg.isMe 
                       ? 'bg-emerald-900/30 border border-emerald-500/20 text-emerald-50 font-medium rounded-tr-sm' 
@@ -404,19 +688,28 @@ export default function ChatPage() {
           )) : (
             <div className="h-full flex flex-col items-center justify-center text-gray-500 space-y-4 pt-20">
               <MessageSquare className="w-12 h-12 text-gray-600/50" />
-              <p className="text-sm font-medium">Você ainda não tem mensagens aqui.</p>
-              <p className="text-xs text-gray-600">Envie um 'Oi' para começar.</p>
+              <p className="text-sm font-medium">{messageSearchQuery ? "Nenhuma mensagem encontrada na busca." : "Você ainda não tem mensagens aqui."}</p>
+              {!messageSearchQuery && <p className="text-xs text-gray-600">Envie um 'Oi' para começar.</p>}
             </div>
-          )}
+          );
+        })()}
         </div>
 
         {/* Input Area */}
-        <div className="p-6 pt-0 bg-transparent shrink-0 relative z-10">
+        <div className="p-6 pt-0 bg-transparent shrink-0 relative z-10 flex flex-col gap-2">
+          {selectedImage && (
+            <div className="relative self-start ml-2 mb-1 animate-in fade-in slide-in-from-bottom-2">
+              <img src={selectedImage} alt="Preview" className="h-24 rounded-lg object-cover border border-white/10 shadow-lg" />
+              <button onClick={() => setSelectedImage(null)} className="absolute -top-2 -right-2 bg-[#1a1a1a] border border-white/10 text-gray-400 hover:text-red-500 rounded-full p-1 shadow-md hover:bg-red-500/10 transition-colors z-20">
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
           <div className="bg-black/50 backdrop-blur-md rounded-2xl shadow-[0_0_30px_rgba(0,255,0,0.03)] border border-white/10 flex items-center p-2 pr-2.5 transition-all focus-within:border-[#00FF00]/30 focus-within:shadow-[0_0_30px_rgba(0,255,0,0.08)] h-14">
             {isRecording ? (
               <div className="flex-1 flex items-center px-4 animate-in fade-in duration-300">
                 <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse mr-3" />
-                <span className="text-red-400 font-medium text-[14px]">Gravando áudio... 0:03</span>
+                <span className="text-red-400 font-medium text-[14px]">Gravando áudio... {formatTime(recordingTime)}</span>
                 <div className="flex-1 flex items-center gap-1 ml-6 overflow-hidden">
                    {[1, 3, 2, 5, 4, 2, 4, 6, 3, 2, 5, 2, 1, 3, 2, 4, 2, 5, 3].map((h, i) => (
                       <div key={i} className="w-1 bg-red-500/50 rounded-full animate-pulse" style={{ height: `${h * 3}px`, animationDelay: `${i * 50}ms` }} />
@@ -425,9 +718,10 @@ export default function ChatPage() {
               </div>
             ) : (
               <>
-                <button className="p-2.5 text-gray-500 hover:text-gray-300 rounded-xl hover:bg-white/5 transition-colors shrink-0" title="Anexar Arquivo">
+                <button onClick={() => fileInputRef.current?.click()} className="p-2.5 text-gray-500 hover:text-gray-300 rounded-xl hover:bg-white/5 transition-colors shrink-0" title="Anexar Imagem">
                   <Paperclip className="h-5 w-5" />
                 </button>
+                <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageSelect} />
                 <Dialog>
                   <DialogTrigger asChild>
                     <button className="p-2.5 text-gray-500 hover:text-[#00FF00] rounded-xl hover:bg-[#00FF00]/10 transition-colors shrink-0" title="Solicitar Aprovação">
@@ -471,21 +765,21 @@ export default function ChatPage() {
             
             <div className="flex items-center gap-1 shrink-0">
               {isRecording ? (
-                <button onClick={() => setIsRecording(false)} className="p-2.5 text-red-500 hover:text-red-400 rounded-xl hover:bg-red-500/10 transition-colors" title="Cancelar Gravação">
+                <button onClick={cancelRecording} className="p-2.5 text-red-500 hover:text-red-400 rounded-xl hover:bg-red-500/10 transition-colors" title="Cancelar Gravação">
                   <Trash2 className="h-5 w-5" />
                 </button>
               ) : (
-                <button onClick={() => setIsRecording(true)} className="p-2.5 text-gray-500 hover:text-gray-300 rounded-xl hover:bg-white/5 transition-colors" title="Gravar Áudio">
+                <button onClick={startRecording} className="p-2.5 text-gray-500 hover:text-gray-300 rounded-xl hover:bg-white/5 transition-colors" title="Gravar Áudio">
                   <Mic className="h-5 w-5" />
                 </button>
               )}
               <button 
                 onClick={handleSendMessage}
                 className={`ml-2 w-10 h-10 flex items-center justify-center rounded-xl transition-all shadow-md ${
-                  message.trim() || isRecording ? 'bg-[#00FF00] text-black hover:bg-[#00CC00] shadow-[0_0_15px_rgba(0,255,0,0.4)]' : 'bg-white/5 text-gray-500 border border-white/5'
+                  message.trim() || isRecording || selectedImage ? 'bg-[#00FF00] text-black hover:bg-[#00CC00] shadow-[0_0_15px_rgba(0,255,0,0.4)]' : 'bg-white/5 text-gray-500 border border-white/5'
                 }`}
               >
-                <Send className="h-4 w-4 ml-0.5" />
+                <Send className={`h-4 w-4 ${message.trim() || isRecording || selectedImage ? '' : 'opacity-50'}`} />
               </button>
             </div>
           </div>
@@ -494,139 +788,166 @@ export default function ChatPage() {
 
       {/* 4. Right Threads Sidebar */}
       <div className="w-[340px] bg-[#121212] border-l border-[#1a1a1a] flex flex-col shrink-0 z-10">
-        <div className="h-16 px-5 flex items-center justify-between border-b border-[#1a1a1a]">
+        <div className="h-12 px-4 flex items-center justify-between border-b border-white/5">
           <div className="flex items-center gap-2">
             {activeTopic && (
-              <button onClick={() => setActiveTopic(null)} className="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
-                <ArrowLeft className="w-4 h-4" />
+              <button onClick={() => setActiveTopic(null)} className="w-6 h-6 rounded flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/5 transition-colors">
+                <ArrowLeft className="w-3.5 h-3.5" />
               </button>
             )}
-            <h3 className="text-[14px] font-semibold text-gray-100 tracking-tight">{activeTopic ? "Detalhes do Tópico" : "Tópicos Ativos"}</h3>
+            <h3 className="text-[13px] font-medium text-gray-400 tracking-tight">{activeTopic ? "Detalhes do Tópico" : "Tópicos Ativos"}</h3>
           </div>
           {!activeTopic && (
             <div className="flex items-center gap-1">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="w-7 h-7 rounded-lg bg-transparent hover:bg-white/10 border border-transparent hover:border-white/5 flex items-center justify-center text-[#00FF00] transition-colors" title="Novo Tópico Manual">
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="bg-[#111] border border-white/10 text-white rounded-3xl p-6 sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle className="text-2xl font-light mb-2">Criar Tópico</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-400">Nome do Tópico</label>
-                      <input type="text" placeholder="Ex: Ajustes na Black Friday" className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00FF00]/50 transition-colors" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-400">Mensagem Inicial</label>
-                      <textarea placeholder="Descreva sobre o que será discutido..." rows={3} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00FF00]/50 transition-colors resize-none" />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <button className="w-full bg-[#00FF00]/10 text-[#00FF00] hover:bg-[#00FF00]/20 font-semibold py-3 px-4 rounded-xl transition-colors">
-                      Iniciar Tópico
+                <Dialog open={isTopicModalOpen} onOpenChange={setIsTopicModalOpen}>
+                  <DialogTrigger asChild>
+                    <button className="w-6 h-6 rounded flex items-center justify-center text-gray-500 hover:text-[#00FF00] hover:bg-[#00FF00]/10 transition-colors" title="Novo Tópico Manual">
+                      <Plus className="w-3.5 h-3.5" />
                     </button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+                  </DialogTrigger>
+                  <DialogContent className="bg-[#111] border border-white/10 text-white rounded-3xl p-6 sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="text-2xl font-light mb-2">Criar Tópico</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-400">Nome do Tópico</label>
+                        <input value={newTopicName} onChange={e => setNewTopicName(e.target.value)} type="text" placeholder="Ex: SKU 3050 mercado livre" className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00FF00]/50 transition-colors" />
+                      </div>
+                      <div className="flex gap-4">
+                        <div className="flex-1 space-y-2">
+                          <label className="text-sm font-medium text-gray-400">Prioridade</label>
+                          <select value={newTopicPriority} onChange={e => setNewTopicPriority(e.target.value)} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00FF00]/50 transition-colors appearance-none">
+                            <option>Baixa</option>
+                            <option>Normal</option>
+                            <option>Alta</option>
+                            <option>Urgente</option>
+                          </select>
+                        </div>
+                        <div className="flex-1 space-y-2">
+                          <label className="text-sm font-medium text-gray-400">Departamento</label>
+                          <select value={newTopicDepartment} onChange={e => setNewTopicDepartment(e.target.value)} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00FF00]/50 transition-colors appearance-none">
+                            <option>Geral</option>
+                            <option>Expedição</option>
+                            <option>Atendimento</option>
+                            <option>Comercial</option>
+                            <option>Financeiro</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-400">Mensagem Inicial</label>
+                        <textarea value={newTopicMessage} onChange={e => setNewTopicMessage(e.target.value)} placeholder="Descreva sobre o que será discutido..." rows={3} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00FF00]/50 transition-colors resize-none" />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <button onClick={handleCreateTopic} disabled={!newTopicName.trim() || !newTopicMessage.trim()} className="w-full bg-[#00FF00] text-black disabled:bg-gray-700 disabled:text-gray-400 hover:bg-[#00CC00] font-semibold py-3 px-4 rounded-xl transition-colors">
+                        Iniciar Tópico
+                      </button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
             </div>
           )}
         </div>
 
-        {activeTopic ? (
-          <div className="flex flex-col h-[calc(100%-64px)]">
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-5">
-              
-              <div className="border-b border-white/10 pb-5 mb-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <MessageSquare className="w-5 h-5 text-[#00FF00]" />
-                  <h4 className="text-[15px] font-bold text-white tracking-tight">{activeTopic}</h4>
-                </div>
-                <div className="bg-[#1a1a1a] rounded-xl p-4 border border-white/5">
-                  <span className="text-[12px] font-bold text-gray-400 mb-1 block">Anderson</span>
-                  <p className="text-[13px] text-gray-200 leading-relaxed">
-                    Pode deixar, vou reportar isso no painel de divergências agora mesmo e pedir o reembolso pelo portal deles.
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-purple-500/20 text-purple-500 flex items-center justify-center text-[11px] font-extrabold border-2 border-[#1a1a1a] shrink-0">AL</div>
-                  <div>
-                    <span className="text-[11px] font-bold text-gray-400 block mb-1">Alyson <span className="text-gray-600 font-normal ml-2">Hoje às 09:37</span></span>
-                    <p className="text-[13px] text-gray-300">Maravilha! Assim que sair o protocolo me envia aqui para eu atualizar a planilha.</p>
-                  </div>
-                </div>
+        {activeTopic ? (() => {
+          const topic = topics.find(t => t.id === activeTopic);
+          if (!topic) return null;
+          return (
+            <div className="flex flex-col h-[calc(100%-48px)]">
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-5">
                 
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-500 flex items-center justify-center text-[11px] font-extrabold border-2 border-[#1a1a1a] shrink-0">RO</div>
-                  <div>
-                    <span className="text-[11px] font-bold text-gray-400 block mb-1">Rogério <span className="text-gray-600 font-normal ml-2">Hoje às 09:41</span></span>
-                    <p className="text-[13px] text-gray-300">Boa Anderson, qualquer coisa me avisa.</p>
+                <div className="border-b border-white/10 pb-5 mb-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="w-5 h-5 text-[#00FF00]" />
+                      <h4 className="text-[15px] font-bold text-white tracking-tight">{topic.name}</h4>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        topic.priority === 'Alta' ? 'bg-red-500/20 text-red-400' :
+                        topic.priority === 'Urgente' ? 'bg-red-600/30 text-red-500 border border-red-500/30' :
+                        'bg-gray-500/20 text-gray-400'
+                      }`}>{topic.priority}</span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400">{topic.department}</span>
+                    </div>
+                  </div>
+                  <div className="bg-[#1a1a1a] rounded-xl p-4 border border-white/5">
+                    <span className="text-[12px] font-bold text-gray-400 mb-1 block">{topic.creator}</span>
+                    <p className="text-[13px] text-gray-200 leading-relaxed whitespace-pre-wrap">
+                      {topic.initialMessage}
+                    </p>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            <div className="p-4 bg-[#161616] border-t border-[#1a1a1a] shrink-0">
-              <div className="bg-[#111] border border-white/10 rounded-xl flex items-center p-1.5 focus-within:border-[#00FF00]/50 transition-colors">
-                <input 
-                  type="text" 
-                  placeholder="Responder no tópico..." 
-                  value={topicReply}
-                  onChange={(e) => setTopicReply(e.target.value)}
-                  className="flex-1 bg-transparent border-none focus:outline-none text-sm text-white px-3"
-                />
-                <button 
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${topicReply.trim() ? 'bg-[#00FF00] text-black' : 'bg-white/5 text-gray-500'}`}
-                >
-                  <Send className="w-3.5 h-3.5 ml-0.5" />
-                </button>
+                <div className="space-y-4">
+                  {topic.replies.map((reply: any, index: number) => (
+                    <div key={index} className="flex gap-3">
+                      <div className={`w-8 h-8 rounded-full ${reply.color || 'bg-gray-500/20 text-gray-400'} flex items-center justify-center text-[11px] font-extrabold border-2 border-[#1a1a1a] shrink-0`}>{reply.initials}</div>
+                      <div>
+                        <span className="text-[11px] font-bold text-gray-400 block mb-1">{reply.sender} <span className="text-gray-600 font-normal ml-2">{reply.time}</span></span>
+                        <p className="text-[13px] text-gray-300 whitespace-pre-wrap">{reply.text}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-4 bg-[#161616] border-t border-[#1a1a1a] shrink-0">
+                <div className="bg-[#111] border border-white/10 rounded-xl flex items-center p-1.5 focus-within:border-[#00FF00]/50 transition-colors">
+                  <input 
+                    type="text" 
+                    placeholder="Responder no tópico..." 
+                    value={topicReply}
+                    onChange={(e) => setTopicReply(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleReplyTopic()}
+                    className="flex-1 bg-transparent border-none focus:outline-none text-sm text-white px-3"
+                  />
+                  <button 
+                    onClick={handleReplyTopic}
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${topicReply.trim() ? 'bg-[#00FF00] text-black' : 'bg-white/5 text-gray-500'}`}
+                  >
+                    <Send className="w-3.5 h-3.5 ml-0.5" />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ) : (
+          );
+        })() : (
           <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
-            <div onClick={() => setActiveTopic('Reclamação Mercado Livre')} className="bg-white/5 backdrop-blur-md rounded-xl p-4 border-t border-t-white/10 shadow-lg cursor-pointer hover:bg-white/10 transition-colors group">
-              <div className="flex items-center gap-2 mb-2">
-                <MessageSquare className="w-4 h-4 text-[#00FF00]" />
-                <span className="text-[13px] font-bold text-gray-100 group-hover:text-white transition-colors">Reclamação Mercado Livre</span>
-              </div>
-              <p className="text-[12px] text-gray-400 mb-4 line-clamp-2 leading-relaxed">
-                <strong className="text-gray-300">Anderson:</strong> Pode deixar, vou reportar isso no painel de divergências...
-              </p>
-              <div className="flex items-center justify-between">
-                <div className="flex -space-x-2">
-                  <div className="w-7 h-7 rounded-full bg-purple-500/20 text-purple-500 flex items-center justify-center text-[10px] font-extrabold border-2 border-[#1a1a1a] relative z-20">AL</div>
-                  <div className="w-7 h-7 rounded-full bg-gray-500/20 text-gray-400 flex items-center justify-center text-[10px] font-extrabold border-2 border-[#1a1a1a] relative z-10">AN</div>
+            {topics.map(topic => (
+              <div key={topic.id} onClick={() => setActiveTopic(topic.id)} className="bg-white/5 backdrop-blur-md rounded-xl p-4 border-t border-t-white/10 shadow-lg cursor-pointer hover:bg-white/10 transition-colors group">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4 text-[#00FF00]" />
+                    <span className="text-[13px] font-bold text-gray-100 group-hover:text-white transition-colors">{topic.name}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      topic.priority === 'Alta' ? 'bg-red-500/20 text-red-400' :
+                      topic.priority === 'Urgente' ? 'bg-red-600/30 text-red-500 border border-red-500/30' :
+                      'bg-gray-500/20 text-gray-400'
+                    }`}>{topic.priority}</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400">{topic.department}</span>
+                  </div>
                 </div>
-                <span className="text-[11px] font-bold text-gray-400 flex items-center gap-1">
-                  2 respostas <ChevronDown className="w-3 h-3 -rotate-90 text-gray-600" />
-                </span>
-              </div>
-            </div>
-            
-            <div onClick={() => setActiveTopic('Coletas Flex (ML)')} className="bg-white/5 backdrop-blur-md rounded-xl p-4 border-t border-t-white/10 shadow-lg cursor-pointer hover:bg-white/10 transition-colors group">
-              <div className="flex items-center gap-2 mb-2">
-                <MessageSquare className="w-4 h-4 text-gray-400" />
-                <span className="text-[13px] font-bold text-gray-100 group-hover:text-white transition-colors">Coletas Flex (ML)</span>
-              </div>
-              <p className="text-[12px] text-gray-400 mb-4 line-clamp-2 leading-relaxed">
-                <strong className="text-gray-300">Rogério:</strong> Pessoal! O flex do Mercado Livre acabou de chegar pra coleta.
-              </p>
-              <div className="flex items-center justify-between">
-                <div className="flex -space-x-2">
-                  <div className="w-7 h-7 rounded-full bg-blue-500/20 text-blue-500 flex items-center justify-center text-[10px] font-extrabold border-2 border-[#1a1a1a] relative z-10">RO</div>
+                <p className="text-[12px] text-gray-400 mb-4 line-clamp-2 leading-relaxed">
+                  <strong className="text-gray-300">{topic.creator}:</strong> {topic.initialMessage}
+                </p>
+                <div className="flex items-center justify-between">
+                  <div className="flex -space-x-2">
+                    <div className="w-7 h-7 rounded-full bg-purple-500/20 text-purple-500 flex items-center justify-center text-[10px] font-extrabold border-2 border-[#1a1a1a] relative z-20">{topic.creatorInitials}</div>
+                    {topic.replies.slice(0, 3).map((r: any, i: number) => (
+                      <div key={i} className={`w-7 h-7 rounded-full ${r.color || 'bg-gray-500/20 text-gray-400'} flex items-center justify-center text-[10px] font-extrabold border-2 border-[#1a1a1a] relative z-10`} style={{ zIndex: 10 - i }}>{r.initials}</div>
+                    ))}
+                  </div>
+                  <span className="text-[11px] font-bold text-gray-400 flex items-center gap-1">
+                    {topic.replies.length} resposta{topic.replies.length !== 1 && 's'} <ChevronDown className="w-3 h-3 -rotate-90 text-gray-600" />
+                  </span>
                 </div>
-                <span className="text-[11px] font-bold text-gray-400 flex items-center gap-1">
-                  1 resposta <ChevronDown className="w-3 h-3 -rotate-90 text-gray-600" />
-                </span>
               </div>
-            </div>
+            ))}
           </div>
         )}
       </div>

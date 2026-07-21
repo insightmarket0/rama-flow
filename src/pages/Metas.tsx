@@ -166,7 +166,7 @@ export default function Metas() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
 
         {/* Card 1: Logística e Entrega */}
-        <div className="bg-[#111315]/80 backdrop-blur-md border border-white/5 rounded-2xl p-6 flex flex-col justify-between shadow-lg">
+        <div className="bg-[#111315]/80 backdrop-blur-md border border-white/5 rounded-2xl p-6 flex flex-col justify-between shadow-lg hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(0,255,0,0.1)] hover:border-[#00FF00]/30 transition-all duration-500 animate-in slide-in-from-bottom-8 fade-in delay-100">
           <div>
             <div className="flex items-center gap-3 mb-2">
               <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
@@ -185,7 +185,7 @@ export default function Metas() {
         </div>
 
         {/* Card 2: Programa de Afiliados */}
-        <div className="bg-[#111315]/80 backdrop-blur-md border border-white/5 rounded-2xl p-6 flex flex-col justify-between shadow-lg">
+        <div className="bg-[#111315]/80 backdrop-blur-md border border-white/5 rounded-2xl p-6 flex flex-col justify-between shadow-lg hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(0,255,0,0.1)] hover:border-[#00FF00]/30 transition-all duration-500 animate-in slide-in-from-bottom-8 fade-in delay-200">
           <div>
             <div className="flex items-center gap-3 mb-2">
               <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
@@ -213,7 +213,7 @@ export default function Metas() {
         </div>
 
         {/* Card 3: Live Commerce */}
-        <div className="bg-[#111315]/80 backdrop-blur-md border border-white/5 rounded-2xl p-6 flex flex-col justify-between shadow-lg">
+        <div className="bg-[#111315]/80 backdrop-blur-md border border-white/5 rounded-2xl p-6 flex flex-col justify-between shadow-lg hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(0,255,0,0.1)] hover:border-[#00FF00]/30 transition-all duration-500 animate-in slide-in-from-bottom-8 fade-in delay-300">
           <div>
             <div className="flex items-center gap-3 mb-2">
               <svg className="w-6 h-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Package, Send, AlertTriangle, CheckCircle2, MessageSquare, Plus, Clock, FileText, CheckCircle, Box, UploadCloud, X, Image as ImageIcon, Truck, Settings2, Save } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Package, Send, AlertTriangle, CheckCircle2, MessageSquare, Plus, Clock, FileText, CheckCircle, Box, UploadCloud, X, Image as ImageIcon, Truck, Settings2, Save, CheckCheck, Paperclip, Mic } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -68,6 +68,87 @@ export default function PortalExpedicao() {
     }
   ]);
 
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+
+  const scrollToBottom = () => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleChatFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      const imageUrl = URL.createObjectURL(file);
+      
+      const newMsg = {
+        id: messages.length + 1,
+        sender: "Anderson",
+        initials: "AN",
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        text: "Enviou uma imagem",
+        imageUrl: imageUrl,
+        isMe: true,
+        color: "bg-[#00FF00] text-black"
+      };
+      
+      setMessages([...messages, newMsg as any]);
+    }
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+      
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data);
+      };
+      
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        
+        const time = `${new Date().getHours().toString().padStart(2, '0')}:${new Date().getMinutes().toString().padStart(2, '0')}`;
+        
+        setMessages(prev => [...prev, {
+          id: Date.now(),
+          sender: "Anderson",
+          initials: "AN",
+          time,
+          text: "",
+          isAudio: true,
+          audioUrl: audioUrl,
+          isMe: true,
+          color: "bg-[#00FF00] text-black"
+        } as any]);
+      };
+      
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      console.error("Erro ao acessar microfone", err);
+      toast.error("Permissão de microfone negada ou indisponível.");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!sku || !description) {
@@ -126,23 +207,26 @@ export default function PortalExpedicao() {
     }, 800);
   };
 
-  const handleChatSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!chatMessage.trim()) return;
+  const sendChatMessage = (text: string) => {
+    if (!text.trim()) return;
     
     const now = new Date();
     const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
     
-    setMessages([...messages, {
+    setMessages(prev => [...prev, {
       id: Date.now(),
       sender: "Anderson",
       initials: "AN",
       time,
-      text: chatMessage,
+      text,
       isMe: true,
       color: "bg-[#00FF00] text-black"
     }]);
+  };
 
+  const handleChatSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    sendChatMessage(chatMessage);
     setChatMessage("");
   };
 
@@ -605,14 +689,12 @@ export default function PortalExpedicao() {
         {/* Lado Direito: Chat Integrado */}
         <div className="bg-[#121212] border border-white/5 rounded-2xl flex flex-col overflow-hidden h-full shadow-2xl relative">
           
-          <div className="p-4 border-b border-white/5 bg-[#181818] flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#00FF00]/10 flex items-center justify-center">
-              <MessageSquare className="w-5 h-5 text-[#00FF00]" />
+          <div className="px-4 py-2.5 border-b border-white/5 bg-[#121212] flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-[#00FF00] animate-pulse" />
+              <h3 className="text-gray-200 font-bold text-sm tracking-tight">#central-logistica</h3>
             </div>
-            <div>
-              <h3 className="text-white font-bold tracking-tight leading-none">#central-logistica</h3>
-              <p className="text-gray-500 text-[10px] uppercase tracking-widest mt-1">Comunicação Direta</p>
-            </div>
+            <span className="text-gray-600 text-[9px] uppercase tracking-widest font-bold">Comunicação</span>
           </div>
 
           <div className="flex-1 p-3 overflow-y-auto flex flex-col gap-3">
@@ -632,34 +714,89 @@ export default function PortalExpedicao() {
                     <span className={`text-[11px] font-bold ${msg.isMe ? 'text-[#00FF00]' : 'text-gray-300'}`}>{msg.sender}</span>
                     <span className="text-[9px] text-gray-500">{msg.time}</span>
                   </div>
-                  <div className={`rounded-xl px-3 py-2 text-[13px] border leading-snug max-w-[260px] shadow-sm ${
+                  <div className={`rounded-xl px-3 py-2 text-[13px] border leading-snug max-w-[260px] shadow-sm break-words overflow-hidden ${
                     msg.isMe 
-                      ? 'bg-[#00FF00]/5 rounded-tr-sm text-[#00E500] border-[#00FF00]/10' 
+                      ? 'bg-[#1A3A2A] rounded-tr-sm text-gray-100 border-[#00FF00]/20' 
                       : 'bg-[#1C1C1E] rounded-tl-sm text-gray-300 border-white/5'
                   }`}>
-                    {msg.text}
+                    {(msg as any).imageUrl && (
+                      <img 
+                        src={(msg as any).imageUrl} 
+                        alt="Anexo" 
+                        onLoad={scrollToBottom}
+                        className="w-full rounded-md mb-2 object-cover max-h-[150px]" 
+                      />
+                    )}
+                    {(msg as any).isAudio && (
+                      <div className="mb-2 w-full min-w-[200px]">
+                        <audio controls src={(msg as any).audioUrl} className="h-8 w-full max-w-[220px] outline-none" />
+                      </div>
+                    )}
+                    {msg.text && <div>{msg.text}</div>}
                   </div>
+                  {msg.isMe && (
+                    <div className="mt-1 mr-1">
+                      <CheckCheck className="w-3.5 h-3.5 text-[#00FF00]" />
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
+            <div ref={chatEndRef} />
           </div>
 
           <div className="p-3 bg-[#181818] border-t border-white/5">
-            <form onSubmit={handleChatSubmit} className="relative">
-              <div className="flex bg-[#111111] border border-white/5 rounded-xl overflow-hidden mt-1 p-1 focus-within:border-white/20 transition-colors shadow-inner">
+            {/* Quick Replies Clean */}
+            <div className="flex gap-4 mb-1 px-2 overflow-x-auto custom-scrollbar">
+              <button type="button" onClick={() => sendChatMessage("👍 Ciente. Pode prosseguir.")} className="whitespace-nowrap text-[10px] font-bold text-gray-500 hover:text-[#00FF00] transition-colors">
+                👍 Ciente
+              </button>
+              <button type="button" onClick={() => sendChatMessage("✅ Aprovado. Liberado para envio.")} className="whitespace-nowrap text-[10px] font-bold text-gray-500 hover:text-[#00FF00] transition-colors">
+                ✅ Aprovado
+              </button>
+              <button type="button" onClick={() => sendChatMessage("❌ Segura o pedido. Vou verificar.")} className="whitespace-nowrap text-[10px] font-bold text-gray-500 hover:text-red-500 transition-colors">
+                ❌ Segura
+              </button>
+              <button type="button" onClick={() => sendChatMessage("📦 Abre um chamado de Falta de Estoque.")} className="whitespace-nowrap text-[10px] font-bold text-gray-500 hover:text-blue-400 transition-colors">
+                📦 Chamado
+              </button>
+            </div>
+            
+            <form onSubmit={handleChatSubmit} className="relative mt-2">
+              <input 
+                type="file" 
+                accept="image/*" 
+                ref={fileInputRef} 
+                onChange={handleChatFileChange} 
+                className="hidden" 
+              />
+              <div className="flex items-center bg-[#111111] rounded-full border border-white/5 focus-within:border-white/10 transition-colors pr-1.5 pl-2 h-10">
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="p-1.5 text-gray-500 hover:text-[#00FF00] transition-colors rounded-full shrink-0">
+                  <Paperclip className="w-4 h-4" />
+                </button>
+                {isRecording ? (
+                  <button type="button" onClick={stopRecording} className="p-1.5 text-red-500 hover:text-red-400 transition-colors rounded-full shrink-0 animate-pulse bg-red-500/10">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+                  </button>
+                ) : (
+                  <button type="button" onClick={startRecording} className="p-1.5 text-gray-500 hover:text-[#00FF00] transition-colors rounded-full shrink-0">
+                    <Mic className="w-4 h-4" />
+                  </button>
+                )}
                 <Input 
                   value={chatMessage}
                   onChange={(e) => setChatMessage(e.target.value)}
-                  placeholder="Responder Lívia..." 
-                  className="flex-1 bg-transparent border-0 h-10 text-sm focus-visible:ring-0 text-white placeholder:text-gray-600 shadow-none"
+                  placeholder={isRecording ? "Gravando áudio..." : "Responder..."} 
+                  disabled={isRecording}
+                  className="flex-1 bg-transparent border-0 h-full text-sm focus-visible:ring-0 text-white placeholder:text-gray-600 shadow-none px-1 disabled:opacity-50"
                 />
-                <Button 
+                <button 
                   type="submit" 
                   disabled={!chatMessage.trim()}
-                  className="h-10 w-10 p-0 bg-gradient-to-br from-[#00E500] to-[#00CC00] hover:from-[#00FF00] hover:to-[#00D900] text-black rounded-lg transition-all shadow-md shrink-0"
+                  className="h-7 w-7 rounded-full flex items-center justify-center transition-all shrink-0 disabled:opacity-30 text-[#00FF00] hover:bg-[#00FF00]/10"
                 >
-                  <Send className="w-4 h-4" />
-                </Button>
+                  <Send className="w-3.5 h-3.5 ml-0.5" />
+                </button>
               </div>
             </form>
           </div>
