@@ -63,6 +63,13 @@ const NAV_GROUPS = [
     ]
   },
   {
+    id: "marketing",
+    icon: Megaphone,
+    title: "Marketing & Growth",
+    mainLink: "/marketing",
+    subItems: []
+  },
+  {
     id: "gestao",
     icon: LineChart,
     title: "Gestão",

@@ -36,6 +36,7 @@ import {
   Trash2
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const CHAT_LIST = [
   { id: "c1", name: "Marketplace", time: "", text: "Nova conversa...", unread: 0, pinned: false, avatar: "MK", color: "bg-[#00FF00]/20 text-[#00FF00]" },
@@ -817,22 +818,32 @@ export default function ChatPage() {
                       <div className="flex gap-4">
                         <div className="flex-1 space-y-2">
                           <label className="text-sm font-medium text-gray-400">Prioridade</label>
-                          <select value={newTopicPriority} onChange={e => setNewTopicPriority(e.target.value)} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00FF00]/50 transition-colors appearance-none">
-                            <option>Baixa</option>
-                            <option>Normal</option>
-                            <option>Alta</option>
-                            <option>Urgente</option>
-                          </select>
+                          <Select value={newTopicPriority} onValueChange={setNewTopicPriority}>
+                            <SelectTrigger className="w-full bg-[#1a1a1a] border border-white/10 h-[46px] rounded-xl px-4 text-sm focus:ring-1 focus:ring-[#00FF00]/50 outline-none text-white shadow-inner">
+                              <SelectValue placeholder="Prioridade" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-[#111111] border-white/10 text-white">
+                              <SelectItem value="Baixa" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">Baixa</SelectItem>
+                              <SelectItem value="Normal" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">Normal</SelectItem>
+                              <SelectItem value="Alta" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">Alta</SelectItem>
+                              <SelectItem value="Urgente" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">Urgente</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="flex-1 space-y-2">
                           <label className="text-sm font-medium text-gray-400">Departamento</label>
-                          <select value={newTopicDepartment} onChange={e => setNewTopicDepartment(e.target.value)} className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00FF00]/50 transition-colors appearance-none">
-                            <option>Geral</option>
-                            <option>Expedição</option>
-                            <option>Atendimento</option>
-                            <option>Comercial</option>
-                            <option>Financeiro</option>
-                          </select>
+                          <Select value={newTopicDepartment} onValueChange={setNewTopicDepartment}>
+                            <SelectTrigger className="w-full bg-[#1a1a1a] border border-white/10 h-[46px] rounded-xl px-4 text-sm focus:ring-1 focus:ring-[#00FF00]/50 outline-none text-white shadow-inner">
+                              <SelectValue placeholder="Departamento" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-[#111111] border-white/10 text-white">
+                              <SelectItem value="Geral" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">Geral</SelectItem>
+                              <SelectItem value="Expedição" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">Expedição</SelectItem>
+                              <SelectItem value="Atendimento" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">Atendimento</SelectItem>
+                              <SelectItem value="Comercial" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">Comercial</SelectItem>
+                              <SelectItem value="Financeiro" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">Financeiro</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
                       <div className="space-y-2">

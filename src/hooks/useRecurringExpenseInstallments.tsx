@@ -66,9 +66,32 @@ export const useRecurringExpenseInstallments = () => {
     },
   });
 
+  const updateInstallmentValue = useMutation({
+    mutationFn: async ({ id, value }: { id: string; value: number }) => {
+      const { data, error } = await supabase
+        .from("recurring_expense_installments")
+        .update({ value, status: "pendente" })
+        .eq("id", id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recurring-expense-installments"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      toast.success("Valor da fatura atualizado com sucesso!");
+    },
+    onError: (error) => {
+      toast.error("Erro ao atualizar valor: " + error.message);
+    },
+  });
+
   return {
     upcomingInstallments,
     isLoading,
     markAsPaid,
+    updateInstallmentValue,
   };
 };

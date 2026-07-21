@@ -45,7 +45,7 @@ type RecurringExpenseInstallmentItem = Tables<"recurring_expense_installments"> 
 export default function ContasFixas() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { recurringExpenses, isLoading: loadingExpenses, deleteRecurringExpense, updateRecurringExpense } = useRecurringExpenses();
-  const { upcomingInstallments, isLoading: loadingInstallments, markAsPaid } = useRecurringExpenseInstallments();
+  const { upcomingInstallments, isLoading: loadingInstallments, markAsPaid, updateInstallmentValue } = useRecurringExpenseInstallments();
   const [valueDialogOpen, setValueDialogOpen] = useState(false);
   const [selectedInstallment, setSelectedInstallment] = useState<RecurringExpenseInstallmentItem | null>(null);
   const [valueInput, setValueInput] = useState("");
@@ -217,7 +217,7 @@ export default function ContasFixas() {
 
     try {
       setIsSubmittingValue(true);
-      await markAsPaid.mutateAsync({ id: selectedInstallment.id, value: parsedValue });
+      await updateInstallmentValue.mutateAsync({ id: selectedInstallment.id, value: parsedValue });
       closeValueDialog();
     } finally {
       setIsSubmittingValue(false);
@@ -446,6 +446,7 @@ export default function ContasFixas() {
                                 <Button
                                   size="sm"
                                   variant="outline"
+                                  className="h-8"
                                   onClick={() => handlePayClick(inst, needsValueBeforePayment)}
                                   disabled={isProcessing}
                                 >
@@ -454,7 +455,7 @@ export default function ContasFixas() {
                                   ) : (
                                     <CheckCircle2 className="mr-1 h-3 w-3" />
                                   )}
-                                  {needsValueBeforePayment ? "Informar e pagar" : "Pagar"}
+                                  {needsValueBeforePayment ? "Informar Fatura" : "Pagar"}
                                 </Button>
                               )}
                             </div>
@@ -487,20 +488,14 @@ export default function ContasFixas() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Informar valor da conta</DialogTitle>
-            <DialogDescription>Preencha o valor cobrado antes de confirmar o pagamento.</DialogDescription>
+            <DialogTitle>Informar Fatura</DialogTitle>
+            <DialogDescription>
+              Informe o valor recebido na fatura para {selectedInstallment?.recurring_expense?.name}. A conta continuará pendente para pagamento no dia {formatInstallmentDueDate(selectedInstallment?.due_date)}.
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <p className="font-semibold">
-                {selectedInstallment?.recurring_expense?.name || "Despesa"}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Vencimento {formatInstallmentDueDate(selectedInstallment?.due_date)}
-              </p>
-            </div>
+          <div className="grid gap-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="installment-value">Valor pago</Label>
+              <Label htmlFor="installment-value">Valor da fatura</Label>
               <Input
                 id="installment-value"
                 type="number"
@@ -519,7 +514,7 @@ export default function ContasFixas() {
             </Button>
             <Button onClick={handlePaymentWithValue} disabled={isSubmittingValue}>
               {isSubmittingValue && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Salvar e pagar
+              Salvar Fatura
             </Button>
           </DialogFooter>
         </DialogContent>

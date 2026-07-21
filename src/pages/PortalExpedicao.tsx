@@ -5,6 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function PortalExpedicao() {
   const [sku, setSku] = useState("");
@@ -13,6 +20,29 @@ export default function PortalExpedicao() {
   const [evidenceFiles, setEvidenceFiles] = useState<File[]>([]);
   const [priority, setPriority] = useState("normal");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const [tickets, setTickets] = useState<any[]>([
+    {
+      id: 1,
+      type: 'insumo',
+      title: 'Caixa Parda 30x20x10',
+      description: 'Estava com apenas 1 rolo restante. Prioridade Crítica.',
+      status: 'Resolvido / Comprado',
+      priority: 'critico',
+      author: 'Anderson',
+      time: 'Ontem às 14:30'
+    },
+    {
+      id: 2,
+      type: 'divergencia',
+      title: 'KITGAS001 - Mercado Livre',
+      description: 'A foto mostra 3 itens, mas a embalagem comporta 2. Precisa arrumar a imagem no anúncio.',
+      status: 'Em Triagem / Sendo Resolvido',
+      priority: 'alta',
+      author: 'Lívia',
+      time: 'Hoje às 09:15'
+    }
+  ]);
   
   // Estados para Aba e Alerta de Insumos
   const [activeTab, setActiveTab] = useState<"divergencia" | "insumos" | "historico">("divergencia");
@@ -165,6 +195,18 @@ export default function PortalExpedicao() {
         style: { background: "#0A0A0A", border: "1px solid #00FF00", color: "#FFF" }
       });
       
+      setTickets(prev => [{
+        id: Date.now(),
+        type: 'divergencia',
+        title: `${sku} - ${marketplace}`,
+        description: description,
+        status: 'Aberto',
+        priority: priority,
+        author: 'Anderson',
+        time: `Hoje às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
+      }, ...prev]);
+      setActiveTab("historico");
+      
       setSku("");
       setMarketplace("Mercado Livre");
       setDescription("");
@@ -196,9 +238,21 @@ export default function PortalExpedicao() {
     setTimeout(() => {
       setIsSubmittingSupply(false);
       toast.success("Alerta de estoque enviado para Compras!", {
-        icon: <CheckCircle2 className="w-5 h-5 text-yellow-500" />,
-        style: { background: "#0A0A0A", border: "1px solid #EAB308", color: "#FFF" }
+        icon: <CheckCircle2 className="w-5 h-5 text-[#00FF00]" />,
+        style: { background: "#0A0A0A", border: "1px solid #00FF00", color: "#FFF" }
       });
+      
+      setTickets(prev => [{
+        id: Date.now(),
+        type: itemCategory.includes('Produto') ? 'produto' : 'insumo',
+        title: itemName,
+        description: `Restante: ${remainingQty}. Categoria: ${itemCategory}`,
+        status: 'Aberto',
+        priority: supplyPriority,
+        author: 'Anderson',
+        time: `Hoje às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
+      }, ...prev]);
+      setActiveTab("historico");
       
       setItemName("");
       setItemCategory("Embalagem (Caixa, Fita, etc)");
@@ -268,15 +322,15 @@ export default function PortalExpedicao() {
 
       {/* Relógio das Coletas (Senso de Urgência) */}
       <div className="bg-[#1A1A1A] border border-white/5 rounded-xl p-3 mb-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl relative overflow-hidden group">
-        <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
+        <div className="absolute top-0 left-0 w-1 h-full bg-[#00FF00]" />
         
         <div className="flex items-center justify-between w-full md:w-auto md:border-r border-white/10 md:pr-4">
-          <div className="flex items-center gap-2 pl-2">
-            <div className="flex items-center gap-1.5 bg-blue-500/10 px-2.5 py-1 rounded-md border border-blue-500/20 text-blue-400 font-mono text-xs font-bold shadow-[0_0_10px_rgba(59,130,246,0.1)]">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+          <div className="flex items-center gap-3 pl-2">
+            <div className="flex items-center gap-2 bg-white/5 backdrop-blur-xl px-3 py-0.5 rounded-full border border-white/10 text-white font-sans text-[15px] font-bold tracking-tight shadow-lg">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00FF00] animate-pulse shadow-[0_0_8px_rgba(0,255,0,0.8)]"></span>
               {now.toLocaleTimeString('pt-BR')}
             </div>
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest hidden sm:inline-block">Próximos Despachos</span>
+            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest hidden sm:inline-block mt-1">Próximos Despachos</span>
           </div>
           <button 
             onClick={() => setIsEditingSchedules(!isEditingSchedules)}
@@ -386,7 +440,7 @@ export default function PortalExpedicao() {
               </button>
               <button 
                 onClick={() => setActiveTab("insumos")}
-                className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-300 ${activeTab === "insumos" ? "bg-yellow-500/10 text-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.1)] border border-yellow-500/20" : "text-gray-500 border border-transparent hover:text-gray-300 hover:bg-white/5"}`}
+                className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-300 ${activeTab === "insumos" ? "bg-[#00FF00]/10 text-[#00E500] shadow-[0_0_10px_rgba(0,255,0,0.1)] border border-[#00FF00]/20" : "text-gray-500 border border-transparent hover:text-gray-300 hover:bg-white/5"}`}
               >
                 <Box className="w-3.5 h-3.5" /> Alerta Insumos
               </button>
@@ -418,18 +472,19 @@ export default function PortalExpedicao() {
                   <label className="text-[9px] font-bold uppercase tracking-widest text-gray-500">
                     Canal de Venda
                   </label>
-                  <select 
-                    value={marketplace}
-                    onChange={(e) => setMarketplace(e.target.value)}
-                    className="w-full bg-black/20 border border-white/10 h-9 rounded-md px-3 text-xs focus:ring-1 focus:ring-[#00FF00]/30 focus:border-[#00FF00]/30 outline-none text-white appearance-none shadow-inner"
-                  >
-                    <option value="Mercado Livre">Mercado Livre</option>
-                    <option value="Shopee">Shopee</option>
-                    <option value="Amazon">Amazon</option>
-                    <option value="Magalu">Magalu</option>
-                    <option value="Site Oficial">Site Oficial</option>
-                    <option value="Geral (Todos)">Geral (Todos)</option>
-                  </select>
+                  <Select value={marketplace} onValueChange={setMarketplace}>
+                    <SelectTrigger className="w-full bg-black/20 border border-white/10 h-9 rounded-md px-3 text-xs focus:ring-1 focus:ring-[#00FF00]/30 focus:border-[#00FF00]/30 outline-none text-white shadow-inner">
+                      <SelectValue placeholder="Selecione o Canal" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#111111] border-white/10 text-white">
+                      <SelectItem value="Mercado Livre" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">Mercado Livre</SelectItem>
+                      <SelectItem value="Shopee" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">Shopee</SelectItem>
+                      <SelectItem value="Amazon" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">Amazon</SelectItem>
+                      <SelectItem value="Magalu" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">Magalu</SelectItem>
+                      <SelectItem value="Site Oficial" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">Site Oficial</SelectItem>
+                      <SelectItem value="Geral (Todos)" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">Geral (Todos)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -547,7 +602,7 @@ export default function PortalExpedicao() {
                     value={itemName}
                     onChange={(e) => setItemName(e.target.value.toUpperCase())}
                     placeholder="Ex: Caixa Parda 30x20x10"
-                    className="bg-black/20 border-white/10 h-9 text-xs focus-visible:ring-1 focus-visible:ring-yellow-500/30 focus-visible:border-yellow-500/30 text-white placeholder:text-gray-600 shadow-inner"
+                    className="bg-black/20 border-white/10 h-9 text-xs focus-visible:ring-1 focus-visible:ring-[#00FF00]/30 focus-visible:border-[#00FF00]/30 text-white placeholder:text-gray-600 shadow-inner"
                   />
                 </div>
 
@@ -555,16 +610,17 @@ export default function PortalExpedicao() {
                   <label className="text-[9px] font-bold uppercase tracking-widest text-gray-500">
                     Categoria
                   </label>
-                  <select 
-                    value={itemCategory}
-                    onChange={(e) => setItemCategory(e.target.value)}
-                    className="w-full bg-black/20 border border-white/10 h-9 rounded-md px-3 text-xs focus:ring-1 focus:ring-yellow-500/30 focus:border-yellow-500/30 outline-none text-white appearance-none shadow-inner"
-                  >
-                    <option value="Embalagem (Caixa, Fita, etc)">Embalagem (Caixa, Fita, Plástico)</option>
-                    <option value="Produto Físico">Produto Físico (Acabou no Estoque)</option>
-                    <option value="Brindes/Folders">Brindes e Folders</option>
-                    <option value="Material Administrativo">Material Administrativo (Papel, Tinta)</option>
-                  </select>
+                  <Select value={itemCategory} onValueChange={setItemCategory}>
+                    <SelectTrigger className="w-full bg-black/20 border border-white/10 h-9 rounded-md px-3 text-xs focus:ring-1 focus:ring-[#00FF00]/30 focus:border-[#00FF00]/30 outline-none text-white shadow-inner">
+                      <SelectValue placeholder="Selecione a Categoria" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#111111] border-white/10 text-white">
+                      <SelectItem value="Embalagem (Caixa, Fita, etc)" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">Embalagem (Caixa, Fita, Plástico)</SelectItem>
+                      <SelectItem value="Produto Físico" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">Produto Físico (Acabou no Estoque)</SelectItem>
+                      <SelectItem value="Brindes/Folders" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">Brindes e Folders</SelectItem>
+                      <SelectItem value="Material Administrativo" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">Material Administrativo (Papel, Tinta)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -576,7 +632,7 @@ export default function PortalExpedicao() {
                   value={remainingQty}
                   onChange={(e) => setRemainingQty(e.target.value)}
                   placeholder="Ex: Tem apenas mais 1 pacote fechado"
-                  className="bg-black/20 border-white/10 h-9 text-xs focus-visible:ring-1 focus-visible:ring-yellow-500/30 focus-visible:border-yellow-500/30 text-white placeholder:text-gray-600 shadow-inner"
+                  className="bg-black/20 border-white/10 h-9 text-xs focus-visible:ring-1 focus-visible:ring-[#00FF00]/30 focus-visible:border-[#00FF00]/30 text-white placeholder:text-gray-600 shadow-inner"
                 />
               </div>
 
@@ -585,7 +641,7 @@ export default function PortalExpedicao() {
                   Nível de Urgência
                 </label>
                 <div className="flex gap-2">
-                  <label className={`flex-1 flex items-center justify-center gap-1.5 border py-2 rounded-lg cursor-pointer transition-all duration-300 ${supplyPriority === 'normal' ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-500' : 'bg-[#111111] border-white/5 text-gray-500 hover:bg-white/5'}`}>
+                  <label className={`flex-1 flex items-center justify-center gap-1.5 border py-2 rounded-lg cursor-pointer transition-all duration-300 ${supplyPriority === 'normal' ? 'bg-[#00FF00]/10 border-[#00FF00]/30 text-[#00FF00]' : 'bg-[#111111] border-white/5 text-gray-500 hover:bg-white/5'}`}>
                     <input 
                       type="radio" 
                       name="supplyPriority" 
@@ -615,7 +671,7 @@ export default function PortalExpedicao() {
                 <Button 
                   type="submit" 
                   disabled={isSubmittingSupply}
-                  className="w-full h-10 bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-400 hover:to-yellow-300 text-black font-extrabold text-sm rounded-lg shadow-[0_4px_15px_rgba(234,179,8,0.15)] border border-yellow-500/50 transition-all duration-300"
+                  className="w-full h-10 bg-gradient-to-r from-[#00FF00] to-[#00CC00] hover:from-[#00CC00] hover:to-[#009900] text-black font-extrabold text-sm rounded-lg shadow-[0_4px_15px_rgba(0,255,0,0.2)] border border-[#00FF00]/50 transition-all duration-300"
                 >
                   {isSubmittingSupply ? "Notificando Compras..." : (
                     <span className="flex items-center gap-2">
@@ -629,59 +685,37 @@ export default function PortalExpedicao() {
 
           {activeTab === "historico" && (
             <div className="flex-1 overflow-y-auto space-y-4 pr-1 animate-in fade-in duration-300">
-              {/* Mock Item 1 - Insumo */}
-              <div className="bg-[#1a1a1a] border border-yellow-500/20 rounded-xl p-4 transition-colors hover:border-yellow-500/40">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="bg-yellow-500/10 text-yellow-500 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1.5">
-                    <Box className="w-3 h-3" /> Insumo
-                  </span>
-                  <span className="bg-green-500/10 text-green-500 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" /> Resolvido / Comprado
-                  </span>
-                </div>
-                <h4 className="text-white font-bold text-sm mb-1">Caixa Parda 30x20x10</h4>
-                <p className="text-gray-400 text-xs mb-3">Estava com apenas 1 rolo restante. Prioridade Crítica.</p>
-                <div className="flex items-center justify-between text-[10px] text-gray-500">
-                  <span>Por: Anderson</span>
-                  <span>Ontem às 14:30</span>
-                </div>
-              </div>
-
-              {/* Mock Item 2 - Divergência */}
-              <div className="bg-[#1a1a1a] border border-[#00FF00]/20 rounded-xl p-4 transition-colors hover:border-[#00FF00]/40">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="bg-[#00FF00]/10 text-[#00FF00] text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1.5">
-                    <AlertTriangle className="w-3 h-3" /> Divergência
-                  </span>
-                  <span className="bg-blue-500/10 text-blue-500 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> Em Triagem / Sendo Resolvido
-                  </span>
-                </div>
-                <h4 className="text-white font-bold text-sm mb-1">KITGAS001 - Mercado Livre</h4>
-                <p className="text-gray-400 text-xs mb-3">A foto mostra 3 itens, mas a embalagem comporta 2. Precisa arrumar a imagem no anúncio.</p>
-                <div className="flex items-center justify-between text-[10px] text-gray-500">
-                  <span>Por: Lívia</span>
-                  <span>Hoje às 09:15</span>
-                </div>
-              </div>
-
-              {/* Mock Item 3 - Insumo Aberto */}
-              <div className="bg-[#1a1a1a] border border-yellow-500/20 rounded-xl p-4 transition-colors hover:border-yellow-500/40">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="bg-yellow-500/10 text-yellow-500 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1.5">
-                    <Box className="w-3 h-3" /> Insumo
-                  </span>
-                  <span className="bg-gray-500/10 text-gray-400 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> Aguardando
-                  </span>
-                </div>
-                <h4 className="text-white font-bold text-sm mb-1">Fita Adesiva Transparente</h4>
-                <p className="text-gray-400 text-xs mb-3">Restam apenas 3 pacotes. Pode esperar.</p>
-                <div className="flex items-center justify-between text-[10px] text-gray-500">
-                  <span>Por: Anderson</span>
-                  <span>Hoje às 11:45</span>
-                </div>
-              </div>
+              {tickets.length === 0 ? (
+                <p className="text-gray-500 text-xs text-center mt-10">Nenhum chamado aberto ainda.</p>
+              ) : (
+                tickets.map(ticket => (
+                  <div key={ticket.id} className={`bg-[#1a1a1a] border border-white/5 rounded-xl p-4 transition-colors ${ticket.type === 'produto' ? 'hover:border-orange-500/40' : ticket.type === 'insumo' ? 'hover:border-yellow-500/40' : 'hover:border-[#00FF00]/40'}`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1.5 ${ticket.type === 'produto' ? 'bg-orange-500/10 text-orange-500' : ticket.type === 'insumo' ? 'bg-yellow-500/10 text-yellow-500' : 'bg-[#00FF00]/10 text-[#00FF00]'}`}>
+                        {ticket.type === 'produto' ? <Package className="w-3 h-3" /> : ticket.type === 'insumo' ? <Box className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />} 
+                        {ticket.type === 'produto' ? 'Falta Produto' : ticket.type === 'insumo' ? 'Insumo' : 'Divergência'}
+                      </span>
+                      <span className="bg-white/5 text-gray-400 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1">
+                        {ticket.status.includes('Resolvido') ? <CheckCircle2 className="w-3 h-3 text-[#00FF00]" /> : <Clock className="w-3 h-3 text-blue-400" />} 
+                        {ticket.status}
+                      </span>
+                    </div>
+                    <h4 className="text-white font-bold text-sm mb-1">{ticket.title}</h4>
+                    <p className="text-gray-400 text-xs mb-3">{ticket.description}</p>
+                    <div className="flex items-center justify-between text-[10px] text-gray-500 border-t border-white/5 pt-3 mt-1">
+                      <div className="flex items-center gap-3">
+                        <span>Por: {ticket.author}</span>
+                        {ticket.priority === 'critico' || ticket.priority === 'alta' ? (
+                          <span className="text-red-500 flex items-center gap-1 font-bold uppercase tracking-wider"><AlertTriangle className="w-3 h-3" /> Crítico</span>
+                        ) : (
+                          <span className="text-[#00FF00] flex items-center gap-1 font-bold uppercase tracking-wider"><CheckCircle2 className="w-3 h-3" /> Normal</span>
+                        )}
+                      </div>
+                      <span>{ticket.time}</span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           )}
         </div>
@@ -689,12 +723,11 @@ export default function PortalExpedicao() {
         {/* Lado Direito: Chat Integrado */}
         <div className="bg-[#121212] border border-white/5 rounded-2xl flex flex-col overflow-hidden h-full shadow-2xl relative">
           
-          <div className="px-4 py-2.5 border-b border-white/5 bg-[#121212] flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#00FF00] animate-pulse" />
-              <h3 className="text-gray-200 font-bold text-sm tracking-tight">#central-logistica</h3>
+          <div className="px-5 py-4 bg-[#121212] flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.6)]"></span>
+              <h3 className="text-gray-100 font-medium text-[15px] tracking-tight">Central de Logística</h3>
             </div>
-            <span className="text-gray-600 text-[9px] uppercase tracking-widest font-bold">Comunicação</span>
           </div>
 
           <div className="flex-1 p-3 overflow-y-auto flex flex-col gap-3">
@@ -704,20 +737,39 @@ export default function PortalExpedicao() {
               </span>
             </div>
 
-            {messages.map((msg) => (
-              <div key={msg.id} className={`flex gap-2.5 ${msg.isMe ? 'flex-row-reverse' : ''}`}>
-                <Avatar className="h-6 w-6 mt-1 shrink-0">
-                  <AvatarFallback className={`text-[10px] font-bold ${msg.color}`}>{msg.initials}</AvatarFallback>
-                </Avatar>
+            {messages.map((msg, index) => {
+              const prevMsg = index > 0 ? messages[index - 1] : null;
+              
+              let isGrouped = false;
+              if (prevMsg && prevMsg.sender === msg.sender) {
+                const [h1, m1] = prevMsg.time.split(':').map(Number);
+                const [h2, m2] = msg.time.split(':').map(Number);
+                const diff = (h2 * 60 + m2) - (h1 * 60 + m1);
+                if (diff >= 0 && diff <= 5) {
+                  isGrouped = true;
+                }
+              }
+
+              return (
+              <div key={msg.id} className={`flex gap-2.5 ${msg.isMe ? 'flex-row-reverse' : ''} ${isGrouped ? 'mt-0.5' : 'mt-2'}`}>
+                <div className="w-6 flex shrink-0 justify-center">
+                  {!isGrouped && (
+                    <Avatar className="h-6 w-6 mt-1">
+                      <AvatarFallback className={`text-[10px] font-bold ${msg.isMe ? 'bg-[#00FF00]/20 text-[#00FF00]' : msg.color}`}>{msg.initials}</AvatarFallback>
+                    </Avatar>
+                  )}
+                </div>
                 <div className={`flex flex-col ${msg.isMe ? 'items-end' : ''}`}>
-                  <div className={`flex items-baseline gap-1.5 mb-0.5 ${msg.isMe ? 'flex-row-reverse' : ''}`}>
-                    <span className={`text-[11px] font-bold ${msg.isMe ? 'text-[#00FF00]' : 'text-gray-300'}`}>{msg.sender}</span>
-                    <span className="text-[9px] text-gray-500">{msg.time}</span>
-                  </div>
-                  <div className={`rounded-xl px-3 py-2 text-[13px] border leading-snug max-w-[260px] shadow-sm break-words overflow-hidden ${
+                  {!isGrouped && (
+                    <div className={`flex items-baseline gap-1.5 mb-0.5 ${msg.isMe ? 'flex-row-reverse' : ''}`}>
+                      <span className="text-[11px] font-bold text-gray-300">{msg.sender}</span>
+                      <span className="text-[9px] text-gray-500">{msg.time}</span>
+                    </div>
+                  )}
+                  <div className={`px-3 py-2 text-[13px] border leading-snug max-w-[260px] shadow-sm break-words overflow-hidden ${
                     msg.isMe 
-                      ? 'bg-[#1A3A2A] rounded-tr-sm text-gray-100 border-[#00FF00]/20' 
-                      : 'bg-[#1C1C1E] rounded-tl-sm text-gray-300 border-white/5'
+                      ? `bg-[#1A3A2A] text-gray-100 border-[#00FF00]/10 ${isGrouped ? 'rounded-xl' : 'rounded-xl rounded-tr-sm'}` 
+                      : `bg-[#1C1C1E] text-gray-300 border-white/5 ${isGrouped ? 'rounded-xl' : 'rounded-xl rounded-tl-sm'}`
                   }`}>
                     {(msg as any).imageUrl && (
                       <img 
@@ -734,15 +786,15 @@ export default function PortalExpedicao() {
                     )}
                     {msg.text && <div>{msg.text}</div>}
                   </div>
-                  {msg.isMe && (
+                  {msg.isMe && !isGrouped && (
                     <div className="mt-1 mr-1">
-                      <CheckCheck className="w-3.5 h-3.5 text-[#00FF00]" />
+                      <CheckCheck className="w-3.5 h-3.5 text-gray-600" />
                     </div>
                   )}
                 </div>
               </div>
-            ))}
-            <div ref={chatEndRef} />
+            )})}
+            <div ref={chatEndRef} className="mt-auto" />
           </div>
 
           <div className="p-3 bg-[#181818] border-t border-white/5">
