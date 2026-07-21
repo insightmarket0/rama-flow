@@ -13,6 +13,8 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const MeuDia = lazy(() => import("./pages/MeuDia"));
 const Ecossistema = lazy(() => import("./pages/Ecossistema"));
 const RankingEquipe = lazy(() => import("./pages/RankingEquipe"));
+const Equipe = lazy(() => import("./pages/Equipe"));
+const PortalExpedicao = lazy(() => import("./pages/PortalExpedicao"));
 const Metas = lazy(() => import("./pages/Metas"));
 const MuralAlinhamento = lazy(() => import("./pages/MuralAlinhamento"));
 const Lembretes = lazy(() => import("./pages/Lembretes"));
@@ -29,6 +31,7 @@ const QuotationDetail = lazy(() => import("./pages/QuotationDetail"));
 const Auth = lazy(() => import("./pages/Auth"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const ChatPage = lazy(() => import("./pages/Chat"));
+const PainelDivergencias = lazy(() => import("./pages/PainelDivergencias"));
 
 const queryClient = new QueryClient();
 
@@ -147,6 +150,36 @@ const App = () => (
                 <ProtectedRoute>
                   <MainLayout>
                     <RankingEquipe />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/equipe"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <Equipe />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/expedicao"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <PortalExpedicao />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/divergencias"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <PainelDivergencias />
                   </MainLayout>
                 </ProtectedRoute>
               }

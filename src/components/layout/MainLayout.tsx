@@ -18,6 +18,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 interface MainLayoutProps {
   children: React.ReactNode;
 }
@@ -27,6 +31,11 @@ export function MainLayout({ children }: MainLayoutProps) {
   const [fullName, setFullName] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [visible, setVisible] = useState(false);
+  
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  
   const location = useLocation();
   const isHomePage = location.pathname === "/meu-dia" || location.pathname === "/";
 
@@ -110,6 +119,38 @@ export function MainLayout({ children }: MainLayoutProps) {
     return "Boa noite";
   };
 
+  const handleOpenProfile = () => {
+    setEditName(fullName || user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || "");
+    setIsProfileOpen(true);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!user) return;
+    setIsSaving(true);
+    try {
+      const { error: authError } = await supabase.auth.updateUser({
+        data: { full_name: editName, name: editName }
+      });
+      if (authError) throw authError;
+
+      const { error: dbError } = await supabase
+        .from('profiles')
+        .update({ full_name: editName })
+        .eq('user_id', user.id);
+        
+      if (dbError) throw dbError;
+      
+      setFullName(editName);
+      setIsProfileOpen(false);
+      toast.success("Perfil atualizado com sucesso!");
+    } catch (error: any) {
+      toast.error("Erro ao atualizar perfil");
+      console.error(error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const initials = () => {
     const name = fullName ?? metadataString("full_name") ?? user?.email ?? "Usuário";
     const parts = name.split(/\s+/).filter(Boolean);
@@ -169,13 +210,9 @@ export function MainLayout({ children }: MainLayoutProps) {
                     </DropdownMenuTrigger>
                     
                     <DropdownMenuContent align="end" className="w-56 bg-[#1C1C1E] border-white/10 text-white rounded-xl shadow-2xl p-2 z-[60]">
-                      <DropdownMenuItem className="focus:bg-[#252528] focus:text-white cursor-pointer rounded-lg py-2.5">
+                      <DropdownMenuItem onSelect={handleOpenProfile} className="focus:bg-[#252528] focus:text-white cursor-pointer rounded-lg py-2.5">
                         <UserIcon className="mr-2 h-4 w-4 text-gray-400" />
                         <span>Meu Perfil</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="focus:bg-[#252528] focus:text-white cursor-pointer rounded-lg py-2.5">
-                        <Settings className="mr-2 h-4 w-4 text-gray-400" />
-                        <span>Configurações</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -189,6 +226,44 @@ export function MainLayout({ children }: MainLayoutProps) {
           </main>
         </div>
       </div>
+      
+      <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
+        <DialogContent className="bg-[#1C1C1E] border border-white/10 text-white sm:max-w-md z-[100]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-light">Meu <span className="font-bold">Perfil</span></DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Atualize as informações da sua conta e como você é chamado pela equipe.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-5 py-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-gray-500">Nome de Exibição</label>
+              <Input 
+                value={editName} 
+                onChange={(e) => setEditName(e.target.value)} 
+                className="bg-[#111111] border-white/10 focus-visible:ring-[#00FF00] h-12 text-lg"
+                placeholder="Ex: Anderson"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-gray-500">E-mail de Acesso</label>
+              <Input 
+                value={user?.email || ""} 
+                disabled 
+                className="bg-[#111111] border-white/10 opacity-50 h-12"
+              />
+            </div>
+          </div>
+          <DialogFooter className="mt-4">
+            <Button variant="ghost" onClick={() => setIsProfileOpen(false)} className="hover:bg-white/5 text-gray-400 hover:text-white">
+              Cancelar
+            </Button>
+            <Button onClick={handleSaveProfile} disabled={isSaving || !editName.trim()} className="bg-[#00FF00] text-black hover:bg-[#00FF00]/80 font-bold px-8">
+              {isSaving ? "Salvando..." : "Salvar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

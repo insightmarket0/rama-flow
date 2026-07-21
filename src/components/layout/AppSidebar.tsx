@@ -17,7 +17,10 @@ import {
   LogOut,
   Sparkles,
   Home,
-  MessageCircle
+  MessageCircle,
+  Package,
+  AlertTriangle,
+  Wrench
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -55,6 +58,7 @@ const NAV_GROUPS = [
     subItems: [
       { title: "Radar da Equipe", url: "/ecossistema", icon: Sparkles },
       { title: "Ranking da Equipe", url: "/ranking-equipe", icon: Trophy },
+      { title: "Gestão de Equipe", url: "/equipe", icon: Users },
       { title: "Playbooks (SOPs)", url: "/playbooks", icon: BookOpen },
     ]
   },
@@ -78,6 +82,15 @@ const NAV_GROUPS = [
       { title: "Fornecedores", url: "/fornecedores", icon: Users },
       { title: "Contas a Pagar", url: "/contas", icon: Wallet },
       { title: "Contas Fixas", url: "/contas-fixas", icon: Calendar },
+    ]
+  },
+  {
+    id: "expedicao",
+    icon: Package,
+    title: "Expedição",
+    subItems: [
+      { title: "Portal de Expedição", url: "/expedicao", icon: LayoutDashboard },
+      { title: "Novo Módulo (Em Breve)", url: "/divergencias", icon: Wrench },
     ]
   }
 ];

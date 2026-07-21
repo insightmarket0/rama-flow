@@ -12,8 +12,10 @@ import {
 } from "lucide-react";
 import { parseISO, isBefore, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useAuth } from "@/hooks/useAuth";
+import { RAP_QUOTES } from "@/lib/quotes";
+
 // ---- MOCKS AGREGADOS PARA DEMONSTRAÇÃO ----
-const CURRENT_USER_NAME = "Lucas";
 
 const MOCK_ANNOUNCEMENTS = [
   {
@@ -56,9 +58,34 @@ const MOCK_ADJUSTMENTS = [
     description: "Tirar a letra R que foi digitada por erro antes da palavra Guardanapo.",
   }
 ];
+
+const getQuoteOfTheDay = () => {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now.getTime() - start.getTime();
+  const oneDay = 1000 * 60 * 60 * 24;
+  const dayOfYear = Math.floor(diff / oneDay);
+  return RAP_QUOTES[dayOfYear % RAP_QUOTES.length];
+};
+
 // -------------------------------------------
 
 export default function MeuDia() {
+  const { user } = useAuth();
+  
+  // Extrai e formata o nome do usuário logado
+  const rawName = user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Equipe";
+  const currentUserName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+
+  // Saudação de acordo com o horário
+  const currentHour = new Date().getHours();
+  let greeting = "Bom dia";
+  if (currentHour >= 12 && currentHour < 18) {
+    greeting = "Boa tarde";
+  } else if (currentHour >= 18 || currentHour < 5) {
+    greeting = "Boa noite";
+  }
+
   const [announcements, setAnnouncements] = useState(MOCK_ANNOUNCEMENTS);
   const [reminders, setReminders] = useState(MOCK_REMINDERS);
   const [adjustments, setAdjustments] = useState(MOCK_ADJUSTMENTS);
@@ -78,6 +105,8 @@ export default function MeuDia() {
   };
 
   const isNothingPending = announcements.length === 0 && reminders.length === 0 && adjustments.length === 0;
+
+  const quoteOfDay = getQuoteOfTheDay();
 
   return (
     <div className="flex flex-col lg:flex-row h-[calc(100vh-48px)] bg-transparent w-full gap-8 font-sans overflow-hidden animate-in fade-in duration-700">
@@ -101,8 +130,8 @@ export default function MeuDia() {
         {/* Tipografia Gigante Empilhada */}
         <div className="flex flex-col space-y-1">
           <h1 className="text-4xl md:text-5xl font-light text-white tracking-tight leading-none mb-2">
-            Bom dia, <br />
-            <span className="font-medium text-[#00FF00]">{CURRENT_USER_NAME}</span>.
+            {greeting}, <br />
+            <span className="font-medium text-[#00FF00]">{currentUserName}</span>.
           </h1>
           
           <div className="flex flex-col space-y-1 mt-6 text-2xl md:text-3xl font-light text-gray-400">
@@ -249,7 +278,7 @@ export default function MeuDia() {
                 </div>
                 <div>
                   <h3 className="text-white text-lg font-light tracking-tight mb-0.5">Desempenho</h3>
-                  <p className="text-gray-500 font-medium text-xs">Resumo até o momento.</p>
+                  <p className="text-gray-400 font-light italic text-xs max-w-sm">{quoteOfDay}</p>
                 </div>
              </div>
              <div className="relative z-10 flex gap-6 mt-4 sm:mt-0">
