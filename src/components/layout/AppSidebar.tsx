@@ -13,6 +13,7 @@ import {
   ShoppingCart, 
   Wallet, 
   Calendar, 
+  CalendarPlus,
   Users,
   LogOut,
   Sparkles,
@@ -84,11 +85,11 @@ const NAV_GROUPS = [
     subItems: [
       { title: "Dashboard Financeiro", url: "/dashboard-financeiro", icon: LineChart },
       { title: "Dashboard Pedidos", url: "/dashboard", icon: LayoutDashboard },
-      { title: "Produtos", url: "/produtos", icon: ShoppingCart },
+      { title: "Contas Fixas (Novo)", url: "/contas-fixas", icon: CalendarPlus },
+      { title: "Contas Fixas (Antigo)", url: "/contas-fixas-legacy", icon: Calendar },
       { title: "Cotações", url: "/quotations", icon: ClipboardList },
       { title: "Fornecedores", url: "/fornecedores", icon: Users },
       { title: "Contas a Pagar", url: "/contas", icon: Wallet },
-      { title: "Contas Fixas", url: "/contas-fixas", icon: Calendar },
     ]
   },
   {

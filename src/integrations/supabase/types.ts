@@ -392,71 +392,184 @@ export type Database = {
     }
     recurring_expenses: {
       Row: {
+        access_info: string | null
         amount: number | null
         category: string
-        created_at: string | null
+        created_at: string
         due_day: number | null
-        due_days?: number[] | null
         due_day_offset: number | null
-        due_rule_type: string
-        end_date: string | null
+        due_days: number[] | null
+        due_rule_type: string | null
         id: string
         is_active: boolean | null
         name: string
         notes: string | null
-        recurrence_type: string
-        start_date: string
+        recurrence_type: string | null
+        start_date: string | null
         supplier_id: string | null
-        tax_description: string | null
-        updated_at: string | null
-        user_id: string
-        value_type: string
+        user_id: string | null
+        value_type: string | null
       }
       Insert: {
+        access_info?: string | null
         amount?: number | null
         category: string
-        created_at?: string | null
+        created_at?: string
         due_day?: number | null
-        due_days?: number[] | null
         due_day_offset?: number | null
-        due_rule_type?: string
-        end_date?: string | null
+        due_days?: number[] | null
+        due_rule_type?: string | null
         id?: string
         is_active?: boolean | null
         name: string
         notes?: string | null
-        recurrence_type: string
-        start_date: string
+        recurrence_type?: string | null
+        start_date?: string | null
         supplier_id?: string | null
-        tax_description?: string | null
-        updated_at?: string | null
-        user_id: string
-        value_type?: string
+        user_id?: string | null
+        value_type?: string | null
       }
       Update: {
+        access_info?: string | null
         amount?: number | null
         category?: string
-        created_at?: string | null
+        created_at?: string
         due_day?: number | null
-        due_days?: number[] | null
         due_day_offset?: number | null
-        due_rule_type?: string
-        end_date?: string | null
+        due_days?: number[] | null
+        due_rule_type?: string | null
         id?: string
         is_active?: boolean | null
         name?: string
         notes?: string | null
-        recurrence_type?: string
-        start_date?: string
+        recurrence_type?: string | null
+        start_date?: string | null
         supplier_id?: string | null
-        tax_description?: string | null
-        updated_at?: string | null
-        user_id?: string
-        value_type?: string
+        user_id?: string | null
+        value_type?: string | null
       }
       Relationships: [
         {
           foreignKeyName: "recurring_expenses_supplier_id_fkey"
+          columns: ["supplier_id"]
+          isOneToOne: false
+          referencedRelation: "suppliers"
+          referencedColumns: ["id"]
+        },
+      ]
+    }
+    smart_contract_installments: {
+      Row: {
+        created_at: string
+        due_date: string
+        id: string
+        paid_at: string | null
+        smart_contract_id: string | null
+        status: string
+        supplier_id: string | null
+        user_id: string | null
+        value: number
+      }
+      Insert: {
+        created_at?: string
+        due_date: string
+        id?: string
+        paid_at?: string | null
+        smart_contract_id?: string | null
+        status?: string
+        supplier_id?: string | null
+        user_id?: string | null
+        value: number
+      }
+      Update: {
+        created_at?: string
+        due_date?: string
+        id?: string
+        paid_at?: string | null
+        smart_contract_id?: string | null
+        status?: string
+        supplier_id?: string | null
+        user_id?: string | null
+        value?: number
+      }
+      Relationships: [
+        {
+          foreignKeyName: "smart_contract_installments_smart_contract_id_fkey"
+          columns: ["smart_contract_id"]
+          isOneToOne: false
+          referencedRelation: "smart_contracts"
+          referencedColumns: ["id"]
+        },
+        {
+          foreignKeyName: "smart_contract_installments_supplier_id_fkey"
+          columns: ["supplier_id"]
+          isOneToOne: false
+          referencedRelation: "suppliers"
+          referencedColumns: ["id"]
+        },
+      ]
+    }
+    smart_contracts: {
+      Row: {
+        access_info: string | null
+        amount: number | null
+        category: string
+        created_at: string
+        due_day: number | null
+        due_day_offset: number | null
+        due_days: number[] | null
+        due_rule_type: string | null
+        id: string
+        is_active: boolean | null
+        name: string
+        notes: string | null
+        recurrence_type: string | null
+        start_date: string | null
+        supplier_id: string | null
+        user_id: string | null
+        value_type: string | null
+      }
+      Insert: {
+        access_info?: string | null
+        amount?: number | null
+        category: string
+        created_at?: string
+        due_day?: number | null
+        due_day_offset?: number | null
+        due_days?: number[] | null
+        due_rule_type?: string | null
+        id?: string
+        is_active?: boolean | null
+        name: string
+        notes?: string | null
+        recurrence_type?: string | null
+        start_date?: string | null
+        supplier_id?: string | null
+        user_id?: string | null
+        value_type?: string | null
+      }
+      Update: {
+        access_info?: string | null
+        amount?: number | null
+        category?: string
+        created_at?: string
+        due_day?: number | null
+        due_day_offset?: number | null
+        due_days?: number[] | null
+        due_rule_type?: string | null
+        id?: string
+        is_active?: boolean | null
+        name?: string
+        notes?: string | null
+        recurrence_type?: string | null
+        start_date?: string | null
+        supplier_id?: string | null
+        user_id?: string | null
+        value_type?: string | null
+      }
+      Relationships: [
+        {
+          foreignKeyName: "smart_contracts_supplier_id_fkey"
           columns: ["supplier_id"]
           isOneToOne: false
           referencedRelation: "suppliers"

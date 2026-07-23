@@ -23,6 +23,7 @@ const Pedidos = lazy(() => import("./pages/Pedidos"));
 const Condicoes = lazy(() => import("./pages/Condicoes"));
 const Contas = lazy(() => import("./pages/Contas"));
 const ContasFixas = lazy(() => import("./pages/ContasFixas"));
+const ContasFixasLegacy = lazy(() => import("./pages/ContasFixasLegacy"));
 const Fornecedores = lazy(() => import("./pages/Fornecedores"));
 const Quotations = lazy(() => import("./pages/Quotations"));
 const QuotationForm = lazy(() => import("./pages/QuotationForm"));
@@ -230,6 +231,16 @@ const App = () => (
                 <ProtectedRoute>
                   <MainLayout>
                     <ContasFixas />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/contas-fixas-legacy"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <ContasFixasLegacy />
                   </MainLayout>
                 </ProtectedRoute>
               }

@@ -1,15 +1,9 @@
 export const EXPENSE_CATEGORIES = [
-  { value: "aluguel", label: "Aluguel", icon: "Home" },
-  { value: "salarios", label: "Salários", icon: "Users" },
-  { value: "impostos", label: "Impostos", icon: "FileText" },
-  { value: "seguros", label: "Seguros", icon: "Shield" },
-  { value: "energia", label: "Energia Elétrica", icon: "Zap" },
-  { value: "agua", label: "Água", icon: "Droplet" },
-  { value: "internet", label: "Internet/Telefone", icon: "Wifi" },
-  { value: "contabilidade", label: "Contabilidade", icon: "Calculator" },
-  { value: "manutencao", label: "Manutenção", icon: "Wrench" },
-  { value: "software", label: "Software/SaaS", icon: "Laptop" },
-  { value: "outros", label: "Outros", icon: "MoreHorizontal" },
+  { value: "infraestrutura", label: "Infraestrutura Física (Aluguel, Luz, etc)", icon: "Building" },
+  { value: "saas", label: "Ferramentas e SaaS (ERPs, Hubs)", icon: "Laptop" },
+  { value: "folha", label: "Folha e Encargos (Salários, Contabilidade)", icon: "Users" },
+  { value: "marketing", label: "Marketing e Ads (Tráfego, Influencers)", icon: "Megaphone" },
+  { value: "impostos", label: "Impostos Diretos", icon: "FileText" },
 ] as const;
 
 export const RECURRENCE_TYPES = [

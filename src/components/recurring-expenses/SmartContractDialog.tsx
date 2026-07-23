@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useRecurringExpenses } from "@/hooks/useRecurringExpenses";
+import { useSmartContracts } from "@/hooks/useSmartContracts";
 import { ArrowLeft, Building2, Cpu, FileText, Loader2, Plus, Users } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -84,15 +84,15 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-interface RecurringExpenseDialogProps {
+interface SmartContractDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   expenseToEdit?: any;
   preset?: {name: string, category: string} | null;
 }
 
-export function RecurringExpenseDialog({ open, onOpenChange, expenseToEdit, preset }: RecurringExpenseDialogProps) {
-  const { createRecurringExpense, updateRecurringExpense } = useRecurringExpenses();
+export function SmartContractDialog({ open, onOpenChange, expenseToEdit, preset }: SmartContractDialogProps) {
+  const { createRecurringExpense, updateRecurringExpense } = useSmartContracts();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<"catalog" | "form">("catalog");
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
