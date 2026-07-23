@@ -39,16 +39,38 @@ export function ContractManagementTab({
 }) {
   const allExpenses = smartContracts || [];
 
+  // Track matched expenses to avoid duplicates
+  const matchedExpenseIds = new Set<string>();
+
   // Identify which expenses fit into the core slots
   const slotMatches = CORE_SLOTS.map(slot => {
-    // Simple matching by name substring (case insensitive)
     const match = allExpenses.find(e => {
+      if (matchedExpenseIds.has(e.id)) return false;
+      
       const eName = e.name.toLowerCase();
       const sName = slot.name.toLowerCase();
-      if (eName.includes(sName.split(' ')[0])) return true;
-      if (slot.aliases && slot.aliases.some((alias: string) => eName.includes(alias))) return true;
-      return false;
+      const firstWord = sName.split(' ')[0];
+      
+      // Strict exact match, or includes first word with spaces, or aliases
+      const hasFirstWord = eName === firstWord || eName.includes(`${firstWord} `) || eName.includes(` ${firstWord}`);
+      
+      const hasAlias = slot.aliases && slot.aliases.some((alias: string) => {
+        // avoid dangerous short substring matching
+        if (alias === 'ia' || alias === 'ai') {
+           return eName === 'ia' || eName.includes(' ia ') || eName.includes(' ai ') || eName.endsWith(' ia');
+        }
+        return eName.includes(alias);
+      });
+      
+      if (eName.includes(firstWord) && firstWord.length > 3) return true; // fallback for big words like "aluguel"
+      
+      return hasFirstWord || hasAlias;
     });
+
+    if (match) {
+      matchedExpenseIds.add(match.id);
+    }
+    
     return { ...slot, match };
   });
 
