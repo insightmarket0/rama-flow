@@ -5,6 +5,7 @@ import {
   FileQuestion, Clock, FileText, Search, Copy, BarChart3, Loader2, CreditCard,
   Zap, Plus, X
 } from "lucide-react";
+import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -151,8 +152,16 @@ export function PaymentManagementTab({
     if (needsValue) {
       openInlineValue(installment);
     } else {
-      markAsPaid.mutate({ id: installment.id });
-      toast.success("Marcado como pago!");
+      markAsPaid.mutate({ id: installment.id }, {
+        onSuccess: () => {
+          confetti({
+            particleCount: 150,
+            spread: 80,
+            origin: { y: 0.6 },
+            colors: ['#00FF00', '#10B981', '#ffffff']
+          });
+        }
+      });
     }
   };
 
