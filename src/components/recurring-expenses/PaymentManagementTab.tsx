@@ -210,7 +210,7 @@ export function PaymentManagementTab({
 
   // Calcula o valor mensal real de todos os contratos/contas ativas
   const trueMonthlyBurnRate = (smartContracts || []).reduce((acc: number, expense: any) => {
-    if (!expense.is_active) return acc;
+    if (!expense.is_active || expense.recurrence_type === "esporadico") return acc;
     const amount = typeof expense.amount === "number" ? expense.amount : 0;
     
     let divisor = 1;
@@ -222,7 +222,15 @@ export function PaymentManagementTab({
     return acc + (amount / divisor);
   }, 0);
 
-  const totalCurrentMonth = trueMonthlyBurnRate;
+  const currentMonthSporadicTaxes = currentMonthInstallments.reduce((acc, inst) => {
+    const contract = (smartContracts || []).find((c: any) => c.id === inst.smart_contract_id);
+    if (contract && contract.recurrence_type === "esporadico") {
+      return acc + (Number(inst.value) || 0);
+    }
+    return acc;
+  }, 0);
+
+  const totalCurrentMonth = trueMonthlyBurnRate + currentMonthSporadicTaxes;
   const totalWithin7Days = sumValues(dueWithin7Days);
   const totalOverdue = sumValues(urgentInstallments.filter((i: any) => getUrgencyLevel(i.due_date) === "overdue"));
 

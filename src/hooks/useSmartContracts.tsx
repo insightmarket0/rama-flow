@@ -85,7 +85,8 @@ export const useSmartContracts = () => {
       if (error) throw error;
 
       // Generate installments immediately so the timeline reflects the new expense
-      if (data?.id) {
+      // Apenas se NÃO for esporádico (pois esporádicos são manuais)
+      if (data?.id && payload.recurrence_type !== "esporadico") {
         try {
           await generateSmartContractInstallments({
             expenseId: data.id,
@@ -126,7 +127,7 @@ export const useSmartContracts = () => {
       const { data, error } = await executeWithSchemaRetry(performUpdate);
       
       if (error) throw error;
-      if (data?.id) {
+      if (data?.id && data.recurrence_type !== "esporadico") {
         try {
           const rebuildMode = data.is_active ? "replace-upcoming" : "remove-upcoming";
           const todayISO = new Date().toISOString().split("T")[0];

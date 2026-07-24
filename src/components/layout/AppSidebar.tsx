@@ -107,6 +107,8 @@ export function AppSidebar() {
   const { signOut } = useAuth();
   const location = useLocation();
   const [hoveredGroup, setHoveredGroup] = useState<string | null>(null);
+  
+  const isMarketing = location.pathname === '/marketing';
 
   // Helper para checar se algum sub-item do grupo está ativo
   const isGroupActive = (group: typeof NAV_GROUPS[0]) => {
@@ -121,7 +123,7 @@ export function AppSidebar() {
         
         {/* Logo Solta no Topo */}
         <div className="mb-8 flex flex-col items-center justify-center group cursor-pointer hover:scale-110 transition-transform duration-300">
-          <Sparkles className="h-8 w-8 text-primary group-hover:text-white transition-colors" />
+          <Sparkles className={`h-8 w-8 transition-colors ${isMarketing ? 'text-cyan-400 group-hover:text-cyan-300 drop-shadow-[0_0_10px_rgba(6,182,212,0.3)]' : 'text-primary group-hover:text-white'}`} />
         </div>
 
         {/* Pill Dock (A Cápsula) */}
@@ -145,8 +147,16 @@ export function AppSidebar() {
                     to={group.mainLink!}
                     className={`h-12 w-12 rounded-full flex items-center justify-center transition-all duration-300 relative ${
                       active 
-                        ? group.special ? "bg-[#00FF00] text-black shadow-[0_0_20px_rgba(0,255,0,0.5)]" : "bg-primary text-black shadow-[0_0_15px_rgba(34,197,94,0.4)]" 
-                        : group.special ? "text-[#00FF00] hover:bg-[#00FF00]/20 bg-[#00FF00]/10" : "text-gray-400 hover:text-white hover:bg-white/10"
+                        ? group.special 
+                          ? "bg-[#00FF00] text-black shadow-[0_0_20px_rgba(0,255,0,0.5)]" 
+                          : isMarketing 
+                            ? "bg-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                            : "bg-primary text-black shadow-[0_0_15px_rgba(34,197,94,0.4)]" 
+                        : group.special 
+                          ? isMarketing
+                            ? "text-cyan-400 hover:bg-cyan-500/20 bg-cyan-500/10"
+                            : "text-[#00FF00] hover:bg-[#00FF00]/20 bg-[#00FF00]/10" 
+                          : "text-gray-400 hover:text-white hover:bg-white/10"
                     }`}
                   >
                     <Icon className={`h-5 w-5 ${active ? 'fill-black' : ''}`} />
@@ -159,7 +169,9 @@ export function AppSidebar() {
                   <button
                     className={`h-12 w-12 rounded-full flex items-center justify-center transition-all duration-300 ${
                       active 
-                        ? "bg-primary text-black shadow-[0_0_15px_rgba(34,197,94,0.4)]" 
+                        ? isMarketing
+                          ? "bg-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                          : "bg-primary text-black shadow-[0_0_15px_rgba(34,197,94,0.4)]" 
                         : "text-gray-400 hover:text-white hover:bg-white/10"
                     }`}
                   >
@@ -171,7 +183,7 @@ export function AppSidebar() {
                   <div className="absolute left-10 top-1/2 -translate-y-1/2 pl-6 py-12 z-50">
                     <div className="bg-[#0a0a0a]/95 backdrop-blur-2xl border border-white/10 rounded-2xl p-2 w-64 shadow-[0_0_40px_rgba(0,0,0,0.9)] animate-in fade-in slide-in-from-left-2 duration-200">
                       <div className="px-3 py-2 mb-2 border-b border-white/5 flex items-center gap-2">
-                        <span className="h-1.5 w-1.5 rounded-full bg-[#00FF00] shadow-[0_0_5px_rgba(0,255,0,0.5)]"></span>
+                        <span className={`h-1.5 w-1.5 rounded-full ${isMarketing ? 'bg-cyan-400 shadow-[0_0_5px_rgba(6,182,212,0.5)]' : 'bg-[#00FF00] shadow-[0_0_5px_rgba(0,255,0,0.5)]'}`}></span>
                         <span className="text-[10px] uppercase font-bold text-gray-400 tracking-widest">
                           {group.title}
                         </span>
@@ -184,14 +196,16 @@ export function AppSidebar() {
                             className={({ isActive }) =>
                               `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group border ${
                                 isActive
-                                  ? "bg-[#00FF00]/10 text-[#00FF00] border-[#00FF00]/20 shadow-[0_0_10px_rgba(0,255,0,0.05)]"
+                                  ? isMarketing
+                                    ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 shadow-[0_0_10px_rgba(6,182,212,0.05)]"
+                                    : "bg-[#00FF00]/10 text-[#00FF00] border-[#00FF00]/20 shadow-[0_0_10px_rgba(0,255,0,0.05)]"
                                   : "border-transparent text-gray-400 hover:bg-white/5 hover:border-white/5 hover:text-white"
                               }`
                             }
                           >
                             {({ isActive }) => (
                               <>
-                                <sub.icon className={`h-4 w-4 ${isActive ? "drop-shadow-[0_0_5px_rgba(0,255,0,0.5)]" : "group-hover:text-[#00FF00] transition-colors"}`} />
+                                <sub.icon className={`h-4 w-4 ${isActive ? (isMarketing ? "drop-shadow-[0_0_5px_rgba(6,182,212,0.5)]" : "drop-shadow-[0_0_5px_rgba(0,255,0,0.5)]") : (isMarketing ? "group-hover:text-cyan-400" : "group-hover:text-[#00FF00]")} transition-colors`} />
                                 {sub.title}
                               </>
                             )}

@@ -15,6 +15,7 @@ export default function ContasFixas() {
   const [activeTab, setActiveTab] = useState("payments");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [taxDialogOpen, setTaxDialogOpen] = useState(false);
+  const [taxDialogPreset, setTaxDialogPreset] = useState<"mensal" | "anual" | "esporadico" | undefined>();
   const [editingContract, setEditingContract] = useState<any>(null);
 
   const { smartContracts = [], isLoading: loadingExpenses, deleteSmartContract } = useSmartContracts();
@@ -60,16 +61,6 @@ export default function ContasFixas() {
               <TabsTrigger value="taxes" className="rounded-md data-[state=active]:bg-[#00FF00]/10 data-[state=active]:text-[#00FF00] text-xs h-full transition-all">Gestão Tributária</TabsTrigger>
               <TabsTrigger value="history" className="rounded-md data-[state=active]:bg-[#00FF00]/10 data-[state=active]:text-[#00FF00] text-xs h-full transition-all">Histórico & Dados</TabsTrigger>
             </TabsList>
-            
-            {activeTab === "payments" && (
-              <Button 
-                onClick={() => { setEditingContract(null); setDialogOpen(true); }} 
-                className="bg-[#00FF00] hover:bg-[#00FF00]/80 text-black font-semibold shadow-[0_0_10px_rgba(0,255,0,0.2)] hover:shadow-[0_0_15px_rgba(0,255,0,0.4)] rounded-lg h-9 px-4 text-sm transition-all mt-4 sm:mt-0"
-              >
-                <Plus className="mr-1.5 h-4 w-4" />
-                Nova Conta Fixa
-              </Button>
-            )}
           </div>
 
           <TabsContent value="payments" className="space-y-6 mt-6">
@@ -96,9 +87,16 @@ export default function ContasFixas() {
              <TaxManagementTab 
                smartContracts={smartContracts}
                onEdit={handleEditContract}
-               onAddNew={() => { setEditingContract(null); setTaxDialogOpen(true); }}
+               onAddNew={(preset) => { 
+                 setEditingContract(null); 
+                 setTaxDialogPreset(preset);
+                 setTaxDialogOpen(true); 
+               }}
                onDelete={handleDeleteContract}
                pastInstallments={pastInstallments}
+               upcomingInstallments={upcomingInstallments}
+               createInstallment={createInstallment}
+               markAsPaid={markAsPaid}
              />
           </TabsContent>
           
@@ -125,9 +123,13 @@ export default function ContasFixas() {
         open={taxDialogOpen} 
         onOpenChange={(open) => {
           setTaxDialogOpen(open);
-          if (!open) setEditingContract(null);
+          if (!open) {
+            setEditingContract(null);
+            setTaxDialogPreset(undefined);
+          }
         }}
         taxToEdit={editingContract}
+        presetRecurrence={taxDialogPreset}
       />
     </>
   );

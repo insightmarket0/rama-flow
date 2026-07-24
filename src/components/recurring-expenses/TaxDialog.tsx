@@ -9,17 +9,20 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useSmartContracts } from "@/hooks/useSmartContracts";
+import { useSmartContractInstallments } from "@/hooks/useSmartContractInstallments";
 import { formatCurrencyBRL } from "@/lib/format";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, AlertTriangle, Building2, Calendar, Target } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
   name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
   company_name: z.string().min(3, "Informe a empresa ou CNPJ"),
   amount: z.string().min(1, "Informe o valor"),
   is_estimated: z.boolean().default(true),
-  recurrence_type: z.enum(["mensal", "anual"]),
+  recurrence_type: z.enum(["mensal", "anual", "esporadico"]),
   due_day: z.string().min(1, "Informe o dia"),
   start_date: z.string().min(1, "Informe a data de início"),
 });
@@ -31,10 +34,13 @@ interface TaxDialogProps {
   onOpenChange: (open: boolean) => void;
   taxToEdit?: any;
   presetName?: string;
+  presetRecurrence?: "mensal" | "anual" | "esporadico";
 }
 
-export function TaxDialog({ open, onOpenChange, taxToEdit, presetName }: TaxDialogProps) {
+export function TaxDialog({ open, onOpenChange, taxToEdit, presetName, presetRecurrence }: TaxDialogProps) {
   const { createSmartContract, updateSmartContract } = useSmartContracts();
+  const { createInstallment } = useSmartContractInstallments();
+  const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormData>({
@@ -63,7 +69,7 @@ export function TaxDialog({ open, onOpenChange, taxToEdit, presetName }: TaxDial
           company_name: parsedNotes.company_name || "",
           amount: taxToEdit.amount ? String(taxToEdit.amount) : "",
           is_estimated: taxToEdit.value_type === "variable",
-          recurrence_type: taxToEdit.recurrence_type === "anual" ? "anual" : "mensal",
+          recurrence_type: taxToEdit.recurrence_type === "anual" ? "anual" : taxToEdit.recurrence_type === "esporadico" ? "esporadico" : "mensal",
           due_day: taxToEdit.due_day ? String(taxToEdit.due_day) : "20",
           start_date: taxToEdit.start_date,
         });
@@ -73,13 +79,13 @@ export function TaxDialog({ open, onOpenChange, taxToEdit, presetName }: TaxDial
           company_name: "",
           amount: "",
           is_estimated: true,
-          recurrence_type: "mensal",
+          recurrence_type: presetRecurrence || "mensal",
           due_day: "20",
           start_date: new Date().toISOString().split("T")[0],
         });
       }
     }
-  }, [open, taxToEdit, presetName, form]);
+  }, [open, taxToEdit, presetName, presetRecurrence, form]);
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
@@ -105,8 +111,47 @@ export function TaxDialog({ open, onOpenChange, taxToEdit, presetName }: TaxDial
 
       if (taxToEdit) {
         await updateSmartContract.mutateAsync({ id: taxToEdit.id, ...payload });
+        
+        if (payload.recurrence_type === "esporadico") {
+          try {
+            const { data: pendingGuia } = await supabase
+              .from("smart_contract_installments")
+              .select("id")
+              .eq("smart_contract_id", taxToEdit.id)
+              .neq("status", "pago")
+              .limit(1)
+              .single();
+
+            if (pendingGuia) {
+              await supabase
+                .from("smart_contract_installments")
+                .update({
+                  due_date: payload.start_date,
+                  value: parsedAmount
+                })
+                .eq("id", pendingGuia.id);
+                
+              queryClient.invalidateQueries({ queryKey: ["smart-contract-installments"] });
+            }
+          } catch (e) {
+            console.error("Erro ao atualizar a guia pendente esporádica:", e);
+          }
+        }
       } else {
-        await createSmartContract.mutateAsync(payload);
+        const createdContract = await createSmartContract.mutateAsync(payload);
+        
+        // Se for esporádico e tiver valor e data preenchidos, lança a primeira guia na hora.
+        if (payload.recurrence_type === "esporadico" && parsedAmount > 0 && payload.start_date) {
+          try {
+             await createInstallment.mutateAsync({
+               smart_contract_id: createdContract.id,
+               value: parsedAmount,
+               due_date: payload.start_date
+             });
+          } catch (e) {
+            console.error("Erro ao criar a 1ª guia esporádica", e);
+          }
+        }
       }
       
       onOpenChange(false);
@@ -198,7 +243,9 @@ export function TaxDialog({ open, onOpenChange, taxToEdit, presetName }: TaxDial
                     name="amount"
                     render={({ field }) => (
                       <FormItem className="flex-1">
-                        <FormLabel className="text-gray-300">Valor Base (R$)</FormLabel>
+                        <FormLabel className="text-gray-300">
+                          {form.watch("recurrence_type") === "esporadico" ? "Valor da Guia (R$)" : "Valor Base (R$)"}
+                        </FormLabel>
                         <FormControl>
                           <Input 
                             type="number" 
@@ -213,24 +260,26 @@ export function TaxDialog({ open, onOpenChange, taxToEdit, presetName }: TaxDial
                     )}
                   />
                   
-                  <FormField
-                    control={form.control}
-                    name="is_estimated"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col pt-8">
-                        <div className="flex items-center gap-2">
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                              className="data-[state=checked]:bg-emerald-500"
-                            />
-                          </FormControl>
-                          <FormLabel className="text-gray-400 text-xs font-normal m-0 pb-0">É estimativa?</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
+                  {form.watch("recurrence_type") !== "esporadico" && (
+                    <FormField
+                      control={form.control}
+                      name="is_estimated"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col pt-8">
+                          <div className="flex items-center gap-2">
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                className="data-[state=checked]:bg-emerald-500"
+                              />
+                            </FormControl>
+                            <FormLabel className="text-gray-400 text-xs font-normal m-0 pb-0">É estimativa?</FormLabel>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -249,32 +298,35 @@ export function TaxDialog({ open, onOpenChange, taxToEdit, presetName }: TaxDial
                           <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
                             <SelectItem value="mensal">Mensal</SelectItem>
                             <SelectItem value="anual">Anual</SelectItem>
+                            <SelectItem value="esporadico">Esporádico</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormItem>
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="due_day"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-gray-300">Dia de Vencimento</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            min="1" 
-                            max="31" 
-                            placeholder="Ex: 20" 
-                            {...field} 
-                            className="bg-white/5 border-white/10 focus-visible:ring-emerald-500 text-white" 
-                          />
-                        </FormControl>
-                        <FormMessage className="text-red-400" />
-                      </FormItem>
-                    )}
-                  />
+                  {form.watch("recurrence_type") !== "esporadico" && (
+                    <FormField
+                      control={form.control}
+                      name="due_day"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-gray-300">Dia de Vencimento</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              min="1" 
+                              max="31" 
+                              placeholder="Ex: 20" 
+                              {...field} 
+                              className="bg-white/5 border-white/10 focus-visible:ring-emerald-500 text-white" 
+                            />
+                          </FormControl>
+                          <FormMessage className="text-red-400" />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </div>
                 
                 <FormField
@@ -282,12 +334,14 @@ export function TaxDialog({ open, onOpenChange, taxToEdit, presetName }: TaxDial
                   name="start_date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-300">Inicia em (Referência)</FormLabel>
+                      <FormLabel className="text-gray-300">
+                        {form.watch("recurrence_type") === "esporadico" ? "Data de Vencimento" : "Inicia em (Referência)"}
+                      </FormLabel>
                       <FormControl>
                         <Input 
                           type="date" 
                           {...field} 
-                          className="bg-white/5 border-white/10 focus-visible:ring-emerald-500 text-white [color-scheme:dark]" 
+                          className="bg-white/5 border-white/10 focus-visible:ring-emerald-500 text-white [color-scheme:dark] w-full" 
                         />
                       </FormControl>
                       <FormMessage className="text-red-400" />

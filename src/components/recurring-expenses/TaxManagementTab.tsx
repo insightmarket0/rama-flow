@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
-  FileText, Plus, UploadCloud, CheckCircle2, AlertTriangle, Clock, Target, Info
+  FileText, Plus, UploadCloud, CheckCircle2, AlertTriangle, Clock, Target, Info, Trash2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,17 +12,21 @@ import { useFinancialClosings } from '@/hooks/useFinancialClosings';
 interface TaxManagementTabProps {
   smartContracts: any[];
   pastInstallments: any[];
-  onAddNew: () => void;
+  upcomingInstallments?: any[];
+  onAddNew: (presetRecurrence?: "mensal" | "anual" | "esporadico") => void;
   onEdit: (expense: any) => void;
   onDelete: (id: string) => void;
 }
 
 export function TaxManagementTab({ 
   smartContracts, 
-  pastInstallments, 
+  pastInstallments,
+  upcomingInstallments,
   onAddNew, 
   onEdit, 
-  onDelete 
+  onDelete,
+  createInstallment,
+  markAsPaid
 }: TaxManagementTabProps) {
   // Estado para simular o Drag & Drop
   const [isDragging, setIsDragging] = useState(false);
@@ -222,6 +226,136 @@ export function TaxManagementTab({
         </Card>
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Seção de Guias Avulsas e Esporádicas (DARE) */}
+        <div>
+        <div className="flex items-center justify-between mb-4 mt-8">
+          <div className="flex items-center gap-2">
+            <Clock className="h-5 w-5 text-white/70" />
+            <h2 className="text-lg font-light text-white tracking-tight">Guias Avulsas & Esporádicas</h2>
+          </div>
+        </div>
+
+        <div className="grid gap-4 grid-cols-1 xl:grid-cols-2">
+            {smartContracts.filter(e => e.category === 'impostos' && e.recurrence_type === 'esporadico').map(tax => {
+              // Verifica se há alguma guia pendente (installment)
+              const pendingGuia = upcomingInstallments?.find(inst => inst.smart_contract_id === tax.id && inst.status !== 'paid');
+              
+              return (
+                <Card key={tax.id} className="transition-all duration-300 backdrop-blur-sm overflow-hidden border-white/10 hover:border-white/20 bg-[#111111]/80 cursor-pointer group hover:scale-[1.01]">
+                  <CardHeader className="pb-3 border-b border-white/5 bg-white/5">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-stone-500/10 text-stone-400 group-hover:scale-110 transition-transform">
+                          <Clock className="h-5 w-5 text-stone-400" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-white text-base font-medium group-hover:text-[#00FF00] transition-colors">{tax.name}</CardTitle>
+                          <CardDescription className="text-gray-400 text-[10px] uppercase tracking-widest mt-0.5 font-semibold">
+                            {pendingGuia ? `Vencimento: ${new Date(pendingGuia.due_date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}` : 'Sem guia ativa'}
+                          </CardDescription>
+                        </div>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => onEdit(tax)} className="h-8 w-8 text-gray-500 hover:text-white hover:bg-white/10 rounded-full">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm("Deseja realmente excluir este imposto?")) {
+                              onDelete(tax.id);
+                            }
+                          }} 
+                          className="h-8 w-8 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-full"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      {pendingGuia ? (
+                        <Badge variant="outline" className="text-[9px] uppercase tracking-widest border-stone-500/30 text-stone-400 bg-stone-500/10">Aguardando Pagamento</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-[9px] uppercase tracking-widest border-stone-500/30 text-stone-400 bg-transparent">Aguardando Próxima Guia</Badge>
+                      )}
+                      
+                      {pendingGuia && (
+                        <span className="text-sm font-semibold text-white">
+                          {formatCurrencyBRL(pendingGuia.value)}
+                        </span>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-4 space-y-3">
+                    <div className="bg-black/50 rounded p-2 text-xs text-gray-400 border border-white/5">
+                      <span className="block text-gray-300 font-medium mb-1">Pagamento Personalizado:</span>
+                      Imposto esporádico. Não possui datas fixas mensais.
+                    </div>
+                    <div className="flex gap-2 mt-4">
+                      {pendingGuia ? (
+                        <>
+                          <Button className="flex-1 bg-transparent hover:bg-white/5 text-gray-300 border border-white/10 text-xs h-8 transition-colors">
+                            <UploadCloud className="w-3 h-3 mr-2" /> Anexar Guia
+                          </Button>
+                          <Button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (markAsPaid) markAsPaid.mutateAsync({ id: pendingGuia.id });
+                            }}
+                            className="flex-1 bg-white/5 hover:bg-[#00FF00]/10 hover:text-[#00FF00] hover:border-[#00FF00]/30 text-white font-semibold text-xs h-8 border border-white/10 transition-all"
+                          >
+                            <CheckCircle2 className="w-3 h-3 mr-2" /> Liquidar
+                          </Button>
+                        </>
+                      ) : (
+                        <Button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (createInstallment) {
+                              const hoje = new Date().toISOString().split('T')[0];
+                              const valor = parseFloat(prompt('Digite o valor da nova guia:') || '0');
+                              const dataStr = prompt('Digite a data de vencimento (AAAA-MM-DD):', hoje);
+                              if (valor > 0 && dataStr) {
+                                createInstallment.mutateAsync({
+                                  smart_contract_id: tax.id,
+                                  value: valor,
+                                  due_date: dataStr
+                                });
+                              }
+                            }
+                          }}
+                          className="w-full bg-white/5 hover:bg-white/10 text-white font-semibold text-xs h-8 border border-white/10 transition-all"
+                        >
+                          <Plus className="w-3 h-3 mr-2" /> Lançar Nova Guia
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+            
+            {smartContracts.filter(e => e.category === 'impostos' && e.recurrence_type === 'esporadico').length === 0 && (
+              <div className="col-span-full py-8 text-center border border-white/5 border-dashed rounded-xl bg-white/[0.02]">
+                <Clock className="w-8 h-8 text-stone-500 mx-auto mb-3 opacity-50" />
+                <p className="text-gray-400 text-sm">Nenhum imposto esporádico (ex: DARE) cadastrado.</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => onAddNew('esporadico')} 
+                  className="mt-4 border-white/10 hover:bg-white/10"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Cadastrar Imposto Esporádico
+                </Button>
+              </div>
+            )}
+        </div>
+      </div>
+
       {/* Seção das Obrigações (Cards Robustos) */}
       <div>
         <div className="flex items-center justify-between mb-4 mt-8">
@@ -238,8 +372,8 @@ export function TaxManagementTab({
           </Button>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {taxes.map(expense => {
+        <div className="grid gap-4 grid-cols-1 xl:grid-cols-2">
+          {taxes.filter(e => e.recurrence_type !== 'esporadico').map(expense => {
             const status = getObligationStatus(expense);
             
             // Definições de Estilo por Estado
@@ -286,17 +420,32 @@ export function TaxManagementTab({
                         </CardDescription>
                       </div>
                     </div>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 text-gray-500 hover:text-white hover:bg-white/10 rounded-full"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEdit(expense);
-                      }}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 text-gray-500 hover:text-white hover:bg-white/10 rounded-full"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEdit(expense);
+                        }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-full"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (window.confirm("Deseja realmente excluir esta obrigação fixa?")) {
+                            onDelete(expense.id);
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                   {/* CNPJ / Empresa */}
                   {expense.notes && (() => {
@@ -348,6 +497,7 @@ export function TaxManagementTab({
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 }
