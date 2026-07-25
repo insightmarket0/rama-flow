@@ -202,9 +202,6 @@ export function MainLayout({ children }: MainLayoutProps) {
                         </Avatar>
                         
                         <div className="flex flex-col items-start justify-center pr-2 text-left">
-                          <span className="text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-0.5">
-                            {role ?? "Membro"}
-                          </span>
                           <span className="text-sm font-semibold text-white tracking-wide leading-tight truncate max-w-[150px]">
                             {fullName ?? user?.email?.split('@')[0] ?? 'Fahema Yesmin'}
                           </span>
@@ -223,9 +220,10 @@ export function MainLayout({ children }: MainLayoutProps) {
                   </DropdownMenu>
             </div>
           )}
-          <main className={`flex-1 ${location.pathname === '/marketing' ? 'h-screen overflow-hidden' : 'p-6'}`}>
-            <div key={location.pathname} className={`${location.pathname === '/marketing' ? 'h-full flex flex-col' : 'space-y-6'} animate-in fade-in slide-in-from-bottom-4 zoom-in-95 duration-300 ease-out`}>
-              {location.pathname !== '/marketing' && <GlobalAlerts />}
+
+          <main className={`flex-1 ${(location.pathname === '/marketing' || location.pathname === '/brand-book' || location.pathname === '/equipe' || location.pathname === '/expedicao') ? 'h-screen overflow-hidden' : 'p-6'}`}>
+            <div key={location.pathname} className={`${(location.pathname === '/marketing' || location.pathname === '/brand-book' || location.pathname === '/equipe' || location.pathname === '/expedicao') ? 'h-full flex flex-col' : 'space-y-6'} animate-in fade-in slide-in-from-bottom-4 zoom-in-95 duration-300 ease-out`}>
+              {(location.pathname !== '/marketing' && location.pathname !== '/brand-book' && location.pathname !== '/equipe' && location.pathname !== '/expedicao') && <GlobalAlerts />}
               {children}
             </div>
           </main>

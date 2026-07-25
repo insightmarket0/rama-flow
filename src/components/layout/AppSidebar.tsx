@@ -21,7 +21,9 @@ import {
   MessageCircle,
   Package,
   AlertTriangle,
-  Wrench
+  Wrench,
+  Heart,
+  DollarSign
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -34,6 +36,7 @@ const NAV_GROUPS = [
     mainLink: "/meu-dia",
     subItems: [] // Sem sub-itens, clica direto
   },
+
   {
     id: "chat",
     icon: MessageCircle,
@@ -53,29 +56,12 @@ const NAV_GROUPS = [
     ]
   },
   {
-    id: "equipe",
-    icon: Users,
-    title: "Equipe",
-    subItems: [
-      // Menu unificado
-      { title: "Radar & Ranking", url: "/ranking-equipe", icon: Trophy },
-      { title: "Gestão de Equipe", url: "/equipe", icon: Users },
-      { title: "Playbooks (SOPs)", url: "/playbooks", icon: BookOpen },
-    ]
-  },
-  {
-    id: "marketing",
-    icon: Megaphone,
-    title: "Marketing & Growth",
-    mainLink: "/marketing",
-    subItems: []
-  },
-  {
     id: "gestao",
     icon: LineChart,
     title: "Gestão",
     subItems: [
       { title: "Metas e Visão", url: "/metas", icon: Target },
+      { title: "Playbooks (SOPs)", url: "/playbooks", icon: BookOpen },
     ]
   },
   {
@@ -86,7 +72,6 @@ const NAV_GROUPS = [
       { title: "Dashboard Financeiro", url: "/dashboard-financeiro", icon: LineChart },
       { title: "Dashboard Pedidos", url: "/dashboard", icon: LayoutDashboard },
       { title: "Contas Fixas (Novo)", url: "/contas-fixas", icon: CalendarPlus },
-      { title: "Contas Fixas (Antigo)", url: "/contas-fixas-legacy", icon: Calendar },
       { title: "Cotações", url: "/quotations", icon: ClipboardList },
       { title: "Fornecedores", url: "/fornecedores", icon: Users },
       { title: "Contas a Pagar", url: "/contas", icon: Wallet },
@@ -100,15 +85,59 @@ const NAV_GROUPS = [
       { title: "Portal de Expedição", url: "/expedicao", icon: LayoutDashboard },
       { title: "Novo Módulo (Em Breve)", url: "/divergencias", icon: Wrench },
     ]
+  },
+  {
+    id: "marketing",
+    icon: Megaphone,
+    title: "Marketing & Growth",
+    mainLink: "/marketing",
+    subItems: [
+      { title: "Dashboard Marketing", url: "/marketing", icon: Megaphone },
+      { title: "Identidade da Marca", url: "/brand-book", icon: Heart },
+    ]
+  },
+  {
+    id: "equipe",
+    icon: Users,
+    title: "Equipe",
+    subItems: [
+      { title: "Gestão de Equipe", url: "/equipe", icon: Users },
+    ]
   }
 ];
 
 export function AppSidebar() {
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const location = useLocation();
   const [hoveredGroup, setHoveredGroup] = useState<string | null>(null);
   
-  const isMarketing = location.pathname === '/marketing';
+  const isMarketing = location.pathname === '/marketing' || location.pathname === '/brand-book';
+
+  const filteredNavGroups = NAV_GROUPS.map(group => {
+    let modifiedGroup = { ...group };
+
+    if (user?.email === "mara@hotmail.com") {
+      if (!["home", "gestao", "expedicao", "operacao"].includes(group.id)) {
+        return null;
+      }
+      if (group.id === "operacao") {
+        modifiedGroup.subItems = modifiedGroup.subItems.filter(item => item.url === "/lembretes");
+      }
+    }
+
+    return modifiedGroup;
+  }).filter(Boolean) as typeof NAV_GROUPS;
+
+  if (user?.email === "mara@hotmail.com") {
+    const maraOrder = ["home", "expedicao", "operacao", "gestao"];
+    filteredNavGroups.sort((a, b) => {
+      let idxA = maraOrder.indexOf(a.id);
+      let idxB = maraOrder.indexOf(b.id);
+      if (idxA === -1) idxA = 999;
+      if (idxB === -1) idxB = 999;
+      return idxA - idxB;
+    });
+  }
 
   // Helper para checar se algum sub-item do grupo está ativo
   const isGroupActive = (group: typeof NAV_GROUPS[0]) => {
@@ -129,7 +158,7 @@ export function AppSidebar() {
         {/* Pill Dock (A Cápsula) */}
         <div className="bg-[#1C1C1E] border border-white/5 rounded-[40px] p-2.5 flex flex-col items-center gap-3 shadow-2xl relative">
           
-          {NAV_GROUPS.map((group) => {
+          {filteredNavGroups.map((group) => {
             const active = isGroupActive(group);
             const Icon = group.icon;
 

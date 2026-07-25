@@ -31,9 +31,9 @@ const NotFound = () => {
 
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Button asChild>
-            <Link to="/dashboard">
+            <Link to="/meu-dia">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Ir para o Dashboard
+              Ir para o Início
             </Link>
           </Button>
           <Button asChild variant="outline">

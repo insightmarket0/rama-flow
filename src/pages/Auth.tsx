@@ -29,7 +29,7 @@ const Auth = () => {
         if (!isMounted) return;
 
         if (session) {
-          navigate("/dashboard", { replace: true });
+          navigate("/meu-dia", { replace: true });
         } else {
           setCheckingSession(false);
         }
@@ -46,7 +46,7 @@ const Auth = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
-        navigate("/dashboard", { replace: true });
+        navigate("/meu-dia", { replace: true });
       }
     });
 
@@ -95,7 +95,7 @@ const Auth = () => {
           title: "Bem-vindo!",
           description: "Login realizado com sucesso.",
         });
-        navigate("/dashboard");
+        navigate("/meu-dia");
       }
     } catch (error: unknown) {
       toast({

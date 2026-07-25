@@ -87,7 +87,7 @@ const ASSETS = [
 ];
 
 export default function Marketing() {
-  const [activeTab, setActiveTab] = useState<"cockpit" | "roadmap" | "crm" | "performance">("cockpit");
+  const [activeTab, setActiveTab] = useState<"orcamento" | "cockpit" | "roadmap" | "crm" | "performance">("cockpit");
   const [viewScope, setViewScope] = useState<"global" | "marca_propria">("global");
   const [isBrandVaultOpen, setIsBrandVaultOpen] = useState(false);
   const [zoom, setZoom] = useState<"semana" | "mes" | "trimestre">("mes");
@@ -144,66 +144,11 @@ export default function Marketing() {
           </div>
         </div>
 
-        {/* Global KPIs Premium */}
-        <div className="grid grid-cols-4 gap-3 shrink-0">
-          <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors">
-            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <div className="flex justify-between mb-1.5">
-              <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">Orçamento</span>
-              <DollarSign className="w-3.5 h-3.5 text-gray-600" />
-            </div>
-            <div className="flex items-end justify-between">
-              <span className="text-lg font-semibold text-white tracking-tight">{currentKPI.orcamento}</span>
-              <span className="text-[10px] text-gray-500">{currentKPI.percentGasto}% gasto</span>
-            </div>
-            <div className="w-full h-1 bg-[#1a1a1a] rounded-full mt-2 overflow-hidden">
-              <div className="h-full bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)] transition-all duration-500" style={{ width: `${currentKPI.percentGasto}%` }}></div>
-            </div>
-          </div>
-
-          <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors">
-            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <div className="flex justify-between mb-1.5">
-              <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">ROAS</span>
-              <Target className="w-3.5 h-3.5 text-gray-600" />
-            </div>
-            <div className="flex items-center gap-2 mt-auto">
-              <span className="text-lg font-semibold text-white tracking-tight">{currentKPI.roas}</span>
-              <span className="flex items-center text-cyan-400 text-[10px] font-medium bg-cyan-500/10 px-1.5 py-0.5 rounded-full border border-cyan-500/20">
-                <ArrowUpRight className="w-2.5 h-2.5 mr-0.5" /> {currentKPI.roasTrend}%
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors">
-            <div className="flex justify-between mb-1.5">
-              <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">CPA (Custo Acq.)</span>
-              <Activity className="w-3.5 h-3.5 text-gray-600" />
-            </div>
-            <div className="flex items-center gap-2 mt-auto">
-              <span className="text-lg font-semibold text-white tracking-tight">{currentKPI.cpa}</span>
-              <span className={`flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded-full border ${currentKPI.cpaTrend > 0 ? 'text-red-400 bg-red-400/10 border-red-400/20' : 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20'}`}>
-                {currentKPI.cpaTrend > 0 ? <ArrowUpRight className="w-2.5 h-2.5 mr-0.5" /> : <ArrowDownRight className="w-2.5 h-2.5 mr-0.5" />}
-                {Math.abs(currentKPI.cpaTrend)}%
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-[#111] to-[#0a0a0a] border border-white/5 hover:border-cyan-500/30 transition-all rounded-2xl p-3.5 flex items-center justify-between cursor-pointer group shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
-            <div>
-              <div className="flex items-center gap-1.5 mb-1">
-                <Flame className="w-3.5 h-3.5 text-cyan-400 drop-shadow-[0_0_5px_rgba(6,182,212,0.8)]" />
-                <span className="text-white text-xs font-medium tracking-wide">Modo Scaling</span>
-              </div>
-              <p className="text-[10px] text-gray-400 leading-tight">Injetar verba automática<br/>na campanha vencedora.</p>
-            </div>
-          </div>
-        </div>
-
         {/* Tabs de Navegação Estilo Pill */}
-        <div className="flex items-center gap-2 mt-2 shrink-0">
+        <div className="flex items-center gap-2 mt-2 shrink-0 overflow-x-auto no-scrollbar">
           {[
             { id: "cockpit", label: "Cockpit Executivo" },
+            { id: "orcamento", label: "Orçamento e Investimentos" },
             { id: "roadmap", label: "Creative Studio (Roteiros)" },
             { id: "crm", label: "CRM Influenciadores" },
             { id: "performance", label: "Performance Ads" },
@@ -267,8 +212,47 @@ export default function Marketing() {
                     </div>
                   </div>
 
+                  {/* Visualização de Mapa (Heatmap ABC/SP) */}
+                  <div className="mt-4 mb-2 relative h-32 bg-[#111111] border border-white/5 rounded-xl overflow-hidden group">
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+                    
+                    {/* Pontos no Mapa */}
+                    <div className="absolute top-1/3 left-1/4 group-hover:scale-110 transition-transform">
+                      <div className="relative">
+                        <span className="animate-ping absolute -inset-1 rounded-full bg-cyan-400 opacity-20"></span>
+                        <div className="w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_8px_rgba(6,182,212,0.8)]"></div>
+                        <span className="absolute top-3 left-1/2 -translate-x-1/2 text-[8px] text-cyan-400/80 font-bold tracking-widest uppercase">SP</span>
+                      </div>
+                    </div>
+                    
+                    <div className="absolute top-1/2 right-1/3 group-hover:scale-110 transition-transform delay-75">
+                      <div className="relative">
+                        <span className="animate-ping absolute -inset-2 rounded-full bg-cyan-500 opacity-30" style={{ animationDuration: '3s' }}></span>
+                        <div className="w-3 h-3 bg-cyan-500 rounded-full shadow-[0_0_12px_rgba(6,182,212,1)]"></div>
+                        <span className="absolute top-4 left-1/2 -translate-x-1/2 text-[8px] text-cyan-400/80 font-bold tracking-widest uppercase">SBC</span>
+                      </div>
+                    </div>
+
+                    <div className="absolute bottom-1/4 right-1/4 group-hover:scale-110 transition-transform delay-150">
+                      <div className="relative">
+                        <span className="animate-ping absolute -inset-1 rounded-full bg-blue-400 opacity-20" style={{ animationDuration: '2.5s' }}></span>
+                        <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                        <span className="absolute top-2.5 left-1/2 -translate-x-1/2 text-[7px] text-blue-400/60 uppercase">SA</span>
+                      </div>
+                    </div>
+                    
+                    <div className="absolute top-1/4 right-1/4 group-hover:scale-110 transition-transform delay-150">
+                      <div className="relative">
+                        <span className="animate-ping absolute -inset-1 rounded-full bg-blue-400 opacity-20" style={{ animationDuration: '2s' }}></span>
+                        <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                        <span className="absolute top-2.5 left-1/2 -translate-x-1/2 text-[7px] text-blue-400/60 uppercase">SCS</span>
+                      </div>
+                    </div>
+
+                  </div>
+
                   {/* Indicador de Risco / Custo */}
-                  <div className="mt-auto pt-6">
+                  <div className="mt-auto pt-2">
                     <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl relative overflow-hidden flex flex-col">
                       <div className="absolute top-0 right-0 p-1">
                         <span className="relative flex h-2 w-2">
@@ -772,7 +756,238 @@ export default function Marketing() {
               </div>
             </div>
           )}
-        </div>
+
+          {/* TAB 4: ORÇAMENTO */}
+          {activeTab === "orcamento" && (
+            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar pb-6 mt-4">
+            <div className="grid grid-cols-4 gap-3 shrink-0">
+              <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="flex justify-between mb-1.5">
+                  <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">Orçamento</span>
+                  <DollarSign className="w-3.5 h-3.5 text-gray-600" />
+                </div>
+                <div className="flex items-end justify-between">
+                  <span className="text-lg font-semibold text-white tracking-tight">{currentKPI.orcamento}</span>
+                  <span className="text-[10px] text-gray-500">{currentKPI.percentGasto}% gasto</span>
+                </div>
+                <div className="w-full h-1 bg-[#1a1a1a] rounded-full mt-2 overflow-hidden">
+                  <div className="h-full bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)] transition-all duration-500" style={{ width: `${currentKPI.percentGasto}%` }}></div>
+                </div>
+              </div>
+
+              <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="flex justify-between mb-1.5">
+                  <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">ROAS</span>
+                  <Target className="w-3.5 h-3.5 text-gray-600" />
+                </div>
+                <div className="flex items-center gap-2 mt-auto">
+                  <span className="text-lg font-semibold text-white tracking-tight">{currentKPI.roas}</span>
+                  <span className="flex items-center text-cyan-400 text-[10px] font-medium bg-cyan-500/10 px-1.5 py-0.5 rounded-full border border-cyan-500/20">
+                    <ArrowUpRight className="w-2.5 h-2.5 mr-0.5" /> {currentKPI.roasTrend}%
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors">
+                <div className="flex justify-between mb-1.5">
+                  <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">CPA (Custo Acq.)</span>
+                  <Activity className="w-3.5 h-3.5 text-gray-600" />
+                </div>
+                <div className="flex items-center gap-2 mt-auto">
+                  <span className="text-lg font-semibold text-white tracking-tight">{currentKPI.cpa}</span>
+                  <span className={`flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded-full border ${currentKPI.cpaTrend > 0 ? 'text-red-400 bg-red-400/10 border-red-400/20' : 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20'}`}>
+                    {currentKPI.cpaTrend > 0 ? <ArrowUpRight className="w-2.5 h-2.5 mr-0.5" /> : <ArrowDownRight className="w-2.5 h-2.5 mr-0.5" />}
+                    {Math.abs(currentKPI.cpaTrend)}%
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-[#111] to-[#0a0a0a] border border-white/5 hover:border-cyan-500/30 transition-all rounded-2xl p-3.5 flex items-center justify-between cursor-pointer group shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
+                <div>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Flame className="w-3.5 h-3.5 text-cyan-400 drop-shadow-[0_0_5px_rgba(6,182,212,0.8)]" />
+                    <span className="text-white text-xs font-medium tracking-wide">Modo Scaling</span>
+                  </div>
+                  <p className="text-[10px] text-gray-400 leading-tight">Injetar verba automática<br/>na campanha vencedora.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Painéis Corporativos */}
+            <div className="mt-6 flex flex-col gap-6 max-w-full pb-4">
+              
+              {/* Split Superior: Distribuição & Aprovações */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                
+                {/* 1. Distribuição de Verba (Burn Rate & Split) */}
+                <div className="lg:col-span-7 bg-[#0a0a0a] border border-white/5 rounded-2xl p-5 flex flex-col">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-white text-sm font-semibold tracking-tight">Split de Investimentos</h3>
+                    <span className="text-xs text-gray-500 font-medium tracking-widest uppercase">Julho / 2026</span>
+                  </div>
+                  
+                  <div className="space-y-5 mt-auto">
+                    <div>
+                      <div className="flex justify-between text-xs mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]"></span>
+                          <span className="text-gray-300 font-medium">Tráfego Pago (Meta/TikTok)</span>
+                        </div>
+                        <span className="text-white font-bold">60%</span>
+                      </div>
+                      <div className="w-full h-2 bg-[#1a1a1a] rounded-full overflow-hidden">
+                        <div className="h-full bg-cyan-500" style={{ width: '60%' }}></div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between text-xs mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span>
+                          <span className="text-gray-300 font-medium">Cachê Base (Influenciadores)</span>
+                        </div>
+                        <span className="text-white font-bold">25%</span>
+                      </div>
+                      <div className="w-full h-2 bg-[#1a1a1a] rounded-full overflow-hidden">
+                        <div className="h-full bg-purple-500" style={{ width: '25%' }}></div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between text-xs mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)]"></span>
+                          <span className="text-gray-300 font-medium">Seeding & Envio de Produtos</span>
+                        </div>
+                        <span className="text-white font-bold">15%</span>
+                      </div>
+                      <div className="w-full h-2 bg-[#1a1a1a] rounded-full overflow-hidden">
+                        <div className="h-full bg-amber-500" style={{ width: '15%' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Pipeline de Aprovações (Corporate Workflow) */}
+                <div className="lg:col-span-5 bg-[#0a0a0a] border border-white/5 rounded-2xl p-5 flex flex-col">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-white text-sm font-semibold tracking-tight">Aprovações Pendentes</h3>
+                    <div className="px-2 py-0.5 bg-yellow-500/10 border border-yellow-500/20 rounded-full flex items-center gap-1.5">
+                      <Clock className="w-3 h-3 text-yellow-500" />
+                      <span className="text-[10px] text-yellow-500 font-bold uppercase tracking-widest">3 Ações</span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3 mt-1 flex-1 overflow-y-auto custom-scrollbar pr-1">
+                    <div className="bg-[#111] border border-white/5 p-3 rounded-xl flex flex-col gap-2 relative overflow-hidden group hover:border-yellow-500/30 transition-all">
+                      <div className="flex justify-between items-start">
+                        <span className="text-xs text-white font-medium">Cachê Extra: Virgínia</span>
+                        <span className="text-xs font-bold text-gray-300">R$ 15.000</span>
+                      </div>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-[10px] text-gray-500">Campanha Black Friday</span>
+                        <div className="flex gap-2">
+                          <button className="text-[9px] font-bold px-2 py-1 bg-white/5 hover:bg-white/10 rounded uppercase text-gray-400">Rejeitar</button>
+                          <button className="text-[9px] font-bold px-2 py-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded uppercase hover:bg-cyan-500/20">Aprovar</button>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-[#111] border border-white/5 p-3 rounded-xl flex flex-col gap-2 relative overflow-hidden group hover:border-yellow-500/30 transition-all">
+                      <div className="flex justify-between items-start">
+                        <span className="text-xs text-white font-medium">Boost Meta Ads</span>
+                        <span className="text-xs font-bold text-gray-300">R$ 5.000</span>
+                      </div>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-[10px] text-gray-500">Escala de Criativo #04</span>
+                        <div className="flex gap-2">
+                          <button className="text-[9px] font-bold px-2 py-1 bg-white/5 hover:bg-white/10 rounded uppercase text-gray-400">Rejeitar</button>
+                          <button className="text-[9px] font-bold px-2 py-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded uppercase hover:bg-cyan-500/20">Aprovar</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* 3. Tabela de ROI de Influenciadores */}
+              <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden flex flex-col">
+                <div className="p-5 border-b border-white/5 flex justify-between items-center bg-[#0d0d0d]">
+                  <div>
+                    <h3 className="text-white text-sm font-semibold tracking-tight">Scorecard & ROI de Influenciadores</h3>
+                    <p className="text-[10px] text-gray-500 mt-1">Análise de retorno financeiro por parceria ativa.</p>
+                  </div>
+                  <button className="bg-transparent border border-white/10 hover:border-white/20 text-gray-300 px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5">
+                    <Download className="w-3.5 h-3.5" /> Exportar
+                  </button>
+                </div>
+                
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-[#111] border-b border-white/5">
+                        <th className="py-3 px-5 text-[10px] font-medium tracking-widest text-gray-500 uppercase">Creator</th>
+                        <th className="py-3 px-5 text-[10px] font-medium tracking-widest text-gray-500 uppercase">Custo (Cachê)</th>
+                        <th className="py-3 px-5 text-[10px] font-medium tracking-widest text-gray-500 uppercase">Custo (Seeding)</th>
+                        <th className="py-3 px-5 text-[10px] font-medium tracking-widest text-gray-500 uppercase">Receita (Cupom)</th>
+                        <th className="py-3 px-5 text-[10px] font-medium tracking-widest text-gray-500 uppercase text-right">eCPA Final</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      <tr className="hover:bg-white/[0.02] transition-colors">
+                        <td className="py-3 px-5">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 p-0.5">
+                              <div className="w-full h-full bg-[#111] rounded-full border border-black overflow-hidden flex items-center justify-center">
+                                <User className="w-4 h-4 text-white" />
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-white">@mariasilva</p>
+                              <p className="text-[9px] text-emerald-400 flex items-center gap-0.5 mt-0.5"><Target className="w-2.5 h-2.5" /> Alta Conversão</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-5 text-xs text-gray-300">R$ 2.000</td>
+                        <td className="py-3 px-5 text-xs text-gray-300">R$ 150 <span className="text-[9px] text-gray-600">(1 Kit)</span></td>
+                        <td className="py-3 px-5 text-xs font-bold text-white">R$ 12.500</td>
+                        <td className="py-3 px-5 text-right">
+                          <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-md text-[10px] font-bold">R$ 8,50</span>
+                        </td>
+                      </tr>
+                      <tr className="hover:bg-white/[0.02] transition-colors">
+                        <td className="py-3 px-5">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-500 to-gray-700 p-0.5">
+                              <div className="w-full h-full bg-[#111] rounded-full border border-black overflow-hidden flex items-center justify-center">
+                                <User className="w-4 h-4 text-white" />
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-white">@carlosfit</p>
+                              <p className="text-[9px] text-yellow-500 flex items-center gap-0.5 mt-0.5"><AlertCircle className="w-2.5 h-2.5" /> Atenção</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-5 text-xs text-gray-300">R$ 0 <span className="text-[9px] text-gray-500">(Permuta)</span></td>
+                        <td className="py-3 px-5 text-xs text-gray-300">R$ 450 <span className="text-[9px] text-gray-600">(3 Kits)</span></td>
+                        <td className="py-3 px-5 text-xs font-bold text-white">R$ 800</td>
+                        <td className="py-3 px-5 text-right">
+                          <span className="px-2 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded-md text-[10px] font-bold">R$ 45,00</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       </div>
 
       {/* OVERLAY: BRAND VAULT */}

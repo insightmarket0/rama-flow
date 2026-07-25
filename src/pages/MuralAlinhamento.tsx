@@ -7,7 +7,8 @@ import {
   AlertTriangle,
   Plus,
   X,
-  MessageSquare
+  MessageSquare,
+  Activity
 } from "lucide-react";
 import { InternalAnnouncement } from "@/integrations/supabase/internal_announcements";
 import { format, parseISO } from "date-fns";
@@ -134,29 +135,32 @@ export default function MuralAlinhamento() {
   return (
     <div className="flex-1 p-4 md:p-8 pt-6 animate-in fade-in duration-500 w-full overflow-y-auto">
       
-      {/* Header Centralizado */}
-      <div className="max-w-4xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-        <div>
-          <h2 className="text-3xl md:text-4xl font-light tracking-tight text-white flex items-center gap-4">
-            <Megaphone className="h-8 w-8 md:h-10 md:w-10 text-[#00FF00] drop-shadow-[0_0_10px_rgba(0,255,0,0.3)]" />
+      {/* Header Centralizado e Alinhado com o Feed */}
+      <div className="max-w-[1400px] w-full mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+        <div className="flex flex-col gap-2">
+          <h2 className="text-3xl md:text-4xl font-light tracking-tight text-white flex items-center gap-3">
+            <Megaphone className="h-7 w-7 md:h-8 md:w-8 text-[#00FF00]" strokeWidth={1.5} />
             Mural de Alinhamento
           </h2>
-          <p className="text-gray-400 mt-2 text-sm md:text-base font-medium tracking-wide">
+          <p className="text-gray-400 text-sm font-medium tracking-wide">
             Feed oficial de comunicados, processos e prevenção de erros da operação.
           </p>
         </div>
         
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="shrink-0 flex items-center justify-center gap-2 bg-[#00FF00]/10 hover:bg-[#00FF00]/20 text-[#00FF00] border border-[#00FF00]/30 px-6 py-3 rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(0,255,0,0.1)] hover:shadow-[0_0_20px_rgba(0,255,0,0.2)]"
+          className="shrink-0 flex items-center justify-center gap-2 bg-[#002A00]/50 hover:bg-[#003A00]/70 text-[#00FF00] border border-[#00FF00]/20 px-5 py-2.5 rounded-lg text-sm font-bold transition-all"
         >
-          <Plus className="h-4 w-4" strokeWidth={3} />
+          <Plus className="h-4 w-4" strokeWidth={2.5} />
           Novo Aviso
         </button>
       </div>
 
       {/* Feed Layout */}
-      <div className="max-w-4xl mx-auto flex flex-col gap-6 pb-20">
+      <div className="max-w-[1400px] mx-auto w-full flex flex-col xl:flex-row gap-8 pb-20">
+        
+        {/* Coluna Esquerda: Mural de Avisos */}
+        <div className="flex-1 flex flex-col gap-6">
         {announcements.map((announcement) => {
           const hasAcknowledged = announcement.acknowledgments?.some(ack => ack.user_id === CURRENT_USER_ID);
           const pinned = announcement.is_pinned;
@@ -287,7 +291,89 @@ export default function MuralAlinhamento() {
             </div>
           );
         })}
+        </div>
+
+        {/* Coluna Direita: Feed de Auditoria */}
+        <div className="w-full xl:w-[400px] shrink-0">
+          <div className="bg-[#0A0A0A] border border-white/5 rounded-2xl p-6 xl:sticky xl:top-24">
+            <h3 className="text-xl font-bold text-white flex items-center gap-3 mb-8 tracking-tight">
+              <Activity className="h-5 w-5 text-gray-400" />
+              Feed de Auditoria
+            </h3>
+            
+            <div className="flex flex-col gap-0 relative">
+              {/* Linha vertical conectando os pontos */}
+              <div className="absolute left-1.5 top-3 bottom-8 w-px bg-white/5"></div>
+
+              {/* Item 1 */}
+              <div className="relative pl-7 pb-8">
+                <div className="absolute left-0 top-1.5 w-3 h-3 rounded-full bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.5)]"></div>
+                <p className="text-gray-300 text-sm mb-2 leading-snug">
+                  <span className="text-white font-bold">Lucas</span> resolveu um ajuste de anúncio
+                </p>
+                <div className="inline-block bg-white/5 border border-white/5 rounded-md text-[10px] text-gray-400 px-2 py-1 mb-2 font-medium">
+                  SKU: KITGAS001 (Mercado Livre)
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">
+                  <Clock className="w-3 h-3" />
+                  Há 5 min
+                </div>
+              </div>
+
+              {/* Item 2 */}
+              <div className="relative pl-7 pb-8">
+                <div className="absolute left-0 top-1.5 w-3 h-3 rounded-full bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.5)]"></div>
+                <p className="text-gray-300 text-sm mb-2 leading-snug">
+                  <span className="text-white font-bold">João</span> deu Ciente em um aviso crítico
+                </p>
+                <div className="inline-block bg-white/5 border border-white/5 rounded-md text-[10px] text-gray-400 px-2 py-1 mb-2 font-medium">
+                  Mural de Alinhamento
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">
+                  <Clock className="w-3 h-3" />
+                  Há 12 min
+                </div>
+              </div>
+
+              {/* Item 3 */}
+              <div className="relative pl-7 pb-8">
+                <div className="absolute left-0 top-1.5 w-3 h-3 rounded-full bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.5)]"></div>
+                <p className="text-gray-300 text-sm mb-2 leading-snug">
+                  <span className="text-white font-bold">Lucas</span> concluiu uma urgência atrasada
+                </p>
+                <div className="inline-block bg-white/5 border border-white/5 rounded-md text-[10px] text-gray-400 px-2 py-1 mb-2 font-medium">
+                  Atualizar foto do kit de gás
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">
+                  <Clock className="w-3 h-3" />
+                  Há 45 min
+                </div>
+              </div>
+
+              {/* Item 4 */}
+              <div className="relative pl-7 pb-4">
+                <div className="absolute left-0 top-1.5 w-3 h-3 rounded-full bg-red-500 shadow-[0_0_8px_rgba(255,0,0,0.5)]"></div>
+                <p className="text-gray-300 text-sm mb-2 leading-snug">
+                  <span className="text-white font-bold">Sistema</span> emitiu alerta de SLA estourado
+                </p>
+                <div className="inline-block bg-white/5 border border-white/5 rounded-md text-[10px] text-gray-400 px-2 py-1 mb-2 font-medium">
+                  João ainda não leu o aviso de Padrão de Imagens
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">
+                  <Clock className="w-3 h-3" />
+                  Há 2 horas
+                </div>
+              </div>
+            </div>
+
+            <button className="w-full mt-6 bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 transition-colors py-3 rounded-xl text-gray-400 hover:text-white text-sm font-medium">
+              Ver Histórico Completo
+            </button>
+          </div>
+        </div>
+
       </div>
+
 
       {/* Modal de Novo Aviso */}
       {isModalOpen && (

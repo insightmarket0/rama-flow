@@ -23,7 +23,6 @@ const Pedidos = lazy(() => import("./pages/Pedidos"));
 const Condicoes = lazy(() => import("./pages/Condicoes"));
 const Contas = lazy(() => import("./pages/Contas"));
 const ContasFixas = lazy(() => import("./pages/ContasFixas"));
-const ContasFixasLegacy = lazy(() => import("./pages/ContasFixasLegacy"));
 const Fornecedores = lazy(() => import("./pages/Fornecedores"));
 const Quotations = lazy(() => import("./pages/Quotations"));
 const QuotationForm = lazy(() => import("./pages/QuotationForm"));
@@ -33,6 +32,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const ChatPage = lazy(() => import("./pages/Chat"));
 const PainelDivergencias = lazy(() => import("./pages/PainelDivergencias"));
 const Marketing = lazy(() => import("./pages/Marketing"));
+const BrandBook = lazy(() => import("./pages/BrandBook"));
 
 const queryClient = new QueryClient();
 
@@ -195,6 +195,17 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+
+            <Route
+              path="/brand-book"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <BrandBook />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/pedidos"
               element={
@@ -231,16 +242,6 @@ const App = () => (
                 <ProtectedRoute>
                   <MainLayout>
                     <ContasFixas />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/contas-fixas-legacy"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <ContasFixasLegacy />
                   </MainLayout>
                 </ProtectedRoute>
               }

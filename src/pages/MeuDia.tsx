@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Zap, 
   Megaphone, 
@@ -9,13 +9,16 @@ import {
   CalendarDays,
   ArrowRight,
   Sparkles,
-  Handshake
+  Handshake,
+  Truck,
+  Package,
+  Settings2
 } from "lucide-react";
 import { parseISO, isBefore, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { RAP_QUOTES } from "@/lib/quotes";
+import { RAP_QUOTES, BIBLE_VERSES } from "@/lib/quotes";
 import { SiMercadopago, SiShopee } from "react-icons/si";
 import { FaAmazon } from "react-icons/fa";
 
@@ -98,16 +101,69 @@ const MOCK_ADJUSTMENTS = [
   }
 ];
 
-const getQuoteOfTheDay = () => {
+const getQuoteOfTheDay = (email?: string) => {
   const now = new Date();
   const start = new Date(now.getFullYear(), 0, 0);
   const diff = now.getTime() - start.getTime();
   const oneDay = 1000 * 60 * 60 * 24;
   const dayOfYear = Math.floor(diff / oneDay);
+  
+  // Exibir versículos bíblicos apenas para a conta do Rogério e da Mara
+  if (email === "suporte.ramamagazine@gmail.com" || email === "mara@hotmail.com") {
+    return BIBLE_VERSES[dayOfYear % BIBLE_VERSES.length];
+  }
+  
   return RAP_QUOTES[dayOfYear % RAP_QUOTES.length];
 };
 
 // -------------------------------------------
+
+const ExpedicaoTracker = () => {
+  const [now, setNow] = useState(new Date());
+  
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <div className="col-span-1 md:col-span-2 bg-[#1A1A1A] border-l-4 border-[#00FF00] rounded-xl p-3 flex flex-wrap items-center justify-between gap-4 shadow-lg">
+      <div className="flex items-center gap-4">
+        <div className="bg-black/40 border border-white/5 rounded-full px-3 py-1 flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-[#00FF00] animate-pulse shadow-[0_0_8px_#00FF00]" />
+          <span className="text-white font-bold tracking-widest font-mono text-sm">
+            {format(now, "HH:mm:ss")}
+          </span>
+        </div>
+        <span className="text-gray-500 font-bold tracking-[0.15em] text-[10px] uppercase hidden sm:inline-block">
+          Próximos Despachos
+        </span>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="bg-black/30 border border-[#00FF00]/10 rounded-lg px-3 py-1.5 flex items-center gap-2">
+          <Truck className="h-4 w-4 text-[#00FF00]" />
+          <span className="text-white text-xs font-medium">Flex <span className="text-gray-400 hidden sm:inline">(ML/Shopee)</span> <span className="font-bold">13:00</span></span>
+          <span className="bg-red-500/20 text-red-400 border border-red-500/20 rounded px-1.5 py-0.5 text-[9px] font-bold">Faltam 24m!</span>
+        </div>
+        <div className="bg-black/30 border border-[#FFE600]/10 rounded-lg px-3 py-1.5 flex items-center gap-2">
+          <Package className="h-4 w-4 text-[#FFE600]" />
+          <span className="text-white text-xs font-medium">ML Agência <span className="font-bold">16:00</span></span>
+          <span className="bg-amber-500/20 text-amber-500 border border-amber-500/20 rounded px-1.5 py-0.5 text-[9px] font-bold">Faltam 3h 24m</span>
+        </div>
+        <div className="bg-black/30 border border-[#EE4D2D]/10 rounded-lg px-3 py-1.5 flex items-center gap-2">
+          <Package className="h-4 w-4 text-[#EE4D2D]" />
+          <span className="text-white text-xs font-medium">Shopee/Amz/Mag <span className="font-bold">17:00</span></span>
+          <span className="bg-orange-500/20 text-orange-500 border border-orange-500/20 rounded px-1.5 py-0.5 text-[9px] font-bold">Faltam 4h 24m</span>
+        </div>
+      </div>
+
+      <button className="h-8 w-8 rounded-full bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 transition-colors shrink-0">
+        <Settings2 className="h-4 w-4 text-gray-400" />
+      </button>
+    </div>
+  );
+};
 
 export default function MeuDia() {
   const { user } = useAuth();
@@ -146,7 +202,7 @@ export default function MeuDia() {
 
   const isNothingPending = announcements.length === 0 && reminders.length === 0 && adjustments.length === 0;
 
-  const quoteOfDay = getQuoteOfTheDay();
+  const quoteOfDay = getQuoteOfTheDay(user?.email);
 
   return (
     <div className="flex flex-col lg:flex-row h-[calc(100vh-48px)] bg-transparent w-full gap-8 font-sans overflow-hidden animate-in fade-in duration-700">
@@ -175,9 +231,15 @@ export default function MeuDia() {
           </h1>
           
           <div className="flex flex-col space-y-1 mt-6 text-2xl md:text-3xl font-light text-gray-400">
-            <div className="hover:text-white transition-colors cursor-pointer flex items-center group">
-              Urgências <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">{reminders.length}</span>
-            </div>
+            {user?.email === "mara@hotmail.com" ? (
+              <div onClick={() => navigate('/expedicao')} className="hover:text-white transition-colors cursor-pointer flex items-center group">
+                Portal de Expedição <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">Ir</span>
+              </div>
+            ) : (
+              <div className="hover:text-white transition-colors cursor-pointer flex items-center group">
+                Urgências <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">{reminders.length}</span>
+              </div>
+            )}
             <div onClick={() => navigate('/lembretes')} className="hover:text-white transition-colors cursor-pointer flex items-center group">
               Workspace <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">Ir</span>
             </div>
@@ -203,9 +265,11 @@ export default function MeuDia() {
           </div>
         )}
 
-        {/* 1. Card de Avisos Não Lidos (NEON SUAVIZADO) */}
-        {announcements.length > 0 && (
-          <div className="col-span-1 md:col-span-2 bg-[#111111] border-l-4 border-[#00FF00] rounded-2xl p-5 group relative shadow-lg h-fit">
+        {user?.email === "mara@hotmail.com" ? (
+          <ExpedicaoTracker />
+        ) : (
+          announcements.length > 0 && (
+            <div className="col-span-1 md:col-span-2 bg-[#111111] border-l-4 border-[#00FF00] rounded-2xl p-5 group relative shadow-lg h-fit">
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-[#00FF00] font-bold tracking-tighter text-xl uppercase flex items-center gap-2">
@@ -246,9 +310,9 @@ export default function MeuDia() {
               </div>
             </div>
           </div>
+          )
         )}
 
-        {/* 2. Cards de Urgências (Textura Dark) */}
         {reminders.length > 0 && reminders.map((reminder, idx) => {
           const isLate = reminder.due_date && isBefore(parseISO(reminder.due_date), new Date());
           return (

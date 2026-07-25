@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Package, Send, AlertTriangle, CheckCircle2, MessageSquare, Plus, Clock, FileText, CheckCircle, Box, UploadCloud, X, Image as ImageIcon, Truck, Settings2, Save, CheckCheck, Paperclip, Mic } from "lucide-react";
+import { Package, Send, AlertTriangle, CheckCircle2, MessageSquare, Plus, Clock, FileText, CheckCircle, Box, UploadCloud, X, XCircle, Image as ImageIcon, Truck, Settings2, Save, CheckCheck, Paperclip, Mic, Phone, PhoneCall, MicOff, PhoneOff, Radio } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,60 +21,89 @@ export default function PortalExpedicao() {
   const [priority, setPriority] = useState("normal");
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  // Estados do Rádio Operacional
+  const [activeRoom, setActiveRoom] = useState<string | null>(null);
+  const [isCalling, setIsCalling] = useState(false);
+  const [isRadioMuted, setIsRadioMuted] = useState(false);
+  const [callDuration, setCallDuration] = useState(0);
+
+  // Efeito para o timer da chamada
+  useEffect(() => {
+    let interval: any;
+    if (activeRoom && !isCalling) {
+      interval = setInterval(() => {
+        setCallDuration(prev => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [activeRoom, isCalling]);
+
+  const joinRoom = (room: string) => {
+    if (activeRoom === room) return;
+    setActiveRoom(room);
+    setIsCalling(true);
+    setCallDuration(0);
+    setIsRadioMuted(false);
+    toast("Conectando na " + room + "...");
+    
+    // Simula a outra pessoa atendendo após 3 segundos
+    setTimeout(() => {
+      setIsCalling(false);
+      toast.success("Conectado!");
+    }, 3000);
+  };
+
+  const leaveRoom = () => {
+    setActiveRoom(null);
+    setIsCalling(false);
+    setCallDuration(0);
+  };
+  
+  const [currentTime, setCurrentTime] = useState(Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(Date.now()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
   const [tickets, setTickets] = useState<any[]>([
     {
       id: 1,
       type: 'insumo',
       title: 'Caixa Parda 30x20x10',
       description: 'Estava com apenas 1 rolo restante. Prioridade Crítica.',
-      status: 'Resolvido / Comprado',
+      status: 'aprovado',
       priority: 'critico',
       author: 'Anderson',
-      time: 'Ontem às 14:30'
+      time: 'Ontem às 14:30',
+      createdAt: Date.now() - 86400000
     },
     {
       id: 2,
-      type: 'divergencia',
+      type: 'risco',
       title: 'KITGAS001 - Mercado Livre',
       description: 'A foto mostra 3 itens, mas a embalagem comporta 2. Precisa arrumar a imagem no anúncio.',
-      status: 'Em Triagem / Sendo Resolvido',
-      priority: 'alta',
+      status: 'aguardando',
+      priority: 'critico',
       author: 'Lívia',
-      time: 'Hoje às 09:15'
+      time: 'Hoje às 09:15',
+      createdAt: Date.now() - 8100000
     }
   ]);
+
+  const changeTicketStatus = (id: number, newStatus: string) => {
+    setTickets(tickets.map(t => t.id === id ? { ...t, status: newStatus } : t));
+    toast.success(newStatus === 'aprovado' ? "Aprovado com sucesso!" : newStatus === 'recusado' ? "Recusado!" : "Voltado para triagem!");
+  };
   
   // Estados para Aba e Alerta de Insumos
-  const [activeTab, setActiveTab] = useState<"divergencia" | "insumos" | "historico">("divergencia");
+  const [activeTab, setActiveTab] = useState<"divergencia" | "insumos" | "kanban" | "historico">("kanban");
   const [itemName, setItemName] = useState("");
   const [itemCategory, setItemCategory] = useState("Embalagem (Caixa, Fita, etc)");
   const [remainingQty, setRemainingQty] = useState("");
   const [supplyPriority, setSupplyPriority] = useState("normal");
   const [isSubmittingSupply, setIsSubmittingSupply] = useState(false);
 
-  // Relógio das Coletas
-  const [schedules, setSchedules] = useState({ flex: 13, ml: 16, outras: 17 });
-  const [isEditingSchedules, setIsEditingSchedules] = useState(false);
-  const [now, setNow] = useState(new Date());
-  useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 60000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const getCountdown = (hour: number) => {
-    const target = new Date();
-    target.setHours(hour, 0, 0, 0);
-    if (now > target) return { text: "Já passou", urgent: false, over: true };
-    const diff = target.getTime() - now.getTime();
-    const h = Math.floor(diff / (1000 * 60 * 60));
-    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    if (h === 0) return { text: `Faltam ${m}m!`, urgent: true, over: false };
-    return { text: `Faltam ${h}h ${m}m`, urgent: false, over: false };
-  };
-
-  const flexCD = getCountdown(schedules.flex);
-  const mlAgenciaCD = getCountdown(schedules.ml);
-  const outrasCD = getCountdown(schedules.outras);
 
   const [chatMessage, setChatMessage] = useState("");
   const [messages, setMessages] = useState([
@@ -83,7 +112,7 @@ export default function PortalExpedicao() {
       sender: "Lívia",
       initials: "LI",
       time: "10:45",
-      text: "Pessoal, o produto CAP002 tá saindo muito hoje, mas notei que a caixa parda que usamos acabou. Posso mandar na caixa branca?",
+      text: "Pessoal, o produto 2343 tá saindo muito hoje, mas notei que a caixa parda que usamos acabou. Posso mandar na caixa branca?",
       isMe: false,
       color: "bg-purple-500 text-white"
     },
@@ -97,6 +126,31 @@ export default function PortalExpedicao() {
       color: "bg-[#00FF00] text-black"
     }
   ]);
+
+  const createTicketFromMessage = (msg: any) => {
+    // Regex buscando especificamente por 4 números seguidos, que é o padrão de SKU da empresa.
+    const skuMatch = msg.text?.match(/\b\d{4}\b/);
+    const skuOrTitle = skuMatch ? `SKU: ${skuMatch[0]}` : msg.text?.split(' ').slice(0, 4).join(' ') + '...';
+    
+    const textLower = msg.text?.toLowerCase() || '';
+    const isRisk = textLower.includes('mercado livre') || textLower.includes('ml') || textLower.includes('anúncio') || textLower.includes('devolução') || textLower.includes('estoque') || textLower.includes('falto');
+
+    const newTicket = {
+      id: Date.now(),
+      type: isRisk ? 'risco' : 'insumo', 
+      title: `${isRisk ? 'Risco Comercial' : 'Alerta'}: ${skuOrTitle || 'Chamado'}`,
+      description: `Gerado via chat por ${msg.sender}: "${msg.text}"`,
+      status: 'aguardando',
+      priority: isRisk ? 'critico' : 'alta',
+      author: msg.sender,
+      time: `Hoje às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`,
+      createdAt: Date.now()
+    };
+    
+    setTickets(prev => [newTicket, ...prev]);
+    toast.success("Chamado gerado a partir do chat!");
+    setActiveTab("kanban");
+  };
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -200,7 +254,7 @@ export default function PortalExpedicao() {
         type: 'divergencia',
         title: `${sku} - ${marketplace}`,
         description: description,
-        status: 'Aberto',
+        status: 'aguardando',
         priority: priority,
         author: 'Anderson',
         time: `Hoje às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
@@ -247,7 +301,7 @@ export default function PortalExpedicao() {
         type: itemCategory.includes('Produto') ? 'produto' : 'insumo',
         title: itemName,
         description: `Restante: ${remainingQty}. Categoria: ${itemCategory}`,
-        status: 'Aberto',
+        status: 'aguardando',
         priority: supplyPriority,
         author: 'Anderson',
         time: `Hoje às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
@@ -285,168 +339,37 @@ export default function PortalExpedicao() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-48px)] bg-transparent w-full font-sans animate-in fade-in duration-700 overflow-hidden pb-4">
-      
-      {/* Cabeçalho */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-2">
-        <div>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-light text-white tracking-tighter flex items-center gap-2">
-              <Package className="w-6 h-6 text-[#00FF00]" />
-              Portal da <span className="font-bold">Expedição</span>
-            </h1>
-            <div className="flex items-center gap-2 md:ml-2">
-              <button 
-                onClick={() => setActiveTab("historico")} 
-                className="flex items-center gap-1.5 px-2.5 py-1 bg-red-500/10 border border-red-500/20 rounded-full text-[10px] font-bold text-red-400 hover:bg-red-500/20 transition-colors cursor-pointer"
-                title="Ver chamados críticos"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
-                3 Críticos
-              </button>
-              <button 
-                onClick={() => setActiveTab("historico")} 
-                className="flex items-center gap-1.5 px-2.5 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold text-gray-300 hover:bg-white/10 transition-colors cursor-pointer"
-                title="Ver chamados abertos"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
-                12 Abertos
-              </button>
-            </div>
-          </div>
-          <p className="text-gray-500 text-xs mt-1 ml-9">
-            Hub centralizado para divergências e comunicação com o estoque.
-          </p>
-        </div>
-      </div>
-
-      {/* Relógio das Coletas (Senso de Urgência) */}
-      <div className="bg-[#1A1A1A] border border-white/5 rounded-xl p-3 mb-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl relative overflow-hidden group">
-        <div className="absolute top-0 left-0 w-1 h-full bg-[#00FF00]" />
+    <div className="flex flex-col h-full bg-transparent w-full font-sans animate-in fade-in duration-700 overflow-hidden p-4">
+      <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
         
-        <div className="flex items-center justify-between w-full md:w-auto md:border-r border-white/10 md:pr-4">
-          <div className="flex items-center gap-3 pl-2">
-            <div className="flex items-center gap-2 bg-white/5 backdrop-blur-xl px-3 py-0.5 rounded-full border border-white/10 text-white font-sans text-[15px] font-bold tracking-tight shadow-lg">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00FF00] animate-pulse shadow-[0_0_8px_rgba(0,255,0,0.8)]"></span>
-              {now.toLocaleTimeString('pt-BR')}
-            </div>
-            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest hidden sm:inline-block mt-1">Próximos Despachos</span>
-          </div>
-          <button 
-            onClick={() => setIsEditingSchedules(!isEditingSchedules)}
-            className="md:hidden p-1.5 rounded-lg bg-white/5 text-gray-400 hover:text-white transition-colors"
-          >
-            {isEditingSchedules ? <Save className="w-4 h-4 text-[#00FF00]" /> : <Settings2 className="w-4 h-4" />}
-          </button>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-start md:justify-end gap-3 md:gap-4 lg:gap-6 flex-1">
-          {/* Flex */}
-          <div className="flex items-center gap-2 bg-[#111111] px-3 py-1.5 rounded-lg border border-white/5">
-            <Truck className="w-3.5 h-3.5 text-[#00E500]" />
-            <span className="text-xs text-gray-300 flex items-center gap-1">
-              Flex (ML/Shopee)
-              {isEditingSchedules ? (
-                <input 
-                  type="number" 
-                  value={schedules.flex} 
-                  onChange={(e) => setSchedules({...schedules, flex: parseInt(e.target.value) || 0})}
-                  className="w-10 h-6 bg-black/40 border border-white/20 rounded text-center text-white text-xs outline-none focus:border-[#00FF00]" 
-                  min="0" max="23"
-                />
-              ) : (
-                <strong className="text-white">{schedules.flex.toString().padStart(2, '0')}:00</strong>
-              )}
-            </span>
-            {!isEditingSchedules && (
-              <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${flexCD.over ? 'bg-white/5 text-gray-500' : flexCD.urgent ? 'bg-red-500/20 text-red-400 animate-pulse' : 'bg-[#00FF00]/10 text-[#00E500]'}`}>
-                {flexCD.text}
-              </span>
-            )}
-          </div>
-
-          {/* ML Agência */}
-          <div className="flex items-center gap-2 bg-[#111111] px-3 py-1.5 rounded-lg border border-white/5">
-            <Package className="w-3.5 h-3.5 text-yellow-500" />
-            <span className="text-xs text-gray-300 flex items-center gap-1">
-              ML Agência
-              {isEditingSchedules ? (
-                <input 
-                  type="number" 
-                  value={schedules.ml} 
-                  onChange={(e) => setSchedules({...schedules, ml: parseInt(e.target.value) || 0})}
-                  className="w-10 h-6 bg-black/40 border border-white/20 rounded text-center text-white text-xs outline-none focus:border-yellow-500" 
-                  min="0" max="23"
-                />
-              ) : (
-                <strong className="text-white">{schedules.ml.toString().padStart(2, '0')}:00</strong>
-              )}
-            </span>
-            {!isEditingSchedules && (
-              <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${mlAgenciaCD.over ? 'bg-white/5 text-gray-500' : mlAgenciaCD.urgent ? 'bg-red-500/20 text-red-400 animate-pulse' : 'bg-yellow-500/10 text-yellow-500'}`}>
-                {mlAgenciaCD.text}
-              </span>
-            )}
-          </div>
-
-          {/* Outras Agências */}
-          <div className="flex items-center gap-2 bg-[#111111] px-3 py-1.5 rounded-lg border border-white/5">
-            <Package className="w-3.5 h-3.5 text-orange-500" />
-            <span className="text-xs text-gray-300 flex items-center gap-1">
-              Shopee/Amz/Mag
-              {isEditingSchedules ? (
-                <input 
-                  type="number" 
-                  value={schedules.outras} 
-                  onChange={(e) => setSchedules({...schedules, outras: parseInt(e.target.value) || 0})}
-                  className="w-10 h-6 bg-black/40 border border-white/20 rounded text-center text-white text-xs outline-none focus:border-orange-500" 
-                  min="0" max="23"
-                />
-              ) : (
-                <strong className="text-white">{schedules.outras.toString().padStart(2, '0')}:00</strong>
-              )}
-            </span>
-            {!isEditingSchedules && (
-              <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${outrasCD.over ? 'bg-white/5 text-gray-500' : outrasCD.urgent ? 'bg-red-500/20 text-red-400 animate-pulse' : 'bg-orange-500/10 text-orange-400'}`}>
-                {outrasCD.text}
-              </span>
-            )}
-          </div>
-
-          <button 
-            onClick={() => setIsEditingSchedules(!isEditingSchedules)}
-            className="hidden md:flex p-1.5 rounded-lg bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors ml-auto"
-            title="Editar Horários"
-          >
-            {isEditingSchedules ? <Save className="w-4 h-4 text-[#00FF00]" /> : <Settings2 className="w-4 h-4" />}
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
-        
-        {/* Lado Esquerdo: Formulário */}
-        <div className="lg:col-span-2 bg-[#1A1A1A] border border-white/5 rounded-2xl p-4 shadow-xl relative overflow-y-auto h-full flex flex-col">
+        {/* Lado Direito na tela original, mas agora será order-2 (Direita) */}
+        <div className="w-full lg:w-[65%] order-2 bg-[#1A1A1A] border border-white/5 rounded-2xl p-4 shadow-xl relative overflow-y-auto h-full flex flex-col">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#00FF00] to-transparent opacity-20" />
           
           {/* Header e Abas Premium */}
           <div className="flex flex-col mb-4 shrink-0">
             <div className="flex flex-wrap items-center bg-[#111111] p-1 rounded-xl border border-white/5 w-full xl:w-fit shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] gap-1">
               <button 
+                onClick={() => setActiveTab("kanban")}
+                className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-300 ${activeTab === "kanban" ? "bg-purple-500/10 text-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.1)] border border-purple-500/20" : "text-gray-500 border border-transparent hover:text-gray-300 hover:bg-white/5"}`}
+              >
+                <CheckCheck className="w-3.5 h-3.5" /> Quadro Kanban
+              </button>
+              <button 
                 onClick={() => setActiveTab("divergencia")}
-                className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-300 ${activeTab === "divergencia" ? "bg-[#00FF00]/10 text-[#00E500] shadow-[0_0_10px_rgba(0,255,0,0.1)] border border-[#00FF00]/20" : "text-gray-500 border border-transparent hover:text-gray-300 hover:bg-white/5"}`}
+                className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-300 ${activeTab === "divergencia" ? "bg-[#00FF00]/10 text-[#00E500] shadow-[0_0_10px_rgba(0,255,0,0.1)] border border-[#00FF00]/20" : "text-gray-500 border border-transparent hover:text-gray-300 hover:bg-white/5"}`}
               >
                 <AlertTriangle className="w-3.5 h-3.5" /> Divergência
               </button>
               <button 
                 onClick={() => setActiveTab("insumos")}
-                className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-300 ${activeTab === "insumos" ? "bg-[#00FF00]/10 text-[#00E500] shadow-[0_0_10px_rgba(0,255,0,0.1)] border border-[#00FF00]/20" : "text-gray-500 border border-transparent hover:text-gray-300 hover:bg-white/5"}`}
+                className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-300 ${activeTab === "insumos" ? "bg-[#00FF00]/10 text-[#00E500] shadow-[0_0_10px_rgba(0,255,0,0.1)] border border-[#00FF00]/20" : "text-gray-500 border border-transparent hover:text-gray-300 hover:bg-white/5"}`}
               >
                 <Box className="w-3.5 h-3.5" /> Alerta Insumos
               </button>
               <button 
                 onClick={() => setActiveTab("historico")}
-                className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-300 ${activeTab === "historico" ? "bg-blue-500/10 text-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.1)] border border-blue-500/20" : "text-gray-500 border border-transparent hover:text-gray-300 hover:bg-white/5"}`}
+                className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-300 ${activeTab === "historico" ? "bg-blue-500/10 text-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.1)] border border-blue-500/20" : "text-gray-500 border border-transparent hover:text-gray-300 hover:bg-white/5"}`}
               >
                 <Clock className="w-3.5 h-3.5" /> Meus Chamados
               </button>
@@ -683,6 +606,136 @@ export default function PortalExpedicao() {
             </form>
           )}
 
+          {activeTab === "kanban" && (
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden animate-in fade-in duration-300">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full pb-2">
+                
+                {/* Coluna: Aguardando */}
+                <div className="bg-[#141414] border border-white/5 rounded-xl flex flex-col overflow-hidden">
+                  <div className="p-3 border-b border-white/5 bg-black/20 flex items-center justify-between shrink-0">
+                    <div className="flex items-center gap-2 text-yellow-500 font-bold text-sm">
+                      <Clock className="w-4 h-4" /> Triagem / Aguardando
+                    </div>
+                    <span className="bg-white/10 text-white text-[10px] px-2 py-0.5 rounded-full">{tickets.filter(t => t.status === 'aguardando').length}</span>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
+                    {tickets.filter(t => t.status === 'aguardando').map(ticket => {
+                      const elapsedMinutes = Math.floor((currentTime - (ticket.createdAt || Date.now())) / 60000);
+                      const isCriticalTimer = ticket.priority === 'critico';
+                      
+                      let borderClass = ticket.type === 'produto' ? 'border-orange-500/30' : ticket.type === 'insumo' ? 'border-yellow-500/30' : ticket.type === 'risco' ? 'border-red-500/30' : 'border-[#00FF00]/30';
+                      let pulseClass = '';
+                      let bgClass = 'bg-[#1A1A1A]';
+
+                      if (isCriticalTimer) {
+                        if (elapsedMinutes > 120) {
+                          borderClass = 'border-red-500';
+                          pulseClass = 'animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.3)]';
+                          bgClass = 'bg-red-950/40';
+                        } else if (elapsedMinutes > 60) {
+                          borderClass = 'border-red-500/80';
+                          bgClass = 'bg-red-900/20';
+                        } else if (elapsedMinutes > 30) {
+                          borderClass = 'border-orange-500/80';
+                        }
+                      }
+
+                      return (
+                      <div key={ticket.id} className={`${bgClass} border ${borderClass} ${pulseClass} hover:border-white/30 transition-all rounded-lg p-3 group relative overflow-hidden mt-2`}>
+                        {isCriticalTimer && elapsedMinutes > 0 && (
+                          <div className="absolute top-0 right-0 bg-red-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg z-10 flex items-center gap-1">
+                            <Clock className="w-2.5 h-2.5" /> Sangrando há {elapsedMinutes > 60 ? `${Math.floor(elapsedMinutes/60)}h ${elapsedMinutes%60}m` : `${elapsedMinutes}m`}
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between mb-2">
+                          <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded flex items-center gap-1 w-fit ${ticket.type === 'produto' ? 'bg-orange-500/10 text-orange-500' : ticket.type === 'insumo' ? 'bg-yellow-500/10 text-yellow-500' : ticket.type === 'risco' ? 'bg-red-500/10 text-red-500' : 'bg-[#00FF00]/10 text-[#00FF00]'}`}>
+                            {ticket.type === 'produto' ? <Package className="w-3 h-3" /> : ticket.type === 'insumo' ? <Box className="w-3 h-3" /> : ticket.type === 'risco' ? <AlertTriangle className="w-3 h-3" /> : <CheckCircle className="w-3 h-3" />} 
+                            {ticket.type === 'produto' ? 'Falta Produto' : ticket.type === 'insumo' ? 'Falta Insumo' : ticket.type === 'risco' ? 'Risco Comercial' : 'Divergência'}
+                          </span>
+                          <span className="text-[9px] text-gray-600">{ticket.time}</span>
+                        </div>
+                        <h4 className="text-white font-medium text-sm leading-tight mb-1">{ticket.title}</h4>
+                        <p className="text-xs text-gray-400 mb-4 line-clamp-3">{ticket.description}</p>
+                        
+                        <div className="flex flex-col gap-2 relative z-10">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] text-gray-500">De: <strong className="text-gray-300">{ticket.author}</strong></span>
+                            {ticket.priority === 'critico' && !isCriticalTimer && <span className="text-red-500 flex items-center gap-1 text-[9px] font-bold uppercase"><AlertTriangle className="w-3 h-3" /> Parou tudo!</span>}
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 mt-1">
+                            <button onClick={() => changeTicketStatus(ticket.id, 'aprovado')} className="flex items-center justify-center gap-1 bg-[#00FF00]/10 hover:bg-[#00FF00]/20 text-[#00FF00] border border-[#00FF00]/30 rounded py-1.5 text-xs font-bold transition-colors">
+                              <CheckCircle className="w-3.5 h-3.5" /> Resolver
+                            </button>
+                            <button onClick={() => changeTicketStatus(ticket.id, 'recusado')} className="flex items-center justify-center gap-1 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 rounded py-1.5 text-xs font-bold transition-colors">
+                              <XCircle className="w-3.5 h-3.5" /> Recusar
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )})}
+                  </div>
+                </div>
+
+                {/* Coluna: Resolvido / Aprovado */}
+                <div className="bg-[#141414] border border-white/5 rounded-xl flex flex-col overflow-hidden">
+                  <div className="p-3 border-b border-white/5 bg-black/20 flex items-center justify-between shrink-0">
+                    <div className="flex items-center gap-2 text-[#00FF00] font-bold text-sm">
+                      <CheckCircle2 className="w-4 h-4" /> Resolvido
+                    </div>
+                    <span className="bg-white/10 text-white text-[10px] px-2 py-0.5 rounded-full">{tickets.filter(t => t.status === 'aprovado').length}</span>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
+                    {tickets.filter(t => t.status === 'aprovado').map(ticket => (
+                      <div key={ticket.id} className="bg-black/40 border border-[#00FF00]/20 rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-2 opacity-70">
+                          <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded flex items-center gap-1 w-fit ${ticket.type === 'produto' ? 'bg-orange-500/10 text-orange-500' : ticket.type === 'insumo' ? 'bg-yellow-500/10 text-yellow-500' : 'bg-[#00FF00]/10 text-[#00FF00]'}`}>
+                            {ticket.type === 'produto' ? <Package className="w-3 h-3" /> : ticket.type === 'insumo' ? <Box className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />} 
+                            {ticket.type === 'produto' ? 'Produto' : ticket.type === 'insumo' ? 'Insumo' : 'Divergência'}
+                          </span>
+                        </div>
+                        <h4 className="text-gray-300 font-medium text-sm leading-tight mb-1">{ticket.title}</h4>
+                        <p className="text-[11px] text-gray-500">{ticket.description}</p>
+                        <div className="mt-3 flex items-center justify-between border-t border-white/5 pt-2">
+                          <span className="text-[10px] text-gray-600">De: {ticket.author}</span>
+                          <button onClick={() => changeTicketStatus(ticket.id, 'aguardando')} className="text-[10px] text-gray-500 hover:text-white underline">Reverter</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Coluna: Recusado */}
+                <div className="bg-[#141414] border border-white/5 rounded-xl flex flex-col overflow-hidden">
+                  <div className="p-3 border-b border-white/5 bg-black/20 flex items-center justify-between shrink-0">
+                    <div className="flex items-center gap-2 text-red-500 font-bold text-sm">
+                      <XCircle className="w-4 h-4" /> Recusado
+                    </div>
+                    <span className="bg-white/10 text-white text-[10px] px-2 py-0.5 rounded-full">{tickets.filter(t => t.status === 'recusado').length}</span>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
+                    {tickets.filter(t => t.status === 'recusado').map(ticket => (
+                      <div key={ticket.id} className="bg-black/40 border border-red-500/20 rounded-lg p-3 opacity-75 grayscale-[30%]">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded flex items-center gap-1 w-fit ${ticket.type === 'produto' ? 'bg-orange-500/10 text-orange-500' : ticket.type === 'insumo' ? 'bg-yellow-500/10 text-yellow-500' : 'bg-[#00FF00]/10 text-[#00FF00]'}`}>
+                            {ticket.type === 'produto' ? <Package className="w-3 h-3" /> : ticket.type === 'insumo' ? <Box className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />} 
+                            {ticket.type === 'produto' ? 'Produto' : ticket.type === 'insumo' ? 'Insumo' : 'Divergência'}
+                          </span>
+                        </div>
+                        <h4 className="text-gray-400 line-through font-medium text-sm leading-tight mb-1">{ticket.title}</h4>
+                        <p className="text-[11px] text-gray-500">{ticket.description}</p>
+                        <div className="mt-3 flex items-center justify-between border-t border-white/5 pt-2">
+                          <span className="text-[10px] text-gray-600">De: {ticket.author}</span>
+                          <button onClick={() => changeTicketStatus(ticket.id, 'aguardando')} className="text-[10px] text-gray-500 hover:text-white underline">Reverter</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          )}
+
           {activeTab === "historico" && (
             <div className="flex-1 overflow-y-auto space-y-4 pr-1 animate-in fade-in duration-300">
               {tickets.length === 0 ? (
@@ -696,8 +749,8 @@ export default function PortalExpedicao() {
                         {ticket.type === 'produto' ? 'Falta Produto' : ticket.type === 'insumo' ? 'Insumo' : 'Divergência'}
                       </span>
                       <span className="bg-white/5 text-gray-400 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1">
-                        {ticket.status.includes('Resolvido') ? <CheckCircle2 className="w-3 h-3 text-[#00FF00]" /> : <Clock className="w-3 h-3 text-blue-400" />} 
-                        {ticket.status}
+                        {ticket.status === 'aprovado' ? <CheckCircle2 className="w-3 h-3 text-[#00FF00]" /> : ticket.status === 'recusado' ? <XCircle className="w-3 h-3 text-red-500" /> : <Clock className="w-3 h-3 text-yellow-500" />} 
+                        {ticket.status === 'aprovado' ? 'Resolvido' : ticket.status === 'recusado' ? 'Recusado' : 'Aguardando'}
                       </span>
                     </div>
                     <h4 className="text-white font-bold text-sm mb-1">{ticket.title}</h4>
@@ -720,14 +773,83 @@ export default function PortalExpedicao() {
           )}
         </div>
 
-        {/* Lado Direito: Chat Integrado */}
-        <div className="bg-[#121212] border border-white/5 rounded-2xl flex flex-col overflow-hidden h-full shadow-2xl relative">
+        {/* Chat Integrado (Agora na Esquerda com order-1) */}
+        <div className="w-full lg:w-[35%] order-1 bg-[#121212] border border-white/5 rounded-2xl flex flex-col overflow-hidden h-full shadow-2xl relative">
           
-          <div className="px-5 py-4 bg-[#121212] flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.6)]"></span>
-              <h3 className="text-gray-100 font-medium text-[15px] tracking-tight">Central de Logística</h3>
-            </div>
+          <div className="px-4 py-3 bg-[#121212] flex flex-col justify-center shrink-0">
+            <h1 className="text-xl font-light text-white tracking-tighter flex items-center gap-2">
+              <Package className="w-5 h-5 text-[#00FF00]" />
+              Portal da <span className="font-bold">Expedição</span>
+            </h1>
+            <p className="text-gray-400 text-xs ml-7 mt-0.5">
+              Hub centralizado para comunicação e aprovações
+            </p>
+          </div>
+
+          <div className="bg-[#181818] border-b border-t border-white/5 px-4 py-3 shrink-0 relative overflow-hidden flex flex-col gap-2">
+            {!activeRoom ? (
+              <>
+                <div className="flex items-center gap-1.5 text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">
+                  <Radio className="w-3.5 h-3.5 text-[#00FF00]" /> Rádio Operacional
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => joinRoom("Mesa da Mara")} className="flex-1 bg-[#222] hover:bg-[#2A2A2A] border border-white/5 rounded-lg p-2 flex items-center gap-2 transition-colors group">
+                    <Avatar className="w-7 h-7 border border-white/10 group-hover:border-[#00FF00]/50 transition-colors">
+                      <AvatarFallback className="bg-purple-500/20 text-purple-400 text-[10px] font-bold">MA</AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col items-start">
+                      <span className="text-white text-xs font-bold">Mesa da Mara</span>
+                      <span className="text-[9px] text-[#00FF00]">Livre</span>
+                    </div>
+                  </button>
+                  <button onClick={() => joinRoom("Equipe Base")} className="flex-1 bg-[#222] hover:bg-[#2A2A2A] border border-white/5 rounded-lg p-2 flex items-center gap-2 transition-colors group">
+                    <div className="w-7 h-7 rounded-full bg-blue-500/20 border border-white/10 group-hover:border-blue-500/50 flex items-center justify-center text-blue-400">
+                      <Package className="w-3.5 h-3.5" />
+                    </div>
+                    <div className="flex flex-col items-start">
+                      <span className="text-white text-xs font-bold">Equipe Base</span>
+                      <span className="text-[9px] text-[#00FF00]">3 online</span>
+                    </div>
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="bg-[#0A2010] border border-[#00FF00]/30 rounded-xl p-3 flex flex-col gap-3 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[#00FF00] to-transparent animate-pulse" />
+                <div className="flex items-center justify-between relative z-10">
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <Avatar className="w-8 h-8 border border-[#00FF00]/50">
+                        <AvatarFallback className="bg-purple-500/20 text-purple-400 text-xs font-bold">
+                          {activeRoom === "Mesa da Mara" ? "MA" : "EQ"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#00FF00] border-2 border-[#0A2010] rounded-full animate-pulse" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-white text-sm font-bold">{activeRoom}</span>
+                      <span className="text-[#00FF00] text-[10px] font-bold tracking-wider uppercase">
+                        {isCalling ? "Chamando..." : `Ao Vivo • ${Math.floor(callDuration/60).toString().padStart(2, '0')}:${(callDuration%60).toString().padStart(2, '0')}`}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => setIsRadioMuted(!isRadioMuted)} 
+                      className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${isRadioMuted ? 'bg-red-500/20 text-red-500 border border-red-500/30' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                    >
+                      {isRadioMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                    </button>
+                    <button 
+                      onClick={leaveRoom} 
+                      className="w-9 h-9 rounded-full bg-red-600 hover:bg-red-500 text-white shadow-[0_0_15px_rgba(220,38,38,0.4)] flex items-center justify-center transition-all"
+                    >
+                      <PhoneOff className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex-1 p-3 overflow-y-auto flex flex-col gap-3">
@@ -766,25 +888,47 @@ export default function PortalExpedicao() {
                       <span className="text-[9px] text-gray-500">{msg.time}</span>
                     </div>
                   )}
-                  <div className={`px-3 py-2 text-[13px] border leading-snug max-w-[260px] shadow-sm break-words overflow-hidden ${
-                    msg.isMe 
-                      ? `bg-[#1A3A2A] text-gray-100 border-[#00FF00]/10 ${isGrouped ? 'rounded-xl' : 'rounded-xl rounded-tr-sm'}` 
-                      : `bg-[#1C1C1E] text-gray-300 border-white/5 ${isGrouped ? 'rounded-xl' : 'rounded-xl rounded-tl-sm'}`
-                  }`}>
-                    {(msg as any).imageUrl && (
-                      <img 
-                        src={(msg as any).imageUrl} 
-                        alt="Anexo" 
-                        onLoad={scrollToBottom}
-                        className="w-full rounded-md mb-2 object-cover max-h-[150px]" 
-                      />
+                  <div className="relative group/bubble flex items-center gap-2">
+                    {msg.isMe && msg.text && (
+                      <button 
+                        onClick={() => createTicketFromMessage(msg)}
+                        title="Converter em Chamado"
+                        className="opacity-0 group-hover/bubble:opacity-100 transition-all p-1.5 bg-purple-500/10 hover:bg-purple-500 border border-purple-500/20 hover:border-purple-500 text-purple-400 hover:text-white rounded-full shadow-sm"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
                     )}
-                    {(msg as any).isAudio && (
-                      <div className="mb-2 w-full min-w-[200px]">
-                        <audio controls src={(msg as any).audioUrl} className="h-8 w-full max-w-[220px] outline-none" />
-                      </div>
+                    
+                    <div className={`px-3 py-2 text-[13px] border leading-snug max-w-[260px] shadow-sm break-words overflow-hidden ${
+                      msg.isMe 
+                        ? `bg-[#1A3A2A] text-gray-100 border-[#00FF00]/10 ${isGrouped ? 'rounded-xl' : 'rounded-xl rounded-tr-sm'}` 
+                        : `bg-[#1C1C1E] text-gray-300 border-white/5 ${isGrouped ? 'rounded-xl' : 'rounded-xl rounded-tl-sm'}`
+                    }`}>
+                      {(msg as any).imageUrl && (
+                        <img 
+                          src={(msg as any).imageUrl} 
+                          alt="Anexo" 
+                          onLoad={scrollToBottom}
+                          className="w-full rounded-md mb-2 object-cover max-h-[150px]" 
+                        />
+                      )}
+                      {(msg as any).isAudio && (
+                        <div className="mb-2 w-full min-w-[200px]">
+                          <audio controls src={(msg as any).audioUrl} className="h-8 w-full max-w-[220px] outline-none" />
+                        </div>
+                      )}
+                      {msg.text && <div>{msg.text}</div>}
+                    </div>
+
+                    {!msg.isMe && msg.text && (
+                      <button 
+                        onClick={() => createTicketFromMessage(msg)}
+                        title="Converter em Chamado"
+                        className="opacity-0 group-hover/bubble:opacity-100 transition-all p-1.5 bg-purple-500/10 hover:bg-purple-500 border border-purple-500/20 hover:border-purple-500 text-purple-400 hover:text-white rounded-full shadow-sm"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
                     )}
-                    {msg.text && <div>{msg.text}</div>}
                   </div>
                   {msg.isMe && !isGrouped && (
                     <div className="mt-1 mr-1">
