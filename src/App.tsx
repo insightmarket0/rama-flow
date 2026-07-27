@@ -33,6 +33,7 @@ const ChatPage = lazy(() => import("./pages/Chat"));
 const PainelDivergencias = lazy(() => import("./pages/PainelDivergencias"));
 const Marketing = lazy(() => import("./pages/Marketing"));
 const BrandBook = lazy(() => import("./pages/BrandBook"));
+const CentralCompras = lazy(() => import("./pages/CentralCompras"));
 
 const queryClient = new QueryClient();
 
@@ -161,6 +162,16 @@ const App = () => (
                 <ProtectedRoute>
                   <MainLayout>
                     <PortalExpedicao />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/suprimentos"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <CentralCompras />
                   </MainLayout>
                 </ProtectedRoute>
               }

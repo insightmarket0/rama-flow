@@ -12,8 +12,14 @@ import {
   Handshake,
   Truck,
   Package,
-  Settings2
+  Settings2,
+  Leaf,
+  Sprout,
+  Trees,
+  LayoutGrid,
+  Heart
 } from "lucide-react";
+import { RamaDoDiaWidget } from "@/components/RamaDoDiaWidget";
 import { parseISO, isBefore, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/hooks/useAuth";
@@ -126,41 +132,100 @@ const ExpedicaoTracker = () => {
     return () => clearInterval(t);
   }, []);
 
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const currentTotalMinutes = hours * 60 + minutes;
+  
+  const dispatches = [
+    { name: "Flex (ML/Shopee)", time: "13:00", minutes: 13 * 60, color: "#00FF00" },
+    { name: "ML Agência", time: "16:00", minutes: 16 * 60, color: "#FFE600" },
+    { name: "Shopee/Amz/Mag", time: "17:00", minutes: 17 * 60, color: "#EE4D2D" },
+  ];
+  
+  let nextDispatch = dispatches.find(d => d.minutes > currentTotalMinutes) || dispatches[0];
+  
+  let remainingMinutes = nextDispatch.minutes - currentTotalMinutes;
+  if (remainingMinutes < 0) remainingMinutes += 24 * 60; // Next day
+  
+  const remainingHoursStr = Math.floor(remainingMinutes / 60).toString().padStart(2, '0');
+  const remainingMinsStr = (remainingMinutes % 60).toString().padStart(2, '0');
+  
+  const maxWindow = 180;
+  const progress = Math.max(0, Math.min(100, ((maxWindow - remainingMinutes) / maxWindow) * 100));
+  
+  const radius = 120;
+  const circumference = 2 * Math.PI * radius;
+
   return (
-    <div className="col-span-1 md:col-span-2 bg-[#1A1A1A] border-l-4 border-[#00FF00] rounded-xl p-3 flex flex-wrap items-center justify-between gap-4 shadow-lg">
-      <div className="flex items-center gap-4">
-        <div className="bg-black/40 border border-white/5 rounded-full px-3 py-1 flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-[#00FF00] animate-pulse shadow-[0_0_8px_#00FF00]" />
-          <span className="text-white font-bold tracking-widest font-mono text-sm">
-            {format(now, "HH:mm:ss")}
+    <div className="col-span-1 md:col-span-2 flex flex-col md:flex-row items-center justify-between py-4 px-6 bg-[#050505] rounded-3xl border border-white/5 relative overflow-hidden shadow-2xl gap-6">
+      {/* Glow background */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[150px] bg-[#EE4D2D]/10 rounded-full blur-[60px] pointer-events-none" />
+      
+      {/* Esquerda: Avisos */}
+      <div className="flex flex-col items-start gap-3 z-10 w-full md:w-auto">
+        <div className="bg-[#111] border border-white/10 rounded-full px-4 py-1.5 flex items-center gap-2 shadow-lg backdrop-blur-md">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#EE4D2D] animate-pulse shadow-[0_0_8px_#EE4D2D]" />
+          <span className="text-gray-300 text-xs tracking-wide">
+            Focado no <strong className="text-white">{nextDispatch.name}</strong>
           </span>
         </div>
-        <span className="text-gray-500 font-bold tracking-[0.15em] text-[10px] uppercase hidden sm:inline-block">
-          Próximos Despachos
+
+        {/* Fila compacta */}
+        <div className="flex flex-col gap-2 mt-2">
+          {dispatches.filter(d => d.name !== nextDispatch.name).map((d, i) => (
+            <div key={i} className="flex items-center gap-2 opacity-70">
+              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: d.color }} />
+              <span className="text-[9px] font-bold uppercase text-gray-400">{d.name} {d.time}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Centro: Relógio Analógico (Menor) */}
+      <div className="relative w-[220px] h-[120px] flex flex-col items-center justify-start overflow-hidden z-10 shrink-0">
+        <svg className="absolute top-0 w-[220px] h-[220px]" viewBox="0 0 300 300">
+          <g stroke="currentColor" strokeWidth="2">
+            {[...Array(31)].map((_, i) => {
+              const angle = 180 + (i * 6);
+              const isMajor = i % 5 === 0;
+              const r1 = 135;
+              const r2 = isMajor ? 115 : 125;
+              const x1 = 150 + r1 * Math.cos((angle * Math.PI) / 180);
+              const y1 = 150 + r1 * Math.sin((angle * Math.PI) / 180);
+              const x2 = 150 + r2 * Math.cos((angle * Math.PI) / 180);
+              const y2 = 150 + r2 * Math.sin((angle * Math.PI) / 180);
+              return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} strokeWidth={isMajor ? "3" : "2"} className={isMajor ? "text-white/40" : "text-white/10"} />;
+            })}
+          </g>
+
+          <circle cx="150" cy="150" r={radius} fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="24" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference / 2} transform="rotate(180 150 150)" />
+          <circle cx="150" cy="150" r={radius} fill="none" stroke="#EE4D2D" strokeWidth="24" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference - ((progress / 100) * (circumference / 2))} transform="rotate(180 150 150)" className="transition-all duration-1000 ease-in-out drop-shadow-[0_0_10px_rgba(238,77,45,0.5)]" />
+        </svg>
+
+        <div className="absolute top-[40%] flex flex-col items-center justify-center w-full">
+          <span className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.1em] mb-0.5">
+            Horário Local
+          </span>
+          <div className="text-white text-5xl font-bold tracking-tighter" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            {hours.toString().padStart(2, '0')}:{minutes.toString().padStart(2, '0')}
+          </div>
+          <span className="text-[#EE4D2D] text-[9px] font-bold uppercase tracking-wider mt-1 bg-[#EE4D2D]/10 px-2 py-0.5 rounded-full">
+            Faltam {remainingHoursStr}h {remainingMinsStr}m
+          </span>
+        </div>
+      </div>
+      
+      {/* Direita: Indicador de Operação */}
+      <div className="flex flex-col items-center justify-center z-10 w-full md:w-auto mt-4 md:mt-0">
+        <div className="relative flex items-center justify-center w-12 h-12 rounded-full bg-[#111] border border-white/10 shadow-[inset_0_0_15px_rgba(255,255,255,0.02)]">
+          <div className="absolute inset-0 rounded-full border border-[#00FF00]/40 animate-[spin_3s_linear_infinite]" style={{ borderTopColor: 'transparent', borderLeftColor: 'transparent' }} />
+          <div className="absolute inset-2 rounded-full bg-[#00FF00]/10 animate-pulse" />
+          <Zap className="w-5 h-5 text-[#00FF00] drop-shadow-[0_0_5px_rgba(0,255,0,0.8)] z-10" />
+        </div>
+        <span className="text-[9px] font-bold tracking-widest text-[#00FF00] uppercase mt-2 animate-pulse">
+          Operando
         </span>
       </div>
-
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="bg-black/30 border border-[#00FF00]/10 rounded-lg px-3 py-1.5 flex items-center gap-2">
-          <Truck className="h-4 w-4 text-[#00FF00]" />
-          <span className="text-white text-xs font-medium">Flex <span className="text-gray-400 hidden sm:inline">(ML/Shopee)</span> <span className="font-bold">13:00</span></span>
-          <span className="bg-red-500/20 text-red-400 border border-red-500/20 rounded px-1.5 py-0.5 text-[9px] font-bold">Faltam 24m!</span>
-        </div>
-        <div className="bg-black/30 border border-[#FFE600]/10 rounded-lg px-3 py-1.5 flex items-center gap-2">
-          <Package className="h-4 w-4 text-[#FFE600]" />
-          <span className="text-white text-xs font-medium">ML Agência <span className="font-bold">16:00</span></span>
-          <span className="bg-amber-500/20 text-amber-500 border border-amber-500/20 rounded px-1.5 py-0.5 text-[9px] font-bold">Faltam 3h 24m</span>
-        </div>
-        <div className="bg-black/30 border border-[#EE4D2D]/10 rounded-lg px-3 py-1.5 flex items-center gap-2">
-          <Package className="h-4 w-4 text-[#EE4D2D]" />
-          <span className="text-white text-xs font-medium">Shopee/Amz/Mag <span className="font-bold">17:00</span></span>
-          <span className="bg-orange-500/20 text-orange-500 border border-orange-500/20 rounded px-1.5 py-0.5 text-[9px] font-bold">Faltam 4h 24m</span>
-        </div>
-      </div>
-
-      <button className="h-8 w-8 rounded-full bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 transition-colors shrink-0">
-        <Settings2 className="h-4 w-4 text-gray-400" />
-      </button>
     </div>
   );
 };
@@ -208,7 +273,7 @@ export default function MeuDia() {
     <div className="flex flex-col lg:flex-row h-[calc(100vh-48px)] bg-transparent w-full gap-8 font-sans overflow-hidden animate-in fade-in duration-700">
       
       {/* Coluna Esquerda: Tipografia Minimalista */}
-      <div className="w-full lg:w-1/3 flex flex-col justify-center border-r border-white/5 pr-8 pt-20 pb-8">
+      <div className="w-full lg:w-1/3 flex flex-col justify-center border-r border-white/5 pr-8 pt-20 pb-8 relative">
         
         {/* Ponto Verde Neon */}
         <div className="flex items-center gap-2 mb-6">
@@ -252,13 +317,16 @@ export default function MeuDia() {
           </div>
         </div>
 
+        {/* A Rama do Dia no canto inferior direito da coluna esquerda */}
+        <RamaDoDiaWidget />
+
       </div>
 
       {/* Coluna Direita: O Bento Grid */}
       <div className="w-full lg:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-4 h-full overflow-y-auto custom-scrollbar pb-10 lg:pb-0 lg:pl-8">
         
         {isNothingPending && (
-          <div className="col-span-1 md:col-span-2 aspect-[2/1] rounded-[2rem] bg-[#111111] flex flex-col items-center justify-center border border-white/5 shadow-2xl p-8">
+          <div className="col-span-1 md:col-span-2 aspect-[2/1] rounded-[2rem] bg-[#111111] flex flex-col items-center justify-center border border-white/5 shadow-2xl p-8 mt-4">
             <CheckCircle2 className="h-20 w-20 text-[#00FF00] mb-6 drop-shadow-[0_0_15px_rgba(0,255,0,0.4)]" />
             <h3 className="text-3xl font-light text-white mb-2 tracking-wide">Tudo zerado</h3>
             <p className="text-gray-500 text-center text-lg">Seu foco operacional está limpo.</p>

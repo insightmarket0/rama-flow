@@ -5,6 +5,7 @@ import { CommandMenu } from "./CommandMenu";
 import { GlobalShortcuts } from "./GlobalShortcuts";
 import { QuickCreateMenu } from "./QuickCreateMenu";
 import { GlobalAlerts } from "./GlobalAlerts";
+import { RamaDoDiaWidget } from "@/components/RamaDoDiaWidget";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -138,12 +139,14 @@ export function MainLayout({ children }: MainLayoutProps) {
       const { error: dbError } = await supabase
         .from('profiles')
         .update({ full_name: editName })
+        .update({ full_name: editName, role: editRole })
         .eq('user_id', user.id);
         
       if (dbError) {
         console.warn("Erro ao atualizar profiles (ignorando):", dbError);
       }
       
+      await refreshUser();
       setFullName(editName);
       setRole(editRole);
       setIsProfileOpen(false);
@@ -221,8 +224,8 @@ export function MainLayout({ children }: MainLayoutProps) {
             </div>
           )}
 
-          <main className={`flex-1 ${(location.pathname === '/marketing' || location.pathname === '/brand-book' || location.pathname === '/equipe' || location.pathname === '/expedicao') ? 'h-screen overflow-hidden' : 'p-6'}`}>
-            <div key={location.pathname} className={`${(location.pathname === '/marketing' || location.pathname === '/brand-book' || location.pathname === '/equipe' || location.pathname === '/expedicao') ? 'h-full flex flex-col' : 'space-y-6'} animate-in fade-in slide-in-from-bottom-4 zoom-in-95 duration-300 ease-out`}>
+          <main className={`flex flex-col flex-1 ${(location.pathname === '/marketing' || location.pathname === '/brand-book' || location.pathname === '/equipe' || location.pathname === '/expedicao') ? 'h-screen max-h-screen overflow-hidden' : 'p-6'}`}>
+            <div key={location.pathname} className={`flex flex-col ${(location.pathname === '/marketing' || location.pathname === '/brand-book' || location.pathname === '/equipe' || location.pathname === '/expedicao') ? 'flex-1 min-h-0 overflow-hidden' : 'space-y-6'} animate-in fade-in slide-in-from-bottom-4 zoom-in-95 duration-300 ease-out`}>
               {(location.pathname !== '/marketing' && location.pathname !== '/brand-book' && location.pathname !== '/equipe' && location.pathname !== '/expedicao') && <GlobalAlerts />}
               {children}
             </div>

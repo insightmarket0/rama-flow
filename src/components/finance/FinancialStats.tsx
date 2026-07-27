@@ -1,7 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardStats } from "@/types/finance";
-import { DollarSign, TrendingUp, Trophy, Calendar } from "lucide-react";
-import { MARKETPLACES } from "@/config/marketplaces";
 
 interface FinancialStatsProps {
     stats: DashboardStats;
@@ -15,71 +12,60 @@ export const FinancialStats = ({ stats }: FinancialStatsProps) => {
         }).format(value);
     };
 
-    const cardClass = "bg-[#111111] border border-white/5 shadow-2xl rounded-2xl overflow-hidden relative p-5 transition-all hover:border-white/10 group";
-    const accentLine = "absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#00FF00]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity";
-
     return (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {/* Faturamento Total */}
-            <Card className={cardClass}>
-                <div className={accentLine} />
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 relative z-10 px-0 pt-0">
-                    <CardTitle className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Faturamento Total (Ano)</CardTitle>
-                    <DollarSign className="h-5 w-5 text-[#00FF00]" />
-                </CardHeader>
-                <CardContent className="relative z-10 px-0 pb-0">
-                    <div className="text-4xl md:text-5xl font-light text-white tracking-tighter leading-none mb-3">{formatCurrency(stats.totalYear)}</div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold bg-[#00FF00]/10 text-[#00FF00] border border-[#00FF00]/20 px-2 py-0.5 rounded-full uppercase tracking-wider">+12% YoY</span>
+        <div className="flex flex-col items-center justify-center pt-2 pb-12 w-full">
+            
+            {/* The Hero Metric */}
+            <div className="text-center mb-16 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                <h3 className="text-gray-500 uppercase tracking-[0.5em] text-[10px] font-semibold mb-6 flex items-center justify-center gap-4 opacity-70">
+                    <span className="w-12 h-px bg-white/10" />
+                    Faturamento Total
+                    <span className="w-12 h-px bg-white/10" />
+                </h3>
+                <div className="text-[15vw] md:text-[8rem] lg:text-[8.5rem] font-light tracking-tighter leading-none mb-8 bg-gradient-to-b from-white via-white to-white/40 bg-clip-text text-transparent drop-shadow-2xl whitespace-nowrap">
+                    {formatCurrency(stats.totalYear).replace("R$", "").trim()}
+                </div>
+                <div className="flex items-center justify-center gap-3">
+                    <div className="flex items-center gap-3 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm">
+                        <span className="text-white/60 tracking-[0.2em] uppercase text-xs font-bold">
+                            BRL
+                        </span>
+                        <div className="w-px h-3 bg-white/20" />
+                        <span className="text-[10px] font-bold text-[#00FF00] uppercase tracking-widest flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#00FF00] animate-pulse" />
+                            +12% VS ANO ANTERIOR
+                        </span>
                     </div>
-                </CardContent>
-            </Card>
+                </div>
+            </div>
 
-            {/* Média Mensal */}
-            <Card className={cardClass}>
-                <div className={accentLine} />
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 relative z-10 px-0 pt-0">
-                    <CardTitle className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Média Mensal</CardTitle>
-                    <TrendingUp className="h-5 w-5 text-[#00FF00]" />
-                </CardHeader>
-                <CardContent className="relative z-10 px-0 pb-0">
-                    <div className="text-4xl md:text-5xl font-light text-white tracking-tighter leading-none mb-3">{formatCurrency(stats.monthlyAverage)}</div>
-                </CardContent>
-            </Card>
+            {/* Secondary Metrics Row */}
+            <div className="w-[90%] grid grid-cols-3 gap-8 md:gap-12 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300 border-t border-white/5 pt-10 relative">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-[#00FF00]/50 to-transparent" />
+                
+                {/* Média Mensal */}
+                <div className="text-center flex flex-col items-center">
+                    <div className="text-gray-500 uppercase tracking-[0.3em] text-[9px] font-bold mb-4 opacity-70">Média Mensal</div>
+                    <div className="text-2xl md:text-4xl font-light text-white tracking-tight">{formatCurrency(stats.monthlyAverage).replace("R$", "").trim()}</div>
+                    <div className="text-gray-500 text-[9px] uppercase tracking-widest font-bold mt-2">BRL</div>
+                </div>
 
-            {/* Melhor Canal */}
-            <Card className={cardClass}>
-                <div className={accentLine} />
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 relative z-10 px-0 pt-0">
-                    <CardTitle className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Melhor Canal</CardTitle>
-                    <Trophy className="h-5 w-5 text-[#00FF00]" />
-                </CardHeader>
-                <CardContent className="relative z-10 px-0 pb-0">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="text-3xl font-light text-white capitalize truncate leading-none" title={stats.bestChannel.name}>
-                            {stats.bestChannel.name}
-                        </div>
-                    </div>
-                    <p className="text-[10px] text-gray-500 uppercase tracking-widest">
-                        <span className="text-[#00FF00] font-bold">{formatCurrency(stats.bestChannel.value)}</span> de receita
-                    </p>
-                </CardContent>
-            </Card>
+                {/* Melhor Canal */}
+                <div className="text-center flex flex-col items-center border-l border-r border-white/5 px-4">
+                    <div className="text-gray-500 uppercase tracking-[0.3em] text-[9px] font-bold mb-4 opacity-70">Melhor Canal</div>
+                    <div className="text-2xl md:text-4xl font-light text-white tracking-tight truncate w-full">{stats.bestChannel.name}</div>
+                    <div className="text-[#00FF00] text-[9px] uppercase tracking-widest font-bold mt-2">{formatCurrency(stats.bestChannel.value)}</div>
+                </div>
 
-            {/* Melhor Mês */}
-            <Card className={cardClass}>
-                <div className={accentLine} />
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 relative z-10 px-0 pt-0">
-                    <CardTitle className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Melhor Mês</CardTitle>
-                    <Calendar className="h-5 w-5 text-[#00FF00]" />
-                </CardHeader>
-                <CardContent className="relative z-10 px-0 pb-0">
-                    <div className="text-4xl md:text-5xl font-light text-white capitalize leading-none mb-3">{stats.bestMonth.month}</div>
-                    <p className="text-[10px] text-gray-500 uppercase tracking-widest">
-                        <span className="text-[#00FF00] font-bold">{formatCurrency(stats.bestMonth.value)}</span> neste mês
-                    </p>
-                </CardContent>
-            </Card>
+                {/* Melhor Mês */}
+                <div className="text-center flex flex-col items-center">
+                    <div className="text-gray-500 uppercase tracking-[0.3em] text-[9px] font-bold mb-4 opacity-70">Melhor Mês</div>
+                    <div className="text-2xl md:text-4xl font-light text-white tracking-tight">{stats.bestMonth.month}</div>
+                    <div className="text-[#00FF00] text-[9px] uppercase tracking-widest font-bold mt-2">{formatCurrency(stats.bestMonth.value)}</div>
+                </div>
+
+            </div>
+            
         </div>
     );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { 
   Zap, 
@@ -26,6 +26,7 @@ import {
   DollarSign
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 // Grupos da Nova Sidebar Minimalista
 const NAV_GROUPS = [
@@ -62,6 +63,7 @@ const NAV_GROUPS = [
     subItems: [
       { title: "Metas e Visão", url: "/metas", icon: Target },
       { title: "Playbooks (SOPs)", url: "/playbooks", icon: BookOpen },
+      { title: "Identidade da Marca", url: "/brand-book", icon: Heart },
     ]
   },
   {
@@ -69,12 +71,12 @@ const NAV_GROUPS = [
     icon: ShoppingCart,
     title: "Comercial",
     subItems: [
-      { title: "Dashboard Financeiro", url: "/dashboard-financeiro", icon: LineChart },
       { title: "Dashboard Pedidos", url: "/dashboard", icon: LayoutDashboard },
       { title: "Contas Fixas (Novo)", url: "/contas-fixas", icon: CalendarPlus },
       { title: "Cotações", url: "/quotations", icon: ClipboardList },
       { title: "Fornecedores", url: "/fornecedores", icon: Users },
       { title: "Contas a Pagar", url: "/contas", icon: Wallet },
+      { title: "Central de Compras", url: "/suprimentos", icon: ShoppingCart },
     ]
   },
   {
@@ -83,7 +85,6 @@ const NAV_GROUPS = [
     title: "Expedição",
     subItems: [
       { title: "Portal de Expedição", url: "/expedicao", icon: LayoutDashboard },
-      { title: "Novo Módulo (Em Breve)", url: "/divergencias", icon: Wrench },
     ]
   },
   {
@@ -93,7 +94,6 @@ const NAV_GROUPS = [
     mainLink: "/marketing",
     subItems: [
       { title: "Dashboard Marketing", url: "/marketing", icon: Megaphone },
-      { title: "Identidade da Marca", url: "/brand-book", icon: Heart },
     ]
   },
   {
@@ -101,6 +101,7 @@ const NAV_GROUPS = [
     icon: Users,
     title: "Equipe",
     subItems: [
+      { title: "Dashboard Financeiro", url: "/dashboard-financeiro", icon: LineChart },
       { title: "Gestão de Equipe", url: "/equipe", icon: Users },
     ]
   }
@@ -110,11 +111,46 @@ export function AppSidebar() {
   const { user, signOut } = useAuth();
   const location = useLocation();
   const [hoveredGroup, setHoveredGroup] = useState<string | null>(null);
+  const [pendingPurchases, setPendingPurchases] = useState(0);
+
+  useEffect(() => {
+    const checkPending = async () => {
+      try {
+        const { count, error } = await supabase
+          .from('supply_requests')
+          .select('*', { count: 'exact', head: true })
+          .or('status.eq.pendente,status.is.null');
+        
+        if (error) {
+          // Fallback para visualização se a tabela não existir
+          setPendingPurchases(1);
+        } else {
+          setPendingPurchases(count || 0);
+        }
+      } catch (err) {
+        setPendingPurchases(1);
+        console.error(err);
+      }
+    };
+    checkPending();
+    
+    const channel = supabase.channel('supply_sidebar').on('postgres_changes', {
+      event: '*', schema: 'public', table: 'supply_requests'
+    }, checkPending).subscribe();
+    
+    return () => { supabase.removeChannel(channel); };
+  }, []);
   
   const isMarketing = location.pathname === '/marketing' || location.pathname === '/brand-book';
 
   const filteredNavGroups = NAV_GROUPS.map(group => {
     let modifiedGroup = { ...group };
+
+    if (group.id === "equipe") {
+      if (user?.email !== "livia@hotmail.com" && user?.email !== "rogerio@ramaflow.com" && user?.email !== "suporte.ramamagazine@gmail.com") {
+        modifiedGroup.subItems = modifiedGroup.subItems.filter(item => item.url !== "/dashboard-financeiro");
+      }
+    }
 
     if (user?.email === "mara@hotmail.com") {
       if (!["home", "gestao", "expedicao", "operacao"].includes(group.id)) {
@@ -170,10 +206,11 @@ export function AppSidebar() {
                 onMouseLeave={() => setHoveredGroup(null)}
               >
                 {/* Botão Principal da Cápsula */}
-                {group.subItems.length === 0 ? (
-                  // Link direto (Home)
+                {group.subItems.length <= 1 ? (
+                  // Link direto (Home ou Único Item)
                   <NavLink
-                    to={group.mainLink!}
+                    to={group.subItems.length === 1 ? group.subItems[0].url : group.mainLink!}
+                    title={group.title}
                     className={`h-12 w-12 rounded-full flex items-center justify-center transition-all duration-300 relative ${
                       active 
                         ? group.special 
@@ -196,7 +233,7 @@ export function AppSidebar() {
                 ) : (
                   // Botão que abre menu (Outros)
                   <button
-                    className={`h-12 w-12 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    className={`h-12 w-12 rounded-full flex items-center justify-center transition-all duration-300 relative ${
                       active 
                         ? isMarketing
                           ? "bg-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]"
@@ -205,10 +242,13 @@ export function AppSidebar() {
                     }`}
                   >
                     <Icon className={`h-5 w-5 ${active ? 'fill-black' : ''}`} />
+                    {group.id === "comercial" && pendingPurchases > 0 && (
+                      <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-[#1C1C1E] animate-bounce" />
+                    )}
                   </button>
                 )}
 
-                {group.subItems.length > 0 && hoveredGroup === group.id && (
+                {group.subItems.length > 1 && hoveredGroup === group.id && (
                   <div className="absolute left-10 top-1/2 -translate-y-1/2 pl-6 py-12 z-50">
                     <div className="bg-[#0a0a0a]/95 backdrop-blur-2xl border border-white/10 rounded-2xl p-2 w-64 shadow-[0_0_40px_rgba(0,0,0,0.9)] animate-in fade-in slide-in-from-left-2 duration-200">
                       <div className="px-3 py-2 mb-2 border-b border-white/5 flex items-center gap-2">
@@ -223,7 +263,7 @@ export function AppSidebar() {
                             key={sub.url}
                             to={sub.url}
                             className={({ isActive }) =>
-                              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group border ${
+                              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group border relative ${
                                 isActive
                                   ? isMarketing
                                     ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 shadow-[0_0_10px_rgba(6,182,212,0.05)]"
@@ -236,6 +276,11 @@ export function AppSidebar() {
                               <>
                                 <sub.icon className={`h-4 w-4 ${isActive ? (isMarketing ? "drop-shadow-[0_0_5px_rgba(6,182,212,0.5)]" : "drop-shadow-[0_0_5px_rgba(0,255,0,0.5)]") : (isMarketing ? "group-hover:text-cyan-400" : "group-hover:text-[#00FF00]")} transition-colors`} />
                                 {sub.title}
+                                {sub.url === "/suprimentos" && pendingPurchases > 0 && (
+                                  <span className="ml-auto flex items-center justify-center min-w-[20px] h-5 rounded-full bg-red-500 text-white text-[10px] font-bold px-1.5 shadow-[0_0_10px_rgba(239,68,68,0.5)] animate-pulse">
+                                    {pendingPurchases}
+                                  </span>
+                                )}
                               </>
                             )}
                           </NavLink>

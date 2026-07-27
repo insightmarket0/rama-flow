@@ -44,6 +44,72 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_messages: {
+        Row: {
+          id: string
+          created_at: string
+          channel: string
+          user_id: string | null
+          sender_name: string
+          sender_initials: string
+          sender_color: string
+          text: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          channel: string
+          user_id?: string | null
+          sender_name: string
+          sender_initials: string
+          sender_color: string
+          text: string
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          channel?: string
+          user_id?: string | null
+          sender_name?: string
+          sender_initials?: string
+          sender_color?: string
+          text?: string
+        }
+        Relationships: []
+      }
+      supply_requests: {
+        Row: {
+          id: string
+          created_at: string
+          item_name: string
+          category: string | null
+          priority: string
+          status: string
+          author: string
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          item_name: string
+          category?: string | null
+          priority: string
+          status?: string
+          author: string
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          item_name?: string
+          category?: string | null
+          priority?: string
+          status?: string
+          author?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       installments: {
         Row: {
           created_at: string

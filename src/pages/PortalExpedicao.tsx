@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Package, Send, AlertTriangle, CheckCircle2, MessageSquare, Plus, Clock, FileText, CheckCircle, Box, UploadCloud, X, XCircle, Image as ImageIcon, Truck, Settings2, Save, CheckCheck, Paperclip, Mic, Phone, PhoneCall, MicOff, PhoneOff, Radio } from "lucide-react";
+import { Package, Send, AlertTriangle, CheckCircle2, MessageSquare, Plus, Clock, FileText, CheckCircle, Box, UploadCloud, X, XCircle, Image as ImageIcon, Truck, Settings2, Save, CheckCheck, Paperclip, Mic, Phone, PhoneCall, MicOff, PhoneOff, Radio, Play, Pause, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,8 +12,104 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+
+const CustomAudioPlayer = ({ src, isMe }: { src: string, isMe?: boolean }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const setAudioData = () => {
+      if (audio.duration && isFinite(audio.duration)) {
+        setDuration(audio.duration);
+      }
+    };
+    const setAudioTime = () => setCurrentTime(audio.currentTime);
+    const onEnded = () => setIsPlaying(false);
+
+    audio.addEventListener('loadedmetadata', setAudioData);
+    // Workaround for some browsers not firing loadedmetadata correctly with blob urls
+    audio.addEventListener('durationchange', setAudioData);
+    audio.addEventListener('timeupdate', setAudioTime);
+    audio.addEventListener('ended', onEnded);
+
+    return () => {
+      audio.removeEventListener('loadedmetadata', setAudioData);
+      audio.removeEventListener('durationchange', setAudioData);
+      audio.removeEventListener('timeupdate', setAudioTime);
+      audio.removeEventListener('ended', onEnded);
+    };
+  }, []);
+
+  const togglePlay = () => {
+    if (isPlaying) {
+      audioRef.current?.pause();
+    } else {
+      audioRef.current?.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const time = Number(e.target.value);
+    setCurrentTime(time);
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+    }
+  };
+
+  const formatTime = (time: number) => {
+    if (isNaN(time) || !isFinite(time)) return "0:00";
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const primaryColor = isMe ? '#00FF00' : '#a855f7';
+  const bgColor = 'rgba(0,0,0,0.3)';
+
+  return (
+    <div className={`flex items-center gap-2.5 w-60 sm:w-[280px] max-w-[85vw] ${isMe ? 'text-[#00FF00]' : 'text-purple-400'} py-1`}>
+      <audio ref={audioRef} src={src} preload="metadata" />
+      <button 
+        onClick={togglePlay} 
+        className={`shrink-0 flex items-center justify-center w-11 h-11 rounded-full transition-all ${isMe ? 'bg-[#00FF00]/10 hover:bg-[#00FF00]/20' : 'bg-purple-500/10 hover:bg-purple-500/20'} shadow-sm`}
+      >
+        {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
+      </button>
+      <div className="flex flex-col w-full gap-1.5 flex-1 relative top-0.5">
+        <input 
+          type="range" 
+          min="0" 
+          max={duration || 100} 
+          value={currentTime} 
+          onChange={handleSliderChange}
+          className={`w-full h-1.5 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full ${isMe ? '[&::-webkit-slider-thumb]:bg-[#00FF00] [&::-webkit-slider-thumb]:shadow-[0_0_10px_rgba(0,255,0,0.5)]' : '[&::-webkit-slider-thumb]:bg-purple-400 [&::-webkit-slider-thumb]:shadow-[0_0_10px_rgba(168,85,247,0.5)]'}`} 
+          style={{
+            background: `linear-gradient(to right, ${primaryColor} ${progressPercent}%, ${bgColor} ${progressPercent}%)`
+          }}
+        />
+        <div className="flex justify-between w-full text-[10px] opacity-75 font-medium tracking-wider">
+          <span>{formatTime(currentTime)}</span>
+          <span>{formatTime(duration)}</span>
+        </div>
+      </div>
+      <div className={`relative w-9 h-9 rounded-full overflow-hidden shrink-0 ml-1 ${isMe ? 'bg-[#00FF00]/10' : 'bg-purple-500/10'} flex items-center justify-center`}>
+          <Mic className={`w-4 h-4 ${isMe ? 'text-[#00FF00]' : 'text-purple-400'}`} />
+      </div>
+    </div>
+  );
+};
 
 export default function PortalExpedicao() {
+  const { user } = useAuth();
   const [sku, setSku] = useState("");
   const [marketplace, setMarketplace] = useState("Mercado Livre");
   const [description, setDescription] = useState("");
@@ -97,35 +193,77 @@ export default function PortalExpedicao() {
   };
   
   // Estados para Aba e Alerta de Insumos
-  const [activeTab, setActiveTab] = useState<"divergencia" | "insumos" | "kanban" | "historico">("kanban");
+  const [activeTab, setActiveTab] = useState<"divergencia" | "insumos" | "urgencias" | "kanban" | "historico">("kanban");
   const [itemName, setItemName] = useState("");
-  const [itemCategory, setItemCategory] = useState("Embalagem (Caixa, Fita, etc)");
+  const [itemCategory, setItemCategory] = useState("");
   const [remainingQty, setRemainingQty] = useState("");
   const [supplyPriority, setSupplyPriority] = useState("normal");
   const [isSubmittingSupply, setIsSubmittingSupply] = useState(false);
 
+  // Estados para Urgência de Produtos Vendidos
+  const [urgencyProduct, setUrgencyProduct] = useState("");
+  const [urgencySupplier, setUrgencySupplier] = useState("");
+  const [urgencyQty, setUrgencyQty] = useState("");
+  const [isSubmittingUrgency, setIsSubmittingUrgency] = useState(false);
+  const [urgencySuccess, setUrgencySuccess] = useState(false);
 
   const [chatMessage, setChatMessage] = useState("");
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      sender: "Lívia",
-      initials: "LI",
-      time: "10:45",
-      text: "Pessoal, o produto 2343 tá saindo muito hoje, mas notei que a caixa parda que usamos acabou. Posso mandar na caixa branca?",
-      isMe: false,
-      color: "bg-purple-500 text-white"
-    },
-    {
-      id: 2,
-      sender: "Anderson",
-      initials: "AN",
-      time: "10:48",
-      text: "Pode mandar na branca sim, Lívia. Mas me abre um chamado ali na esquerda pra eu lembrar de comprar mais parda depois.",
-      isMe: true,
-      color: "bg-[#00FF00] text-black"
-    }
-  ]);
+  const [messages, setMessages] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchMessages = async () => {
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('channel', 'expedicao')
+        .order('created_at', { ascending: true });
+        
+      if (data && !error) {
+        const formatted = data.map(m => ({
+          id: m.id,
+          sender: m.sender_name,
+          initials: m.sender_initials,
+          time: new Date(m.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+          text: m.text,
+          isMe: m.user_id === user.id,
+          color: m.sender_color
+        }));
+        setMessages(formatted);
+      }
+    };
+
+    fetchMessages();
+
+    const channel = supabase
+      .channel('expedicao_chat')
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'chat_messages',
+        filter: 'channel=eq.expedicao'
+      }, (payload) => {
+        const m = payload.new as any;
+        setMessages(prev => {
+          if (prev.find(msg => msg.id === m.id)) return prev;
+          return [...prev, {
+            id: m.id,
+            sender: m.sender_name,
+            initials: m.sender_initials,
+            time: new Date(m.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+            text: m.text,
+            isMe: m.user_id === user.id,
+            color: m.sender_color
+          }];
+        });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   const createTicketFromMessage = (msg: any) => {
     // Regex buscando especificamente por 4 números seguidos, que é o padrão de SKU da empresa.
@@ -280,18 +418,40 @@ export default function PortalExpedicao() {
     setEvidenceFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleSupplySubmit = (e: React.FormEvent) => {
+  const handleSupplySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!itemName || !remainingQty) {
+    if (!itemName || !remainingQty || !user) {
       toast.error("Preencha o nome do item e a quantidade restante!");
       return;
     }
 
     setIsSubmittingSupply(true);
     
-    setTimeout(() => {
-      setIsSubmittingSupply(false);
-      toast.success("Alerta de estoque enviado para Compras!", {
+    // Inserir no banco de dados de suprimentos
+    const isMara = user.email === "mara@hotmail.com";
+    const authorName = isMara ? "Mara" : "Anderson";
+
+    try {
+      await supabase.from('supply_requests').insert({
+        item_name: itemName,
+        category: itemCategory,
+        priority: supplyPriority,
+        status: 'pendente',
+        author: authorName,
+        user_id: user.id
+      });
+
+      // Opcional: Mandar uma mensagem automática no chat notificando a solicitação
+      await supabase.from('chat_messages').insert({
+        channel: 'expedicao',
+        user_id: user.id,
+        sender_name: "Sistema Bot",
+        sender_initials: "BOT",
+        sender_color: "bg-blue-500 text-white",
+        text: `📦 Foi solicitado a reposição de: **${itemName}**. Restante: ${remainingQty}. Prioridade: ${supplyPriority.toUpperCase()}.`
+      });
+
+      toast.success("Alerta de estoque enviado para a Central de Compras!", {
         icon: <CheckCircle2 className="w-5 h-5 text-[#00FF00]" />,
         style: { background: "#0A0A0A", border: "1px solid #00FF00", color: "#FFF" }
       });
@@ -303,33 +463,109 @@ export default function PortalExpedicao() {
         description: `Restante: ${remainingQty}. Categoria: ${itemCategory}`,
         status: 'aguardando',
         priority: supplyPriority,
-        author: 'Anderson',
+        author: authorName,
         time: `Hoje às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
       }, ...prev]);
-      setActiveTab("historico");
-      
+      // Limpa os campos
       setItemName("");
-      setItemCategory("Embalagem (Caixa, Fita, etc)");
+      setItemCategory("");
       setRemainingQty("");
       setSupplyPriority("normal");
-    }, 800);
+      
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao solicitar insumo. Verifique se o SQL foi rodado.");
+    } finally {
+      setIsSubmittingSupply(false);
+    }
   };
 
-  const sendChatMessage = (text: string) => {
-    if (!text.trim()) return;
+  const handleUrgencySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!urgencyProduct || !urgencyQty) {
+      toast.error("Preencha o produto faltante e a quantidade necessária.");
+      return;
+    }
+
+    setIsSubmittingUrgency(true);
+    try {
+      const finalItemName = `${urgencyProduct} (Qtd: ${urgencyQty})${urgencySupplier ? ` | Fornecedor: ${urgencySupplier}` : ''}`;
+      
+      const { error } = await supabase.from('supply_requests').insert({
+        item_name: finalItemName,
+        category: 'Produto Vendido (Urgência)',
+        priority: 'critico',
+        status: 'pendente',
+        quantity_bought: 0,
+        author: user?.user_metadata?.full_name || 'Expedição (Mara)',
+        user_id: user?.id
+      });
+
+      if (error) {
+        console.error("Supabase Error Details:", error);
+        throw error;
+      }
+
+      toast.success("Alerta de urgência enviado para Compras!");
+
+      setUrgencySuccess(true);
+      setTimeout(() => {
+        setUrgencySuccess(false);
+        setUrgencyProduct("");
+        setUrgencySupplier("");
+        setUrgencyQty("");
+      }, 2500);
+
+      await supabase.from('chat_messages').insert({
+        channel: 'expedicao',
+        user_id: user?.id,
+        sender_name: "Sistema de Urgências",
+        sender_initials: "URG",
+        sender_color: "bg-red-600 text-white animate-pulse",
+        text: `🚨 **URGÊNCIA: PRODUTO VENDIDO FALTANTE!**\nO item **${urgencyProduct}** precisa ser comprado hoje.\nQtd necessária: ${urgencyQty}${urgencySupplier ? `\nSugestão de Compra: ${urgencySupplier}` : ''}`
+      });
+      
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao registrar urgência.");
+    } finally {
+      setIsSubmittingUrgency(false);
+    }
+  };
+
+  const sendChatMessage = async (text: string) => {
+    if (!text.trim() || !user) return;
+    
+    // Determinar informações do usuário atual
+    const isMara = user.email === "mara@hotmail.com";
+    const senderName = isMara ? "Mara" : "Anderson";
+    const initials = isMara ? "MA" : "AN";
+    const color = isMara ? "bg-purple-500 text-white" : "bg-[#00FF00] text-black";
     
     const now = new Date();
     const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    const tempId = Date.now().toString();
     
+    // Optimistic Update (mostra na tela imediatamente antes de gravar)
     setMessages(prev => [...prev, {
-      id: Date.now(),
-      sender: "Anderson",
-      initials: "AN",
+      id: tempId,
+      sender: senderName,
+      initials,
       time,
       text,
       isMe: true,
-      color: "bg-[#00FF00] text-black"
+      color
     }]);
+
+    // Gravar no Banco de Dados
+    await supabase.from('chat_messages').insert({
+      channel: 'expedicao',
+      user_id: user.id,
+      sender_name: senderName,
+      sender_initials: initials,
+      sender_color: color,
+      text
+    });
   };
 
   const handleChatSubmit = (e: React.FormEvent) => {
@@ -366,6 +602,12 @@ export default function PortalExpedicao() {
                 className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-300 ${activeTab === "insumos" ? "bg-[#00FF00]/10 text-[#00E500] shadow-[0_0_10px_rgba(0,255,0,0.1)] border border-[#00FF00]/20" : "text-gray-500 border border-transparent hover:text-gray-300 hover:bg-white/5"}`}
               >
                 <Box className="w-3.5 h-3.5" /> Alerta Insumos
+              </button>
+              <button 
+                onClick={() => setActiveTab("urgencias")}
+                className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-300 ${activeTab === "urgencias" ? "bg-red-500/10 text-red-500 shadow-[0_0_10px_rgba(239,68,68,0.1)] border border-red-500/20" : "text-gray-500 border border-transparent hover:text-gray-300 hover:bg-white/5"}`}
+              >
+                <AlertTriangle className="w-3.5 h-3.5" /> Produto Urgente
               </button>
               <button 
                 onClick={() => setActiveTab("historico")}
@@ -606,6 +848,83 @@ export default function PortalExpedicao() {
             </form>
           )}
 
+          {activeTab === "urgencias" && (
+            <form onSubmit={handleUrgencySubmit} className="space-y-4 flex-1 flex flex-col animate-in fade-in duration-300 bg-red-950/10 border border-red-500/20 rounded-xl p-4 shadow-[inset_0_0_20px_rgba(239,68,68,0.05)]">
+              <div className="flex items-center gap-2 text-red-500 mb-2">
+                <AlertTriangle className="w-5 h-5 animate-pulse" />
+                <h3 className="font-bold">Urgência: Produto Faltante</h3>
+              </div>
+              <p className="text-xs text-red-400/80 -mt-3 mb-2">Use isso apenas para produtos que já foram vendidos e precisam ser comprados no mesmo dia!</p>
+
+              <div className="space-y-1">
+                <label className="text-[9px] font-bold uppercase tracking-widest text-red-500">
+                  Nome do Produto Vendido
+                </label>
+                <Input 
+                  value={urgencyProduct}
+                  onChange={(e) => setUrgencyProduct(e.target.value.toUpperCase())}
+                  placeholder="Ex: Teclado Mecânico Redragon"
+                  className="bg-black/40 border-red-500/30 h-10 text-xs focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/50 text-white shadow-inner"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-red-500">
+                    Onde o Rogério costuma comprar? (Opcional)
+                  </label>
+                  <Input 
+                    value={urgencySupplier}
+                    onChange={(e) => setUrgencySupplier(e.target.value)}
+                    placeholder="Ex: Distribuidora SP, Galeria Pagé"
+                    className="bg-black/40 border-red-500/30 h-10 text-xs focus-visible:ring-1 focus-visible:ring-red-500/50 text-white shadow-inner"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-red-500">
+                    Quantidade Faltante
+                  </label>
+                  <Input 
+                    value={urgencyQty}
+                    type="number"
+                    min="1"
+                    onChange={(e) => setUrgencyQty(e.target.value)}
+                    placeholder="Ex: 2"
+                    className="bg-black/40 border-red-500/30 h-10 text-xs focus-visible:ring-1 focus-visible:ring-red-500/50 text-white shadow-inner"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <Button 
+                  type="submit" 
+                  disabled={isSubmittingUrgency || urgencySuccess}
+                  className={`w-full h-12 text-white font-extrabold text-sm rounded-lg border transition-all duration-500 overflow-hidden relative group ${
+                    urgencySuccess 
+                      ? "bg-green-500 border-green-500 shadow-[0_0_30px_rgba(34,197,94,0.4)] text-white"
+                      : "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 shadow-[0_0_20px_rgba(239,68,68,0.4)] border-red-500"
+                  }`}
+                >
+                  <div className="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+                  
+                  {isSubmittingUrgency ? (
+                    <span className="flex items-center gap-2 relative z-10">
+                      <RefreshCw className="w-5 h-5 animate-spin" /> ENVIANDO...
+                    </span>
+                  ) : urgencySuccess ? (
+                    <span className="flex items-center gap-2 relative z-10 animate-in zoom-in duration-300">
+                      <CheckCircle2 className="w-6 h-6 drop-shadow-md" /> ENVIADO COM SUCESSO!
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2 relative z-10">
+                      <AlertTriangle className="w-5 h-5" /> NOTIFICAR ROGÉRIO AGORA
+                    </span>
+                  )}
+                </Button>
+              </div>
+            </form>
+          )}
+
           {activeTab === "kanban" && (
             <div className="flex-1 flex flex-col min-h-0 overflow-hidden animate-in fade-in duration-300">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full pb-2">
@@ -641,7 +960,7 @@ export default function PortalExpedicao() {
                       }
 
                       return (
-                      <div key={ticket.id} className={`${bgClass} border ${borderClass} ${pulseClass} hover:border-white/30 transition-all rounded-lg p-3 group relative overflow-hidden mt-2`}>
+                      <div key={ticket.id} className={`${bgClass} border ${borderClass} ${pulseClass} hover:border-white/30 transition-all rounded-lg p-2.5 group relative overflow-hidden mt-2`}>
                         {isCriticalTimer && elapsedMinutes > 0 && (
                           <div className="absolute top-0 right-0 bg-red-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg z-10 flex items-center gap-1">
                             <Clock className="w-2.5 h-2.5" /> Sangrando há {elapsedMinutes > 60 ? `${Math.floor(elapsedMinutes/60)}h ${elapsedMinutes%60}m` : `${elapsedMinutes}m`}
@@ -655,7 +974,7 @@ export default function PortalExpedicao() {
                           <span className="text-[9px] text-gray-600">{ticket.time}</span>
                         </div>
                         <h4 className="text-white font-medium text-sm leading-tight mb-1">{ticket.title}</h4>
-                        <p className="text-xs text-gray-400 mb-4 line-clamp-3">{ticket.description}</p>
+                        <p className="text-[11px] text-gray-400 mb-3 line-clamp-3 leading-snug">{ticket.description}</p>
                         
                         <div className="flex flex-col gap-2 relative z-10">
                           <div className="flex items-center justify-between">
@@ -686,7 +1005,7 @@ export default function PortalExpedicao() {
                   </div>
                   <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
                     {tickets.filter(t => t.status === 'aprovado').map(ticket => (
-                      <div key={ticket.id} className="bg-black/40 border border-[#00FF00]/20 rounded-lg p-3">
+                      <div key={ticket.id} className="bg-black/40 border border-[#00FF00]/20 rounded-lg p-2.5">
                         <div className="flex items-center justify-between mb-2 opacity-70">
                           <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded flex items-center gap-1 w-fit ${ticket.type === 'produto' ? 'bg-orange-500/10 text-orange-500' : ticket.type === 'insumo' ? 'bg-yellow-500/10 text-yellow-500' : 'bg-[#00FF00]/10 text-[#00FF00]'}`}>
                             {ticket.type === 'produto' ? <Package className="w-3 h-3" /> : ticket.type === 'insumo' ? <Box className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />} 
@@ -704,31 +1023,113 @@ export default function PortalExpedicao() {
                   </div>
                 </div>
 
-                {/* Coluna: Recusado */}
-                <div className="bg-[#141414] border border-white/5 rounded-xl flex flex-col overflow-hidden">
-                  <div className="p-3 border-b border-white/5 bg-black/20 flex items-center justify-between shrink-0">
-                    <div className="flex items-center gap-2 text-red-500 font-bold text-sm">
-                      <XCircle className="w-4 h-4" /> Recusado
+                {/* Coluna: Radio Operacional */}
+                <div className="bg-[#121212] border border-white/5 rounded-2xl flex flex-col overflow-hidden h-full">
+                  <div className="p-3 border-b border-white/5 bg-transparent flex items-center justify-between shrink-0">
+                    <div className="flex items-center gap-2 text-[#00FF00] font-bold text-sm">
+                      <Radio className="w-4 h-4" /> Rádio Operacional
                     </div>
-                    <span className="bg-white/10 text-white text-[10px] px-2 py-0.5 rounded-full">{tickets.filter(t => t.status === 'recusado').length}</span>
                   </div>
-                  <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
-                    {tickets.filter(t => t.status === 'recusado').map(ticket => (
-                      <div key={ticket.id} className="bg-black/40 border border-red-500/20 rounded-lg p-3 opacity-75 grayscale-[30%]">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded flex items-center gap-1 w-fit ${ticket.type === 'produto' ? 'bg-orange-500/10 text-orange-500' : ticket.type === 'insumo' ? 'bg-yellow-500/10 text-yellow-500' : 'bg-[#00FF00]/10 text-[#00FF00]'}`}>
-                            {ticket.type === 'produto' ? <Package className="w-3 h-3" /> : ticket.type === 'insumo' ? <Box className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />} 
-                            {ticket.type === 'produto' ? 'Produto' : ticket.type === 'insumo' ? 'Insumo' : 'Divergência'}
-                          </span>
+                  <div className="flex-1 p-4 flex flex-col justify-start overflow-y-auto custom-scrollbar gap-6">
+                    {/* Salas */}
+                    <div className="flex flex-col gap-2">
+                      <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Salas (Pressione para Falar)</span>
+                      {!activeRoom ? (
+                        <div className="flex flex-col gap-2">
+                          <button onClick={() => joinRoom("Mesa da Mara")} className="bg-[#1C1C1E] hover:bg-[#2A2A2A] border border-white/5 rounded-lg p-2.5 flex items-center gap-3 transition-colors group">
+                            <Avatar className="w-8 h-8 border border-white/10 group-hover:border-[#00FF00]/50 transition-colors">
+                              <AvatarFallback className="bg-purple-500/20 text-purple-400 text-xs font-bold">MA</AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col items-start">
+                              <span className="text-white text-sm font-bold">Mesa da Mara</span>
+                              <span className="text-[10px] text-[#00FF00]">Livre</span>
+                            </div>
+                          </button>
+                          <button onClick={() => joinRoom("Equipe Base")} className="bg-[#1C1C1E] hover:bg-[#2A2A2A] border border-white/5 rounded-lg p-2.5 flex items-center gap-3 transition-colors group">
+                            <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-white/10 group-hover:border-blue-500/50 flex items-center justify-center text-blue-400">
+                              <Package className="w-4 h-4" />
+                            </div>
+                            <div className="flex flex-col items-start">
+                              <span className="text-white text-sm font-bold">Equipe Base</span>
+                              <span className="text-[10px] text-[#00FF00]">3 online</span>
+                            </div>
+                          </button>
                         </div>
-                        <h4 className="text-gray-400 line-through font-medium text-sm leading-tight mb-1">{ticket.title}</h4>
-                        <p className="text-[11px] text-gray-500">{ticket.description}</p>
-                        <div className="mt-3 flex items-center justify-between border-t border-white/5 pt-2">
-                          <span className="text-[10px] text-gray-600">De: {ticket.author}</span>
-                          <button onClick={() => changeTicketStatus(ticket.id, 'aguardando')} className="text-[10px] text-gray-500 hover:text-white underline">Reverter</button>
+                      ) : (
+                        <div className="bg-[#0A2010] border border-[#00FF00]/30 rounded-xl p-4 flex flex-col gap-4 relative overflow-hidden">
+                          <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[#00FF00] to-transparent animate-pulse" />
+                          <div className="flex flex-col items-center justify-center gap-2 relative z-10">
+                            <div className="relative">
+                              <Avatar className="w-10 h-10 border border-[#00FF00]/50">
+                                <AvatarFallback className="bg-purple-500/20 text-purple-400 text-sm font-bold">
+                                  {activeRoom === "Mesa da Mara" ? "MA" : "EQ"}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#00FF00] border-2 border-[#0A2010] rounded-full animate-pulse" />
+                            </div>
+                            <div className="flex flex-col items-center">
+                              <span className="text-white text-sm font-bold">{activeRoom}</span>
+                              <span className="text-[#00FF00] text-[10px] font-bold tracking-wider uppercase">
+                                {isCalling ? "Chamando..." : `Ao Vivo • ${Math.floor(callDuration/60).toString().padStart(2, '0')}:${(callDuration%60).toString().padStart(2, '0')}`}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-center gap-3 mt-1">
+                            <button 
+                              onClick={() => setIsRadioMuted(!isRadioMuted)} 
+                              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${isRadioMuted ? 'bg-red-500/20 text-red-500 border border-red-500/30' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                            >
+                              {isRadioMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                            </button>
+                            <button 
+                              onClick={leaveRoom} 
+                              className="w-9 h-9 rounded-full bg-red-600 hover:bg-red-500 text-white shadow-[0_0_15px_rgba(220,38,38,0.4)] flex items-center justify-center transition-all"
+                            >
+                              <PhoneOff className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
+                      )}
+                    </div>
+
+                    {/* Na Escuta */}
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Na Escuta (Online)</span>
+                        <span className="flex h-2 w-2 relative mr-1">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00FF00] opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00FF00]"></span>
+                        </span>
                       </div>
-                    ))}
+                      <div className="flex -space-x-2 overflow-hidden py-1">
+                        <img className="inline-block h-7 w-7 rounded-full ring-2 ring-[#121212] object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=64&h=64" alt="Mara" title="Mara" />
+                        <img className="inline-block h-7 w-7 rounded-full ring-2 ring-[#121212] object-cover" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=64&h=64" alt="Rogério" title="Rogério" />
+                      </div>
+                    </div>
+
+                    {/* Pings Rápidos */}
+                    <div className="flex flex-col gap-2 mt-auto">
+                      <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Pings Rápidos</span>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button className="bg-[#1C1C1E] hover:bg-yellow-500/10 border border-white/5 hover:border-yellow-500/30 text-gray-400 hover:text-yellow-500 text-[10px] font-bold py-2.5 rounded-lg flex flex-col items-center gap-1.5 transition-colors">
+                          <AlertTriangle className="w-3.5 h-3.5" />
+                          Supervisor
+                        </button>
+                        <button className="bg-[#1C1C1E] hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/30 text-gray-400 hover:text-blue-400 text-[10px] font-bold py-2.5 rounded-lg flex flex-col items-center gap-1.5 transition-colors">
+                          <Package className="w-3.5 h-3.5" />
+                          Falta Caixa
+                        </button>
+                        <button className="bg-[#1C1C1E] hover:bg-orange-500/10 border border-white/5 hover:border-orange-500/30 text-gray-400 hover:text-orange-500 text-[10px] font-bold py-2.5 rounded-lg flex flex-col items-center gap-1.5 transition-colors">
+                          <Clock className="w-3.5 h-3.5" />
+                          Pausa Fluxo
+                        </button>
+                        <button className="bg-[#1C1C1E] hover:bg-[#00FF00]/10 border border-white/5 hover:border-[#00FF00]/30 text-gray-400 hover:text-[#00FF00] text-[10px] font-bold py-2.5 rounded-lg flex flex-col items-center gap-1.5 transition-colors">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          Tudo OK
+                        </button>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
 
@@ -786,71 +1187,7 @@ export default function PortalExpedicao() {
             </p>
           </div>
 
-          <div className="bg-[#181818] border-b border-t border-white/5 px-4 py-3 shrink-0 relative overflow-hidden flex flex-col gap-2">
-            {!activeRoom ? (
-              <>
-                <div className="flex items-center gap-1.5 text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">
-                  <Radio className="w-3.5 h-3.5 text-[#00FF00]" /> Rádio Operacional
-                </div>
-                <div className="flex gap-2">
-                  <button onClick={() => joinRoom("Mesa da Mara")} className="flex-1 bg-[#222] hover:bg-[#2A2A2A] border border-white/5 rounded-lg p-2 flex items-center gap-2 transition-colors group">
-                    <Avatar className="w-7 h-7 border border-white/10 group-hover:border-[#00FF00]/50 transition-colors">
-                      <AvatarFallback className="bg-purple-500/20 text-purple-400 text-[10px] font-bold">MA</AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col items-start">
-                      <span className="text-white text-xs font-bold">Mesa da Mara</span>
-                      <span className="text-[9px] text-[#00FF00]">Livre</span>
-                    </div>
-                  </button>
-                  <button onClick={() => joinRoom("Equipe Base")} className="flex-1 bg-[#222] hover:bg-[#2A2A2A] border border-white/5 rounded-lg p-2 flex items-center gap-2 transition-colors group">
-                    <div className="w-7 h-7 rounded-full bg-blue-500/20 border border-white/10 group-hover:border-blue-500/50 flex items-center justify-center text-blue-400">
-                      <Package className="w-3.5 h-3.5" />
-                    </div>
-                    <div className="flex flex-col items-start">
-                      <span className="text-white text-xs font-bold">Equipe Base</span>
-                      <span className="text-[9px] text-[#00FF00]">3 online</span>
-                    </div>
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div className="bg-[#0A2010] border border-[#00FF00]/30 rounded-xl p-3 flex flex-col gap-3 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[#00FF00] to-transparent animate-pulse" />
-                <div className="flex items-center justify-between relative z-10">
-                  <div className="flex items-center gap-2">
-                    <div className="relative">
-                      <Avatar className="w-8 h-8 border border-[#00FF00]/50">
-                        <AvatarFallback className="bg-purple-500/20 text-purple-400 text-xs font-bold">
-                          {activeRoom === "Mesa da Mara" ? "MA" : "EQ"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#00FF00] border-2 border-[#0A2010] rounded-full animate-pulse" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-white text-sm font-bold">{activeRoom}</span>
-                      <span className="text-[#00FF00] text-[10px] font-bold tracking-wider uppercase">
-                        {isCalling ? "Chamando..." : `Ao Vivo • ${Math.floor(callDuration/60).toString().padStart(2, '0')}:${(callDuration%60).toString().padStart(2, '0')}`}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button 
-                      onClick={() => setIsRadioMuted(!isRadioMuted)} 
-                      className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${isRadioMuted ? 'bg-red-500/20 text-red-500 border border-red-500/30' : 'bg-white/10 text-white hover:bg-white/20'}`}
-                    >
-                      {isRadioMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                    </button>
-                    <button 
-                      onClick={leaveRoom} 
-                      className="w-9 h-9 rounded-full bg-red-600 hover:bg-red-500 text-white shadow-[0_0_15px_rgba(220,38,38,0.4)] flex items-center justify-center transition-all"
-                    >
-                      <PhoneOff className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+
 
           <div className="flex-1 p-3 overflow-y-auto flex flex-col gap-3">
             <div className="flex justify-center my-1">
@@ -913,8 +1250,8 @@ export default function PortalExpedicao() {
                         />
                       )}
                       {(msg as any).isAudio && (
-                        <div className="mb-2 w-full min-w-[200px]">
-                          <audio controls src={(msg as any).audioUrl} className="h-8 w-full max-w-[220px] outline-none" />
+                        <div className="mb-2 w-full flex">
+                          <CustomAudioPlayer src={(msg as any).audioUrl} isMe={msg.isMe} />
                         </div>
                       )}
                       {msg.text && <div>{msg.text}</div>}
@@ -966,33 +1303,38 @@ export default function PortalExpedicao() {
                 onChange={handleChatFileChange} 
                 className="hidden" 
               />
-              <div className="flex items-center bg-[#111111] rounded-full border border-white/5 focus-within:border-white/10 transition-colors pr-1.5 pl-2 h-10">
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="p-1.5 text-gray-500 hover:text-[#00FF00] transition-colors rounded-full shrink-0">
-                  <Paperclip className="w-4 h-4" />
-                </button>
-                {isRecording ? (
-                  <button type="button" onClick={stopRecording} className="p-1.5 text-red-500 hover:text-red-400 transition-colors rounded-full shrink-0 animate-pulse bg-red-500/10">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
-                  </button>
-                ) : (
-                  <button type="button" onClick={startRecording} className="p-1.5 text-gray-500 hover:text-[#00FF00] transition-colors rounded-full shrink-0">
-                    <Mic className="w-4 h-4" />
-                  </button>
-                )}
-                <Input 
+              <div className="flex items-center bg-white/5 rounded-full border border-white/5 focus-within:bg-white/10 focus-within:border-white/10 transition-all pr-1.5 pl-4 h-11">
+                <input 
+                  type="text"
                   value={chatMessage}
                   onChange={(e) => setChatMessage(e.target.value)}
-                  placeholder={isRecording ? "Gravando áudio..." : "Responder..."} 
+                  placeholder={isRecording ? "Gravando áudio..." : "Mensagem..."} 
                   disabled={isRecording}
-                  className="flex-1 bg-transparent border-0 h-full text-sm focus-visible:ring-0 text-white placeholder:text-gray-600 shadow-none px-1 disabled:opacity-50"
+                  className="flex-1 bg-transparent border-none outline-none ring-0 h-full text-[13px] text-white placeholder:text-gray-500 shadow-none px-0 focus:ring-0 focus:outline-none disabled:opacity-50"
                 />
-                <button 
-                  type="submit" 
-                  disabled={!chatMessage.trim()}
-                  className="h-7 w-7 rounded-full flex items-center justify-center transition-all shrink-0 disabled:opacity-30 text-[#00FF00] hover:bg-[#00FF00]/10"
-                >
-                  <Send className="w-3.5 h-3.5 ml-0.5" />
-                </button>
+                
+                <div className="flex items-center gap-1 shrink-0 ml-2">
+                  <button type="button" onClick={() => fileInputRef.current?.click()} className="h-8 w-8 flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/10 transition-colors rounded-full">
+                    <Paperclip className="w-4 h-4" />
+                  </button>
+                  
+                  {chatMessage.trim() ? (
+                    <button 
+                      type="submit" 
+                      className="h-8 w-8 rounded-full flex items-center justify-center transition-all bg-[#00FF00] text-black hover:bg-[#00cc00] hover:scale-105 shadow-[0_0_10px_rgba(0,255,0,0.2)]"
+                    >
+                      <Send className="w-3.5 h-3.5 ml-0.5" />
+                    </button>
+                  ) : isRecording ? (
+                    <button type="button" onClick={stopRecording} className="h-8 w-8 rounded-full flex items-center justify-center transition-all bg-red-500 text-white hover:bg-red-600 shadow-[0_0_10px_rgba(239,68,68,0.3)] animate-pulse">
+                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+                    </button>
+                  ) : (
+                    <button type="button" onClick={startRecording} className="h-8 w-8 flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/10 transition-colors rounded-full">
+                      <Mic className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
               </div>
             </form>
           </div>

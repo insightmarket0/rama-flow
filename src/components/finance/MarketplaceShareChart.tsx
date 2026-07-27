@@ -1,5 +1,4 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip, Legend } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MonthlyClosing } from "@/types/finance";
 import { useMarketplaces } from "@/hooks/useMarketplaces";
 import { useMemo } from "react";
@@ -57,78 +56,119 @@ export const MarketplaceShareChart = ({ data }: MarketplaceShareChartProps) => {
     };
 
     return (
-        <Card className="col-span-3 bg-[#111111] border border-white/5 shadow-2xl rounded-2xl p-2 transition-all hover:border-white/10 group relative overflow-hidden">
-            <CardHeader className="px-6 pt-6">
-                <CardTitle className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Share por Marketplace</CardTitle>
-            </CardHeader>
-            <CardContent className="px-6 pb-6">
-                <div className="h-[280px] w-full relative">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                            <Pie
-                                data={chartData.data}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={80}
-                                outerRadius={110}
-                                paddingAngle={5}
-                                dataKey="value"
-                                stroke="none"
-                                label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
-                                    const RADIAN = Math.PI / 180;
-                                    const radius = 25 + innerRadius + (outerRadius - innerRadius);
-                                    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                                    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-                                    const market = marketplaces.find(m => m.label === chartData.data[index].name);
-                                    const Icon = market?.icon;
+        <div className="w-full flex flex-col items-center justify-center relative">
+            <h4 className="text-gray-500 uppercase tracking-widest text-[10px] font-bold mb-8 opacity-70">
+                Faturamento por Canal
+            </h4>
+            <div className="h-[320px] w-full relative opacity-95">
+                <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                        <defs>
+                            <filter id="pieGlow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur stdDeviation="6" result="blur" />
+                                <feMerge>
+                                    <feMergeNode in="blur" />
+                                    <feMergeNode in="SourceGraphic" />
+                                </feMerge>
+                            </filter>
+                            {marketplaces.map(m => (
+                                <linearGradient key={`pie-grad-${m.id}`} id={`pie-grad-${m.id}`} x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stopColor={m.color} stopOpacity={1} />
+                                    <stop offset="100%" stopColor={m.color} stopOpacity={0.3} />
+                                </linearGradient>
+                            ))}
+                        </defs>
+                        <Pie
+                            data={chartData.data}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={90}
+                            outerRadius={110}
+                            paddingAngle={3}
+                            dataKey="value"
+                            stroke="none"
+                            filter="url(#pieGlow)"
+                            labelLine={false}
+                            label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
+                                const RADIAN = Math.PI / 180;
+                                const radius = 30 + innerRadius + (outerRadius - innerRadius);
+                                const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                                const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                                const market = marketplaces.find(m => m.label === chartData.data[index].name);
+                                const Icon = market?.icon;
 
-                                    if (percent < 0.01) return null;
+                                if (percent < 0.01) return null;
 
-                                    return (
-                                        <g>
-                                            <foreignObject x={x - 20} y={y - 12} width={40} height={24}>
-                                                <div className="flex items-center justify-center gap-1 bg-[#121212]/80 backdrop-blur-sm rounded-md border border-white/10 px-1 py-0.5 shadow-sm">
-                                                    {Icon && <Icon className="h-3 w-3" style={{ color: chartData.data[index].color }} />}
-                                                    <span className="text-[10px] font-bold text-white">
-                                                        {`${(percent * 100).toFixed(0)}%`}
+                                return (
+                                    <g>
+                                        <foreignObject x={x - 32} y={y - 14} width={64} height={28} className="overflow-visible">
+                                            <div className="flex items-center justify-center gap-1.5 bg-[#0A0A0A]/90 backdrop-blur-xl rounded-md border border-white/10 px-2 py-1 shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-all">
+                                                {Icon && <Icon className="h-3 w-3" style={{ color: chartData.data[index].color }} />}
+                                                <span className="text-[10px] font-bold text-white tracking-widest">
+                                                    {`${(percent * 100).toFixed(0)}%`}
+                                                </span>
+                                            </div>
+                                        </foreignObject>
+                                    </g>
+                                );
+                            }}
+                        >
+                            {chartData.data.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={`url(#pie-grad-${entry.id})`} />
+                            ))}
+                        </Pie>
+                        <Tooltip
+                            formatter={(value: number) => formatTooltip(value)}
+                            contentStyle={{
+                                backgroundColor: "rgba(10,10,10,0.95)",
+                                backdropFilter: "blur(12px)",
+                                borderColor: "rgba(255,255,255,0.05)",
+                                borderRadius: "8px",
+                                color: "#E5E7EB",
+                                padding: "12px",
+                                fontSize: "12px"
+                            }}
+                            itemStyle={{ color: "#E5E7EB", fontWeight: "bold", fontSize: "14px" }}
+                        />
+                        <Legend
+                            verticalAlign="bottom"
+                            height={40}
+                            content={(props) => {
+                                const { payload } = props;
+                                return (
+                                    <ul className="flex flex-wrap justify-center gap-4 mt-8">
+                                        {payload?.map((entry, index) => {
+                                            const realColor = chartData.data[index]?.color || "#FFF";
+                                            return (
+                                                <li key={`item-${index}`} className="flex items-center gap-2">
+                                                    <span 
+                                                        className="w-1.5 h-1.5 rounded-full" 
+                                                        style={{ 
+                                                            backgroundColor: realColor,
+                                                            boxShadow: `0 0 8px ${realColor}`
+                                                        }} 
+                                                    />
+                                                    <span className="text-gray-400 text-[9px] uppercase tracking-[0.2em] font-bold">
+                                                        {entry.value}
                                                     </span>
-                                                </div>
-                                            </foreignObject>
-                                        </g>
-                                    );
-                                }}
-                            >
-                                {chartData.data.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={pastelColors[entry.id as string] || entry.color} />
-                                ))}
-                            </Pie>
-                            <Tooltip
-                                formatter={(value: number) => formatTooltip(value)}
-                                contentStyle={{
-                                    backgroundColor: "#1C1C1E",
-                                    borderColor: "rgba(255,255,255,0.1)",
-                                    borderRadius: "12px",
-                                    color: "#E5E7EB"
-                                }}
-                                itemStyle={{ color: "#E5E7EB" }}
-                            />
-                            <Legend
-                                verticalAlign="bottom"
-                                height={36}
-                                iconType="circle"
-                                formatter={(value) => <span className="text-gray-300 font-medium ml-1">{value}</span>}
-                            />
-                        </PieChart>
-                    </ResponsiveContainer>
-                    {/* Centered Total */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pb-8">
-                        <span className="text-sm text-muted-foreground font-medium uppercase tracking-wide">Total</span>
-                        <span className="text-2xl font-bold text-white">
-                            {formatCurrency(chartData.totalAll)}
-                        </span>
-                    </div>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                );
+                            }}
+                        />
+                    </PieChart>
+                </ResponsiveContainer>
+                {/* Centered Total */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pb-8">
+                    <span className="text-[8px] text-gray-500 font-bold uppercase tracking-[0.3em] mb-2 opacity-80">Total</span>
+                    <span className="text-3xl font-light tracking-[-0.03em] bg-gradient-to-b from-white via-white to-white/40 bg-clip-text text-transparent drop-shadow-sm">
+                        {formatCurrency(chartData.totalAll).replace("R$", "").trim()}
+                    </span>
+                    <span className="text-[8px] text-gray-500 uppercase tracking-widest font-bold mt-1">BRL</span>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 };
