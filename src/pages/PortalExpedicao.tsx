@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Package, Send, AlertTriangle, CheckCircle2, MessageSquare, Plus, Clock, FileText, CheckCircle, Box, UploadCloud, X, XCircle, Image as ImageIcon, Truck, Settings2, Save, CheckCheck, Paperclip, Mic, Phone, PhoneCall, MicOff, PhoneOff, Radio, Play, Pause, RefreshCw } from "lucide-react";
+import { Package, Send, AlertTriangle, CheckCircle2, MessageSquare, Plus, Clock, FileText, CheckCircle, Box, UploadCloud, X, XCircle, Image as ImageIcon, Truck, Settings2, Save, CheckCheck, Paperclip, Mic, Phone, PhoneCall, MicOff, PhoneOff, Radio, Play, Pause, RefreshCw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -108,10 +108,30 @@ const CustomAudioPlayer = ({ src, isMe }: { src: string, isMe?: boolean }) => {
   );
 };
 
+const formatChatMessage = (text: string) => {
+  if (!text) return "";
+  let formatted = text;
+  // Bold
+  formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // Line breaks
+  formatted = formatted.replace(/\n/g, '<br />');
+  // Links tag: [LINK_ANUNCIO]url[/LINK_ANUNCIO]
+  formatted = formatted.replace(/\[LINK_ANUNCIO\](.*?)\[\/LINK_ANUNCIO\]/g, (match, link) => {
+    const url = link.startsWith('http') ? link : `https://${link}`;
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-[#00FF00] underline font-bold hover:text-white transition-colors">Acessar Anúncio</a>`;
+  });
+  return formatted;
+};
+
 export default function PortalExpedicao() {
   const { user } = useAuth();
+  
+  const rawName = user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Expedição";
+  const currentUserName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+
   const [sku, setSku] = useState("");
   const [marketplace, setMarketplace] = useState("Mercado Livre");
+  const [adLink, setAdLink] = useState("");
   const [description, setDescription] = useState("");
   const [evidenceFiles, setEvidenceFiles] = useState<File[]>([]);
   const [priority, setPriority] = useState("normal");
@@ -162,38 +182,86 @@ export default function PortalExpedicao() {
     return () => clearInterval(timer);
   }, []);
 
-  const [tickets, setTickets] = useState<any[]>([
-    {
-      id: 1,
-      type: 'insumo',
-      title: 'Caixa Parda 30x20x10',
-      description: 'Estava com apenas 1 rolo restante. Prioridade Crítica.',
-      status: 'aprovado',
-      priority: 'critico',
-      author: 'Anderson',
-      time: 'Ontem às 14:30',
-      createdAt: Date.now() - 86400000
-    },
-    {
-      id: 2,
-      type: 'risco',
-      title: 'KITGAS001 - Mercado Livre',
-      description: 'A foto mostra 3 itens, mas a embalagem comporta 2. Precisa arrumar a imagem no anúncio.',
-      status: 'aguardando',
-      priority: 'critico',
-      author: 'Lívia',
-      time: 'Hoje às 09:15',
-      createdAt: Date.now() - 8100000
-    }
-  ]);
+  const [tickets, setTickets] = useState<any[]>([]);
 
-  const changeTicketStatus = (id: number, newStatus: string) => {
-    setTickets(tickets.map(t => t.id === id ? { ...t, status: newStatus } : t));
-    toast.success(newStatus === 'aprovado' ? "Aprovado com sucesso!" : newStatus === 'recusado' ? "Recusado!" : "Voltado para triagem!");
+  // Carregar e ouvir tickets do Supabase em tempo real
+  useEffect(() => {
+    const fetchTickets = async () => {
+      const { data, error } = await supabase
+        .from('expedicao_tickets')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (data && !error) {
+        setTickets(data);
+      }
+    };
+
+    fetchTickets();
+
+    const channel = supabase
+      .channel('expedicao_tickets_changes')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'expedicao_tickets'
+      }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          setTickets(prev => {
+            if (prev.find(t => t.id === payload.new.id)) return prev;
+            return [payload.new, ...prev].sort((a, b) => b.created_at - a.created_at);
+          });
+        } else if (payload.eventType === 'UPDATE') {
+          setTickets(prev => prev.map(t => t.id === payload.new.id ? payload.new : t));
+        } else if (payload.eventType === 'DELETE') {
+          setTickets(prev => prev.filter(t => t.id !== payload.old.id));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const changeTicketStatus = async (id: string, newStatus: string) => {
+    try {
+      await supabase.from('expedicao_tickets').update({ status: newStatus }).eq('id', id);
+      toast.success(newStatus === 'aprovado' ? "Resolvido com sucesso!" : newStatus === 'recusado' ? "Recusado!" : "Voltado para triagem!");
+    } catch (e) {
+      toast.error("Erro ao atualizar status");
+    }
+  };
+
+  const handleQuickRequest = async (title: string, description: string, type: string) => {
+    const newTicket = {
+      title,
+      description,
+      status: "aguardando",
+      type,
+      author: currentUserName,
+      priority: "alta",
+      time: `Hoje às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`,
+      created_at: Date.now()
+    };
+    
+    toast.success(`Solicitação rápida enviada: ${title}`);
+    
+    await supabase.from('expedicao_tickets').insert(newTicket);
+    
+    await supabase.from('chat_messages').insert({
+      channel: 'expedicao',
+      user_id: user?.id,
+      sender_name: "Sistema Bot",
+      sender_initials: "BOT",
+      sender_color: "bg-blue-500 text-white",
+      text: `⚡ **Solicitação Rápida:** ${title}\n${description}`
+    });
   };
   
   // Estados para Aba e Alerta de Insumos
-  const [activeTab, setActiveTab] = useState<"divergencia" | "insumos" | "urgencias" | "kanban" | "historico">("kanban");
+  const [activeTab, setActiveTab] = useState<"novo_chamado" | "kanban" | "historico">("kanban");
+  const [chamadoType, setChamadoType] = useState<"divergencia" | "insumos" | "urgencias" | null>(null);
   const [itemName, setItemName] = useState("");
   const [itemCategory, setItemCategory] = useState("");
   const [remainingQty, setRemainingQty] = useState("");
@@ -203,6 +271,7 @@ export default function PortalExpedicao() {
   // Estados para Urgência de Produtos Vendidos
   const [urgencyProduct, setUrgencyProduct] = useState("");
   const [urgencySupplier, setUrgencySupplier] = useState("");
+  const [urgencyLink, setUrgencyLink] = useState("");
   const [urgencyQty, setUrgencyQty] = useState("");
   const [isSubmittingUrgency, setIsSubmittingUrgency] = useState(false);
   const [urgencySuccess, setUrgencySuccess] = useState(false);
@@ -239,24 +308,45 @@ export default function PortalExpedicao() {
     const channel = supabase
       .channel('expedicao_chat')
       .on('postgres_changes', { 
-        event: 'INSERT', 
+        event: '*', 
         schema: 'public', 
         table: 'chat_messages',
         filter: 'channel=eq.expedicao'
       }, (payload) => {
-        const m = payload.new as any;
-        setMessages(prev => {
-          if (prev.find(msg => msg.id === m.id)) return prev;
-          return [...prev, {
-            id: m.id,
-            sender: m.sender_name,
-            initials: m.sender_initials,
-            time: new Date(m.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-            text: m.text,
-            isMe: m.user_id === user.id,
-            color: m.sender_color
-          }];
-        });
+        if (payload.eventType === 'DELETE') {
+          // Se recebemos um DELETE, removemos a mensagem específica da tela
+          setMessages(prev => prev.filter(msg => msg.id !== payload.old.id));
+          return;
+        }
+
+        if (payload.eventType === 'INSERT') {
+          const m = payload.new as any;
+          setMessages(prev => {
+            if (prev.find(msg => msg.id === m.id)) return prev;
+            
+            const optimisticMatch = prev.find(msg => 
+              typeof msg.id === 'string' && 
+              msg.id.startsWith('temp_') && 
+              msg.text === m.text && 
+              msg.sender === m.sender_name
+            );
+            
+            const newMsg = {
+              id: m.id,
+              sender: m.sender_name,
+              initials: m.sender_initials,
+              time: new Date(m.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+              text: m.text,
+              isMe: m.user_id === user.id,
+              color: m.sender_color
+            };
+
+            if (optimisticMatch) {
+              return prev.map(msg => msg.id === optimisticMatch.id ? newMsg : msg);
+            }
+            return [...prev, newMsg];
+          });
+        }
       })
       .subscribe();
 
@@ -265,7 +355,7 @@ export default function PortalExpedicao() {
     };
   }, [user]);
 
-  const createTicketFromMessage = (msg: any) => {
+  const createTicketFromMessage = async (msg: any) => {
     // Regex buscando especificamente por 4 números seguidos, que é o padrão de SKU da empresa.
     const skuMatch = msg.text?.match(/\b\d{4}\b/);
     const skuOrTitle = skuMatch ? `SKU: ${skuMatch[0]}` : msg.text?.split(' ').slice(0, 4).join(' ') + '...';
@@ -273,8 +363,7 @@ export default function PortalExpedicao() {
     const textLower = msg.text?.toLowerCase() || '';
     const isRisk = textLower.includes('mercado livre') || textLower.includes('ml') || textLower.includes('anúncio') || textLower.includes('devolução') || textLower.includes('estoque') || textLower.includes('falto');
 
-    const newTicket = {
-      id: Date.now(),
+    await supabase.from('expedicao_tickets').insert({
       type: isRisk ? 'risco' : 'insumo', 
       title: `${isRisk ? 'Risco Comercial' : 'Alerta'}: ${skuOrTitle || 'Chamado'}`,
       description: `Gerado via chat por ${msg.sender}: "${msg.text}"`,
@@ -282,10 +371,9 @@ export default function PortalExpedicao() {
       priority: isRisk ? 'critico' : 'alta',
       author: msg.sender,
       time: `Hoje às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`,
-      createdAt: Date.now()
-    };
+      created_at: Date.now()
+    });
     
-    setTickets(prev => [newTicket, ...prev]);
     toast.success("Chamado gerado a partir do chat!");
     setActiveTab("kanban");
   };
@@ -387,20 +475,32 @@ export default function PortalExpedicao() {
         style: { background: "#0A0A0A", border: "1px solid #00FF00", color: "#FFF" }
       });
       
-      setTickets(prev => [{
-        id: Date.now(),
+      supabase.from('expedicao_tickets').insert({
         type: 'divergencia',
         title: `${sku} - ${marketplace}`,
         description: description,
+        ad_link: adLink,
         status: 'aguardando',
         priority: priority,
-        author: 'Anderson',
-        time: `Hoje às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
-      }, ...prev]);
-      setActiveTab("historico");
+        author: currentUserName,
+        time: `Hoje às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`,
+        created_at: Date.now()
+      }).then(() => {
+        setActiveTab("historico");
+        
+        supabase.from('chat_messages').insert({
+          channel: 'expedicao',
+          user_id: user?.id,
+          sender_name: "Sistema Bot",
+          sender_initials: "BOT",
+          sender_color: "bg-blue-500 text-white",
+          text: `⚠️ **Nova Divergência Reportada:**\n**SKU:** ${sku} - ${marketplace}\n**Descrição:** ${description}${adLink ? `\nLink do Anúncio: [LINK_ANUNCIO]${adLink}[/LINK_ANUNCIO]` : ''}`
+        });
+      });
       
       setSku("");
       setMarketplace("Mercado Livre");
+      setAdLink("");
       setDescription("");
       setEvidenceFiles([]);
       setPriority("normal");
@@ -428,8 +528,7 @@ export default function PortalExpedicao() {
     setIsSubmittingSupply(true);
     
     // Inserir no banco de dados de suprimentos
-    const isMara = user.email === "mara@hotmail.com";
-    const authorName = isMara ? "Mara" : "Anderson";
+    const authorName = currentUserName;
 
     try {
       await supabase.from('supply_requests').insert({
@@ -456,16 +555,16 @@ export default function PortalExpedicao() {
         style: { background: "#0A0A0A", border: "1px solid #00FF00", color: "#FFF" }
       });
       
-      setTickets(prev => [{
-        id: Date.now(),
+      await supabase.from('expedicao_tickets').insert({
         type: itemCategory.includes('Produto') ? 'produto' : 'insumo',
         title: itemName,
         description: `Restante: ${remainingQty}. Categoria: ${itemCategory}`,
         status: 'aguardando',
         priority: supplyPriority,
         author: authorName,
-        time: `Hoje às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
-      }, ...prev]);
+        time: `Hoje às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`,
+        created_at: Date.now()
+      });
       // Limpa os campos
       setItemName("");
       setItemCategory("");
@@ -489,7 +588,7 @@ export default function PortalExpedicao() {
 
     setIsSubmittingUrgency(true);
     try {
-      const finalItemName = `${urgencyProduct} (Qtd: ${urgencyQty})${urgencySupplier ? ` | Fornecedor: ${urgencySupplier}` : ''}`;
+      const finalItemName = `${urgencyProduct} (Qtd: ${urgencyQty})${urgencySupplier ? ` | Fornecedor: ${urgencySupplier}` : ''}${urgencyLink ? ` | Link: ${urgencyLink}` : ''}`;
       
       const { error } = await supabase.from('supply_requests').insert({
         item_name: finalItemName,
@@ -507,12 +606,25 @@ export default function PortalExpedicao() {
       }
 
       toast.success("Alerta de urgência enviado para Compras!");
+      
+      await supabase.from('expedicao_tickets').insert({
+        type: 'risco',
+        title: `URGÊNCIA: ${urgencyProduct}`,
+        description: `Qtd necessária: ${urgencyQty}${urgencySupplier ? ` | Sugestão: ${urgencySupplier}` : ''}`,
+        ad_link: urgencyLink,
+        status: 'aguardando',
+        priority: 'critico',
+        author: currentUserName,
+        time: `Hoje às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`,
+        created_at: Date.now()
+      });
 
       setUrgencySuccess(true);
       setTimeout(() => {
         setUrgencySuccess(false);
         setUrgencyProduct("");
         setUrgencySupplier("");
+        setUrgencyLink("");
         setUrgencyQty("");
       }, 2500);
 
@@ -522,7 +634,7 @@ export default function PortalExpedicao() {
         sender_name: "Sistema de Urgências",
         sender_initials: "URG",
         sender_color: "bg-red-600 text-white animate-pulse",
-        text: `🚨 **URGÊNCIA: PRODUTO VENDIDO FALTANTE!**\nO item **${urgencyProduct}** precisa ser comprado hoje.\nQtd necessária: ${urgencyQty}${urgencySupplier ? `\nSugestão de Compra: ${urgencySupplier}` : ''}`
+        text: `🚨 **URGÊNCIA: PRODUTO VENDIDO FALTANTE!**\nO item **${urgencyProduct}** precisa ser comprado hoje.\nQtd necessária: ${urgencyQty}${urgencySupplier ? `\nSugestão de Compra: ${urgencySupplier}` : ''}${urgencyLink ? `\nLink do Anúncio: [LINK_ANUNCIO]${urgencyLink}[/LINK_ANUNCIO]` : ''}`
       });
       
     } catch (err) {
@@ -533,20 +645,33 @@ export default function PortalExpedicao() {
     }
   };
 
+  const playMessageSound = () => {
+    try {
+      const audio = new Audio('/whatsapp.mp3');
+      audio.volume = 0.15; // Volume bem baixo e sutil
+      audio.play().catch(e => console.log("Erro ao tocar áudio (pode ser bloqueio do navegador):", e));
+    } catch(e) {
+      console.log("Erro ao inicializar áudio", e);
+    }
+  };
+
   const sendChatMessage = async (text: string) => {
     if (!text.trim() || !user) return;
     
+    // Toca o som de mensagem enviada/recebida
+    playMessageSound();
+    
     // Determinar informações do usuário atual
     const isMara = user.email === "mara@hotmail.com";
-    const senderName = isMara ? "Mara" : "Anderson";
-    const initials = isMara ? "MA" : "AN";
+    const senderName = currentUserName;
+    const initials = senderName.substring(0, 2).toUpperCase();
     const color = isMara ? "bg-purple-500 text-white" : "bg-[#00FF00] text-black";
     
     const now = new Date();
     const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    const tempId = Date.now().toString();
+    const tempId = 'temp_' + Date.now().toString();
     
-    // Optimistic Update (mostra na tela imediatamente antes de gravar)
+    // Atualização Otimista Instantânea
     setMessages(prev => [...prev, {
       id: tempId,
       sender: senderName,
@@ -557,7 +682,7 @@ export default function PortalExpedicao() {
       color
     }]);
 
-    // Gravar no Banco de Dados
+    // Gravar no Banco de Dados (o Realtime substituirá o tempId)
     await supabase.from('chat_messages').insert({
       channel: 'expedicao',
       user_id: user.id,
@@ -574,6 +699,16 @@ export default function PortalExpedicao() {
     setChatMessage("");
   };
 
+  const clearChatHistory = async () => {
+    try {
+      await supabase.from('chat_messages').delete().eq('channel', 'expedicao');
+      setMessages([]);
+      toast.success("Histórico do chat apagado!");
+    } catch (e) {
+      toast.error("Erro ao apagar histórico do chat.");
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-transparent w-full font-sans animate-in fade-in duration-700 overflow-hidden p-4">
       <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
@@ -587,42 +722,53 @@ export default function PortalExpedicao() {
             <div className="flex flex-wrap items-center bg-[#111111] p-1 rounded-xl border border-white/5 w-full xl:w-fit shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] gap-1">
               <button 
                 onClick={() => setActiveTab("kanban")}
-                className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-300 ${activeTab === "kanban" ? "bg-purple-500/10 text-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.1)] border border-purple-500/20" : "text-gray-500 border border-transparent hover:text-gray-300 hover:bg-white/5"}`}
+                className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-300 ${activeTab === "kanban" ? "bg-cyan-400/10 text-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.1)] border border-cyan-400/20" : "text-gray-300 border border-transparent hover:text-white hover:bg-white/10"}`}
               >
                 <CheckCheck className="w-3.5 h-3.5" /> Quadro Kanban
               </button>
               <button 
-                onClick={() => setActiveTab("divergencia")}
-                className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-300 ${activeTab === "divergencia" ? "bg-[#00FF00]/10 text-[#00E500] shadow-[0_0_10px_rgba(0,255,0,0.1)] border border-[#00FF00]/20" : "text-gray-500 border border-transparent hover:text-gray-300 hover:bg-white/5"}`}
+                onClick={() => { setActiveTab("novo_chamado"); if (!chamadoType) setChamadoType("urgencias"); }}
+                className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-300 ${activeTab === "novo_chamado" ? "bg-[#00FF00]/10 text-[#00E500] shadow-[0_0_10px_rgba(0,255,0,0.1)] border border-[#00FF00]/20" : "text-gray-300 border border-transparent hover:text-white hover:bg-white/10"}`}
               >
-                <AlertTriangle className="w-3.5 h-3.5" /> Divergência
-              </button>
-              <button 
-                onClick={() => setActiveTab("insumos")}
-                className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-300 ${activeTab === "insumos" ? "bg-[#00FF00]/10 text-[#00E500] shadow-[0_0_10px_rgba(0,255,0,0.1)] border border-[#00FF00]/20" : "text-gray-500 border border-transparent hover:text-gray-300 hover:bg-white/5"}`}
-              >
-                <Box className="w-3.5 h-3.5" /> Alerta Insumos
-              </button>
-              <button 
-                onClick={() => setActiveTab("urgencias")}
-                className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-300 ${activeTab === "urgencias" ? "bg-red-500/10 text-red-500 shadow-[0_0_10px_rgba(239,68,68,0.1)] border border-red-500/20" : "text-gray-500 border border-transparent hover:text-gray-300 hover:bg-white/5"}`}
-              >
-                <AlertTriangle className="w-3.5 h-3.5" /> Produto Urgente
+                <AlertTriangle className="w-3.5 h-3.5" /> Novo Chamado
               </button>
               <button 
                 onClick={() => setActiveTab("historico")}
-                className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-300 ${activeTab === "historico" ? "bg-blue-500/10 text-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.1)] border border-blue-500/20" : "text-gray-500 border border-transparent hover:text-gray-300 hover:bg-white/5"}`}
+                className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all duration-300 ${activeTab === "historico" ? "bg-white/10 text-white shadow-[0_0_10px_rgba(255,255,255,0.05)] border border-white/20" : "text-gray-300 border border-transparent hover:text-white hover:bg-white/10"}`}
               >
                 <Clock className="w-3.5 h-3.5" /> Meus Chamados
               </button>
             </div>
           </div>
 
-          {activeTab === "divergencia" && (
+          {activeTab === "novo_chamado" && (
+            <div className="flex flex-col h-full space-y-4">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setChamadoType("urgencias")}
+                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all duration-300 ${chamadoType === "urgencias" ? "bg-red-500/10 text-red-500 shadow-[0_0_10px_rgba(239,68,68,0.1)] border border-red-500/20" : "text-gray-300 border border-transparent hover:text-white hover:bg-white/10"}`}
+                >
+                  Produto Urgente
+                </button>
+                <button
+                  onClick={() => setChamadoType("divergencia")}
+                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all duration-300 ${chamadoType === "divergencia" ? "bg-[#00FF00]/10 text-[#00E500] shadow-[0_0_10px_rgba(0,255,0,0.1)] border border-[#00FF00]/20" : "text-gray-300 border border-transparent hover:text-white hover:bg-white/10"}`}
+                >
+                  Divergência
+                </button>
+                <button
+                  onClick={() => setChamadoType("insumos")}
+                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all duration-300 ${chamadoType === "insumos" ? "bg-[#00FF00]/10 text-[#00E500] shadow-[0_0_10px_rgba(0,255,0,0.1)] border border-[#00FF00]/20" : "text-gray-300 border border-transparent hover:text-white hover:bg-white/10"}`}
+                >
+                  Alerta Insumos
+                </button>
+              </div>
+
+              {chamadoType === "divergencia" && (
             <form onSubmit={handleSubmit} className="space-y-3 flex-1 flex flex-col animate-in fade-in duration-300">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-gray-500">
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-gray-300">
                     Código SKU ou Produto
                   </label>
                   <Input 
@@ -634,7 +780,7 @@ export default function PortalExpedicao() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-gray-500">
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-gray-300">
                     Canal de Venda
                   </label>
                   <Select value={marketplace} onValueChange={setMarketplace}>
@@ -653,8 +799,20 @@ export default function PortalExpedicao() {
                 </div>
               </div>
 
+              <div className="space-y-1">
+                <label className="text-[9px] font-bold uppercase tracking-widest text-gray-300">
+                  Link do Anúncio (Opcional)
+                </label>
+                <Input 
+                  value={adLink}
+                  onChange={(e) => setAdLink(e.target.value)}
+                  placeholder="Ex: https://produto.mercadolivre.com.br/..."
+                  className="bg-black/20 border-white/10 h-9 text-xs focus-visible:ring-1 focus-visible:ring-[#00FF00]/30 focus-visible:border-[#00FF00]/30 text-white placeholder:text-gray-600 shadow-inner"
+                />
+              </div>
+
               <div className="space-y-1 flex-1 flex flex-col">
-                <label className="text-[9px] font-bold uppercase tracking-widest text-gray-500">
+                <label className="text-[9px] font-bold uppercase tracking-widest text-gray-300">
                   Descrição do Erro
                 </label>
                 <Textarea 
@@ -667,7 +825,7 @@ export default function PortalExpedicao() {
 
               {/* Upload de Evidências */}
               <div className="space-y-1">
-                <label className="text-[9px] font-bold uppercase tracking-widest text-gray-500">
+                <label className="text-[9px] font-bold uppercase tracking-widest text-gray-300">
                   Evidências (Fotos/Vídeos)
                 </label>
                 <div className="bg-black/20 border border-dashed border-white/20 rounded-xl p-3 flex flex-col items-center justify-center gap-1.5 hover:border-[#00FF00]/50 hover:bg-[#00FF00]/5 transition-colors group relative cursor-pointer">
@@ -710,11 +868,11 @@ export default function PortalExpedicao() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[9px] font-bold uppercase tracking-widest text-gray-500">
+                <label className="text-[9px] font-bold uppercase tracking-widest text-gray-300">
                   Nível de Urgência
                 </label>
                 <div className="flex gap-2">
-                  <label className={`flex-1 flex items-center justify-center gap-1.5 border py-2 rounded-lg cursor-pointer transition-all duration-300 ${priority === 'normal' ? 'bg-[#00FF00]/10 border-[#00FF00]/30 text-[#00E500]' : 'bg-[#111111] border-white/5 text-gray-500 hover:bg-white/5'}`}>
+                  <label className={`flex-1 flex items-center justify-center gap-1.5 border py-2 rounded-lg cursor-pointer transition-all duration-300 ${priority === 'normal' ? 'bg-[#00FF00]/10 border-[#00FF00]/30 text-[#00E500]' : 'bg-[#111111] border-white/5 text-gray-300 hover:bg-white/10'}`}>
                     <input 
                       type="radio" 
                       name="priority" 
@@ -726,7 +884,7 @@ export default function PortalExpedicao() {
                     <CheckCircle2 className="w-3.5 h-3.5" /> <span className="text-xs">Pode esperar</span>
                   </label>
 
-                  <label className={`flex-1 flex items-center justify-center gap-1.5 border py-2 rounded-lg cursor-pointer transition-all duration-300 ${priority === 'critico' ? 'bg-red-500/20 border-red-500/50 text-red-500' : 'bg-[#111111] border-white/5 text-gray-500 hover:bg-white/5'}`}>
+                  <label className={`flex-1 flex items-center justify-center gap-1.5 border py-2 rounded-lg cursor-pointer transition-all duration-300 ${priority === 'critico' ? 'bg-red-500/20 border-red-500/50 text-red-500' : 'bg-[#111111] border-white/5 text-gray-300 hover:bg-white/10'}`}>
                     <input 
                       type="radio" 
                       name="priority" 
@@ -756,11 +914,11 @@ export default function PortalExpedicao() {
             </form>
           )}
 
-          {activeTab === "insumos" && (
+          {chamadoType === "insumos" && (
             <form onSubmit={handleSupplySubmit} className="space-y-3 flex-1 flex flex-col animate-in fade-in duration-300">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-gray-500">
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-gray-300">
                     Nome do Item / Insumo
                   </label>
                   <Input 
@@ -772,7 +930,7 @@ export default function PortalExpedicao() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-gray-500">
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-gray-300">
                     Categoria
                   </label>
                   <Select value={itemCategory} onValueChange={setItemCategory}>
@@ -790,7 +948,7 @@ export default function PortalExpedicao() {
               </div>
 
               <div className="space-y-1 flex-1">
-                <label className="text-[9px] font-bold uppercase tracking-widest text-gray-500">
+                <label className="text-[9px] font-bold uppercase tracking-widest text-gray-300">
                   Quantidade Restante Estimada
                 </label>
                 <Input 
@@ -802,11 +960,11 @@ export default function PortalExpedicao() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[9px] font-bold uppercase tracking-widest text-gray-500">
+                <label className="text-[9px] font-bold uppercase tracking-widest text-gray-300">
                   Nível de Urgência
                 </label>
                 <div className="flex gap-2">
-                  <label className={`flex-1 flex items-center justify-center gap-1.5 border py-2 rounded-lg cursor-pointer transition-all duration-300 ${supplyPriority === 'normal' ? 'bg-[#00FF00]/10 border-[#00FF00]/30 text-[#00FF00]' : 'bg-[#111111] border-white/5 text-gray-500 hover:bg-white/5'}`}>
+                  <label className={`flex-1 flex items-center justify-center gap-1.5 border py-2 rounded-lg cursor-pointer transition-all duration-300 ${supplyPriority === 'normal' ? 'bg-[#00FF00]/10 border-[#00FF00]/30 text-[#00FF00]' : 'bg-[#111111] border-white/5 text-gray-300 hover:bg-white/10'}`}>
                     <input 
                       type="radio" 
                       name="supplyPriority" 
@@ -818,7 +976,7 @@ export default function PortalExpedicao() {
                     <CheckCircle2 className="w-3.5 h-3.5" /> <span className="text-xs">Dá pra usar hoje</span>
                   </label>
 
-                  <label className={`flex-1 flex items-center justify-center gap-1.5 border py-2 rounded-lg cursor-pointer transition-all duration-300 ${supplyPriority === 'critico' ? 'bg-red-500/20 border-red-500/50 text-red-500' : 'bg-[#111111] border-white/5 text-gray-500 hover:bg-white/5'}`}>
+                  <label className={`flex-1 flex items-center justify-center gap-1.5 border py-2 rounded-lg cursor-pointer transition-all duration-300 ${supplyPriority === 'critico' ? 'bg-red-500/20 border-red-500/50 text-red-500' : 'bg-[#111111] border-white/5 text-gray-300 hover:bg-white/10'}`}>
                     <input 
                       type="radio" 
                       name="supplyPriority" 
@@ -848,40 +1006,40 @@ export default function PortalExpedicao() {
             </form>
           )}
 
-          {activeTab === "urgencias" && (
+          {chamadoType === "urgencias" && (
             <form onSubmit={handleUrgencySubmit} className="space-y-4 flex-1 flex flex-col animate-in fade-in duration-300 bg-red-950/10 border border-red-500/20 rounded-xl p-4 shadow-[inset_0_0_20px_rgba(239,68,68,0.05)]">
               <div className="flex items-center gap-2 text-red-500 mb-2">
                 <AlertTriangle className="w-5 h-5 animate-pulse" />
                 <h3 className="font-bold">Urgência: Produto Faltante</h3>
               </div>
-              <p className="text-xs text-red-400/80 -mt-3 mb-2">Use isso apenas para produtos que já foram vendidos e precisam ser comprados no mesmo dia!</p>
+              <p className="text-xs text-gray-300 -mt-3 mb-2">Use isso apenas para produtos que já foram vendidos e precisam ser comprados no mesmo dia!</p>
 
               <div className="space-y-1">
-                <label className="text-[9px] font-bold uppercase tracking-widest text-red-500">
+                <label className="text-[9px] font-bold uppercase tracking-widest text-gray-300">
                   Nome do Produto Vendido
                 </label>
                 <Input 
                   value={urgencyProduct}
                   onChange={(e) => setUrgencyProduct(e.target.value.toUpperCase())}
                   placeholder="Ex: Teclado Mecânico Redragon"
-                  className="bg-black/40 border-red-500/30 h-10 text-xs focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/50 text-white shadow-inner"
+                  className="bg-black/40 border-red-500/30 h-10 text-xs focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/50 text-white placeholder:text-gray-500 shadow-inner"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-red-500">
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-gray-300">
                     Onde o Rogério costuma comprar? (Opcional)
                   </label>
                   <Input 
                     value={urgencySupplier}
                     onChange={(e) => setUrgencySupplier(e.target.value)}
                     placeholder="Ex: Distribuidora SP, Galeria Pagé"
-                    className="bg-black/40 border-red-500/30 h-10 text-xs focus-visible:ring-1 focus-visible:ring-red-500/50 text-white shadow-inner"
+                    className="bg-black/40 border-red-500/30 h-10 text-xs focus-visible:ring-1 focus-visible:ring-red-500/50 text-white placeholder:text-gray-500 shadow-inner"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-red-500">
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-gray-300">
                     Quantidade Faltante
                   </label>
                   <Input 
@@ -890,9 +1048,21 @@ export default function PortalExpedicao() {
                     min="1"
                     onChange={(e) => setUrgencyQty(e.target.value)}
                     placeholder="Ex: 2"
-                    className="bg-black/40 border-red-500/30 h-10 text-xs focus-visible:ring-1 focus-visible:ring-red-500/50 text-white shadow-inner"
+                    className="bg-black/40 border-red-500/30 h-10 text-xs focus-visible:ring-1 focus-visible:ring-red-500/50 text-white placeholder:text-gray-500 shadow-inner"
                   />
                 </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[9px] font-bold uppercase tracking-widest text-gray-300">
+                  Link do Anúncio (Opcional)
+                </label>
+                <Input 
+                  value={urgencyLink}
+                  onChange={(e) => setUrgencyLink(e.target.value)}
+                  placeholder="Ex: https://produto.mercadolivre.com.br/..."
+                  className="bg-black/40 border-red-500/30 h-10 text-xs focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/50 text-white placeholder:text-gray-500 shadow-inner"
+                />
               </div>
 
               <div className="pt-2">
@@ -924,6 +1094,8 @@ export default function PortalExpedicao() {
               </div>
             </form>
           )}
+          </div>
+          )}
 
           {activeTab === "kanban" && (
             <div className="flex-1 flex flex-col min-h-0 overflow-hidden animate-in fade-in duration-300">
@@ -932,7 +1104,7 @@ export default function PortalExpedicao() {
                 {/* Coluna: Aguardando */}
                 <div className="bg-[#141414] border border-white/5 rounded-xl flex flex-col overflow-hidden">
                   <div className="p-3 border-b border-white/5 bg-black/20 flex items-center justify-between shrink-0">
-                    <div className="flex items-center gap-2 text-yellow-500 font-bold text-sm">
+                    <div className="flex items-center gap-2 text-cyan-400 font-bold text-sm">
                       <Clock className="w-4 h-4" /> Triagem / Aguardando
                     </div>
                     <span className="bg-white/10 text-white text-[10px] px-2 py-0.5 rounded-full">{tickets.filter(t => t.status === 'aguardando').length}</span>
@@ -942,7 +1114,7 @@ export default function PortalExpedicao() {
                       const elapsedMinutes = Math.floor((currentTime - (ticket.createdAt || Date.now())) / 60000);
                       const isCriticalTimer = ticket.priority === 'critico';
                       
-                      let borderClass = ticket.type === 'produto' ? 'border-orange-500/30' : ticket.type === 'insumo' ? 'border-yellow-500/30' : ticket.type === 'risco' ? 'border-red-500/30' : 'border-[#00FF00]/30';
+                      let borderClass = ticket.type === 'produto' ? 'border-orange-500/30' : ticket.type === 'insumo' ? 'border-cyan-400/30' : ticket.type === 'risco' ? 'border-red-500/30' : 'border-[#00FF00]/30';
                       let pulseClass = '';
                       let bgClass = 'bg-[#1A1A1A]';
 
@@ -967,27 +1139,41 @@ export default function PortalExpedicao() {
                           </div>
                         )}
                         <div className="flex items-center justify-between mb-2">
-                          <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded flex items-center gap-1 w-fit ${ticket.type === 'produto' ? 'bg-orange-500/10 text-orange-500' : ticket.type === 'insumo' ? 'bg-yellow-500/10 text-yellow-500' : ticket.type === 'risco' ? 'bg-red-500/10 text-red-500' : 'bg-[#00FF00]/10 text-[#00FF00]'}`}>
+                          <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded flex items-center gap-1 w-fit ${ticket.type === 'produto' ? 'bg-orange-500/10 text-orange-500' : ticket.type === 'insumo' ? 'bg-cyan-400/10 text-cyan-400' : ticket.type === 'risco' ? 'bg-red-500/10 text-red-500' : 'bg-[#00FF00]/10 text-[#00FF00]'}`}>
                             {ticket.type === 'produto' ? <Package className="w-3 h-3" /> : ticket.type === 'insumo' ? <Box className="w-3 h-3" /> : ticket.type === 'risco' ? <AlertTriangle className="w-3 h-3" /> : <CheckCircle className="w-3 h-3" />} 
                             {ticket.type === 'produto' ? 'Falta Produto' : ticket.type === 'insumo' ? 'Falta Insumo' : ticket.type === 'risco' ? 'Risco Comercial' : 'Divergência'}
                           </span>
                           <span className="text-[9px] text-gray-600">{ticket.time}</span>
                         </div>
                         <h4 className="text-white font-medium text-sm leading-tight mb-1">{ticket.title}</h4>
-                        <p className="text-[11px] text-gray-400 mb-3 line-clamp-3 leading-snug">{ticket.description}</p>
+                        <p className="text-[11px] text-gray-400 mb-2 line-clamp-3 leading-snug">{ticket.description}</p>
+                        {ticket.ad_link && (
+                          <a href={ticket.ad_link.startsWith('http') ? ticket.ad_link : `https://${ticket.ad_link}`} target="_blank" rel="noopener noreferrer" className="inline-block mb-2 bg-white/5 hover:bg-white/10 text-cyan-400 hover:text-cyan-300 text-[10px] font-bold py-1 px-3 rounded-full transition-colors w-fit border border-cyan-400/20">
+                            Acessar Anúncio
+                          </a>
+                        )}
                         
-                        <div className="flex flex-col gap-2 relative z-10">
-                          <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-1 relative z-10">
+                          <div className="mt-1 flex items-center justify-between border-t border-white/5 pt-2 relative z-10">
                             <span className="text-[10px] text-gray-500">De: <strong className="text-gray-300">{ticket.author}</strong></span>
-                            {ticket.priority === 'critico' && !isCriticalTimer && <span className="text-red-500 flex items-center gap-1 text-[9px] font-bold uppercase"><AlertTriangle className="w-3 h-3" /> Parou tudo!</span>}
-                          </div>
-                          <div className="grid grid-cols-2 gap-2 mt-1">
-                            <button onClick={() => changeTicketStatus(ticket.id, 'aprovado')} className="flex items-center justify-center gap-1 bg-[#00FF00]/10 hover:bg-[#00FF00]/20 text-[#00FF00] border border-[#00FF00]/30 rounded py-1.5 text-xs font-bold transition-colors">
-                              <CheckCircle className="w-3.5 h-3.5" /> Resolver
-                            </button>
-                            <button onClick={() => changeTicketStatus(ticket.id, 'recusado')} className="flex items-center justify-center gap-1 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 rounded py-1.5 text-xs font-bold transition-colors">
-                              <XCircle className="w-3.5 h-3.5" /> Recusar
-                            </button>
+                            <div className="flex items-center gap-3">
+                              <button 
+                                onClick={() => {
+                                  supabase.from('expedicao_tickets').delete().eq('id', ticket.id).then(() => {
+                                    toast.success("Chamado removido!");
+                                  });
+                                }} 
+                                className="text-[10px] text-gray-500 hover:text-red-500 transition-colors"
+                              >
+                                Excluir
+                              </button>
+                              <button 
+                                onClick={() => changeTicketStatus(ticket.id, 'aprovado')} 
+                                className="text-[10px] font-bold text-gray-400 hover:text-[#00FF00] transition-colors"
+                              >
+                                Resolver
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1007,16 +1193,38 @@ export default function PortalExpedicao() {
                     {tickets.filter(t => t.status === 'aprovado').map(ticket => (
                       <div key={ticket.id} className="bg-black/40 border border-[#00FF00]/20 rounded-lg p-2.5">
                         <div className="flex items-center justify-between mb-2 opacity-70">
-                          <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded flex items-center gap-1 w-fit ${ticket.type === 'produto' ? 'bg-orange-500/10 text-orange-500' : ticket.type === 'insumo' ? 'bg-yellow-500/10 text-yellow-500' : 'bg-[#00FF00]/10 text-[#00FF00]'}`}>
+                          <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded flex items-center gap-1 w-fit ${ticket.type === 'produto' ? 'bg-orange-500/10 text-orange-500' : ticket.type === 'insumo' ? 'bg-cyan-400/10 text-cyan-400' : 'bg-[#00FF00]/10 text-[#00FF00]'}`}>
                             {ticket.type === 'produto' ? <Package className="w-3 h-3" /> : ticket.type === 'insumo' ? <Box className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />} 
                             {ticket.type === 'produto' ? 'Produto' : ticket.type === 'insumo' ? 'Insumo' : 'Divergência'}
                           </span>
                         </div>
                         <h4 className="text-gray-300 font-medium text-sm leading-tight mb-1">{ticket.title}</h4>
-                        <p className="text-[11px] text-gray-500">{ticket.description}</p>
-                        <div className="mt-3 flex items-center justify-between border-t border-white/5 pt-2">
+                        <p className="text-[11px] text-gray-500 mb-1">{ticket.description}</p>
+                        {ticket.ad_link && (
+                          <a href={ticket.ad_link.startsWith('http') ? ticket.ad_link : `https://${ticket.ad_link}`} target="_blank" rel="noopener noreferrer" className="inline-block mb-1 bg-white/5 hover:bg-white/10 text-cyan-500 hover:text-cyan-400 text-[10px] font-bold py-1 px-2 rounded-full transition-colors w-fit border border-cyan-500/20">
+                            Acessar Anúncio
+                          </a>
+                        )}
+                        <div className="mt-2 flex items-center justify-between border-t border-white/5 pt-2">
                           <span className="text-[10px] text-gray-600">De: {ticket.author}</span>
-                          <button onClick={() => changeTicketStatus(ticket.id, 'aguardando')} className="text-[10px] text-gray-500 hover:text-white underline">Reverter</button>
+                          <div className="flex items-center gap-3">
+                            <button 
+                              onClick={() => {
+                                supabase.from('expedicao_tickets').delete().eq('id', ticket.id).then(() => {
+                                  toast.success("Chamado removido!");
+                                });
+                              }} 
+                              className="text-[10px] text-gray-600 hover:text-red-500 transition-colors"
+                            >
+                              Excluir
+                            </button>
+                            <button 
+                              onClick={() => changeTicketStatus(ticket.id, 'aguardando')} 
+                              className="text-[10px] text-gray-500 hover:text-white underline transition-colors"
+                            >
+                              Reverter
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -1038,6 +1246,7 @@ export default function PortalExpedicao() {
                         <div className="flex flex-col gap-2">
                           <button onClick={() => joinRoom("Mesa da Mara")} className="bg-[#1C1C1E] hover:bg-[#2A2A2A] border border-white/5 rounded-lg p-2.5 flex items-center gap-3 transition-colors group">
                             <Avatar className="w-8 h-8 border border-white/10 group-hover:border-[#00FF00]/50 transition-colors">
+                              <AvatarImage src="/mara.png" className="object-cover" />
                               <AvatarFallback className="bg-purple-500/20 text-purple-400 text-xs font-bold">MA</AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col items-start">
@@ -1045,13 +1254,14 @@ export default function PortalExpedicao() {
                               <span className="text-[10px] text-[#00FF00]">Livre</span>
                             </div>
                           </button>
-                          <button onClick={() => joinRoom("Equipe Base")} className="bg-[#1C1C1E] hover:bg-[#2A2A2A] border border-white/5 rounded-lg p-2.5 flex items-center gap-3 transition-colors group">
-                            <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-white/10 group-hover:border-blue-500/50 flex items-center justify-center text-blue-400">
-                              <Package className="w-4 h-4" />
-                            </div>
+                          <button onClick={() => joinRoom("Mesa do Rogério")} className="bg-[#1C1C1E] hover:bg-[#2A2A2A] border border-white/5 rounded-lg p-2.5 flex items-center gap-3 transition-colors group">
+                            <Avatar className="w-8 h-8 border border-white/10 group-hover:border-[#00FF00]/50 transition-colors">
+                              <AvatarImage src="/rogerio.png" className="object-cover" />
+                              <AvatarFallback className="bg-purple-500/20 text-purple-400 text-xs font-bold">RO</AvatarFallback>
+                            </Avatar>
                             <div className="flex flex-col items-start">
-                              <span className="text-white text-sm font-bold">Equipe Base</span>
-                              <span className="text-[10px] text-[#00FF00]">3 online</span>
+                              <span className="text-white text-sm font-bold">Mesa do Rogério</span>
+                              <span className="text-[10px] text-[#00FF00] font-medium tracking-wide">Online</span>
                             </div>
                           </button>
                         </div>
@@ -1061,8 +1271,10 @@ export default function PortalExpedicao() {
                           <div className="flex flex-col items-center justify-center gap-2 relative z-10">
                             <div className="relative">
                               <Avatar className="w-10 h-10 border border-[#00FF00]/50">
+                                {activeRoom === "Mesa da Mara" && <AvatarImage src="/mara.png" className="object-cover" />}
+                                {activeRoom === "Mesa do Rogério" && <AvatarImage src="/rogerio.png" className="object-cover" />}
                                 <AvatarFallback className="bg-purple-500/20 text-purple-400 text-sm font-bold">
-                                  {activeRoom === "Mesa da Mara" ? "MA" : "EQ"}
+                                  {activeRoom === "Mesa da Mara" ? "MA" : "RO"}
                                 </AvatarFallback>
                               </Avatar>
                               <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#00FF00] border-2 border-[#0A2010] rounded-full animate-pulse" />
@@ -1102,30 +1314,42 @@ export default function PortalExpedicao() {
                         </span>
                       </div>
                       <div className="flex -space-x-2 overflow-hidden py-1">
-                        <img className="inline-block h-7 w-7 rounded-full ring-2 ring-[#121212] object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=64&h=64" alt="Mara" title="Mara" />
-                        <img className="inline-block h-7 w-7 rounded-full ring-2 ring-[#121212] object-cover" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=64&h=64" alt="Rogério" title="Rogério" />
+                        <img className="inline-block h-7 w-7 rounded-full ring-2 ring-[#121212] object-cover" src="/mara.png" alt="Mara" title="Mara" />
+                        <img className="inline-block h-7 w-7 rounded-full ring-2 ring-[#121212] object-cover" src="/rogerio.png" alt="Rogério" title="Rogério" />
                       </div>
                     </div>
 
-                    {/* Pings Rápidos */}
+                    {/* Solicitações Rápidas */}
                     <div className="flex flex-col gap-2 mt-auto">
-                      <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Pings Rápidos</span>
+                      <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Solicitações Rápidas</span>
                       <div className="grid grid-cols-2 gap-2">
-                        <button className="bg-[#1C1C1E] hover:bg-yellow-500/10 border border-white/5 hover:border-yellow-500/30 text-gray-400 hover:text-yellow-500 text-[10px] font-bold py-2.5 rounded-lg flex flex-col items-center gap-1.5 transition-colors">
-                          <AlertTriangle className="w-3.5 h-3.5" />
-                          Supervisor
-                        </button>
-                        <button className="bg-[#1C1C1E] hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/30 text-gray-400 hover:text-blue-400 text-[10px] font-bold py-2.5 rounded-lg flex flex-col items-center gap-1.5 transition-colors">
-                          <Package className="w-3.5 h-3.5" />
+                        <button 
+                          onClick={() => handleQuickRequest("Falta de Caixa Parda", "Bancada precisa de reposição urgente de Caixas de Papelão.", "insumo")}
+                          className="bg-[#1C1C1E] hover:bg-orange-500/10 border border-white/5 hover:border-orange-500/30 text-gray-400 hover:text-orange-500 text-[10px] font-bold py-2.5 px-1 rounded-lg flex flex-col items-center gap-1.5 transition-colors text-center leading-tight"
+                        >
+                          <Package className="w-4 h-4" />
                           Falta Caixa
                         </button>
-                        <button className="bg-[#1C1C1E] hover:bg-orange-500/10 border border-white/5 hover:border-orange-500/30 text-gray-400 hover:text-orange-500 text-[10px] font-bold py-2.5 rounded-lg flex flex-col items-center gap-1.5 transition-colors">
-                          <Clock className="w-3.5 h-3.5" />
-                          Pausa Fluxo
+                        <button 
+                          onClick={() => handleQuickRequest("Falta de Etiqueta ZPL", "Bancada precisa de reposição urgente de rolos de etiqueta.", "insumo")}
+                          className="bg-[#1C1C1E] hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/30 text-gray-400 hover:text-blue-400 text-[10px] font-bold py-2.5 px-1 rounded-lg flex flex-col items-center gap-1.5 transition-colors text-center leading-tight"
+                        >
+                          <FileText className="w-4 h-4" />
+                          Falta Etiqueta
                         </button>
-                        <button className="bg-[#1C1C1E] hover:bg-[#00FF00]/10 border border-white/5 hover:border-[#00FF00]/30 text-gray-400 hover:text-[#00FF00] text-[10px] font-bold py-2.5 rounded-lg flex flex-col items-center gap-1.5 transition-colors">
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          Tudo OK
+                        <button 
+                          onClick={() => handleQuickRequest("Falta de Plástico Bolha", "Bancada precisa de reposição de plástico bolha.", "insumo")}
+                          className="bg-[#1C1C1E] hover:bg-purple-500/10 border border-white/5 hover:border-purple-500/30 text-gray-400 hover:text-purple-400 text-[10px] font-bold py-2.5 px-1 rounded-lg flex flex-col items-center gap-1.5 transition-colors text-center leading-tight"
+                        >
+                          <Box className="w-4 h-4" />
+                          Falta Bolha
+                        </button>
+                        <button 
+                          onClick={() => setActiveTab("novo_chamado")}
+                          className="bg-[#1C1C1E] hover:bg-[#00FF00]/10 border border-white/5 hover:border-[#00FF00]/30 text-gray-400 hover:text-[#00FF00] text-[10px] font-bold py-2.5 px-1 rounded-lg flex flex-col items-center gap-1.5 transition-colors text-center leading-tight"
+                        >
+                          <Plus className="w-4 h-4" />
+                          Novo Chamado
                         </button>
                       </div>
                     </div>
@@ -1143,19 +1367,37 @@ export default function PortalExpedicao() {
                 <p className="text-gray-500 text-xs text-center mt-10">Nenhum chamado aberto ainda.</p>
               ) : (
                 tickets.map(ticket => (
-                  <div key={ticket.id} className={`bg-[#1a1a1a] border border-white/5 rounded-xl p-4 transition-colors ${ticket.type === 'produto' ? 'hover:border-orange-500/40' : ticket.type === 'insumo' ? 'hover:border-yellow-500/40' : 'hover:border-[#00FF00]/40'}`}>
+                  <div key={ticket.id} className={`bg-[#1a1a1a] border border-white/5 rounded-xl p-4 transition-colors ${ticket.type === 'produto' ? 'hover:border-orange-500/40' : ticket.type === 'insumo' ? 'hover:border-cyan-400/40' : 'hover:border-[#00FF00]/40'}`}>
                     <div className="flex items-center justify-between mb-3">
-                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1.5 ${ticket.type === 'produto' ? 'bg-orange-500/10 text-orange-500' : ticket.type === 'insumo' ? 'bg-yellow-500/10 text-yellow-500' : 'bg-[#00FF00]/10 text-[#00FF00]'}`}>
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1.5 ${ticket.type === 'produto' ? 'bg-orange-500/10 text-orange-500' : ticket.type === 'insumo' ? 'bg-cyan-400/10 text-cyan-400' : 'bg-[#00FF00]/10 text-[#00FF00]'}`}>
                         {ticket.type === 'produto' ? <Package className="w-3 h-3" /> : ticket.type === 'insumo' ? <Box className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />} 
                         {ticket.type === 'produto' ? 'Falta Produto' : ticket.type === 'insumo' ? 'Insumo' : 'Divergência'}
                       </span>
-                      <span className="bg-white/5 text-gray-400 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1">
-                        {ticket.status === 'aprovado' ? <CheckCircle2 className="w-3 h-3 text-[#00FF00]" /> : ticket.status === 'recusado' ? <XCircle className="w-3 h-3 text-red-500" /> : <Clock className="w-3 h-3 text-yellow-500" />} 
-                        {ticket.status === 'aprovado' ? 'Resolvido' : ticket.status === 'recusado' ? 'Recusado' : 'Aguardando'}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="bg-white/5 text-gray-400 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1">
+                          {ticket.status === 'aprovado' ? <CheckCircle2 className="w-3 h-3 text-[#00FF00]" /> : ticket.status === 'recusado' ? <XCircle className="w-3 h-3 text-red-500" /> : <Clock className="w-3 h-3 text-cyan-400" />} 
+                          {ticket.status === 'aprovado' ? 'Resolvido' : ticket.status === 'recusado' ? 'Recusado' : 'Aguardando'}
+                        </span>
+                        <button 
+                          onClick={() => {
+                            supabase.from('expedicao_tickets').delete().eq('id', ticket.id).then(() => {
+                              toast.success("Chamado removido!");
+                            });
+                          }}
+                          className="p-1 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors"
+                          title="Remover do Histórico"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                     <h4 className="text-white font-bold text-sm mb-1">{ticket.title}</h4>
-                    <p className="text-gray-400 text-xs mb-3">{ticket.description}</p>
+                    <p className="text-gray-400 text-xs mb-2">{ticket.description}</p>
+                    {ticket.ad_link && (
+                      <a href={ticket.ad_link.startsWith('http') ? ticket.ad_link : `https://${ticket.ad_link}`} target="_blank" rel="noopener noreferrer" className="inline-block mb-2 bg-white/5 hover:bg-white/10 text-cyan-400 hover:text-cyan-300 text-xs font-bold py-1 px-3 rounded-full transition-colors w-fit border border-cyan-400/20">
+                        Acessar Anúncio
+                      </a>
+                    )}
                     <div className="flex items-center justify-between text-[10px] text-gray-500 border-t border-white/5 pt-3 mt-1">
                       <div className="flex items-center gap-3">
                         <span>Por: {ticket.author}</span>
@@ -1177,14 +1419,23 @@ export default function PortalExpedicao() {
         {/* Chat Integrado (Agora na Esquerda com order-1) */}
         <div className="w-full lg:w-[35%] order-1 bg-[#121212] border border-white/5 rounded-2xl flex flex-col overflow-hidden h-full shadow-2xl relative">
           
-          <div className="px-4 py-3 bg-[#121212] flex flex-col justify-center shrink-0">
-            <h1 className="text-xl font-light text-white tracking-tighter flex items-center gap-2">
-              <Package className="w-5 h-5 text-[#00FF00]" />
-              Portal da <span className="font-bold">Expedição</span>
-            </h1>
-            <p className="text-gray-400 text-xs ml-7 mt-0.5">
-              Hub centralizado para comunicação e aprovações
-            </p>
+          <div className="px-4 py-3 bg-[#121212] flex items-center justify-between shrink-0">
+            <div>
+              <h1 className="text-xl font-light text-white tracking-tighter flex items-center gap-2">
+                <Truck className="w-5 h-5 text-[#00FF00]" />
+                Portal da <span className="font-bold">Expedição</span>
+              </h1>
+              <p className="text-gray-400 text-xs ml-7 mt-0.5">
+                Hub centralizado para comunicação e aprovações
+              </p>
+            </div>
+            <button 
+              onClick={clearChatHistory}
+              className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+              title="Apagar Histórico do Chat"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
           </div>
 
 
@@ -1254,7 +1505,7 @@ export default function PortalExpedicao() {
                           <CustomAudioPlayer src={(msg as any).audioUrl} isMe={msg.isMe} />
                         </div>
                       )}
-                      {msg.text && <div>{msg.text}</div>}
+                      {msg.text && <div dangerouslySetInnerHTML={{ __html: formatChatMessage(msg.text) }} />}
                     </div>
 
                     {!msg.isMe && msg.text && (
@@ -1278,7 +1529,7 @@ export default function PortalExpedicao() {
             <div ref={chatEndRef} className="mt-auto" />
           </div>
 
-          <div className="p-3 bg-[#181818] border-t border-white/5">
+          <div className="p-3">
             {/* Quick Replies Clean */}
             <div className="flex gap-4 mb-1 px-2 overflow-x-auto custom-scrollbar">
               <button type="button" onClick={() => sendChatMessage("👍 Ciente. Pode prosseguir.")} className="whitespace-nowrap text-[10px] font-bold text-gray-500 hover:text-[#00FF00] transition-colors">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Package, Box, AlertTriangle, CheckCircle2, Clock, ShoppingCart, RefreshCw, DollarSign, BarChart2, Calendar, FileText, Trash2 } from "lucide-react";
+import { Package, Box, AlertTriangle, CheckCircle2, Clock, ShoppingCart, RefreshCw, DollarSign, BarChart2, Calendar, FileText, Trash2, Truck, Link, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,12 +12,15 @@ export default function CentralCompras() {
   const { user } = useAuth();
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'pendentes' | 'a_caminho' | 'recebidos'>('pendentes');
   
   // Estados para o Modal de Compra
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [purchaseQuantity, setPurchaseQuantity] = useState("");
   const [purchaseCost, setPurchaseCost] = useState("");
+  const [purchaseETA, setPurchaseETA] = useState("");
+  const [purchaseSupplier, setPurchaseSupplier] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchRequests = async () => {
@@ -29,7 +32,7 @@ export default function CentralCompras() {
         .order('created_at', { ascending: false });
         
       if (error) {
-        // Fallback Fictício se a tabela não existir
+        // Fallback Fictício
         setRequests([{
           id: "fake-123",
           item_name: "Caixas de Papelão Parda (Tamanho M)",
@@ -38,17 +41,22 @@ export default function CentralCompras() {
           status: "pendente",
           author: "Mara",
           created_at: new Date().toISOString(),
-        }]);
-      } else if (data) {
-        setRequests(data.length > 0 ? data : [{
-          id: "fake-123",
+        },
+        {
+          id: "fake-456",
           item_name: "Fita Adesiva Larga (Transparente)",
           category: "Embalagem",
           priority: "alta",
-          status: "pendente",
+          status: "comprado",
+          quantity_bought: 50,
+          total_cost: 250.00,
+          expected_date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
+          supplier: "Mercado Livre",
           author: "Mara",
           created_at: new Date().toISOString(),
         }]);
+      } else if (data) {
+        setRequests(data);
       }
     } catch (err) {
       console.error(err);
@@ -119,49 +127,52 @@ export default function CentralCompras() {
     setSelectedRequest(req);
     setPurchaseQuantity("");
     setPurchaseCost("");
+    setPurchaseETA("");
+    setPurchaseSupplier("");
     setIsPurchaseModalOpen(true);
   };
 
   const confirmPurchase = async () => {
-    if (!purchaseQuantity || !purchaseCost) {
-      toast.error("Preencha a quantidade e o valor.");
+    if (!purchaseQuantity || !purchaseCost || !purchaseETA) {
+      toast.error("Preencha quantidade, valor e data de previsão.");
       return;
     }
     
     setIsSubmitting(true);
 
     try {
-      // Tentar atualizar no Supabase (se a coluna existir)
       const numericCost = parseFloat(purchaseCost.replace(',', '.'));
       const { error } = await supabase
         .from('supply_requests')
         .update({ 
           status: 'comprado',
           quantity_bought: Number(purchaseQuantity),
-          total_cost: numericCost 
+          total_cost: numericCost,
+          expected_date: purchaseETA,
+          supplier: purchaseSupplier || 'Não informado'
         })
         .eq('id', selectedRequest.id);
 
       if (error) {
-        // Fallback visual se não conseguir gravar (ex: mock mode)
         setRequests(prev => prev.map(r => r.id === selectedRequest.id ? { 
           ...r, 
           status: 'comprado', 
           quantity_bought: Number(purchaseQuantity), 
-          total_cost: numericCost 
+          total_cost: numericCost,
+          expected_date: purchaseETA,
+          supplier: purchaseSupplier || 'Não informado'
         } : r));
       }
 
       toast.success("Compra registrada com sucesso!");
 
-      // Envia notificação no chat da Expedição para fechar o loop
       await supabase.from('chat_messages').insert({
         channel: 'expedicao',
         user_id: user?.id,
         sender_name: "Sistema Bot",
         sender_initials: "BOT",
-        sender_color: "bg-blue-500 text-white",
-        text: `✅ O item **${selectedRequest.item_name}** foi comprado pelo Rogério! Qtd: ${purchaseQuantity} | Previsão: A Caminho.`
+        sender_color: "bg-[#00FF00] text-black",
+        text: `✅ O item **${selectedRequest.item_name}** foi comprado pelo Rogério! Qtd: ${purchaseQuantity} | Previsão de chegada: ${new Date(purchaseETA).toLocaleDateString('pt-BR')} (A Caminho).`
       });
 
       setIsPurchaseModalOpen(false);
@@ -170,6 +181,24 @@ export default function CentralCompras() {
       toast.error("Erro ao registrar a compra.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const confirmReceipt = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('supply_requests')
+        .update({ status: 'recebido' })
+        .eq('id', id);
+
+      if (error) {
+        setRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'recebido' } : r));
+      }
+
+      toast.success("Item marcado como recebido!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao confirmar recebimento.");
     }
   };
 
@@ -194,158 +223,199 @@ export default function CentralCompras() {
 
   if (!user) return null;
 
+  const filteredRequests = requests.filter(req => {
+    if (activeTab === 'pendentes') return req.status === 'pendente';
+    if (activeTab === 'a_caminho') return req.status === 'comprado';
+    if (activeTab === 'recebidos') return req.status === 'recebido';
+    return true;
+  });
+
   return (
-    <div className="flex flex-col h-full bg-transparent w-full font-sans animate-in fade-in duration-700 overflow-hidden p-2 md:p-4">
-      
+    <div className="flex flex-col h-full bg-transparent w-full font-sans animate-in fade-in duration-700 overflow-hidden p-2 md:p-3">
       {/* Header & Metrics */}
-      <div className="mb-6 space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-            <ShoppingCart className="w-6 h-6 text-blue-500" />
-          </div>
-          <div>
-            <h2 className="text-white text-xl font-black uppercase tracking-wider">Central de Compras</h2>
-            <p className="text-gray-400 text-sm">Controle financeiro e gestão de insumos da operação</p>
+      <div className="mb-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-[#00FF00]/10 flex items-center justify-center border border-[#00FF00]/20 shadow-[0_0_15px_rgba(0,255,0,0.15)]">
+              <ShoppingCart className="w-5 h-5 text-[#00FF00]" />
+            </div>
+            <div>
+              <h2 className="text-white text-lg font-black uppercase tracking-wider leading-none">Central de Compras</h2>
+              <p className="text-gray-400 text-xs mt-1">Painel de controle e acompanhamento de insumos</p>
+            </div>
           </div>
         </div>
 
         {/* Dashboard Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
-          <div className="bg-[#111] border border-white/5 rounded-xl p-4 flex flex-col relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110" />
-            <div className="flex items-center gap-2 mb-1 text-blue-400">
-              <DollarSign className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider">Gasto no Mês</span>
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 md:gap-3">
+          <div className="bg-[#111]/60 backdrop-blur-xl border border-white/[0.05] hover:border-[#00FF00]/30 rounded-xl p-3 flex flex-col relative overflow-hidden group shadow-md transition-all duration-300">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-[#00FF00]/5 rounded-bl-full -mr-6 -mt-6 transition-transform duration-500 group-hover:scale-110" />
+            <div className="flex items-center gap-1.5 mb-1.5 text-[#00FF00]">
+              <DollarSign className="w-3.5 h-3.5" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Gasto Mês</span>
             </div>
-            <span className="text-xl md:text-2xl font-black text-white truncate">{formatCurrency(metrics.totalSpent)}</span>
+            <span className="text-lg md:text-xl font-black text-white truncate tracking-tight">{formatCurrency(metrics.totalSpent)}</span>
           </div>
 
-          <div className="bg-[#111] border border-white/5 rounded-xl p-4 flex flex-col relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110" />
-            <div className="flex items-center gap-2 mb-1 text-purple-400">
-              <Package className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider">Caixas</span>
+          <div className="bg-[#111]/60 backdrop-blur-xl border border-white/[0.05] hover:border-white/20 rounded-xl p-3 flex flex-col relative overflow-hidden group shadow-md transition-all duration-300">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-bl-full -mr-6 -mt-6 transition-transform duration-500 group-hover:scale-110" />
+            <div className="flex items-center gap-1.5 mb-1.5 text-gray-300">
+              <Package className="w-3.5 h-3.5" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Caixas</span>
             </div>
-            <span className="text-xl md:text-2xl font-black text-white truncate">{metrics.totalBoxes} <span className="text-xs md:text-sm font-medium text-gray-500">un.</span></span>
+            <span className="text-lg md:text-xl font-black text-white truncate tracking-tight">{metrics.totalBoxes} <span className="text-[10px] font-medium text-gray-500">un.</span></span>
           </div>
           
-          <div className="bg-[#111] border border-white/5 rounded-xl p-4 flex flex-col relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110" />
-            <div className="flex items-center gap-2 mb-1 text-orange-400">
-              <Box className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider">Sacos / Env.</span>
+          <div className="bg-[#111]/60 backdrop-blur-xl border border-white/[0.05] hover:border-white/20 rounded-xl p-3 flex flex-col relative overflow-hidden group shadow-md transition-all duration-300">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-bl-full -mr-6 -mt-6 transition-transform duration-500 group-hover:scale-110" />
+            <div className="flex items-center gap-1.5 mb-1.5 text-gray-300">
+              <Box className="w-3.5 h-3.5" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Sacos/Env</span>
             </div>
-            <span className="text-xl md:text-2xl font-black text-white truncate">{metrics.totalBags} <span className="text-xs md:text-sm font-medium text-gray-500">un.</span></span>
+            <span className="text-lg md:text-xl font-black text-white truncate tracking-tight">{metrics.totalBags} <span className="text-[10px] font-medium text-gray-500">un.</span></span>
           </div>
           
-          <div className="bg-[#111] border border-white/5 rounded-xl p-4 flex flex-col relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-500/5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110" />
-            <div className="flex items-center gap-2 mb-1 text-yellow-400">
-              <FileText className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider">Etiquetas/Fitas</span>
+          <div className="bg-[#111]/60 backdrop-blur-xl border border-white/[0.05] hover:border-white/20 rounded-xl p-3 flex flex-col relative overflow-hidden group shadow-md transition-all duration-300">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-bl-full -mr-6 -mt-6 transition-transform duration-500 group-hover:scale-110" />
+            <div className="flex items-center gap-1.5 mb-1.5 text-gray-300">
+              <FileText className="w-3.5 h-3.5" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Fitas</span>
             </div>
-            <span className="text-xl md:text-2xl font-black text-white truncate">{metrics.totalLabels} <span className="text-xs md:text-sm font-medium text-gray-500">un.</span></span>
+            <span className="text-lg md:text-xl font-black text-white truncate tracking-tight">{metrics.totalLabels} <span className="text-[10px] font-medium text-gray-500">un.</span></span>
           </div>
 
-          <div className="bg-[#111] border border-white/5 rounded-xl p-4 flex flex-col relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-[#00FF00]/5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110" />
-            <div className="flex items-center gap-2 mb-1 text-[#00FF00]">
-              <BarChart2 className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider">Volume Total</span>
+          <div className="bg-[#111]/60 backdrop-blur-xl border border-white/[0.05] hover:border-[#00FF00]/30 rounded-xl p-3 flex flex-col relative overflow-hidden group shadow-md transition-all duration-300">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-[#00FF00]/10 rounded-bl-full -mr-6 -mt-6 transition-transform duration-500 group-hover:scale-110" />
+            <div className="flex items-center gap-1.5 mb-1.5 text-[#00FF00]">
+              <BarChart2 className="w-3.5 h-3.5" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Volume</span>
             </div>
-            <span className="text-xl md:text-2xl font-black text-white truncate">{metrics.totalItems} <span className="text-xs md:text-sm font-medium text-gray-500">un.</span></span>
+            <span className="text-lg md:text-xl font-black text-white truncate tracking-tight">{metrics.totalItems} <span className="text-[10px] font-medium text-gray-500">un.</span></span>
           </div>
         </div>
       </div>
 
       {/* Requests List */}
-      <div className="bg-[#1A1A1A] border border-white/5 rounded-2xl p-6 shadow-xl flex-1 flex flex-col relative overflow-hidden">
+      <div className="bg-[#111]/40 backdrop-blur-2xl border border-white/5 rounded-2xl p-4 shadow-xl flex-1 flex flex-col relative overflow-hidden">
         
         {metrics.urgenciesToday > 0 && (
-          <div className="mb-6 bg-red-500/10 border-l-4 border-l-red-500 border-t border-t-white/5 border-r border-r-white/5 border-b border-b-white/5 rounded-r-xl rounded-l-md p-4 flex items-center justify-between shadow-sm">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
-                <AlertTriangle className="w-6 h-6 text-red-500" />
+          <div className="mb-4 bg-red-500/10 border-l-4 border-l-red-500 border-t border-t-white/5 border-r border-r-white/5 border-b border-b-white/5 rounded-r-xl rounded-l-md p-3 flex items-center justify-between shadow-[0_0_15px_rgba(239,68,68,0.1)]">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.3)] shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-500" />
               </div>
               <div>
-                <h3 className="text-red-400 font-bold uppercase text-sm tracking-wider">Atenção: Urgências Pendentes</h3>
-                <p className="text-gray-300 text-sm mt-0.5">Existem produtos vendidos que faltaram no estoque e precisam ser comprados <strong className="text-white">hoje</strong>.</p>
+                <h3 className="text-red-400 font-bold uppercase text-[11px] tracking-widest">Urgências Pendentes</h3>
+                <p className="text-gray-300 text-xs mt-0.5">Faltas no estoque para envio <strong className="text-white">hoje</strong>.</p>
               </div>
             </div>
-            <div className="text-center bg-black/40 border border-red-500/20 px-5 py-2.5 rounded-xl flex flex-col items-center justify-center">
-              <span className="block text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Urgências Hoje</span>
-              <span className="block text-3xl font-black text-red-500 leading-none">{metrics.urgenciesToday}</span>
+            <div className="text-center bg-black/60 border border-red-500/30 px-4 py-2 rounded-lg flex flex-col items-center justify-center shrink-0">
+              <span className="block text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-0.5">Hoje</span>
+              <span className="block text-2xl font-black text-red-500 leading-none drop-shadow-[0_0_5px_rgba(239,68,68,0.8)]">{metrics.urgenciesToday}</span>
             </div>
           </div>
         )}
 
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-white text-lg font-bold flex items-center gap-2">
-            <FileText className="w-5 h-5 text-gray-400" />
-            Fila de Pedidos
-          </h3>
+        {/* Abas */}
+        <div className="flex items-center mb-4 gap-2 border-b border-white/10 pb-3">
+          <div className="flex bg-[#050505]/80 p-1 rounded-xl border border-white/5 shadow-inner">
+            <button 
+              onClick={() => setActiveTab('pendentes')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-300 flex items-center gap-1.5 ${activeTab === 'pendentes' ? 'bg-[#00FF00]/20 text-[#00FF00] shadow-[0_0_10px_rgba(0,255,0,0.15)]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+            >
+              <ShoppingCart className="w-3.5 h-3.5" /> Pendentes ({requests.filter(r => r.status === 'pendente').length})
+            </button>
+            <button 
+              onClick={() => setActiveTab('a_caminho')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-300 flex items-center gap-1.5 ${activeTab === 'a_caminho' ? 'bg-white/10 text-white shadow-[0_0_10px_rgba(255,255,255,0.05)]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+            >
+              <Truck className="w-3.5 h-3.5" /> A Caminho ({requests.filter(r => r.status === 'comprado').length})
+            </button>
+            <button 
+              onClick={() => setActiveTab('recebidos')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-300 flex items-center gap-1.5 ${activeTab === 'recebidos' ? 'bg-[#00FF00]/20 text-[#00FF00] shadow-[0_0_10px_rgba(0,255,0,0.15)]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" /> Histórico
+            </button>
+          </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto space-y-3 pr-2">
+        <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 custom-scrollbar">
           {loading ? (
             <div className="flex justify-center mt-10 text-gray-500">
-              <RefreshCw className="w-6 h-6 animate-spin" />
+              <RefreshCw className="w-5 h-5 animate-spin" />
             </div>
-          ) : requests.length === 0 ? (
-            <p className="text-gray-500 text-center mt-10">Nenhum pedido de insumo na fila.</p>
+          ) : filteredRequests.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-32 text-gray-500 opacity-50">
+              <FileText className="w-8 h-8 mb-2" />
+              <p className="text-xs">Nenhum pedido nesta aba.</p>
+            </div>
           ) : (
-            requests.map((req) => (
-              <div key={req.id} className={`bg-[#151515] border ${req.category === 'Produto Vendido (Urgência)' && req.status !== 'comprado' ? 'border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.15)] bg-red-950/20' : req.status === 'comprado' ? 'border-[#00FF00]/20' : 'border-white/5'} rounded-xl p-5 transition-all hover:bg-white/[0.02] flex flex-col md:flex-row md:items-center justify-between gap-4`}>
-                <div className="flex flex-col">
-                  <div className="flex flex-wrap items-center gap-2 mb-3">
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md flex items-center gap-1.5 ${req.priority === 'critico' ? 'bg-red-500/10 text-red-500' : req.priority === 'alta' ? 'bg-orange-500/10 text-orange-500' : 'bg-gray-500/10 text-gray-400'}`}>
-                      <AlertTriangle className="w-3.5 h-3.5" />
+            filteredRequests.map((req) => (
+              <div key={req.id} className={`bg-white/[0.02] backdrop-blur-sm border ${req.category === 'Produto Vendido (Urgência)' && req.status === 'pendente' ? 'border-red-500/40 bg-red-950/10' : req.status === 'recebido' ? 'border-[#00FF00]/10 opacity-75' : 'border-white/5'} rounded-xl p-3.5 transition-all duration-300 hover:bg-white/[0.04] flex flex-col md:flex-row md:items-center justify-between gap-3`}>
+                <div className="flex flex-col flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded flex items-center gap-1 ${req.priority === 'critico' ? 'bg-red-500/20 text-red-400' : req.priority === 'alta' ? 'bg-orange-500/20 text-orange-400' : 'bg-gray-500/20 text-gray-400'}`}>
+                      {req.priority === 'critico' && <AlertTriangle className="w-3 h-3" />}
                       {req.priority.toUpperCase()}
                     </span>
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md flex items-center gap-1.5 ${req.status === 'comprado' ? 'bg-[#00FF00]/10 text-[#00FF00]' : 'bg-blue-500/10 text-blue-400'}`}>
-                      {req.status === 'comprado' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5" />}
-                      {req.status === 'comprado' ? 'COMPRADO' : 'AGUARDANDO COMPRA'}
+                    <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded flex items-center gap-1 ${req.status === 'recebido' ? 'bg-[#00FF00]/20 text-[#00FF00]' : req.status === 'comprado' ? 'bg-white/10 text-gray-300' : 'bg-white/10 text-white'}`}>
+                      {req.status === 'recebido' ? <CheckCircle2 className="w-3 h-3" /> : req.status === 'comprado' ? <Truck className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                      {req.status === 'recebido' ? 'RECEBIDO' : req.status === 'comprado' ? 'A CAMINHO' : 'AGUARDANDO'}
                     </span>
                   </div>
                   
-                  <h3 className="text-white font-bold text-lg mb-1">{req.item_name}</h3>
-                  <div className="flex items-center gap-3 text-xs text-gray-400">
-                    <span className="flex items-center gap-1"><Package className="w-3.5 h-3.5" /> {req.category}</span>
-                    <span>•</span>
-                    <span>Solicitado por: <span className="text-gray-200 font-semibold">{req.author}</span></span>
-                    <span>•</span>
-                    <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {new Date(req.created_at).toLocaleDateString('pt-BR')}</span>
+                  <h3 className="text-white font-bold text-sm mb-1.5 truncate">{req.item_name}</h3>
+                  <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-[11px] text-gray-400">
+                    <span className="flex items-center gap-1 bg-white/5 px-1.5 py-0.5 rounded shadow-inner border border-white/5"><Package className="w-3 h-3 text-gray-300" /> {req.category}</span>
+                    <span className="flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-[#00FF00]" /> Solicitante: <strong className="text-gray-200">{req.author}</strong></span>
+                    <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-gray-500" /> {new Date(req.created_at).toLocaleDateString('pt-BR')}</span>
                   </div>
                 </div>
                 
-                {req.status !== 'comprado' ? (
-                  <div className="flex gap-2 w-full md:w-auto">
+                {req.status === 'pendente' ? (
+                  <div className="flex gap-2 w-full md:w-auto shrink-0 mt-2 md:mt-0">
                     <button 
                       onClick={() => openPurchaseModal(req)}
-                      className="flex-1 md:flex-none bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm px-5 py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg whitespace-nowrap"
+                      className="flex-1 md:flex-none bg-[#00FF00] hover:bg-[#00FF00]/80 text-black font-bold text-xs px-4 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-colors shadow-[0_0_10px_rgba(0,255,0,0.2)] whitespace-nowrap"
                     >
-                      <ShoppingCart className="w-4 h-4" />
-                      Registrar Compra
+                      <ShoppingCart className="w-3.5 h-3.5" />
+                      Comprar
                     </button>
                     <button 
                       onClick={() => handleDeleteRequest(req.id)}
-                      className="bg-white/5 hover:bg-red-500/20 hover:text-red-500 text-gray-400 font-bold px-4 py-3 rounded-xl flex items-center justify-center transition-colors border border-transparent hover:border-red-500/30"
+                      className="bg-white/5 hover:bg-red-500/20 hover:text-red-500 text-gray-400 px-3 py-2 rounded-lg flex items-center justify-center transition-colors"
                       title="Excluir Pedido"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 ) : (
-                  <div className="bg-[#00FF00]/10 border border-[#00FF00]/20 rounded-xl p-3 flex items-center gap-4 min-w-[200px]">
+                  <div className="flex items-center gap-3 shrink-0 mt-2 md:mt-0 bg-black/30 border border-white/5 p-2 rounded-lg">
                     <div className="flex flex-col">
-                      <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Quantidade</span>
-                      <span className="text-white font-bold">{req.quantity_bought || 0} unid.</span>
+                      <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Custo ({req.quantity_bought || 0} un)</span>
+                      <span className="text-[#00FF00] font-bold text-xs">{formatCurrency(req.total_cost || 0)}</span>
                     </div>
-                    <div className="w-px h-8 bg-white/10"></div>
+                    <div className="w-px h-6 bg-white/10 hidden sm:block"></div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Custo Total</span>
-                      <span className="text-[#00FF00] font-bold">{formatCurrency(req.total_cost || 0)}</span>
+                      <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Prev / Fornecedor</span>
+                      <div className="flex items-center gap-1.5">
+                        {req.expected_date && <span className="text-gray-300 font-bold text-[10px] flex items-center gap-0.5"><Calendar className="w-2.5 h-2.5"/> {new Date(req.expected_date).toLocaleDateString('pt-BR')}</span>}
+                        {req.supplier && <span className="text-gray-400 text-[10px] flex items-center gap-0.5 bg-white/10 px-1 py-0.5 rounded"><Link className="w-2.5 h-2.5"/> {req.supplier}</span>}
+                      </div>
                     </div>
+                    {req.status === 'comprado' && (
+                      <>
+                        <div className="w-px h-6 bg-white/10 hidden sm:block"></div>
+                        <button 
+                          onClick={() => confirmReceipt(req.id)}
+                          className="bg-[#00FF00]/10 hover:bg-[#00FF00]/20 text-[#00FF00] p-1.5 rounded-md transition-colors"
+                          title="Marcar como Recebido"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -356,48 +426,79 @@ export default function CentralCompras() {
 
       {/* Modal de Confirmação de Compra */}
       <Dialog open={isPurchaseModalOpen} onOpenChange={setIsPurchaseModalOpen}>
-        <DialogContent className="bg-[#121212] border-white/10 text-white sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-xl">Registrar Compra</DialogTitle>
+        <DialogContent className="bg-[#121212] border-white/10 text-white sm:max-w-md p-5">
+          <DialogHeader className="mb-2">
+            <DialogTitle className="text-lg font-bold flex items-center gap-2"><ShoppingCart className="w-4 h-4 text-[#00FF00]"/> Registrar Compra</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-4">
             <div className="p-3 bg-white/5 rounded-lg border border-white/5">
-              <span className="text-xs text-gray-400 block mb-1">Item Solicitado:</span>
-              <span className="font-bold text-blue-400">{selectedRequest?.item_name}</span>
+              <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-0.5">Item Solicitado</span>
+              <span className="font-bold text-[#00FF00] text-sm">{selectedRequest?.item_name}</span>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="qty" className="text-gray-300">Quantidade Comprada</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="qty" className="text-gray-300 font-bold text-[10px] uppercase tracking-wider">Quantidade</Label>
                 <Input 
                   id="qty"
                   type="number" 
                   placeholder="Ex: 50"
                   value={purchaseQuantity}
                   onChange={(e) => setPurchaseQuantity(e.target.value)}
-                  className="bg-[#1A1A1A] border-white/10"
+                  className="bg-[#1A1A1A] border-white/10 focus:border-[#00FF00] h-9 text-sm"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="cost" className="text-gray-300">Valor Total Pago (R$)</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="cost" className="text-gray-300 font-bold text-[10px] uppercase tracking-wider">Valor Total (R$)</Label>
                 <Input 
                   id="cost"
                   type="text" 
                   placeholder="Ex: 150.50"
                   value={purchaseCost}
                   onChange={(e) => setPurchaseCost(e.target.value)}
-                  className="bg-[#1A1A1A] border-white/10"
+                  className="bg-[#1A1A1A] border-white/10 focus:border-[#00FF00] h-9 text-sm"
                 />
               </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="eta" className="text-gray-300 font-bold text-[10px] uppercase tracking-wider flex items-center gap-1"><Calendar className="w-3 h-3"/> Prev. Entrega</Label>
+                <Input 
+                  id="eta"
+                  type="date" 
+                  value={purchaseETA}
+                  onChange={(e) => setPurchaseETA(e.target.value)}
+                  className="bg-[#1A1A1A] border-white/10 focus:border-[#00FF00] [color-scheme:dark] h-9 text-sm"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="supplier" className="text-gray-300 font-bold text-[10px] uppercase tracking-wider flex items-center gap-1"><MapPin className="w-3 h-3"/> Fornecedor/Rastreio</Label>
+                <Input 
+                  id="supplier"
+                  type="text" 
+                  placeholder="Mercado Livre"
+                  value={purchaseSupplier}
+                  onChange={(e) => setPurchaseSupplier(e.target.value)}
+                  className="bg-[#1A1A1A] border-white/10 focus:border-[#00FF00] h-9 text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="bg-[#00FF00]/5 border border-[#00FF00]/20 rounded-lg p-2.5">
+              <p className="text-[11px] text-gray-300 flex gap-2 leading-snug">
+                <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-[#00FF00]" />
+                Ao confirmar, a Expedição será notificada com a previsão de chegada.
+              </p>
+            </div>
           </div>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="ghost" onClick={() => setIsPurchaseModalOpen(false)} className="hover:bg-white/5">
+          <DialogFooter className="gap-2 sm:gap-0 mt-4">
+            <Button variant="ghost" onClick={() => setIsPurchaseModalOpen(false)} className="hover:bg-white/5 text-gray-400 h-9 text-xs">
               Cancelar
             </Button>
-            <Button onClick={confirmPurchase} disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-500 text-white font-bold">
-              {isSubmitting ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
-              Confirmar Compra
+            <Button onClick={confirmPurchase} disabled={isSubmitting} className="bg-[#00FF00] hover:bg-[#00FF00]/80 text-black font-black px-5 h-9 text-xs">
+              {isSubmitting ? <RefreshCw className="w-3.5 h-3.5 animate-spin mr-1.5" /> : <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />}
+              Confirmar
             </Button>
           </DialogFooter>
         </DialogContent>

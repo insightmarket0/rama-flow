@@ -6,6 +6,7 @@ import { GlobalShortcuts } from "./GlobalShortcuts";
 import { QuickCreateMenu } from "./QuickCreateMenu";
 import { GlobalAlerts } from "./GlobalAlerts";
 import { RamaDoDiaWidget } from "@/components/RamaDoDiaWidget";
+import { ChatWidget } from "@/components/chat/ChatWidget";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -167,7 +168,12 @@ export function MainLayout({ children }: MainLayoutProps) {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   };
 
-  const avatarUrl = metadataString("avatar_url");
+  let avatarUrl = metadataString("avatar_url");
+  const currentName = fullName ?? metadataString("full_name") ?? user?.email ?? "";
+  if (!avatarUrl) {
+    if (currentName.toLowerCase().includes("mara")) avatarUrl = "/mara.png";
+    if (currentName.toLowerCase().includes("rogério") || currentName.toLowerCase().includes("rogerio")) avatarUrl = "/rogerio.png";
+  }
 
   return (
     <>
@@ -186,7 +192,8 @@ export function MainLayout({ children }: MainLayoutProps) {
                     </div>
                     <span className="text-sm text-gray-400 font-medium">Notifications</span>
                     <div className="h-5 w-5 bg-[#FF5C5C] rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
-                      6
+                      {/* TODO: Implement real notification count */}
+                      0
                     </div>
                   </button>
 
@@ -279,6 +286,7 @@ export function MainLayout({ children }: MainLayoutProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {isHomePage && !currentName.toLowerCase().includes("mara") && <ChatWidget />}
     </>
   );
 }

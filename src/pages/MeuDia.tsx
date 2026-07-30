@@ -68,9 +68,9 @@ const getMarketplaceStyle = (marketplace: string) => {
 const MOCK_ANNOUNCEMENTS = [
   {
     id: "ann_1",
-    creator: { full_name: "Anderson • Estratégia" },
-    title: "Padrão de Imagens - Kits de Gás",
-    content: "Atenção nas fotos dos kits de gás: verifiquem as imagens do fornecedor antes de subir.",
+    creator: { full_name: "Anderson • Supervisão" },
+    title: "Cuidado com os itens de vidro!",
+    content: "Lembrete: A partir de hoje, é obrigatório usar plástico bolha duplo em todos os itens frágeis.",
     is_pinned: true,
   }
 ];
@@ -78,15 +78,15 @@ const MOCK_ANNOUNCEMENTS = [
 const MOCK_REMINDERS = [
   {
     id: "rem_1",
-    title: "Replicar correção em todos os canais",
-    description: "Tira o R antes do Guardanapo. Atualizar Mercado Livre, Amazon e Shopee.",
+    title: "Reposição de Insumos: Caixa Parda 30x20x10",
+    description: "O almoxarifado separou as caixas solicitadas. Estão a caminho da bancada 2.",
     due_date: new Date(new Date().setHours(17, 0, 0, 0)).toISOString(),
     status: "pendente",
   },
   {
     id: "rem_2",
-    title: "Atualizar foto do kit de gás",
-    description: "Trocar a foto do anúncio mestre, fornecedor mandou nova.",
+    title: "Estoque Crítico: Fita Adesiva",
+    description: "Atenção: Restam apenas 3 rolos de fita. O pedido de compra já foi aprovado.",
     due_date: new Date(new Date().setHours(10, 0, 0, 0)).toISOString(),
     status: "pendente",
   }
@@ -97,13 +97,13 @@ const MOCK_ADJUSTMENTS = [
     id: "adj_1",
     marketplace: "Mercado Livre",
     sku: "KITGAS001",
-    description: "Aviso no kit de gás: corrigir a imagem e a descrição.",
+    description: "Divergência Corrigida: O anúncio foi pausado e o estoque atualizado. Pode desmontar o pacote.",
   },
   {
     id: "adj_2",
     marketplace: "Geral",
     sku: "RGUARDANAPO",
-    description: "Tirar a letra R que foi digitada por erro antes da palavra Guardanapo.",
+    description: "Falta de item solucionada. O pacote do guardanapo foi enviado para sua bancada para concluir o despacho.",
   }
 ];
 
@@ -159,12 +159,12 @@ const ExpedicaoTracker = () => {
   return (
     <div className="col-span-1 md:col-span-2 flex flex-col md:flex-row items-center justify-between py-4 px-6 bg-[#050505] rounded-3xl border border-white/5 relative overflow-hidden shadow-2xl gap-6">
       {/* Glow background */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[150px] bg-[#EE4D2D]/10 rounded-full blur-[60px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[200px] bg-[#00FF00]/5 rounded-full blur-[80px] pointer-events-none" />
       
       {/* Esquerda: Avisos */}
       <div className="flex flex-col items-start gap-3 z-10 w-full md:w-auto">
         <div className="bg-[#111] border border-white/10 rounded-full px-4 py-1.5 flex items-center gap-2 shadow-lg backdrop-blur-md">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#EE4D2D] animate-pulse shadow-[0_0_8px_#EE4D2D]" />
+          <div className="w-1.5 h-1.5 rounded-full bg-[#00FF00] animate-pulse shadow-[0_0_8px_#00FF00]" />
           <span className="text-gray-300 text-xs tracking-wide">
             Focado no <strong className="text-white">{nextDispatch.name}</strong>
           </span>
@@ -182,7 +182,7 @@ const ExpedicaoTracker = () => {
       </div>
 
       {/* Centro: Relógio Analógico (Menor) */}
-      <div className="relative w-[220px] h-[120px] flex flex-col items-center justify-start overflow-hidden z-10 shrink-0">
+      <div className="relative w-[220px] h-[135px] flex flex-col items-center justify-start overflow-hidden z-10 shrink-0">
         <svg className="absolute top-0 w-[220px] h-[220px]" viewBox="0 0 300 300">
           <g stroke="currentColor" strokeWidth="2">
             {[...Array(31)].map((_, i) => {
@@ -199,17 +199,17 @@ const ExpedicaoTracker = () => {
           </g>
 
           <circle cx="150" cy="150" r={radius} fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="24" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference / 2} transform="rotate(180 150 150)" />
-          <circle cx="150" cy="150" r={radius} fill="none" stroke="#EE4D2D" strokeWidth="24" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference - ((progress / 100) * (circumference / 2))} transform="rotate(180 150 150)" className="transition-all duration-1000 ease-in-out drop-shadow-[0_0_10px_rgba(238,77,45,0.5)]" />
+          <circle cx="150" cy="150" r={radius} fill="none" stroke="#00FF00" strokeWidth="24" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference - ((progress / 100) * (circumference / 2))} transform="rotate(180 150 150)" className="transition-all duration-1000 ease-in-out drop-shadow-[0_0_15px_rgba(0,255,0,0.3)]" />
         </svg>
 
-        <div className="absolute top-[40%] flex flex-col items-center justify-center w-full">
+        <div className="absolute top-[35%] flex flex-col items-center justify-center w-full">
           <span className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.1em] mb-0.5">
             Horário Local
           </span>
           <div className="text-white text-5xl font-bold tracking-tighter" style={{ fontVariantNumeric: 'tabular-nums' }}>
             {hours.toString().padStart(2, '0')}:{minutes.toString().padStart(2, '0')}
           </div>
-          <span className="text-[#EE4D2D] text-[9px] font-bold uppercase tracking-wider mt-1 bg-[#EE4D2D]/10 px-2 py-0.5 rounded-full">
+          <span className="text-[#00FF00] text-[9px] font-bold uppercase tracking-wider mt-1 bg-[#00FF00]/10 px-2 py-0.5 rounded-full">
             Faltam {remainingHoursStr}h {remainingMinsStr}m
           </span>
         </div>
@@ -225,6 +225,67 @@ const ExpedicaoTracker = () => {
         <span className="text-[9px] font-bold tracking-widest text-[#00FF00] uppercase mt-2 animate-pulse">
           Operando
         </span>
+      </div>
+    </div>
+  );
+};
+
+const MuralExpedicao = ({ user }: { user: any }) => {
+  const [notes, setNotes] = useState([
+    { id: 1, text: "Lembrete: A partir de hoje, é obrigatório usar plástico bolha duplo em todos os itens frágeis.", author: "Rogério", date: "Hoje" },
+    { id: 2, text: "Verificar se as caixas da Shopee chegaram.", author: "Mara", date: "Ontem" }
+  ]);
+  const [newNote, setNewNote] = useState("");
+
+  const handlePost = () => {
+    if (newNote.trim()) {
+      setNotes([{id: Date.now(), text: newNote, author: user?.user_metadata?.full_name || "Expedição", date: "Agora"}, ...notes]);
+      setNewNote("");
+    }
+  };
+
+  return (
+    <div className="col-span-1 md:col-span-2 bg-[#111111] border-l-4 border-[#00FF00] rounded-2xl p-5 group relative shadow-lg h-fit mt-4">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-[#00FF00] font-bold tracking-tighter text-xl uppercase flex items-center gap-2">
+          <Megaphone className="h-5 w-5" strokeWidth={3} />
+          Mural da Expedição
+        </h3>
+        <span className="text-[#00FF00] text-[10px] font-bold tracking-widest uppercase border border-[#00FF00]/20 px-2 py-0.5 rounded-full">
+          Avisos Internos
+        </span>
+      </div>
+      
+      <div className="space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-2 mb-4">
+        {notes.map(note => (
+          <div key={note.id} className="bg-black/30 rounded-xl p-4 border border-white/5 flex flex-col gap-2">
+            <div className="flex items-center justify-between text-gray-400 font-bold text-[10px] uppercase tracking-wider">
+              <span>{note.author}</span>
+              <span>{note.date}</span>
+            </div>
+            <p className="text-white text-sm font-medium leading-relaxed">
+              {note.text}
+            </p>
+          </div>
+        ))}
+      </div>
+      
+      <div className="flex gap-2">
+        <input 
+          value={newNote} 
+          onChange={e => setNewNote(e.target.value)}
+          placeholder="Adicionar novo aviso..."
+          className="flex h-10 w-full rounded-md border border-white/10 bg-black/50 px-3 py-2 text-sm text-white placeholder:text-gray-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00FF00]/50"
+          onKeyDown={e => {
+            if (e.key === 'Enter') handlePost();
+          }}
+        />
+        <button 
+          onClick={handlePost}
+          className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-[#00FF00] text-black hover:bg-[#00E500] h-10 px-4 py-2 font-bold"
+        >
+          Postar
+        </button>
       </div>
     </div>
   );
@@ -308,12 +369,16 @@ export default function MeuDia() {
             <div onClick={() => navigate('/lembretes')} className="hover:text-white transition-colors cursor-pointer flex items-center group">
               Workspace <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">Ir</span>
             </div>
-            <div onClick={() => navigate('/mural-ajustes')} className="hover:text-white transition-colors cursor-pointer flex items-center group">
-              Ajustes <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">{adjustments.length}</span>
-            </div>
-            <div onClick={() => navigate('/mural-alinhamento')} className="hover:text-white transition-colors cursor-pointer flex items-center group">
-              Alinhamento <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">2</span>
-            </div>
+            {user?.email !== "mara@hotmail.com" && (
+              <>
+                <div onClick={() => navigate('/mural-ajustes')} className="hover:text-white transition-colors cursor-pointer flex items-center group">
+                  Ajustes <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">{adjustments.length}</span>
+                </div>
+                <div onClick={() => navigate('/mural-alinhamento')} className="hover:text-white transition-colors cursor-pointer flex items-center group">
+                  Alinhamento <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">2</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -381,66 +446,72 @@ export default function MeuDia() {
           )
         )}
 
-        {reminders.length > 0 && reminders.map((reminder, idx) => {
-          const isLate = reminder.due_date && isBefore(parseISO(reminder.due_date), new Date());
-          return (
-            <div key={reminder.id} className={`col-span-1 rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden transition-all hover:border-white/20 group ${isLate ? 'bg-[#1a0f0f] border border-red-500/20' : 'bg-[#111] border border-white/5'}`}>
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <CalendarDays className={`h-5 w-5 ${isLate ? 'text-red-500' : 'text-gray-500'}`} />
-                  {isLate && (
-                    <span className="bg-red-500 text-white text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full">
-                      Atrasado
-                    </span>
-                  )}
+        {user?.email === "mara@hotmail.com" ? (
+          <MuralExpedicao user={user} />
+        ) : (
+          <>
+            {reminders.length > 0 && reminders.map((reminder, idx) => {
+              const isLate = reminder.due_date && isBefore(parseISO(reminder.due_date), new Date());
+              return (
+                <div key={reminder.id} className={`col-span-1 rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden transition-all hover:border-white/20 group ${isLate ? 'bg-[#1a0f0f] border border-red-500/20' : 'bg-[#111] border border-white/5'}`}>
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <CalendarDays className={`h-5 w-5 ${isLate ? 'text-red-500' : 'text-gray-500'}`} />
+                      {isLate && (
+                        <span className="bg-red-500 text-white text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full">
+                          Atrasado
+                        </span>
+                      )}
+                    </div>
+                    <h4 className="text-white text-lg font-light tracking-tight leading-tight mb-2">
+                      {reminder.title}
+                    </h4>
+                    <p className="text-gray-500 text-xs font-medium line-clamp-2">
+                      {reminder.description}
+                    </p>
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-white/5">
+                    <button 
+                      onClick={() => handleCompleteReminder(reminder.id)}
+                      className="w-full flex items-center justify-between group-hover:text-[#00FF00] text-gray-400 font-bold text-xs tracking-widest uppercase transition-colors"
+                    >
+                      Concluir Tarefa
+                      <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  </div>
                 </div>
-                <h4 className="text-white text-lg font-light tracking-tight leading-tight mb-2">
-                  {reminder.title}
-                </h4>
-                <p className="text-gray-500 text-xs font-medium line-clamp-2">
-                  {reminder.description}
-                </p>
-              </div>
-              <div className="mt-4 pt-4 border-t border-white/5">
+              );
+            })}
+
+            {/* 3. Cards de Ajustes (Estética Glass/Branding) */}
+            {adjustments.length > 0 && adjustments.map((ticket, idx) => (
+              <div key={ticket.id} className="col-span-1 rounded-2xl p-5 flex flex-col justify-between bg-gradient-to-b from-[#18181A] to-[#111111] border border-white/5 shadow-xl relative group">
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border flex items-center gap-1.5 ${getMarketplaceStyle(ticket.marketplace)}`}>
+                      {getMarketplaceLogo(ticket.marketplace)}
+                      {ticket.marketplace}
+                    </span>
+                    <span className="text-gray-500 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1">
+                      <Tag className="h-2.5 w-2.5" /> {ticket.sku}
+                    </span>
+                  </div>
+                  
+                  <p className="text-gray-300 font-light text-sm leading-relaxed mb-4 line-clamp-3">
+                    {ticket.description}
+                  </p>
+                </div>
+                
                 <button 
-                  onClick={() => handleCompleteReminder(reminder.id)}
-                  className="w-full flex items-center justify-between group-hover:text-[#00FF00] text-gray-400 font-bold text-xs tracking-widest uppercase transition-colors"
+                  onClick={() => handleResolveAdjustment(ticket.id)}
+                  className="w-full bg-white/5 hover:bg-[#00FF00] hover:text-black text-white px-4 py-2 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-2 group-hover:shadow-[0_0_15px_rgba(0,255,0,0.2)]"
                 >
-                  Concluir Tarefa
-                  <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
+                  Marcar Resolvido <CheckCircle2 className="h-3 w-3" />
                 </button>
               </div>
-            </div>
-          );
-        })}
-
-        {/* 3. Cards de Ajustes (Estética Glass/Branding) */}
-        {adjustments.length > 0 && adjustments.map((ticket, idx) => (
-          <div key={ticket.id} className="col-span-1 rounded-2xl p-5 flex flex-col justify-between bg-gradient-to-b from-[#18181A] to-[#111111] border border-white/5 shadow-xl relative group">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border flex items-center gap-1.5 ${getMarketplaceStyle(ticket.marketplace)}`}>
-                  {getMarketplaceLogo(ticket.marketplace)}
-                  {ticket.marketplace}
-                </span>
-                <span className="text-gray-500 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1">
-                  <Tag className="h-2.5 w-2.5" /> {ticket.sku}
-                </span>
-              </div>
-              
-              <p className="text-gray-300 font-light text-sm leading-relaxed mb-4 line-clamp-3">
-                {ticket.description}
-              </p>
-            </div>
-            
-            <button 
-              onClick={() => handleResolveAdjustment(ticket.id)}
-              className="w-full bg-white/5 hover:bg-[#00FF00] hover:text-black text-white px-4 py-2 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-2 group-hover:shadow-[0_0_15px_rgba(0,255,0,0.2)]"
-            >
-              Marcar Resolvido <CheckCircle2 className="h-3 w-3" />
-            </button>
-          </div>
-        ))}
+            ))}
+          </>
+        )}
 
         {/* 4. Card de Desempenho Rápido */}
         {!isNothingPending && (
@@ -455,14 +526,12 @@ export default function MeuDia() {
                 </div>
              </div>
              <div className="relative z-10 flex gap-6 mt-4 sm:mt-0">
-               <div className="text-center">
-                 <div className="text-3xl font-extrabold text-white tracking-tighter leading-none">12</div>
-                 <div className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-1">Ajustes</div>
-               </div>
-               <div className="text-center">
-                 <div className="text-3xl font-extrabold text-[#00FF00] tracking-tighter leading-none">4</div>
-                 <div className="text-[9px] font-bold text-[#00FF00] uppercase tracking-widest mt-1">Urgências</div>
-               </div>
+               {user?.email === "mara@hotmail.com" && (
+                 <div className="text-center">
+                   <div className="text-3xl font-extrabold text-[#00FF00] tracking-tighter leading-none">{reminders.length + adjustments.length}</div>
+                   <div className="text-[9px] font-bold text-[#00FF00] uppercase tracking-widest mt-1">Casos Abertos</div>
+                 </div>
+               )}
              </div>
           </div>
         )}

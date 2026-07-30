@@ -7,6 +7,7 @@ export default function Equipe() {
     {
       id: "rogerio",
       name: "Rogério",
+      image: "/rogerio.png",
       role: "Dono",
       focus: "Visão Geral e Estratégia",
       icon: Crown,
@@ -92,6 +93,7 @@ export default function Equipe() {
     {
       id: "mara",
       name: "Mara",
+      image: "/mara.png",
       role: "Logística & Expedição",
       focus: "Conferência e Envios",
       icon: Package,
@@ -126,7 +128,7 @@ export default function Equipe() {
                 
                 <div className="flex items-center gap-4 mb-4">
                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${member.bgColor} ${member.borderColor} border relative overflow-hidden shrink-0`}>
-                    {member.image && member.id === 'william' ? (
+                    {member.image ? (
                        <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
                     ) : (
                       <member.icon className={`w-6 h-6 ${member.textColor}`} />

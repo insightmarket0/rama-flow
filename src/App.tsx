@@ -29,7 +29,7 @@ const QuotationForm = lazy(() => import("./pages/QuotationForm"));
 const QuotationDetail = lazy(() => import("./pages/QuotationDetail"));
 const Auth = lazy(() => import("./pages/Auth"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const ChatPage = lazy(() => import("./pages/Chat"));
+
 const PainelDivergencias = lazy(() => import("./pages/PainelDivergencias"));
 const Marketing = lazy(() => import("./pages/Marketing"));
 const BrandBook = lazy(() => import("./pages/BrandBook"));
@@ -186,16 +186,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/chat"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <ChatPage />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
+
             <Route
               path="/marketing"
               element={

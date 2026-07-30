@@ -39,14 +39,6 @@ const NAV_GROUPS = [
   },
 
   {
-    id: "chat",
-    icon: MessageCircle,
-    title: "Comunicação",
-    mainLink: "/chat",
-    subItems: [],
-    special: true // Flag para dar destaque
-  },
-  {
     id: "operacao",
     icon: Zap,
     title: "Operação",
@@ -157,7 +149,9 @@ export function AppSidebar() {
         return null;
       }
       if (group.id === "operacao") {
-        modifiedGroup.subItems = modifiedGroup.subItems.filter(item => item.url === "/lembretes");
+        modifiedGroup.subItems = modifiedGroup.subItems.filter(
+          item => item.url !== "/mural-ajustes" && item.url !== "/mural-alinhamento"
+        );
       }
     }
 
