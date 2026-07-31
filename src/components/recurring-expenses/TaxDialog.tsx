@@ -12,7 +12,7 @@ import { useSmartContracts } from "@/hooks/useSmartContracts";
 import { useSmartContractInstallments } from "@/hooks/useSmartContractInstallments";
 import { formatCurrencyBRL } from "@/lib/format";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, AlertTriangle, Building2, Calendar, Target } from "lucide-react";
+import { Loader2, AlertTriangle, Building2, Calendar, Target, Barcode } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +25,7 @@ const formSchema = z.object({
   recurrence_type: z.enum(["mensal", "anual", "esporadico"]),
   due_day: z.string().min(1, "Informe o dia"),
   start_date: z.string().min(1, "Informe a data de início"),
+  barcode: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -53,6 +54,7 @@ export function TaxDialog({ open, onOpenChange, taxToEdit, presetName, presetRec
       recurrence_type: "mensal",
       due_day: "20",
       start_date: new Date().toISOString().split("T")[0],
+      barcode: "",
     },
   });
 
@@ -72,6 +74,7 @@ export function TaxDialog({ open, onOpenChange, taxToEdit, presetName, presetRec
           recurrence_type: taxToEdit.recurrence_type === "anual" ? "anual" : taxToEdit.recurrence_type === "esporadico" ? "esporadico" : "mensal",
           due_day: taxToEdit.due_day ? String(taxToEdit.due_day) : "20",
           start_date: taxToEdit.start_date,
+          barcode: parsedNotes.barcode || "",
         });
       } else {
         form.reset({
@@ -82,6 +85,7 @@ export function TaxDialog({ open, onOpenChange, taxToEdit, presetName, presetRec
           recurrence_type: presetRecurrence || "mensal",
           due_day: "20",
           start_date: new Date().toISOString().split("T")[0],
+          barcode: "",
         });
       }
     }
@@ -94,6 +98,7 @@ export function TaxDialog({ open, onOpenChange, taxToEdit, presetName, presetRec
 
       const notesPayload = JSON.stringify({
         company_name: data.company_name || "",
+        barcode: data.barcode || "",
       });
 
       const payload = {
@@ -219,6 +224,26 @@ export function TaxDialog({ open, onOpenChange, taxToEdit, presetName, presetRec
                       <FormControl>
                         <Input 
                           placeholder="Ex: RAMA Matriz" 
+                          {...field} 
+                          className="bg-white/5 border-white/10 focus-visible:ring-orange-500 text-white" 
+                        />
+                      </FormControl>
+                      <FormMessage className="text-red-400" />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="barcode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-300 flex items-center gap-2">
+                        <Barcode className="h-3 w-3" /> Código de Barras / Linha Digitável
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Ex: 34191.09008..." 
                           {...field} 
                           className="bg-white/5 border-white/10 focus-visible:ring-orange-500 text-white" 
                         />

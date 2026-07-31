@@ -68,7 +68,6 @@ const NAV_GROUPS = [
       { title: "Cotações", url: "/quotations", icon: ClipboardList },
       { title: "Fornecedores", url: "/fornecedores", icon: Users },
       { title: "Contas a Pagar", url: "/contas", icon: Wallet },
-      { title: "Central de Compras", url: "/suprimentos", icon: ShoppingCart },
     ]
   },
   {
@@ -77,6 +76,7 @@ const NAV_GROUPS = [
     title: "Expedição",
     subItems: [
       { title: "Portal de Expedição", url: "/expedicao", icon: LayoutDashboard },
+      { title: "Central de Compras", url: "/suprimentos", icon: ShoppingCart },
     ]
   },
   {

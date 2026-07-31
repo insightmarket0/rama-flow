@@ -164,6 +164,14 @@ export default function CentralCompras() {
         } : r));
       }
 
+      // Remove da triagem (aguardando) e manda para resolvido (aprovado) na expedição
+      // Fazemos isso independente de erro no supply_requests para suportar o fallback
+      await supabase
+        .from('expedicao_tickets')
+        .update({ status: 'aprovado' })
+        .eq('title', selectedRequest.item_name)
+        .eq('status', 'aguardando');
+
       toast.success("Compra registrada com sucesso!");
 
       await supabase.from('chat_messages').insert({
