@@ -7,61 +7,7 @@ All colors MUST be HSL.
 */
 
 @layer base {
-  :root {
-    --background: 0 0% 98%;
-    --foreground: 150 69% 15%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 150 69% 15%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 150 69% 15%;
-
-    --primary: 150 69% 15%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 142 71% 29%;
-    --secondary-foreground: 0 0% 100%;
-
-    --muted: 150 10% 95%;
-    --muted-foreground: 150 20% 40%;
-
-    --accent: 50 100% 58%;
-    --accent-foreground: 150 69% 15%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 150 15% 88%;
-    --input: 150 15% 88%;
-    --ring: 150 69% 15%;
-
-    --radius: 0.75rem;
-
-    --sidebar-background: 150 69% 15%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 142 71% 29%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 150 69% 20%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 150 69% 20%;
-    --sidebar-ring: 50 100% 58%;
-
-    /* Custom RAMA tokens */
-    --rama-green-dark: 150 69% 15%;
-    --rama-green-medium: 142 71% 29%;
-    --rama-yellow: 50 100% 58%;
-    --rama-success: 142 71% 29%;
-    --rama-warning: 50 100% 58%;
-    --rama-danger: 0 84.2% 60.2%;
-    
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-  }
-
-  .dark {
+  :root, .dark {
     --background: 150 25% 5%;
     --foreground: 150 20% 90%;
 
@@ -90,6 +36,8 @@ All colors MUST be HSL.
     --input: 150 24% 18%;
     --ring: 142 71% 40%;
 
+    --radius: 0.75rem;
+
     --sidebar-background: 150 23% 9%;
     --sidebar-foreground: 150 20% 92%;
     --sidebar-primary: 142 71% 45%;
@@ -105,6 +53,11 @@ All colors MUST be HSL.
     --rama-success: 142 71% 45%;
     --rama-warning: 50 100% 58%;
     --rama-danger: 0 70% 50%;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
   }
 }
 

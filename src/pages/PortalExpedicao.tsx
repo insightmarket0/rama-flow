@@ -143,6 +143,15 @@ export default function PortalExpedicao() {
   const [isRadioMuted, setIsRadioMuted] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
 
+  const [isRadioRecording, setIsRadioRecording] = useState(false);
+  const radioRecorderRef = useRef<MediaRecorder | null>(null);
+  const radioChunksRef = useRef<BlobPart[]>([]);
+  const radioChannelRef = useRef<any>(null);
+  const presenceChannelRef = useRef<any>(null);
+  const signalingChannelRef = useRef<any>(null);
+  const [onlineRadioUsers, setOnlineRadioUsers] = useState<any[]>([]);
+  const [incomingCall, setIncomingCall] = useState<{ callerId: string, callerName: string, room: string } | null>(null);
+
   // Efeito para o timer da chamada
   useEffect(() => {
     let interval: any;
@@ -154,25 +163,206 @@ export default function PortalExpedicao() {
     return () => clearInterval(interval);
   }, [activeRoom, isCalling]);
 
+  // Presence and Signaling Effect
+  useEffect(() => {
+    if (!user) return;
+    const presenceChannel = supabase.channel('radio_presence', {
+      config: { presence: { key: user.id } }
+    });
+
+    presenceChannel
+      .on('presence', { event: 'sync' }, () => {
+        const state = presenceChannel.presenceState();
+        const users = Object.values(state).flat();
+        setOnlineRadioUsers(users);
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await presenceChannel.track({
+            id: user.id,
+            name: currentUserName,
+            avatar: currentUserName.substring(0, 2).toUpperCase(),
+          });
+        }
+      });
+      
+    presenceChannelRef.current = presenceChannel;
+
+    const signalingChannel = supabase.channel('radio_signaling');
+    signalingChannel
+      .on('broadcast', { event: 'ring' }, (payload) => {
+        if (payload.payload.target_room === `Mesa da ${currentUserName}` || payload.payload.target_room === `Mesa do ${currentUserName}`) {
+          setIncomingCall({
+            callerId: payload.payload.callerId,
+            callerName: payload.payload.callerName,
+            room: payload.payload.target_room
+          });
+          const ringAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3');
+          ringAudio.play().catch(() => {});
+        }
+      })
+      .on('broadcast', { event: 'call_accepted' }, (payload) => {
+        if (payload.payload.callerId === user.id) {
+          setIsCalling(false);
+          toast.success("Ligação atendida por " + payload.payload.targetName);
+          joinAudioChannel(payload.payload.target_room);
+        }
+      })
+      .on('broadcast', { event: 'call_rejected' }, (payload) => {
+        if (payload.payload.callerId === user.id) {
+          toast.error("A ligação foi recusada ou a pessoa não está na mesa.");
+          leaveRoom();
+        }
+      })
+      .subscribe();
+      
+    signalingChannelRef.current = signalingChannel;
+
+    return () => {
+      supabase.removeChannel(presenceChannel);
+      supabase.removeChannel(signalingChannel);
+    };
+  }, [user, currentUserName]);
+
+  const joinAudioChannel = (room: string) => {
+    if (radioChannelRef.current) {
+      supabase.removeChannel(radioChannelRef.current);
+    }
+    const channelName = `radio_room_${room.replace(/\s+/g, '_')}`;
+    const channel = supabase.channel(channelName);
+
+    channel
+      .on('broadcast', { event: 'audio_message' }, (payload) => {
+        if (payload.payload.sender_id !== user?.id) {
+          const audio = new Audio(payload.payload.audio_data);
+          audio.play().catch(e => console.error("Erro ao tocar áudio recebido", e));
+        }
+      })
+      .subscribe();
+
+    radioChannelRef.current = channel;
+  };
+
   const joinRoom = (room: string) => {
     if (activeRoom === room) return;
+    
     setActiveRoom(room);
-    setIsCalling(true);
     setCallDuration(0);
     setIsRadioMuted(false);
-    toast("Conectando na " + room + "...");
     
-    // Simula a outra pessoa atendendo após 3 segundos
-    setTimeout(() => {
+    if (room === "Canal Geral (Todos)") {
       setIsCalling(false);
-      toast.success("Conectado!");
-    }, 3000);
+      joinAudioChannel(room);
+      toast.success("Conectado no Canal Geral");
+    } else {
+      setIsCalling(true);
+      toast("Chamando " + room + "...");
+      if (signalingChannelRef.current) {
+        signalingChannelRef.current.send({
+          type: 'broadcast',
+          event: 'ring',
+          payload: {
+            target_room: room,
+            callerId: user?.id,
+            callerName: currentUserName
+          }
+        });
+      }
+    }
+  };
+
+  const acceptCall = () => {
+    if (!incomingCall) return;
+    setActiveRoom(incomingCall.room);
+    setIsCalling(false);
+    setCallDuration(0);
+    joinAudioChannel(incomingCall.room);
+    if (signalingChannelRef.current) {
+      signalingChannelRef.current.send({
+        type: 'broadcast',
+        event: 'call_accepted',
+        payload: {
+          target_room: incomingCall.room,
+          callerId: incomingCall.callerId,
+          targetName: currentUserName
+        }
+      });
+    }
+    setIncomingCall(null);
+  };
+
+  const rejectCall = () => {
+    if (!incomingCall) return;
+    if (signalingChannelRef.current) {
+      signalingChannelRef.current.send({
+        type: 'broadcast',
+        event: 'call_rejected',
+        payload: {
+          target_room: incomingCall.room,
+          callerId: incomingCall.callerId
+        }
+      });
+    }
+    setIncomingCall(null);
   };
 
   const leaveRoom = () => {
+    if (radioChannelRef.current) {
+      supabase.removeChannel(radioChannelRef.current);
+      radioChannelRef.current = null;
+    }
     setActiveRoom(null);
     setIsCalling(false);
     setCallDuration(0);
+  };
+
+  const startRadioRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      radioRecorderRef.current = mediaRecorder;
+      radioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          radioChunksRef.current.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(radioChunksRef.current, { type: 'audio/webm' });
+        const reader = new FileReader();
+        reader.readAsDataURL(audioBlob);
+        reader.onloadend = () => {
+          const base64Audio = reader.result as string;
+          if (radioChannelRef.current) {
+            radioChannelRef.current.send({
+              type: 'broadcast',
+              event: 'audio_message',
+              payload: {
+                sender_id: user?.id,
+                sender_name: currentUserName,
+                audio_data: base64Audio
+              }
+            });
+          }
+        };
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRadioRecording(true);
+    } catch (err) {
+      console.error("Erro ao acessar microfone", err);
+      toast.error("Permita o uso do microfone para falar no rádio.");
+    }
+  };
+
+  const stopRadioRecording = () => {
+    if (radioRecorderRef.current && isRadioRecording) {
+      radioRecorderRef.current.stop();
+      setIsRadioRecording(false);
+    }
   };
   
   const [currentTime, setCurrentTime] = useState(Date.now());
@@ -1242,8 +1432,17 @@ export default function PortalExpedicao() {
                     {/* Salas */}
                     <div className="flex flex-col gap-2">
                       <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Salas (Pressione para Falar)</span>
-                      {!activeRoom ? (
+                      {!activeRoom && !incomingCall ? (
                         <div className="flex flex-col gap-2">
+                          <button onClick={() => joinRoom("Canal Geral (Todos)")} className="bg-[#1C1C1E] hover:bg-[#2A2A2A] border border-white/5 rounded-lg p-2.5 flex items-center gap-3 transition-colors group">
+                            <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs border border-white/10 group-hover:border-[#00FF00]/50 transition-colors">
+                              <Radio className="w-4 h-4" />
+                            </div>
+                            <div className="flex flex-col items-start">
+                              <span className="text-white text-sm font-bold">Canal Geral (Todos)</span>
+                              <span className="text-[10px] text-gray-400">Rádio Aberto</span>
+                            </div>
+                          </button>
                           <button onClick={() => joinRoom("Mesa da Mara")} className="bg-[#1C1C1E] hover:bg-[#2A2A2A] border border-white/5 rounded-lg p-2.5 flex items-center gap-3 transition-colors group">
                             <Avatar className="w-8 h-8 border border-white/10 group-hover:border-[#00FF00]/50 transition-colors">
                               <AvatarImage src="/mara.png" className="object-cover" />
@@ -1264,6 +1463,30 @@ export default function PortalExpedicao() {
                               <span className="text-[10px] text-[#00FF00] font-medium tracking-wide">Online</span>
                             </div>
                           </button>
+                        </div>
+                      ) : incomingCall ? (
+                        <div className="bg-[#0A2010] border border-[#00FF00]/50 rounded-xl p-4 flex flex-col gap-4 relative overflow-hidden animate-[pulse_2s_ease-in-out_infinite]">
+                          <div className="flex flex-col items-center justify-center gap-2 relative z-10">
+                            <PhoneCall className="w-8 h-8 text-[#00FF00] mb-2 animate-bounce" />
+                            <span className="text-white text-sm font-bold text-center">{incomingCall.callerName} está chamando...</span>
+                            <span className="text-[#00FF00] text-[10px] font-bold tracking-wider uppercase">
+                              Para {incomingCall.room}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-center gap-3 mt-2">
+                            <button 
+                              onClick={acceptCall}
+                              className="w-10 h-10 rounded-full bg-[#00FF00] text-black hover:bg-[#00CC00] flex items-center justify-center transition-all shadow-[0_0_15px_rgba(0,255,0,0.4)]"
+                            >
+                              <Phone className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={rejectCall} 
+                              className="w-10 h-10 rounded-full bg-red-600 hover:bg-red-500 text-white shadow-[0_0_15px_rgba(220,38,38,0.4)] flex items-center justify-center transition-all"
+                            >
+                              <PhoneOff className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       ) : (
                         <div className="bg-[#0A2010] border border-[#00FF00]/30 rounded-xl p-4 flex flex-col gap-4 relative overflow-hidden">
@@ -1288,10 +1511,13 @@ export default function PortalExpedicao() {
                           </div>
                           <div className="flex items-center justify-center gap-3 mt-1">
                             <button 
-                              onClick={() => setIsRadioMuted(!isRadioMuted)} 
-                              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${isRadioMuted ? 'bg-red-500/20 text-red-500 border border-red-500/30' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                              onMouseDown={startRadioRecording}
+                              onMouseUp={stopRadioRecording}
+                              onTouchStart={startRadioRecording}
+                              onTouchEnd={stopRadioRecording}
+                              className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${isRadioRecording ? 'bg-red-500/20 text-red-500 border border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.4)]' : 'bg-white/10 text-white hover:bg-white/20'}`}
                             >
-                              {isRadioMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                              <Mic className="w-6 h-6" />
                             </button>
                             <button 
                               onClick={leaveRoom} 
@@ -1314,8 +1540,17 @@ export default function PortalExpedicao() {
                         </span>
                       </div>
                       <div className="flex -space-x-2 overflow-hidden py-1">
-                        <img className="inline-block h-7 w-7 rounded-full ring-2 ring-[#121212] object-cover" src="/mara.png" alt="Mara" title="Mara" />
-                        <img className="inline-block h-7 w-7 rounded-full ring-2 ring-[#121212] object-cover" src="/rogerio.png" alt="Rogério" title="Rogério" />
+                        {onlineRadioUsers.length === 0 ? (
+                          <span className="text-[10px] text-gray-500">Ninguém na escuta</span>
+                        ) : (
+                          onlineRadioUsers.map((u, i) => (
+                            <Avatar key={i} className="inline-block h-7 w-7 rounded-full ring-2 ring-[#121212] object-cover" title={u.name}>
+                              <AvatarFallback className="bg-purple-500/20 text-purple-400 text-[10px] font-bold">
+                                {u.avatar}
+                              </AvatarFallback>
+                            </Avatar>
+                          ))
+                        )}
                       </div>
                     </div>
 

@@ -398,7 +398,7 @@ export default function MeuDia() {
           </div>
         )}
 
-        {user?.email === "mara@hotmail.com" ? (
+        {(user?.email === "mara@hotmail.com" || currentUserName.startsWith("Rogério")) ? (
           <ExpedicaoTracker />
         ) : (
           announcements.length > 0 && (
@@ -446,7 +446,7 @@ export default function MeuDia() {
           )
         )}
 
-        {user?.email === "mara@hotmail.com" ? (
+        {(user?.email === "mara@hotmail.com" || currentUserName.startsWith("Rogério")) ? (
           <MuralExpedicao user={user} />
         ) : (
           <>
@@ -526,7 +526,7 @@ export default function MeuDia() {
                 </div>
              </div>
              <div className="relative z-10 flex gap-6 mt-4 sm:mt-0">
-               {user?.email === "mara@hotmail.com" && (
+               {(user?.email === "mara@hotmail.com" || currentUserName.startsWith("Rogério")) && (
                  <div className="text-center">
                    <div className="text-3xl font-extrabold text-[#00FF00] tracking-tighter leading-none">{reminders.length + adjustments.length}</div>
                    <div className="text-[9px] font-bold text-[#00FF00] uppercase tracking-widest mt-1">Casos Abertos</div>

@@ -49,16 +49,6 @@ const NAV_GROUPS = [
     ]
   },
   {
-    id: "gestao",
-    icon: LineChart,
-    title: "Gestão",
-    subItems: [
-      { title: "Metas e Visão", url: "/metas", icon: Target },
-      { title: "Playbooks (SOPs)", url: "/playbooks", icon: BookOpen },
-      { title: "Identidade da Marca", url: "/brand-book", icon: Heart },
-    ]
-  },
-  {
     id: "comercial",
     icon: ShoppingCart,
     title: "Comercial",
@@ -86,6 +76,16 @@ const NAV_GROUPS = [
     mainLink: "/marketing",
     subItems: [
       { title: "Dashboard Marketing", url: "/marketing", icon: Megaphone },
+    ]
+  },
+  {
+    id: "gestao",
+    icon: LineChart,
+    title: "Gestão",
+    subItems: [
+      { title: "Metas e Visão", url: "/metas", icon: Target },
+      { title: "Playbooks (SOPs)", url: "/playbooks", icon: BookOpen },
+      { title: "Identidade da Marca", url: "/brand-book", icon: Heart },
     ]
   },
   {
