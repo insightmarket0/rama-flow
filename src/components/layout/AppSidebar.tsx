@@ -23,7 +23,8 @@ import {
   AlertTriangle,
   Wrench,
   Heart,
-  DollarSign
+  DollarSign,
+  Truck
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -86,6 +87,7 @@ const NAV_GROUPS = [
       { title: "Metas e Visão", url: "/metas", icon: Target },
       { title: "Playbooks (SOPs)", url: "/playbooks", icon: BookOpen },
       { title: "Identidade da Marca", url: "/brand-book", icon: Heart },
+      { title: "Instaladores Externos", url: "/instaladores", icon: Truck },
     ]
   },
   {

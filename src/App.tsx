@@ -34,6 +34,13 @@ const PainelDivergencias = lazy(() => import("./pages/PainelDivergencias"));
 const Marketing = lazy(() => import("./pages/Marketing"));
 const BrandBook = lazy(() => import("./pages/BrandBook"));
 const CentralCompras = lazy(() => import("./pages/CentralCompras"));
+const GestaoInstaladores = lazy(() => import("./pages/GestaoInstaladores"));
+
+// Mobile Installer Pages
+import { MobileLayout } from "./components/layout/MobileLayout";
+const InstaladorHome = lazy(() => import("./pages/instalador/InstaladorHome"));
+const InstaladorServico = lazy(() => import("./pages/instalador/InstaladorServico"));
+const InstaladorEstoque = lazy(() => import("./pages/instalador/InstaladorEstoque"));
 
 const queryClient = new QueryClient();
 
@@ -219,6 +226,16 @@ const App = () => (
               }
             />
             <Route
+              path="/instaladores"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <GestaoInstaladores />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/condicoes"
               element={
                 <ProtectedRoute>
@@ -298,6 +315,21 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+
+            {/* Rotas Mobile do Instalador */}
+            <Route
+              path="/instalador"
+              element={
+                <ProtectedRoute>
+                  <MobileLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<InstaladorHome />} />
+              <Route path="servico/:id" element={<InstaladorServico />} />
+              <Route path="estoque" element={<InstaladorEstoque />} />
+              <Route path="perfil" element={<div className="p-4 text-white">Perfil (Em Breve)</div>} />
+            </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
