@@ -316,14 +316,10 @@ const App = () => (
               }
             />
 
-            {/* Rotas Mobile do Instalador */}
+            {/* Rotas Mobile do Instalador (Acesso Livre para Apresentação) */}
             <Route
               path="/instalador"
-              element={
-                <ProtectedRoute>
-                  <MobileLayout />
-                </ProtectedRoute>
-              }
+              element={<MobileLayout />}
             >
               <Route index element={<InstaladorHome />} />
               <Route path="servico/:id" element={<InstaladorServico />} />
