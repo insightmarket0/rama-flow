@@ -24,7 +24,9 @@ import {
   Wrench,
   Heart,
   DollarSign,
-  Truck
+  Truck,
+  Palette,
+  Rocket
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,6 +79,8 @@ const NAV_GROUPS = [
     mainLink: "/marketing",
     subItems: [
       { title: "Dashboard Marketing", url: "/marketing", icon: Megaphone },
+      { title: "Demandas de Artes", url: "/marketing/artes", icon: Palette },
+      { title: "Marca & Expansão", url: "/brand-hub", icon: Rocket },
     ]
   },
   {
@@ -135,7 +139,7 @@ export function AppSidebar() {
     return () => { supabase.removeChannel(channel); };
   }, []);
   
-  const isMarketing = location.pathname === '/marketing' || location.pathname === '/brand-book';
+  const isMarketing = location.pathname.startsWith('/marketing') || location.pathname === '/brand-book';
 
   const filteredNavGroups = NAV_GROUPS.map(group => {
     let modifiedGroup = { ...group };

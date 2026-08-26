@@ -19,24 +19,30 @@ import { formatCurrencyBRL } from "@/lib/format";
 import { toast } from "sonner";
 
 // Helpers
+const parseLocalDate = (dateStr: string) => {
+  if (!dateStr) return new Date();
+  const [year, month, day] = dateStr.split('T')[0].split('-');
+  return new Date(Number(year), Number(month) - 1, Number(day));
+};
+
 const getCategoryLabel = (category: string) => {
   return EXPENSE_CATEGORIES.find((c) => c.value === category)?.label || category;
 };
 
 const formatInstallmentDueDate = (value?: string | null) => {
   if (!value) return "Data não informada";
-  const parsed = new Date(value);
+  const parsed = parseLocalDate(value);
   if (Number.isNaN(parsed.getTime())) return "Data inválida";
   return format(parsed, "dd/MM/yy");
 };
 
 const getDaysUntilDue = (dueDate: string) => {
-  const due = new Date(dueDate);
+  const due = parseLocalDate(dueDate);
   const today = new Date();
-  due.setHours(0, 0, 0, 0);
   today.setHours(0, 0, 0, 0);
+  
   const diffTime = due.getTime() - today.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
   
   if (diffDays === 0) return "Hoje";
   if (diffDays === 1) return "Amanhã";
@@ -46,12 +52,12 @@ const getDaysUntilDue = (dueDate: string) => {
 };
 
 const getUrgencyLevel = (dueDate: string) => {
-  const due = new Date(dueDate);
+  const due = parseLocalDate(dueDate);
   const today = new Date();
-  due.setHours(0, 0, 0, 0);
   today.setHours(0, 0, 0, 0);
+  
   const diffTime = due.getTime() - today.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
   
   if (diffDays < 0) return "overdue";
   if (diffDays === 0) return "today";
@@ -167,11 +173,11 @@ export function PaymentManagementTab({
 
   // Processing Data
   const sortedUpcomingInstallments = upcomingInstallments
-    ? [...upcomingInstallments].sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())
+    ? [...upcomingInstallments].sort((a, b) => parseLocalDate(a.due_date).getTime() - parseLocalDate(b.due_date).getTime())
     : [];
 
   const currentMonthInstallments = sortedUpcomingInstallments.filter(inst => {
-    const due = new Date(inst.due_date);
+    const due = parseLocalDate(inst.due_date);
     const today = new Date();
     return due.getMonth() === today.getMonth() && due.getFullYear() === today.getFullYear();
   });
@@ -179,6 +185,10 @@ export function PaymentManagementTab({
   const dueWithin7Days = sortedUpcomingInstallments.filter(inst => {
     const level = getUrgencyLevel(inst.due_date);
     return level === "week" || level === "today";
+  });
+
+  const dueTodayInstallments = sortedUpcomingInstallments.filter(inst => {
+    return getUrgencyLevel(inst.due_date) === "today";
   });
 
   // Split into Timeline Zones
@@ -190,10 +200,16 @@ export function PaymentManagementTab({
     return isVariable && !hasValue && (level === "overdue" || level === "today" || level === "week");
   });
 
-  const urgentInstallments = sortedUpcomingInstallments.filter(inst => {
+  const overdueInstallments = sortedUpcomingInstallments.filter(inst => {
     if (pendingValueInstallments.includes(inst)) return false;
     const level = getUrgencyLevel(inst.due_date);
-    return level === "overdue" || level === "today";
+    return level === "overdue";
+  });
+
+  const todayInstallments = sortedUpcomingInstallments.filter(inst => {
+    if (pendingValueInstallments.includes(inst)) return false;
+    const level = getUrgencyLevel(inst.due_date);
+    return level === "today";
   });
   
   const weekInstallments = sortedUpcomingInstallments.filter(inst => {
@@ -232,14 +248,15 @@ export function PaymentManagementTab({
 
   const totalCurrentMonth = trueMonthlyBurnRate + currentMonthSporadicTaxes;
   const totalWithin7Days = sumValues(dueWithin7Days);
-  const totalOverdue = sumValues(urgentInstallments.filter((i: any) => getUrgencyLevel(i.due_date) === "overdue"));
+  const totalDueToday = sumValues(dueTodayInstallments);
+  const totalOverdue = sumValues(overdueInstallments);
 
   // Identify Variable Contracts for Quick Launcher
   const variableContracts = (smartContracts || []).filter((exp: any) => 
     exp.is_active && (exp.value_type === 'variable' || exp.category === 'impostos')
   );
 
-  const renderCard = (inst: any, styleType: 'urgent' | 'variable' | 'normal' | 'future') => {
+  const renderCard = (inst: any, styleType: 'urgent' | 'today' | 'variable' | 'normal' | 'future') => {
     const rawValue = typeof inst.value === "number" ? inst.value : null;
     const hasValue = rawValue !== null && rawValue > 0;
     const isVariable = (inst.smart_contract?.value_type ?? "fixed") === "variable";
@@ -263,6 +280,13 @@ export function PaymentManagementTab({
         icon: <AlertCircle className="h-5 w-5 text-red-500" />,
         iconBg: 'bg-red-500/10 text-red-500',
         badge: <Badge variant="outline" className="text-[9px] uppercase tracking-widest border-red-500/40 text-red-500 bg-red-500/10 animate-pulse">{getDaysUntilDue(inst.due_date)}</Badge>
+      },
+      today: {
+        border: 'border-white/20 hover:border-white/30 shadow-[0_0_15px_rgba(255,255,255,0.03)]',
+        bg: 'bg-[#111111]/90',
+        icon: <Calendar className="h-5 w-5 text-white" />,
+        iconBg: 'bg-white/10 text-white',
+        badge: <Badge variant="outline" className="text-[9px] uppercase tracking-widest border-white/40 text-white bg-white/10">HOJE</Badge>
       },
       variable: {
         border: 'border-yellow-500/30 border-dashed hover:border-yellow-500/50',
@@ -364,7 +388,7 @@ export function PaymentManagementTab({
                 {needsValueBeforePayment ? (
                   <Button 
                     size="sm"
-                    className="w-full h-8 bg-white hover:bg-gray-200 text-black shadow-[0_0_10px_rgba(255,255,255,0.2)] font-semibold text-xs px-2 transition-all"
+                    className="w-full h-8 bg-white/10 hover:bg-white/20 text-white font-semibold text-xs px-2 transition-all"
                     onClick={(e) => { e.stopPropagation(); handlePayClick(inst, true); }}
                   >
                     Informar Valor
@@ -372,7 +396,7 @@ export function PaymentManagementTab({
                 ) : (
                   <Button 
                     size="sm"
-                    className="w-full h-8 bg-[#00FF00] hover:bg-[#00FF00]/80 text-black font-semibold shadow-[0_0_10px_rgba(0,255,0,0.2)] text-xs px-2"
+                    className="w-full h-8 bg-white hover:bg-gray-200 text-black font-semibold shadow-[0_0_10px_rgba(255,255,255,0.1)] text-xs px-2 transition-all"
                     onClick={(e) => { e.stopPropagation(); handlePayClick(inst, false); }}
                     disabled={markAsPaid.isPending}
                   >
@@ -471,14 +495,14 @@ export function PaymentManagementTab({
             
             {needsValueBeforePayment ? (
               <Button 
-                className="w-full h-12 bg-white hover:bg-gray-200 text-black shadow-[0_0_15px_rgba(255,255,255,0.2)] font-bold text-lg transition-all"
+                className="w-full h-12 bg-white/10 hover:bg-white/20 text-white font-bold text-lg transition-all"
                 onClick={() => handlePayClick(inst, true)}
               >
                 Informar Valor
               </Button>
             ) : inst.status !== "pago" ? (
               <Button 
-                className="w-full h-12 bg-[#00FF00] hover:bg-[#00FF00]/80 text-black font-bold text-lg"
+                className="w-full h-12 bg-white hover:bg-gray-200 text-black font-bold shadow-[0_0_15px_rgba(255,255,255,0.1)] text-lg transition-all"
                 onClick={() => handlePayClick(inst, false)}
                 disabled={markAsPaid.isPending}
               >
@@ -525,24 +549,24 @@ export function PaymentManagementTab({
           <CardHeader className="relative z-10 pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-gray-300 text-sm font-medium uppercase tracking-widest flex items-center gap-2">
-                <Calendar className="h-4 w-4" /> Próximos 7 Dias
+                <Calendar className="h-4 w-4" /> Vence Hoje
               </CardTitle>
             </div>
-            <CardDescription className="text-gray-400">Caixa necessário para a semana</CardDescription>
+            <CardDescription className="text-gray-400">Pagamentos que vencem hoje</CardDescription>
           </CardHeader>
           <CardContent className="relative z-10">
             <div className="text-3xl font-light text-white mb-4">
-              {formatCurrencyBRL(totalWithin7Days)}
+              {formatCurrencyBRL(totalDueToday)}
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-xs text-gray-500">
-                <span>Contas na semana</span>
-                <span className="text-gray-300 font-medium">{dueWithin7Days.length} obrigações</span>
+                <span>Contas hoje</span>
+                <span className="text-gray-300 font-medium">{dueTodayInstallments.length} obrigações</span>
               </div>
               <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden shadow-inner">
                 <div 
                   className="h-full bg-gradient-to-r from-gray-500 to-gray-300 transition-all duration-1000" 
-                  style={{ width: `${Math.min(100, totalCurrentMonth > 0 ? (totalWithin7Days / totalCurrentMonth) * 100 : 0)}%` }} 
+                  style={{ width: `${Math.min(100, totalCurrentMonth > 0 ? (totalDueToday / totalCurrentMonth) * 100 : 0)}%` }} 
                 />
               </div>
             </div>
@@ -567,7 +591,7 @@ export function PaymentManagementTab({
               <div className="flex justify-between text-xs text-gray-500">
                 <span>Contas atrasadas</span>
                 <span className={`${totalOverdue > 0 ? "text-red-500" : "text-gray-500"} font-medium`}>
-                  {urgentInstallments.filter((i: any) => getUrgencyLevel(i.due_date) === "overdue").length} pendências
+                  {overdueInstallments.length} pendências
                 </span>
               </div>
               <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden shadow-inner">
@@ -595,15 +619,28 @@ export function PaymentManagementTab({
       ) : (
         <div className="space-y-12">
           
-          {/* Zona de Ação Imediata */}
-          {urgentInstallments.length > 0 && (
+          {/* Atrasados */}
+          {overdueInstallments.length > 0 && (
             <div className="space-y-4">
               <div className="flex items-center gap-2 border-b border-red-500/20 pb-2 mt-8">
                 <AlertCircle className="h-5 w-5 text-red-500" />
-                <h2 className="text-lg font-light text-red-500 tracking-tight">Ação Imediata (Vencem Hoje & Atrasados)</h2>
+                <h2 className="text-lg font-light text-red-500 tracking-tight">Atrasados (Ação Imediata)</h2>
               </div>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {urgentInstallments.map(inst => renderCard(inst, 'urgent'))}
+                {overdueInstallments.map(inst => renderCard(inst, 'urgent'))}
+              </div>
+            </div>
+          )}
+
+          {/* Vencem Hoje */}
+          {todayInstallments.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 border-b border-white/20 pb-2 mt-8">
+                <Calendar className="h-5 w-5 text-white" />
+                <h2 className="text-lg font-light text-white tracking-tight">Vencem Hoje</h2>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {todayInstallments.map(inst => renderCard(inst, 'today'))}
               </div>
             </div>
           )}

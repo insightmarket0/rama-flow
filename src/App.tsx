@@ -18,6 +18,9 @@ const Metas = lazy(() => import("./pages/Metas"));
 const MuralAlinhamento = lazy(() => import("./pages/MuralAlinhamento"));
 const Lembretes = lazy(() => import("./pages/Lembretes"));
 const MuralAjustes = lazy(() => import("./pages/MuralAjustes"));
+const GestaoInstaladores = lazy(() => import("./pages/GestaoInstaladores"));
+const BrandBook = lazy(() => import("./pages/BrandBook"));
+const BrandHub = lazy(() => import("./pages/BrandHub"));
 const Playbooks = lazy(() => import("./pages/Playbooks"));
 const Pedidos = lazy(() => import("./pages/Pedidos"));
 const Condicoes = lazy(() => import("./pages/Condicoes"));
@@ -32,9 +35,8 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 
 const PainelDivergencias = lazy(() => import("./pages/PainelDivergencias"));
 const Marketing = lazy(() => import("./pages/Marketing"));
-const BrandBook = lazy(() => import("./pages/BrandBook"));
+const DemandasArtes = lazy(() => import("./pages/DemandasArtes"));
 const CentralCompras = lazy(() => import("./pages/CentralCompras"));
-const GestaoInstaladores = lazy(() => import("./pages/GestaoInstaladores"));
 
 // Mobile Installer Pages
 import { MobileLayout } from "./components/layout/MobileLayout";
@@ -206,11 +208,32 @@ const App = () => (
             />
 
             <Route
+              path="/marketing/artes"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <DemandasArtes />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path="/brand-book"
               element={
                 <ProtectedRoute>
                   <MainLayout>
                     <BrandBook />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/brand-hub"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <BrandHub />
                   </MainLayout>
                 </ProtectedRoute>
               }

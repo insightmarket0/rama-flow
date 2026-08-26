@@ -179,7 +179,7 @@ export function MainLayout({ children }: MainLayoutProps) {
     <>
       <GlobalDialogs />
       <GlobalShortcuts />
-      <div className={`flex min-h-screen w-full ${location.pathname === '/marketing' ? '' : 'bg-background pl-24'}`}>
+      <div className={`flex min-h-screen w-full ${location.pathname.startsWith('/marketing') ? '' : 'bg-background pl-24'}`}>
         <AppSidebar />
         <div className="flex flex-1 flex-col">
           {/* Header Condicional (Só no Início) - Flutuante para não empurrar o layout */}
@@ -231,9 +231,9 @@ export function MainLayout({ children }: MainLayoutProps) {
             </div>
           )}
 
-          <main className={`flex flex-col flex-1 ${(location.pathname === '/marketing' || location.pathname === '/brand-book' || location.pathname === '/equipe' || location.pathname === '/expedicao' || location.pathname === '/instaladores') ? 'h-screen max-h-screen overflow-hidden' : 'p-6'}`}>
-            <div key={location.pathname} className={`flex flex-col ${(location.pathname === '/marketing' || location.pathname === '/brand-book' || location.pathname === '/equipe' || location.pathname === '/expedicao' || location.pathname === '/instaladores') ? 'flex-1 min-h-0 overflow-hidden' : 'space-y-6'} animate-in fade-in slide-in-from-bottom-4 zoom-in-95 duration-300 ease-out`}>
-              {(location.pathname !== '/marketing' && location.pathname !== '/brand-book' && location.pathname !== '/equipe' && location.pathname !== '/expedicao' && location.pathname !== '/instaladores') && <GlobalAlerts />}
+          <main className={`flex flex-col flex-1 ${(location.pathname.startsWith('/marketing') || location.pathname === '/brand-book' || location.pathname === '/equipe' || location.pathname === '/expedicao' || location.pathname === '/instaladores') ? 'h-screen max-h-screen overflow-hidden' : 'p-6'}`}>
+            <div key={location.pathname} className={`flex flex-col ${(location.pathname.startsWith('/marketing') || location.pathname === '/brand-book' || location.pathname === '/equipe' || location.pathname === '/expedicao' || location.pathname === '/instaladores') ? 'flex-1 min-h-0 overflow-hidden' : 'space-y-6'} animate-in fade-in slide-in-from-bottom-4 zoom-in-95 duration-300 ease-out`}>
+              {(!location.pathname.startsWith('/marketing') && location.pathname !== '/brand-book' && location.pathname !== '/equipe' && location.pathname !== '/expedicao' && location.pathname !== '/instaladores') && <GlobalAlerts />}
               {children}
             </div>
           </main>
