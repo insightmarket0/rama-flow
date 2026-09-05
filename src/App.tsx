@@ -26,10 +26,10 @@ const Pedidos = lazy(() => import("./pages/Pedidos"));
 const Condicoes = lazy(() => import("./pages/Condicoes"));
 const Contas = lazy(() => import("./pages/Contas"));
 const ContasFixas = lazy(() => import("./pages/ContasFixas"));
+const PedidosCompras = lazy(() => import("./pages/PedidosCompras"));
 const Fornecedores = lazy(() => import("./pages/Fornecedores"));
-const Quotations = lazy(() => import("./pages/Quotations"));
-const QuotationForm = lazy(() => import("./pages/QuotationForm"));
-const QuotationDetail = lazy(() => import("./pages/QuotationDetail"));
+
+const ComparativoContas = lazy(() => import("./pages/ComparativoContas"));
 const Auth = lazy(() => import("./pages/Auth"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -289,6 +289,26 @@ const App = () => (
               }
             />
             <Route
+              path="/comparativo"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <ComparativoContas />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/pedidos-compras"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <PedidosCompras />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/fornecedores"
               element={
                 <ProtectedRoute>
@@ -298,46 +318,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/quotations"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <Quotations />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/quotations/new"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <QuotationForm />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/quotations/:id/edit"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <QuotationForm />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/quotations/:id"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <QuotationDetail />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
+
 
             {/* Rotas Mobile do Instalador (Acesso Livre para Apresentação) */}
             <Route

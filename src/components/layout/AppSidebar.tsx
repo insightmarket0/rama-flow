@@ -56,9 +56,10 @@ const NAV_GROUPS = [
     icon: ShoppingCart,
     title: "Comercial",
     subItems: [
+      { title: "Contas Fixas", url: "/contas-fixas", icon: CalendarPlus },
+      { title: "Pedidos de Compras (Novo)", url: "/pedidos-compras", icon: ShoppingCart },
+      { title: "Análise Financeira (Novo)", url: "/comparativo", icon: LineChart },
       { title: "Dashboard Pedidos", url: "/dashboard", icon: LayoutDashboard },
-      { title: "Contas Fixas (Novo)", url: "/contas-fixas", icon: CalendarPlus },
-      { title: "Cotações", url: "/quotations", icon: ClipboardList },
       { title: "Fornecedores", url: "/fornecedores", icon: Users },
       { title: "Contas a Pagar", url: "/contas", icon: Wallet },
     ]

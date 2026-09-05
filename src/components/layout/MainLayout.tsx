@@ -5,6 +5,7 @@ import { CommandMenu } from "./CommandMenu";
 import { GlobalShortcuts } from "./GlobalShortcuts";
 import { QuickCreateMenu } from "./QuickCreateMenu";
 import { GlobalAlerts } from "./GlobalAlerts";
+import { FeatureAnnouncementModal } from "./FeatureAnnouncementModal";
 import { RamaDoDiaWidget } from "@/components/RamaDoDiaWidget";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -179,6 +180,7 @@ export function MainLayout({ children }: MainLayoutProps) {
     <>
       <GlobalDialogs />
       <GlobalShortcuts />
+      <FeatureAnnouncementModal />
       <div className={`flex min-h-screen w-full ${location.pathname.startsWith('/marketing') ? '' : 'bg-background pl-24'}`}>
         <AppSidebar />
         <div className="flex flex-1 flex-col">
