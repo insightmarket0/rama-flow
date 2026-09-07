@@ -150,7 +150,7 @@ const DashboardFinanceiro = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10 mb-4">
         <div className="flex items-center gap-4">
           <h1 className="text-[10px] md:text-xs font-bold tracking-[0.3em] uppercase text-white/80">
-            Dashboard Financeiro
+            Faturamento e Lucros
           </h1>
         </div>
 

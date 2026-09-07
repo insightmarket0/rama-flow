@@ -22,7 +22,7 @@ export const useRecurringExpenseInstallments = () => {
         .from("recurring_expense_installments")
         .select(`
           *,
-          recurring_expense:recurring_expenses(name, category),
+          recurring_expense:recurring_expenses(name, category, amount),
           supplier:suppliers(name)
 
         `)
@@ -66,7 +66,7 @@ export const useRecurringExpenseInstallments = () => {
         .from("recurring_expense_installments")
         .select(`
           *,
-          recurring_expense:recurring_expenses(name, category),
+          recurring_expense:recurring_expenses(name, category, amount),
           supplier:suppliers(name)
         `)
         .eq("status", "pago")

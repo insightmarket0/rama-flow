@@ -20,6 +20,7 @@ import {
   Heart
 } from "lucide-react";
 import { RamaDoDiaWidget } from "@/components/RamaDoDiaWidget";
+import { PainelPagamentosHoje } from "@/components/finance/PainelPagamentosHoje";
 import { parseISO, isBefore, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/hooks/useAuth";
@@ -401,48 +402,52 @@ export default function MeuDia() {
         {(user?.email === "mara@hotmail.com" || currentUserName.startsWith("Rogério")) ? (
           <ExpedicaoTracker />
         ) : (
-          announcements.length > 0 && (
-            <div className="col-span-1 md:col-span-2 bg-[#111111] border-l-4 border-[#00FF00] rounded-2xl p-5 group relative shadow-lg h-fit">
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-[#00FF00] font-bold tracking-tighter text-xl uppercase flex items-center gap-2">
-                  <Megaphone className="h-5 w-5" strokeWidth={3} />
-                  Mural
-                </h3>
-                <span className="text-[#00FF00] text-[10px] font-bold tracking-widest uppercase border border-[#00FF00]/20 px-2 py-0.5 rounded-full">
-                  Prioridade
-                </span>
-              </div>
-              
-              <div className="space-y-3">
-                {announcements.map(ann => (
-                  <div key={ann.id} className="bg-black/30 rounded-xl p-4 border border-white/5 hover:bg-black/50 transition-colors">
-                    <div>
-                      <div className="flex items-center gap-2 mb-2 text-gray-400 font-bold text-[10px] uppercase tracking-wider">
-                        <span>{ann.creator.full_name}</span>
-                        {ann.is_pinned && <AlertTriangle className="h-3 w-3 text-amber-500" />}
+          (user?.email === "livia@hotmail.com" || currentUserName.startsWith("Rogério")) ? (
+            <PainelPagamentosHoje />
+          ) : (
+            announcements.length > 0 && (
+              <div className="col-span-1 md:col-span-2 bg-[#111111] border-l-4 border-[#00FF00] rounded-2xl p-5 group relative shadow-lg h-fit">
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-[#00FF00] font-bold tracking-tighter text-xl uppercase flex items-center gap-2">
+                    <Megaphone className="h-5 w-5" strokeWidth={3} />
+                    Mural
+                  </h3>
+                  <span className="text-[#00FF00] text-[10px] font-bold tracking-widest uppercase border border-[#00FF00]/20 px-2 py-0.5 rounded-full">
+                    Prioridade
+                  </span>
+                </div>
+                
+                <div className="space-y-3">
+                  {announcements.map(ann => (
+                    <div key={ann.id} className="bg-black/30 rounded-xl p-4 border border-white/5 hover:bg-black/50 transition-colors">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2 text-gray-400 font-bold text-[10px] uppercase tracking-wider">
+                          <span>{ann.creator.full_name}</span>
+                          {ann.is_pinned && <AlertTriangle className="h-3 w-3 text-amber-500" />}
+                        </div>
+                        <h4 className="text-white font-extrabold text-lg mb-1 leading-tight tracking-tight">
+                          {ann.title}
+                        </h4>
                       </div>
-                      <h4 className="text-white font-extrabold text-lg mb-1 leading-tight tracking-tight">
-                        {ann.title}
-                      </h4>
+                      
+                      <div className="flex items-end justify-between gap-4 mt-1">
+                        <p className="text-gray-400 font-medium text-xs mb-0">
+                          {ann.content}
+                        </p>
+                        <button 
+                          onClick={() => handleAcknowledge(ann.id)}
+                          className="bg-[#00FF00]/10 text-[#00FF00] border border-[#00FF00]/20 px-4 py-1.5 rounded-lg font-bold text-xs flex items-center gap-2 hover:bg-[#00FF00]/20 transition-colors w-fit shrink-0 mb-1"
+                        >
+                          Estou Ciente <CheckCircle2 className="h-3 w-3" />
+                        </button>
+                      </div>
                     </div>
-                    
-                    <div className="flex items-end justify-between gap-4 mt-1">
-                      <p className="text-gray-400 font-medium text-xs mb-0">
-                        {ann.content}
-                      </p>
-                      <button 
-                        onClick={() => handleAcknowledge(ann.id)}
-                        className="bg-[#00FF00]/10 text-[#00FF00] border border-[#00FF00]/20 px-4 py-1.5 rounded-lg font-bold text-xs flex items-center gap-2 hover:bg-[#00FF00]/20 transition-colors w-fit shrink-0 mb-1"
-                      >
-                        Estou Ciente <CheckCircle2 className="h-3 w-3" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+            )
           )
         )}
 

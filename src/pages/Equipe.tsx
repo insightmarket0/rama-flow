@@ -48,7 +48,8 @@ export default function Equipe() {
       children: ["william", "alyson", "mara"]
     },
     {
-      id: "william",
+      departmentBadge: "Equipe de Marketing",
+    id: "william",
       name: "Will Mendes",
       role: "Design & Marketplaces",
       focus: "Contas de Marketplaces e Design",
@@ -67,10 +68,32 @@ export default function Equipe() {
       careerPlan: "Construção de Marca 360, profissionalismo no design alinhado à comunicação assertiva.",
       strategicFocus: ["Mercado Livre 2", "TikTok", "Criação de Marca e Conteúdo Estratégico"],
       goals: ["Vender mais atingindo as pessoas com conteúdo estratégico", "Saber expor corretamente para o público final", "Garantir profissionalismo visual em todos os touchpoints"],
+      children: ["social_media"]
+    },
+    {
+      id: "social_media",
+      name: "Social Media (Vaga)",
+      role: "Gravação e Redes Sociais",
+      focus: "Gravar rotina e comunicação",
+      icon: ActivitySquare,
+      color: "from-purple-400 to-fuchsia-500",
+      textColor: "text-purple-400",
+      bgColor: "bg-purple-400/10",
+      borderColor: "border-purple-400/20",
+      description: "Vai começar gravando a rotina do instalador, depois a rama, até cuidar de toda a nossa comunicação nas redes sociais.",
+      tags: ["Conteúdo", "Gravação", "Social Media"],
+      email: "vaga_aberta@ramaflow.com",
+      phone: "-",
+      joined: "Em breve",
+      autonomy: "Criação de Conteúdo Diário",
+      careerPlan: "Tornar-se a voz e a imagem principal da marca nas redes sociais, liderando a estratégia de comunicação em vídeo.",
+      strategicFocus: ["Rotina do Instalador", "Bastidores da Rama", "Engajamento Social"],
+      goals: ["Criar um volume alto de vídeos diários", "Humanizar a marca", "Atrair clientes finais via redes sociais"],
       children: []
     },
     {
-      id: "alyson",
+      departmentBadge: "Equipe de E-commerce",
+    id: "alyson",
       name: "Alyson",
       role: "Dev & Marketplaces",
       focus: "Marketplaces e Site da Loja",
@@ -91,7 +114,8 @@ export default function Equipe() {
       children: []
     },
     {
-      id: "mara",
+      departmentBadge: "Equipe de Logística",
+    id: "mara",
       name: "Mara",
       image: "/mara.png",
       role: "Logística & Expedição",
@@ -119,35 +143,41 @@ export default function Equipe() {
     if (!member) return null;
 
     return (
-      <li key={member.id}>
-        <div className="inline-block relative z-10 transition-transform duration-300 hover:-translate-y-1 group">
+      <li key={member.id} className="relative">
+          {member.departmentBadge && (
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-[#1a1a1a] border border-white/10 text-gray-300 px-3 py-1 rounded-full text-[8px] font-bold tracking-[0.2em] uppercase z-20 whitespace-nowrap shadow-lg flex items-center gap-1.5 backdrop-blur-md">
+              <div className={`w-1.5 h-1.5 rounded-full ${member.bgColor.replace('bg-', 'bg-').replace('/10', '')} shadow-[0_0_8px_currentColor]`} style={{ color: 'inherit' }} />
+              {member.departmentBadge}
+            </div>
+          )}
+        <div className="inline-block relative z-10 transition-transform duration-300 hover:-translate-y-1 group pt-4">
           <Dialog>
             <DialogTrigger asChild>
-              <div className="bg-[#111111] border border-white/5 hover:border-white/20 rounded-[1.5rem] p-5 cursor-pointer shadow-2xl relative overflow-hidden text-left min-w-[280px] max-w-[320px] backdrop-blur-md">
+              <div className="bg-[#111111] border border-white/5 hover:border-white/20 rounded-[1.25rem] p-4 cursor-pointer shadow-2xl relative overflow-hidden text-left min-w-[240px] max-w-[260px] backdrop-blur-md">
                 <div className={`absolute -right-10 -top-10 w-32 h-32 bg-gradient-to-br ${member.color} rounded-full blur-[50px] opacity-[0.05] group-hover:opacity-[0.15] transition-opacity duration-700 pointer-events-none`} />
                 
-                <div className="flex items-center gap-4 mb-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${member.bgColor} ${member.borderColor} border relative overflow-hidden shrink-0`}>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${member.bgColor} ${member.borderColor} border relative overflow-hidden shrink-0`}>
                     {member.image ? (
                        <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
                     ) : (
-                      <member.icon className={`w-6 h-6 ${member.textColor}`} />
+                      <member.icon className={`w-5 h-5 ${member.textColor}`} />
                     )}
                   </div>
                   <div>
-                    <h2 className="text-xl font-medium text-white tracking-tight leading-tight">{member.name}</h2>
-                    <p className="text-[11px] text-gray-400 mt-0.5">{member.role}</p>
+                    <h2 className="text-lg font-medium text-white tracking-tight leading-tight">{member.name}</h2>
+                    <p className="text-[10px] text-gray-400">{member.role}</p>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <div className={`text-[10px] font-bold uppercase tracking-[0.1em] px-2.5 py-1 rounded-md inline-flex items-center gap-1 ${member.bgColor} ${member.textColor} border ${member.borderColor}`}>
+                  <div className={`text-[9px] font-bold uppercase tracking-[0.1em] px-2 py-1 rounded-md inline-flex items-center gap-1 ${member.bgColor} ${member.textColor} border ${member.borderColor}`}>
                     <member.icon className="w-3 h-3" />
                     {member.focus}
                   </div>
                 </div>
                 
-                <div className="mt-4 pt-3 border-t border-white/5 text-center">
+                <div className="mt-3 pt-2.5 border-t border-white/5 text-center">
                   <span className="text-[10px] text-blue-400 font-medium hover:text-blue-300 transition-colors uppercase tracking-widest flex items-center justify-center gap-1">
                     Detalhes da Carreira <ArrowRight className="w-3 h-3" />
                   </span>
@@ -275,13 +305,13 @@ export default function Equipe() {
           float: left; text-align: center;
           list-style-type: none;
           position: relative;
-          padding: 20px 40px 0 40px;
+          padding: 15px 15px 0 15px;
         }
         .org-tree li::before, .org-tree li::after {
           content: '';
           position: absolute; top: 0; right: 50%;
           border-top: 2px solid rgba(71, 85, 105, 0.8);
-          width: 50%; height: 20px;
+          width: 50%; height: 15px;
         }
         .org-tree li::after {
           right: auto; left: 50%;
@@ -307,7 +337,7 @@ export default function Equipe() {
           content: '';
           position: absolute; top: 0; left: 50%;
           border-left: 2px solid rgba(71, 85, 105, 0.8);
-          width: 0; height: 20px;
+          width: 0; height: 15px;
           transform: translateX(-50%);
         }
       `}} />
@@ -334,8 +364,8 @@ export default function Equipe() {
       </div>
 
       {/* Organograma (Tree) */}
-      <div className="relative z-10 flex flex-col items-center justify-center w-full h-full pt-16">
-        <div className="org-tree transform scale-[0.85] origin-top md:scale-90 lg:scale-95 xl:scale-100">
+      <div className="relative z-10 flex flex-col items-center justify-start w-full h-full pt-4 overflow-hidden">
+        <div className="org-tree transform scale-[0.75] origin-top md:scale-[0.80] lg:scale-[0.85] xl:scale-[0.90]">
           <ul>
             {renderNode("rogerio")}
           </ul>

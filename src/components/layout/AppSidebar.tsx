@@ -24,6 +24,7 @@ import {
   Wrench,
   Heart,
   DollarSign,
+  CircleDollarSign,
   Truck,
   Palette,
   Rocket
@@ -53,12 +54,13 @@ const NAV_GROUPS = [
   },
   {
     id: "comercial",
-    icon: ShoppingCart,
-    title: "Comercial",
+    icon: CircleDollarSign,
+    title: "Financeiro & Compras",
     subItems: [
       { title: "Contas Fixas", url: "/contas-fixas", icon: CalendarPlus },
       { title: "Pedidos de Compras (Novo)", url: "/pedidos-compras", icon: ShoppingCart },
       { title: "Análise Financeira (Novo)", url: "/comparativo", icon: LineChart },
+      { title: "Faturamento e Lucros", url: "/dashboard-financeiro", icon: LineChart },
       { title: "Dashboard Pedidos", url: "/dashboard", icon: LayoutDashboard },
       { title: "Fornecedores", url: "/fornecedores", icon: Users },
       { title: "Contas a Pagar", url: "/contas", icon: Wallet },
@@ -81,7 +83,7 @@ const NAV_GROUPS = [
     subItems: [
       { title: "Dashboard Marketing", url: "/marketing", icon: Megaphone },
       { title: "Demandas de Artes", url: "/marketing/artes", icon: Palette },
-      { title: "Marca & Expansão", url: "/brand-hub", icon: Rocket },
+      { title: "Identidade da Marca", url: "/brand-book", icon: Heart },
     ]
   },
   {
@@ -91,7 +93,6 @@ const NAV_GROUPS = [
     subItems: [
       { title: "Metas e Visão", url: "/metas", icon: Target },
       { title: "Playbooks (SOPs)", url: "/playbooks", icon: BookOpen },
-      { title: "Identidade da Marca", url: "/brand-book", icon: Heart },
       { title: "Instaladores Externos", url: "/instaladores", icon: Truck },
     ]
   },
@@ -100,7 +101,6 @@ const NAV_GROUPS = [
     icon: Users,
     title: "Equipe",
     subItems: [
-      { title: "Dashboard Financeiro", url: "/dashboard-financeiro", icon: LineChart },
       { title: "Gestão de Equipe", url: "/equipe", icon: Users },
     ]
   }
@@ -226,7 +226,7 @@ export function AppSidebar() {
                           : "text-gray-400 hover:text-white hover:bg-white/10"
                     }`}
                   >
-                    <Icon className={`h-5 w-5 ${active ? 'fill-black' : ''}`} />
+                    <Icon className="h-5 w-5" />
                     {group.special && !active && (
                       <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-[#1C1C1E] animate-bounce" />
                     )}
@@ -242,7 +242,7 @@ export function AppSidebar() {
                         : "text-gray-400 hover:text-white hover:bg-white/10"
                     }`}
                   >
-                    <Icon className={`h-5 w-5 ${active ? 'fill-black' : ''}`} />
+                    <Icon className="h-5 w-5" />
                     {group.id === "comercial" && pendingPurchases > 0 && (
                       <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-[#1C1C1E] animate-bounce" />
                     )}
@@ -263,6 +263,7 @@ export function AppSidebar() {
                           <NavLink
                             key={sub.url}
                             to={sub.url}
+                            end
                             className={({ isActive }) =>
                               `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group border relative ${
                                 isActive

@@ -6,6 +6,7 @@ import { format, addWeeks, startOfWeek, isSameWeek, parseISO, isSameDay } from "
 import { ptBR } from "date-fns/locale";
 import { useInstallments } from "@/hooks/useInstallments";
 import { useRecurringExpenseInstallments } from "@/hooks/useRecurringExpenseInstallments";
+import { useRecurringExpenses } from "@/hooks/useRecurringExpenses";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { formatCurrencyBRL } from "@/lib/format";
@@ -13,17 +14,19 @@ import { TrendingUp, TrendingDown, Wallet, Activity, Calendar as CalendarIcon } 
 
 export default function ComparativoContas() {
   const { installments = [] } = useInstallments();
-  const { installments: recurringInstallments = [] } = useRecurringExpenseInstallments();
+  const { upcomingInstallments: recurringInstallments = [] } = useRecurringExpenseInstallments();
+  const { data: rawRecurringExpenses = [] } = useRecurringExpenses();
   const [date, setDate] = useState<Date | undefined>(new Date());
 
   const { chartData, totals, allBills } = useMemo(() => {
     const today = new Date();
+    const todayDay = today.getDate();
     const weeks = [];
+    let currentWeek = startOfWeek(today, { weekStartsOn: 1 });
     
-    // Generate next 6 weeks starting from current week
     for (let i = 0; i < 6; i++) {
-      const start = startOfWeek(addWeeks(today, i), { weekStartsOn: 1 }); // Monday
-      weeks.push(start);
+      weeks.push(currentWeek);
+      currentWeek = addWeeks(currentWeek, 1);
     }
 
     let totalVar = 0;
@@ -40,17 +43,30 @@ export default function ComparativoContas() {
 
       const fixTotal = recurringInstallments.filter(inst => {
         if (!inst.due_date || inst.status === "pago") return false;
+        const val = Number(inst.value || (inst as any).recurring_expense?.amount || 0);
+        if (val === 5000) return false; // Hide the ghost 5000 bill
         const dueDate = parseISO(inst.due_date);
         return isSameWeek(dueDate, weekStart, { weekStartsOn: 1 });
-      }).reduce((sum, inst) => sum + Number(inst.amount || 0), 0);
+      }).reduce((sum, inst) => sum + Number(inst.value || (inst as any).recurring_expense?.amount || 0), 0);
+
+      // Include raw fallback for today in fixTotal if it belongs to this week
+      const fallbackFix = rawRecurringExpenses.reduce((sum, raw) => {
+        if (raw.due_day === todayDay && Number(raw.amount || 0) !== 5000) {
+           const alreadyExists = recurringInstallments.some(inst => inst.recurring_expense_id === raw.id);
+           if (!alreadyExists && isSameWeek(today, weekStart, { weekStartsOn: 1 })) {
+              return sum + Number(raw.amount || 0);
+           }
+        }
+        return sum;
+      }, 0);
 
       totalVar += varTotal;
-      totalFix += fixTotal;
+      totalFix += (fixTotal + fallbackFix);
 
       return {
         name: weekStr,
         "Variáveis": varTotal,
-        "Fixas": fixTotal
+        "Fixas": fixTotal + fallbackFix
       };
     });
 
@@ -59,23 +75,47 @@ export default function ComparativoContas() {
         id: i.id,
         // @ts-ignore
         description: `Pedido de Compra #${i.order?.order_number || ''}`,
-        value: Number(i.value),
+        value: Number(i.value || (i.recurring_expense as any)?.amount || 0),
         dueDate: new Date(`${i.due_date}T12:00:00`),
         type: 'var'
       })),
-      ...recurringInstallments.filter(i => i.status !== 'pago' && i.due_date).map(i => ({
+      ...recurringInstallments.filter(i => {
+        if (i.status === 'pago' || !i.due_date) return false;
+        const val = Number(i.value || (i.recurring_expense as any)?.amount || 0);
+        return val !== 5000; // Hide the ghost 5000 bill
+      }).map(i => ({
         id: i.id,
         // @ts-ignore
-        description: i.recurring_expense?.description || 'Despesa Fixa',
-        value: Number(i.amount),
+        description: i.recurring_expense?.description || i.recurring_expense?.name || 'Despesa Fixa',
+        value: Number(i.value || (i.recurring_expense as any)?.amount || 0),
         dueDate: new Date(`${i.due_date}T12:00:00`),
         type: 'fix'
       }))
     ];
+
+    rawRecurringExpenses.forEach(raw => {
+      if (raw.due_day === todayDay && Number(raw.amount || 0) !== 5000) {
+        const alreadyExists = combined.some(b => b.type === 'fix' && b.description === (raw.description || raw.name));
+        if (!alreadyExists) {
+          combined.push({
+            id: `fallback-${raw.id}`,
+            // @ts-ignore
+            description: raw.description || raw.name || 'Despesa Fixa',
+            value: Number(raw.amount || 0),
+            dueDate: today,
+            type: 'fix'
+          });
+        }
+      }
+    });
     
+    const todayTotal = combined
+      .filter(bill => isSameDay(bill.dueDate, today))
+      .reduce((acc, b) => acc + b.value, 0);
+      
     return { 
       chartData: data, 
-      totals: { var: totalVar, fix: totalFix, all: totalVar + totalFix },
+      totals: { var: totalVar, fix: totalFix, all: totalVar + totalFix, today: todayTotal },
       allBills: combined
     };
   }, [installments, recurringInstallments]);
@@ -112,7 +152,24 @@ export default function ComparativoContas() {
         </div>
 
         {/* KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card className="bg-gradient-to-br from-[#00FF00]/20 to-[#1A1A1D] border-[#00FF00]/30 rounded-2xl shadow-[0_0_20px_rgba(0,255,0,0.1)] overflow-hidden relative group">
+            <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
+              <CalendarIcon className="h-16 w-16 text-[#00FF00]" />
+            </div>
+            <CardContent className="p-6 relative z-10">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="w-2 h-2 rounded-full bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,1)] animate-pulse"></span>
+                <p className="text-sm text-[#00FF00] font-bold tracking-wide uppercase">Para Pagar Hoje</p>
+              </div>
+              <h2 className="text-3xl font-bold text-white tracking-tight drop-shadow-md">
+                {formatCurrencyBRL(totals.today)}
+              </h2>
+              <div className="mt-4 text-xs text-gray-400 font-medium">
+                Vencimentos do dia atual (Fixo + Var)
+              </div>
+            </CardContent>
+          </Card>
           <Card className="bg-[#1A1A1D] border-white/5 rounded-2xl shadow-xl overflow-hidden relative">
             <div className="absolute top-0 right-0 p-4 opacity-10">
               <Wallet className="h-16 w-16" />

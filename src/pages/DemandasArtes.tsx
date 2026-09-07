@@ -7,7 +7,7 @@ export default function DemandasArtes() {
       <div className="p-4 md:p-5 max-w-[1400px] w-full mx-auto h-full flex flex-col gap-1 relative z-10">
         
         {/* Header Compacto Premium */}
-        <div className="flex items-center justify-between shrink-0 mb-[-10px]">
+        <div className="flex items-center justify-between shrink-0 mb-0">
           <div>
             <h1 className="text-xl font-semibold text-white tracking-tight flex items-center gap-2">
               DEMANDAS DE <span className="text-cyan-400 font-light">ARTES</span>

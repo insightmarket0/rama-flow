@@ -176,313 +176,138 @@ export default function Marketing() {
             <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar pb-6">
               <div className="grid grid-cols-12 gap-4 min-h-full">
                 
-                {/* Radar Logístico (Esquerda, 4 colunas) */}
-                <div className="col-span-12 lg:col-span-4 bg-[#0a0a0a] border border-white/5 rounded-2xl p-4 flex flex-col relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-[40px] pointer-events-none"></div>
-                  <div className="flex items-center justify-between mb-4 relative z-10">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 bg-cyan-500/10 rounded-lg">
-                        <Truck className="w-4 h-4 text-cyan-400" />
-                      </div>
-                      <h3 className="text-white text-sm font-semibold tracking-tight">Radar Logístico</h3>
-                    </div>
-                    <span className="flex items-center gap-1 text-[10px] font-medium text-gray-500 uppercase tracking-widest bg-white/5 px-2 py-1 rounded-full">
-                      <MapPin className="w-3 h-3 text-cyan-500" /> ABC Paulista
-                    </span>
-                  </div>
-
-                  <div className="space-y-4 relative z-10 mt-2">
-                    <div>
-                      <div className="flex justify-between text-xs mb-1">
-                        <span className="text-gray-400">Same-Day (Hoje)</span>
-                        <span className="text-white font-medium">142 envios</span>
-                      </div>
-                      <div className="w-full h-1.5 bg-[#1a1a1a] rounded-full overflow-hidden">
-                        <div className="h-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]" style={{ width: '75%' }}></div>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-xs mb-1">
-                        <span className="text-gray-400">Next-Day (Amanhã)</span>
-                        <span className="text-white font-medium">48 envios</span>
-                      </div>
-                      <div className="w-full h-1.5 bg-[#1a1a1a] rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-500/50" style={{ width: '25%' }}></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Visualização de Mapa (Heatmap ABC/SP) */}
-                  <div className="mt-4 mb-2 relative h-32 bg-[#111111] border border-white/5 rounded-xl overflow-hidden group">
-                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
-                    
-                    {/* Pontos no Mapa */}
-                    <div className="absolute top-1/3 left-1/4 group-hover:scale-110 transition-transform">
-                      <div className="relative">
-                        <span className="animate-ping absolute -inset-1 rounded-full bg-cyan-400 opacity-20"></span>
-                        <div className="w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_8px_rgba(6,182,212,0.8)]"></div>
-                        <span className="absolute top-3 left-1/2 -translate-x-1/2 text-[8px] text-cyan-400/80 font-bold tracking-widest uppercase">SP</span>
-                      </div>
-                    </div>
-                    
-                    <div className="absolute top-1/2 right-1/3 group-hover:scale-110 transition-transform delay-75">
-                      <div className="relative">
-                        <span className="animate-ping absolute -inset-2 rounded-full bg-cyan-500 opacity-30" style={{ animationDuration: '3s' }}></span>
-                        <div className="w-3 h-3 bg-cyan-500 rounded-full shadow-[0_0_12px_rgba(6,182,212,1)]"></div>
-                        <span className="absolute top-4 left-1/2 -translate-x-1/2 text-[8px] text-cyan-400/80 font-bold tracking-widest uppercase">SBC</span>
-                      </div>
-                    </div>
-
-                    <div className="absolute bottom-1/4 right-1/4 group-hover:scale-110 transition-transform delay-150">
-                      <div className="relative">
-                        <span className="animate-ping absolute -inset-1 rounded-full bg-blue-400 opacity-20" style={{ animationDuration: '2.5s' }}></span>
-                        <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
-                        <span className="absolute top-2.5 left-1/2 -translate-x-1/2 text-[7px] text-blue-400/60 uppercase">SA</span>
-                      </div>
-                    </div>
-                    
-                    <div className="absolute top-1/4 right-1/4 group-hover:scale-110 transition-transform delay-150">
-                      <div className="relative">
-                        <span className="animate-ping absolute -inset-1 rounded-full bg-blue-400 opacity-20" style={{ animationDuration: '2s' }}></span>
-                        <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
-                        <span className="absolute top-2.5 left-1/2 -translate-x-1/2 text-[7px] text-blue-400/60 uppercase">SCS</span>
-                      </div>
-                    </div>
-
-                  </div>
-
-                  {/* Indicador de Risco / Custo */}
-                  <div className="mt-auto pt-2">
-                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl relative overflow-hidden flex flex-col">
-                      <div className="absolute top-0 right-0 p-1">
-                        <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                        </span>
-                      </div>
-                      <span className="text-red-400 text-[10px] font-bold uppercase tracking-widest mb-1">Custo Médio Frete (Mauá)</span>
-                      <div className="flex items-end justify-between">
-                        <span className="text-white text-xl font-bold tracking-tight">R$ 18,50<span className="text-xs text-gray-400 font-normal ml-1">/pedido</span></span>
-                        <span className="text-red-400 text-xs font-medium flex items-center">
-                          <ArrowUpRight className="w-3 h-3 mr-0.5" /> Acima da meta
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Termômetro de Aquisição (Centro-Direita, 8 colunas) */}
-                <div className="col-span-12 lg:col-span-8 flex flex-col gap-4">
-                  <div className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-2xl p-4 relative overflow-hidden flex flex-col">
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-2">
-                        <div className="p-1.5 bg-cyan-500/10 rounded-lg">
-                          <BarChart3 className="w-4 h-4 text-cyan-400" />
-                        </div>
-                        <h3 className="text-white text-sm font-semibold tracking-tight">Termômetro de Aquisição</h3>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-cyan-500 shadow-[0_0_5px_rgba(6,182,212,0.8)]"></span><span className="text-xs text-gray-400">Tráfego Próprio</span></div>
-                        <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-purple-500"></span><span className="text-xs text-gray-400">Afiliados Shopee</span></div>
-                      </div>
-                    </div>
-
-                    <div className="flex-1 grid grid-cols-2 gap-6 items-center">
-                      <div className="flex flex-col justify-center gap-4 border-r border-white/5 pr-6 h-full">
-                        <div>
-                          <div className="flex justify-between items-baseline mb-2">
-                            <span className="text-gray-400 text-xs font-medium">UGC / TikTok Ads</span>
-                            <span className="text-white font-bold">R$ 42.500 <span className="text-[10px] text-gray-500 font-normal">Faturamento</span></span>
-                          </div>
-                          <div className="w-full h-8 bg-[#111] border border-white/5 rounded-xl overflow-hidden relative">
-                            <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-600 to-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]" style={{ width: '85%' }}></div>
-                            <div className="absolute inset-y-0 left-4 flex items-center">
-                              <span className="text-black/80 text-[10px] font-bold">ROI 4.2x</span>
-                            </div>
-                          </div>
-                          <span className="text-cyan-400 text-[10px] font-medium mt-1 inline-block">CAC: R$ 13,48</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex flex-col justify-center gap-4 pl-2 h-full">
-                        <div>
-                          <div className="flex justify-between items-baseline mb-2">
-                            <span className="text-gray-400 text-xs font-medium">Shopee Afiliados</span>
-                            <span className="text-white font-bold">R$ 18.200 <span className="text-[10px] text-gray-500 font-normal">Vendas Líq.</span></span>
-                          </div>
-                          <div className="w-full h-8 bg-[#111] border border-white/5 rounded-xl overflow-hidden relative">
-                            <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-600 to-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.4)]" style={{ width: '35%' }}></div>
-                            <div className="absolute inset-y-0 left-4 flex items-center">
-                              <span className="text-white/80 text-[10px] font-bold">12% Comis.</span>
-                            </div>
-                          </div>
-                          <span className="text-purple-400 text-[10px] font-medium mt-1 inline-block">Custo Total: R$ 2.184</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Régua de Breakeven */}
-                  <div className="h-32 bg-[#0a0a0a] border border-white/5 rounded-2xl p-4 flex flex-col justify-center relative overflow-hidden">
-                    <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-[50px] pointer-events-none"></div>
-                    <div className="flex items-center justify-between mb-3 relative z-10">
-                      <div className="flex items-center gap-2">
-                        <Gauge className="w-4 h-4 text-emerald-400" />
-                        <h3 className="text-white text-sm font-semibold tracking-tight">Ponto de Equilíbrio <span className="text-gray-500 font-normal ml-1">(Breakeven da Marca)</span></h3>
-                      </div>
-                      <span className="text-emerald-400 text-xs font-bold tracking-tight">Faltam R$ 3.200</span>
-                    </div>
-                    
-                    <div className="relative z-10">
-                      <div className="w-full h-3 bg-[#111] border border-white/5 rounded-full overflow-hidden relative">
-                        {/* Marcador do breakeven target */}
-                        <div className="absolute top-0 bottom-0 left-[85%] w-px bg-white/50 z-20"></div>
-                        <div className="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]" style={{ width: '70%' }}></div>
-                      </div>
-                      <div className="flex justify-between text-[10px] text-gray-500 mt-2 font-medium">
-                        <span>R$ 0</span>
-                        <span>Custos Fixos (Mês)</span>
-                        <span className="text-white">R$ 25.000 Meta</span>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-
                 {/* --- NOVA LINHA DO COCKPIT --- */}
 
-                {/* Tabela de Lead Quality / Parcerias (Esquerda, 8 colunas) */}
-                <div className="col-span-12 lg:col-span-8 bg-[#0a0a0a] border border-white/5 rounded-2xl p-4 flex flex-col relative overflow-hidden group mt-2">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 bg-cyan-500/10 rounded-lg">
-                        <Users className="w-4 h-4 text-cyan-400" />
-                      </div>
-                      <h3 className="text-white text-sm font-semibold tracking-tight">Qualidade de Captação <span className="text-gray-500 font-normal ml-1">(B2B & Influenciadores)</span></h3>
-                    </div>
-                  </div>
-
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                      <thead>
-                        <tr className="border-b border-white/5 text-[10px] uppercase tracking-widest text-gray-500">
-                          <th className="pb-3 font-medium">Data</th>
-                          <th className="pb-3 font-medium">Nome / Empresa</th>
-                          <th className="pb-3 font-medium">Origem</th>
-                          <th className="pb-3 font-medium">Status</th>
-                          <th className="pb-3 font-medium text-right">Ação</th>
-                        </tr>
-                      </thead>
-                      <tbody className="text-xs">
-                        {/* Linha 1 */}
-                        <tr className="border-b border-white/5 group/row hover:bg-white/[0.02] transition-colors">
-                          <td className="py-3 text-gray-400">Hoje, 14:12</td>
-                          <td className="py-3 text-white font-medium">TechHouse B2B</td>
-                          <td className="py-3 text-gray-400">Inbound (Orgânico)</td>
-                          <td className="py-3">
-                            <span className="bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 px-2 py-0.5 rounded-full text-[10px] font-bold">Em Negociação</span>
-                          </td>
-                          <td className="py-3 text-right">
-                            <button className="text-cyan-400 hover:text-cyan-300 font-medium">Ver Dossiê</button>
-                          </td>
-                        </tr>
-                        {/* Linha 2 */}
-                        <tr className="border-b border-white/5 group/row hover:bg-white/[0.02] transition-colors">
-                          <td className="py-3 text-gray-400">Hoje, 09:30</td>
-                          <td className="py-3 text-white font-medium">Maria Clara <span className="text-gray-500 font-normal">(@mariaclara)</span></td>
-                          <td className="py-3 text-gray-400">Prospecção Ativa</td>
-                          <td className="py-3">
-                            <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full text-[10px] font-bold">Aprovado</span>
-                          </td>
-                          <td className="py-3 text-right">
-                            <button className="text-gray-500 hover:text-white transition-colors"><MoreHorizontal className="w-4 h-4 ml-auto" /></button>
-                          </td>
-                        </tr>
-                        {/* Linha 3 */}
-                        <tr className="group/row hover:bg-white/[0.02] transition-colors">
-                          <td className="py-3 text-gray-400">Ontem, 16:45</td>
-                          <td className="py-3 text-white font-medium">Mega Ferragens</td>
-                          <td className="py-3 text-gray-400">Indicação</td>
-                          <td className="py-3">
-                            <span className="bg-red-500/10 text-red-400 border border-red-500/20 px-2 py-0.5 rounded-full text-[10px] font-bold">Rejeitado</span>
-                          </td>
-                          <td className="py-3 text-right">
-                            <button className="text-gray-500 hover:text-white transition-colors"><MoreHorizontal className="w-4 h-4 ml-auto" /></button>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                {/* Social Media Tracker (Direita, 4 colunas) */}
-                <div className="col-span-12 lg:col-span-4 flex flex-col gap-4 mt-2">
-                  <div className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-2xl p-4 relative overflow-hidden flex flex-col">
-                    <div className="absolute -right-10 -top-10 w-32 h-32 bg-purple-500/10 rounded-full blur-[40px] pointer-events-none"></div>
-                    <div className="flex items-center justify-between mb-4 relative z-10">
-                      <div className="flex items-center gap-2">
-                        <div className="p-1.5 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
-                          <Instagram className="w-4 h-4 text-white" />
+                {/* Social Media & TikTok Trackers (Compactos) */}
+                <div className="col-span-12 lg:col-span-8 flex flex-col gap-4 mt-2">
+                  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    {/* INSTAGRAM COMPACTO */}
+                    <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-4 relative overflow-hidden flex flex-col">
+                      <div className="absolute -right-10 -top-10 w-24 h-24 bg-purple-500/10 rounded-full blur-[30px] pointer-events-none"></div>
+                      <div className="flex items-center justify-between mb-4 relative z-10">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
+                            <Instagram className="w-4 h-4 text-white" />
+                          </div>
+                          <h3 className="text-white text-sm font-semibold tracking-tight">Instagram</h3>
                         </div>
-                        <h3 className="text-white text-sm font-semibold tracking-tight">Instagram Performance</h3>
+                        <span className="text-[10px] text-gray-500">Últimos 7 dias</span>
                       </div>
-                      <span className="text-xs text-gray-500">Últimos 7 dias</span>
-                    </div>
-
-                    <div className="space-y-4 relative z-10">
-                      <div>
-                        <span className="text-[10px] font-medium tracking-widest uppercase text-gray-500">Seguidores</span>
-                        <div className="flex items-end gap-2 mt-0.5">
-                          <span className="text-2xl font-bold text-white">135.145</span>
-                          <span className="text-emerald-400 text-xs font-medium mb-1 flex items-center"><ArrowUpRight className="w-3 h-3 mr-0.5" /> 1.2%</span>
+                      
+                      <div className="flex items-end gap-3 mb-4">
+                        <div>
+                          <span className="text-[9px] font-medium tracking-widest uppercase text-gray-500 block mb-0.5">Seguidores</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl font-bold text-white">135.145</span>
+                            <span className="text-emerald-400 text-[10px] font-medium flex items-center bg-emerald-400/10 px-1.5 py-0.5 rounded"><ArrowUpRight className="w-2.5 h-2.5 mr-0.5" /> 1.2%</span>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/5">
-                        <div className="bg-[#111] border border-white/5 rounded-xl p-2.5 flex items-center justify-between">
+                      <div className="grid grid-cols-2 gap-2 mb-4">
+                        <div className="bg-[#111] border border-white/5 rounded-lg p-2 flex items-center justify-between">
                           <div className="flex items-center gap-1.5">
                             <Heart className="w-3 h-3 text-gray-500" />
-                            <span className="text-xs text-gray-400">Likes</span>
+                            <span className="text-[10px] text-gray-400">Likes</span>
                           </div>
                           <span className="text-white text-xs font-medium">42.5K</span>
                         </div>
-                        <div className="bg-[#111] border border-white/5 rounded-xl p-2.5 flex items-center justify-between">
+                        <div className="bg-[#111] border border-white/5 rounded-lg p-2 flex items-center justify-between">
                           <div className="flex items-center gap-1.5">
                             <MessageCircle className="w-3 h-3 text-gray-500" />
-                            <span className="text-xs text-gray-400">Coment.</span>
+                            <span className="text-[10px] text-gray-400">Coment.</span>
                           </div>
                           <span className="text-white text-xs font-medium">8.2K</span>
                         </div>
                       </div>
 
-                      <div>
-                        <span className="text-[10px] font-medium tracking-widest uppercase text-gray-500 mb-2 block">Top Posts (Alcance)</span>
-                        <div className="flex gap-2">
-                          <div className="w-1/3 aspect-[4/5] bg-[#1a1a1a] rounded-lg border border-white/10 overflow-hidden relative group cursor-pointer">
-                            <div className="absolute inset-0 flex items-center justify-center text-gray-600 text-[10px]">Post 1</div>
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                              <span className="text-white text-[10px] font-bold">120K</span>
+                      <div className="mt-auto pt-3 border-t border-white/5">
+                        <span className="text-[9px] font-medium tracking-widest uppercase text-gray-500 mb-2 block">Top Posts (Alcance)</span>
+                        <div className="space-y-2">
+                          {[
+                            { title: "Bastidores da Instalação", views: "120K", growth: "+15%" },
+                            { title: "Dica de Fixação", views: "95K", growth: "+8%" },
+                            { title: "Review Nova Linha", views: "88K", growth: "+5%" }
+                          ].map((post, i) => (
+                            <div key={i} className="flex items-center justify-between group cursor-pointer hover:bg-white/5 p-1 -mx-1 rounded transition-colors">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-6 h-6 bg-[#1a1a1a] rounded border border-white/5 flex items-center justify-center shrink-0">
+                                  <ImageIcon className="w-3 h-3 text-gray-600 group-hover:text-white transition-colors" />
+                                </div>
+                                <span className="text-[11px] text-gray-400 group-hover:text-gray-200 transition-colors truncate max-w-[100px]">{post.title}</span>
+                              </div>
+                              <span className="text-[10px] font-semibold text-white">{post.views}</span>
                             </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* TIKTOK COMPACTO */}
+                    <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-4 relative overflow-hidden flex flex-col">
+                      <div className="absolute -right-10 -top-10 w-24 h-24 bg-cyan-500/10 rounded-full blur-[30px] pointer-events-none"></div>
+                      <div className="flex items-center justify-between mb-4 relative z-10">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg">
+                            <PlayCircle className="w-4 h-4 text-white" />
                           </div>
-                          <div className="w-1/3 aspect-[4/5] bg-[#1a1a1a] rounded-lg border border-white/10 overflow-hidden relative group cursor-pointer">
-                            <div className="absolute inset-0 flex items-center justify-center text-gray-600 text-[10px]">Post 2</div>
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                              <span className="text-white text-[10px] font-bold">95K</span>
+                          <h3 className="text-white text-sm font-semibold tracking-tight">TikTok</h3>
+                        </div>
+                        <span className="text-[10px] text-gray-500">Últimos 7 dias</span>
+                      </div>
+                      
+                      <div className="flex items-end gap-3 mb-4">
+                        <div>
+                          <span className="text-[9px] font-medium tracking-widest uppercase text-gray-500 block mb-0.5">Seguidores</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl font-bold text-white">241.800</span>
+                            <span className="text-emerald-400 text-[10px] font-medium flex items-center bg-emerald-400/10 px-1.5 py-0.5 rounded"><ArrowUpRight className="w-2.5 h-2.5 mr-0.5" /> 5.4%</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 mb-4">
+                        <div className="bg-[#111] border border-white/5 rounded-lg p-2 flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <Heart className="w-3 h-3 text-gray-500" />
+                            <span className="text-[10px] text-gray-400">Likes</span>
+                          </div>
+                          <span className="text-white text-xs font-medium">89.2K</span>
+                        </div>
+                        <div className="bg-[#111] border border-white/5 rounded-lg p-2 flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <MessageCircle className="w-3 h-3 text-gray-500" />
+                            <span className="text-[10px] text-gray-400">Coment.</span>
+                          </div>
+                          <span className="text-white text-xs font-medium">14.5K</span>
+                        </div>
+                      </div>
+
+                      <div className="mt-auto pt-3 border-t border-white/5">
+                        <span className="text-[9px] font-medium tracking-widest uppercase text-gray-500 mb-2 block">Top Videos (Views)</span>
+                        <div className="space-y-2">
+                          {[
+                            { title: "Review da Cadeira", views: "340K", growth: "+15%" },
+                            { title: "Como montar em 5 min", views: "210K", growth: "+8%" },
+                            { title: "Trend da Empresa", views: "195K", growth: "+4%" }
+                          ].map((post, i) => (
+                            <div key={i} className="flex items-center justify-between group cursor-pointer hover:bg-white/5 p-1 -mx-1 rounded transition-colors">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-6 h-6 bg-[#1a1a1a] rounded border border-white/5 flex items-center justify-center shrink-0">
+                                  <FileVideo className="w-3 h-3 text-gray-600 group-hover:text-white transition-colors" />
+                                </div>
+                                <span className="text-[11px] text-gray-400 group-hover:text-gray-200 transition-colors truncate max-w-[100px]">{post.title}</span>
+                              </div>
+                              <span className="text-[10px] font-semibold text-white">{post.views}</span>
                             </div>
-                          </div>
-                          <div className="w-1/3 aspect-[4/5] bg-[#1a1a1a] rounded-lg border border-white/10 overflow-hidden relative group cursor-pointer">
-                            <div className="absolute inset-0 flex items-center justify-center text-gray-600 text-[10px]">Post 3</div>
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                              <span className="text-white text-[10px] font-bold">88K</span>
-                            </div>
-                          </div>
+                          ))}
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-
-              </div>
+          </div>
             </div>
           )}
 
@@ -710,6 +535,182 @@ export default function Marketing() {
           {/* TAB 3: PERFORMANCE */}
           {activeTab === "performance" && (
             <div className="flex-1 flex flex-col gap-3 min-h-0">
+                <div className="grid grid-cols-12 gap-4 shrink-0 mb-3">
+                  {/* Radar Logístico (Esquerda, 4 colunas) */}
+                <div className="col-span-12 lg:col-span-4 bg-[#0a0a0a] border border-white/5 rounded-2xl p-4 flex flex-col relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-[40px] pointer-events-none"></div>
+                  <div className="flex items-center justify-between mb-4 relative z-10">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-cyan-500/10 rounded-lg">
+                        <Truck className="w-4 h-4 text-cyan-400" />
+                      </div>
+                      <h3 className="text-white text-sm font-semibold tracking-tight">Radar Logístico</h3>
+                    </div>
+                    <span className="flex items-center gap-1 text-[10px] font-medium text-gray-500 uppercase tracking-widest bg-white/5 px-2 py-1 rounded-full">
+                      <MapPin className="w-3 h-3 text-cyan-500" /> ABC Paulista
+                    </span>
+                  </div>
+
+                  <div className="space-y-4 relative z-10 mt-2">
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-gray-400">Same-Day (Hoje)</span>
+                        <span className="text-white font-medium">142 envios</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-[#1a1a1a] rounded-full overflow-hidden">
+                        <div className="h-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]" style={{ width: '75%' }}></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-gray-400">Next-Day (Amanhã)</span>
+                        <span className="text-white font-medium">48 envios</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-[#1a1a1a] rounded-full overflow-hidden">
+                        <div className="h-full bg-blue-500/50" style={{ width: '25%' }}></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Visualização de Mapa (Heatmap ABC/SP) */}
+                  <div className="mt-4 mb-2 relative h-32 bg-[#111111] border border-white/5 rounded-xl overflow-hidden group">
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+                    
+                    {/* Pontos no Mapa */}
+                    <div className="absolute top-1/3 left-1/4 group-hover:scale-110 transition-transform">
+                      <div className="relative">
+                        <span className="animate-ping absolute -inset-1 rounded-full bg-cyan-400 opacity-20"></span>
+                        <div className="w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_8px_rgba(6,182,212,0.8)]"></div>
+                        <span className="absolute top-3 left-1/2 -translate-x-1/2 text-[8px] text-cyan-400/80 font-bold tracking-widest uppercase">SP</span>
+                      </div>
+                    </div>
+                    
+                    <div className="absolute top-1/2 right-1/3 group-hover:scale-110 transition-transform delay-75">
+                      <div className="relative">
+                        <span className="animate-ping absolute -inset-2 rounded-full bg-cyan-500 opacity-30" style={{ animationDuration: '3s' }}></span>
+                        <div className="w-3 h-3 bg-cyan-500 rounded-full shadow-[0_0_12px_rgba(6,182,212,1)]"></div>
+                        <span className="absolute top-4 left-1/2 -translate-x-1/2 text-[8px] text-cyan-400/80 font-bold tracking-widest uppercase">SBC</span>
+                      </div>
+                    </div>
+
+                    <div className="absolute bottom-1/4 right-1/4 group-hover:scale-110 transition-transform delay-150">
+                      <div className="relative">
+                        <span className="animate-ping absolute -inset-1 rounded-full bg-blue-400 opacity-20" style={{ animationDuration: '2.5s' }}></span>
+                        <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                        <span className="absolute top-2.5 left-1/2 -translate-x-1/2 text-[7px] text-blue-400/60 uppercase">SA</span>
+                      </div>
+                    </div>
+                    
+                    <div className="absolute top-1/4 right-1/4 group-hover:scale-110 transition-transform delay-150">
+                      <div className="relative">
+                        <span className="animate-ping absolute -inset-1 rounded-full bg-blue-400 opacity-20" style={{ animationDuration: '2s' }}></span>
+                        <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                        <span className="absolute top-2.5 left-1/2 -translate-x-1/2 text-[7px] text-blue-400/60 uppercase">SCS</span>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  {/* Indicador de Risco / Custo */}
+                  <div className="mt-auto pt-2">
+                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl relative overflow-hidden flex flex-col">
+                      <div className="absolute top-0 right-0 p-1">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                        </span>
+                      </div>
+                      <span className="text-red-400 text-[10px] font-bold uppercase tracking-widest mb-1">Custo Médio Frete (Mauá)</span>
+                      <div className="flex items-end justify-between">
+                        <span className="text-white text-xl font-bold tracking-tight">R$ 18,50<span className="text-xs text-gray-400 font-normal ml-1">/pedido</span></span>
+                        <span className="text-red-400 text-xs font-medium flex items-center">
+                          <ArrowUpRight className="w-3 h-3 mr-0.5" /> Acima da meta
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Termômetro de Aquisição (Centro-Direita, 8 colunas) */}
+                <div className="col-span-12 lg:col-span-8 flex flex-col gap-4">
+                  <div className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-2xl p-4 relative overflow-hidden flex flex-col">
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1.5 bg-cyan-500/10 rounded-lg">
+                          <BarChart3 className="w-4 h-4 text-cyan-400" />
+                        </div>
+                        <h3 className="text-white text-sm font-semibold tracking-tight">Termômetro de Aquisição</h3>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-cyan-500 shadow-[0_0_5px_rgba(6,182,212,0.8)]"></span><span className="text-xs text-gray-400">Tráfego Próprio</span></div>
+                        <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-purple-500"></span><span className="text-xs text-gray-400">Afiliados Shopee</span></div>
+                      </div>
+                    </div>
+
+                    <div className="flex-1 grid grid-cols-2 gap-6 items-center">
+                      <div className="flex flex-col justify-center gap-4 border-r border-white/5 pr-6 h-full">
+                        <div>
+                          <div className="flex justify-between items-baseline mb-2">
+                            <span className="text-gray-400 text-xs font-medium">UGC / TikTok Ads</span>
+                            <span className="text-white font-bold">R$ 42.500 <span className="text-[10px] text-gray-500 font-normal">Faturamento</span></span>
+                          </div>
+                          <div className="w-full h-8 bg-[#111] border border-white/5 rounded-xl overflow-hidden relative">
+                            <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-600 to-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]" style={{ width: '85%' }}></div>
+                            <div className="absolute inset-y-0 left-4 flex items-center">
+                              <span className="text-black/80 text-[10px] font-bold">ROI 4.2x</span>
+                            </div>
+                          </div>
+                          <span className="text-cyan-400 text-[10px] font-medium mt-1 inline-block">CAC: R$ 13,48</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col justify-center gap-4 pl-2 h-full">
+                        <div>
+                          <div className="flex justify-between items-baseline mb-2">
+                            <span className="text-gray-400 text-xs font-medium">Shopee Afiliados</span>
+                            <span className="text-white font-bold">R$ 18.200 <span className="text-[10px] text-gray-500 font-normal">Vendas Líq.</span></span>
+                          </div>
+                          <div className="w-full h-8 bg-[#111] border border-white/5 rounded-xl overflow-hidden relative">
+                            <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-600 to-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.4)]" style={{ width: '35%' }}></div>
+                            <div className="absolute inset-y-0 left-4 flex items-center">
+                              <span className="text-white/80 text-[10px] font-bold">12% Comis.</span>
+                            </div>
+                          </div>
+                          <span className="text-purple-400 text-[10px] font-medium mt-1 inline-block">Custo Total: R$ 2.184</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Régua de Breakeven */}
+                  <div className="h-32 bg-[#0a0a0a] border border-white/5 rounded-2xl p-4 flex flex-col justify-center relative overflow-hidden">
+                    <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-[50px] pointer-events-none"></div>
+                    <div className="flex items-center justify-between mb-3 relative z-10">
+                      <div className="flex items-center gap-2">
+                        <Gauge className="w-4 h-4 text-emerald-400" />
+                        <h3 className="text-white text-sm font-semibold tracking-tight">Ponto de Equilíbrio <span className="text-gray-500 font-normal ml-1">(Breakeven da Marca)</span></h3>
+                      </div>
+                      <span className="text-emerald-400 text-xs font-bold tracking-tight">Faltam R$ 3.200</span>
+                    </div>
+                    
+                    <div className="relative z-10">
+                      <div className="w-full h-3 bg-[#111] border border-white/5 rounded-full overflow-hidden relative">
+                        {/* Marcador do breakeven target */}
+                        <div className="absolute top-0 bottom-0 left-[85%] w-px bg-white/50 z-20"></div>
+                        <div className="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]" style={{ width: '70%' }}></div>
+                      </div>
+                      <div className="flex justify-between text-[10px] text-gray-500 mt-2 font-medium">
+                        <span>R$ 0</span>
+                        <span>Custos Fixos (Mês)</span>
+                        <span className="text-white">R$ 25.000 Meta</span>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                
+                </div>
               <div className="bg-[#2A1313] border border-red-900/50 rounded-lg p-3 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-3">
                   <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
