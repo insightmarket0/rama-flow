@@ -64,12 +64,12 @@ const getMarketplaceStyle = (marketplace: string) => {
   }
 };
 
-// ---- MOCKS AGREGADOS PARA DEMONSTRAÇÃO ----
+// ---- MOCKS AGREGADOS PARA DEMONSTRA�!ÒO ----
 
 const MOCK_ANNOUNCEMENTS = [
   {
     id: "ann_1",
-    creator: { full_name: "Anderson • Supervisão" },
+    creator: { full_name: "Anderson ⬢ Supervisão" },
     title: "Cuidado com os itens de vidro!",
     content: "Lembrete: A partir de hoje, é obrigatório usar plástico bolha duplo em todos os itens frágeis.",
     is_pinned: true,
@@ -399,95 +399,60 @@ export default function MeuDia() {
           </div>
         )}
 
-        {(user?.email === "mara@hotmail.com" || currentUserName.startsWith("Rogério")) ? (
-          <ExpedicaoTracker />
+        {(user?.email === "livia@hotmail.com" || currentUserName.startsWith("Rogério")) ? (
+          <PainelPagamentosHoje />
         ) : (
-          (user?.email === "livia@hotmail.com" || currentUserName.startsWith("Rogério")) ? (
-            <PainelPagamentosHoje />
-          ) : (
-            announcements.length > 0 && (
-              <div className="col-span-1 md:col-span-2 bg-[#111111] border-l-4 border-[#00FF00] rounded-2xl p-5 group relative shadow-lg h-fit">
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-[#00FF00] font-bold tracking-tighter text-xl uppercase flex items-center gap-2">
-                    <Megaphone className="h-5 w-5" strokeWidth={3} />
-                    Mural
-                  </h3>
-                  <span className="text-[#00FF00] text-[10px] font-bold tracking-widest uppercase border border-[#00FF00]/20 px-2 py-0.5 rounded-full">
-                    Prioridade
-                  </span>
-                </div>
-                
-                <div className="space-y-3">
-                  {announcements.map(ann => (
-                    <div key={ann.id} className="bg-black/30 rounded-xl p-4 border border-white/5 hover:bg-black/50 transition-colors">
-                      <div>
-                        <div className="flex items-center gap-2 mb-2 text-gray-400 font-bold text-[10px] uppercase tracking-wider">
-                          <span>{ann.creator.full_name}</span>
-                          {ann.is_pinned && <AlertTriangle className="h-3 w-3 text-amber-500" />}
-                        </div>
-                        <h4 className="text-white font-extrabold text-lg mb-1 leading-tight tracking-tight">
-                          {ann.title}
-                        </h4>
+          user?.email !== "mara@hotmail.com" && announcements.length > 0 && (
+            <div className="col-span-1 md:col-span-2 bg-[#111111] border-l-4 border-[#00FF00] rounded-2xl p-5 group relative shadow-lg h-fit">
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-[#00FF00] font-bold tracking-tighter text-xl uppercase flex items-center gap-2">
+                  <Megaphone className="h-5 w-5" strokeWidth={3} />
+                  Mural
+                </h3>
+                <span className="text-[#00FF00] text-[10px] font-bold tracking-widest uppercase border border-[#00FF00]/20 px-2 py-0.5 rounded-full">
+                  Prioridade
+                </span>
+              </div>
+              
+              <div className="space-y-3">
+                {announcements.map(ann => (
+                  <div key={ann.id} className="bg-black/30 rounded-xl p-4 border border-white/5 hover:bg-black/50 transition-colors">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2 text-gray-400 font-bold text-[10px] uppercase tracking-wider">
+                        <span>{ann.creator.full_name}</span>
+                        {ann.is_pinned && <AlertTriangle className="h-3 w-3 text-amber-500" />}
                       </div>
-                      
-                      <div className="flex items-end justify-between gap-4 mt-1">
-                        <p className="text-gray-400 font-medium text-xs mb-0">
-                          {ann.content}
-                        </p>
-                        <button 
-                          onClick={() => handleAcknowledge(ann.id)}
-                          className="bg-[#00FF00]/10 text-[#00FF00] border border-[#00FF00]/20 px-4 py-1.5 rounded-lg font-bold text-xs flex items-center gap-2 hover:bg-[#00FF00]/20 transition-colors w-fit shrink-0 mb-1"
-                        >
-                          Estou Ciente <CheckCircle2 className="h-3 w-3" />
-                        </button>
-                      </div>
+                      <h4 className="text-white font-extrabold text-lg mb-1 leading-tight tracking-tight">
+                        {ann.title}
+                      </h4>
                     </div>
-                  ))}
-                </div>
+                    
+                    <div className="flex items-end justify-between gap-4 mt-1">
+                      <p className="text-gray-400 font-medium text-xs mb-0">
+                        {ann.content}
+                      </p>
+                      <button 
+                        onClick={() => handleAcknowledge(ann.id)}
+                        className="bg-[#00FF00]/10 text-[#00FF00] border border-[#00FF00]/20 px-4 py-1.5 rounded-lg font-bold text-xs flex items-center gap-2 hover:bg-[#00FF00]/20 transition-colors w-fit shrink-0 mb-1"
+                      >
+                        Estou Ciente <CheckCircle2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-            )
+          </div>
           )
         )}
+
+        <ExpedicaoTracker />
 
         {(user?.email === "mara@hotmail.com" || currentUserName.startsWith("Rogério")) ? (
           <MuralExpedicao user={user} />
         ) : (
           <>
-            {reminders.length > 0 && reminders.map((reminder, idx) => {
-              const isLate = reminder.due_date && isBefore(parseISO(reminder.due_date), new Date());
-              return (
-                <div key={reminder.id} className={`col-span-1 rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden transition-all hover:border-white/20 group ${isLate ? 'bg-[#1a0f0f] border border-red-500/20' : 'bg-[#111] border border-white/5'}`}>
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <CalendarDays className={`h-5 w-5 ${isLate ? 'text-red-500' : 'text-gray-500'}`} />
-                      {isLate && (
-                        <span className="bg-red-500 text-white text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full">
-                          Atrasado
-                        </span>
-                      )}
-                    </div>
-                    <h4 className="text-white text-lg font-light tracking-tight leading-tight mb-2">
-                      {reminder.title}
-                    </h4>
-                    <p className="text-gray-500 text-xs font-medium line-clamp-2">
-                      {reminder.description}
-                    </p>
-                  </div>
-                  <div className="mt-4 pt-4 border-t border-white/5">
-                    <button 
-                      onClick={() => handleCompleteReminder(reminder.id)}
-                      className="w-full flex items-center justify-between group-hover:text-[#00FF00] text-gray-400 font-bold text-xs tracking-widest uppercase transition-colors"
-                    >
-                      Concluir Tarefa
-                      <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-
             {/* 3. Cards de Ajustes (Estética Glass/Branding) */}
             {adjustments.length > 0 && adjustments.map((ticket, idx) => (
               <div key={ticket.id} className="col-span-1 rounded-2xl p-5 flex flex-col justify-between bg-gradient-to-b from-[#18181A] to-[#111111] border border-white/5 shadow-xl relative group">
@@ -545,3 +510,4 @@ export default function MeuDia() {
     </div>
   );
 }
+

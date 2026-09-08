@@ -27,6 +27,7 @@ const Contas = lazy(() => import("./pages/Contas"));
 const ContasFixas = lazy(() => import("./pages/ContasFixas"));
 const PedidosCompras = lazy(() => import("./pages/PedidosCompras"));
 const Fornecedores = lazy(() => import("./pages/Fornecedores"));
+const BusinessPlan = lazy(() => import("./pages/BusinessPlan"));
 
 const ComparativoContas = lazy(() => import("./pages/ComparativoContas"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -309,6 +310,16 @@ const App = () => (
             />
 
 
+            <Route
+              path="/business-plan"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <BusinessPlan />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
             {/* Rotas Mobile do Instalador (Acesso Livre para Apresentação) */}
             <Route
               path="/instalador"

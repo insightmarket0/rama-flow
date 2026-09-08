@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { 
+  FileText,
   Zap, 
   Target, 
   Megaphone, 
@@ -91,7 +92,8 @@ const NAV_GROUPS = [
     icon: LineChart,
     title: "Gestão",
     subItems: [
-      { title: "Metas e Visão", url: "/metas", icon: Target },
+              { title: "Business Plan", url: "/business-plan", icon: FileText },
+        { title: "Metas e Visão", url: "/metas", icon: Target },
       { title: "Playbooks (SOPs)", url: "/playbooks", icon: BookOpen },
       { title: "Instaladores Externos", url: "/instaladores", icon: Truck },
     ]

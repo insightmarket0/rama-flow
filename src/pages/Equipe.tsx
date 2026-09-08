@@ -45,7 +45,7 @@ export default function Equipe() {
       careerPlan: "Consolidação como Chief Operating Officer (COO) e Chief Financial Officer (CFO).",
       strategicFocus: ["Otimização de Custos", "Estruturação de Equipes", "KPIs Financeiros"],
       goals: ["Reduzir custos operacionais em 15%", "Aumentar a margem de lucro líquida", "Escalar a capacidade de atendimento"],
-      children: ["william", "alyson", "mara"]
+      children: ["william", "alyson", "mara", "tecnico_gas"]
     },
     {
       departmentBadge: "Equipe de Marketing",
@@ -135,7 +135,30 @@ export default function Equipe() {
       strategicFocus: ["Tempo de Expedição", "Controle de Qualidade (Erro Zero)", "Gestão de Transportadoras"],
       goals: ["Despachar 100% dos pedidos no mesmo dia", "Reduzir taxa de erro na separação para zero", "Otimizar custos de embalagem"],
       children: []
-    }
+    },
+      {
+      departmentBadge: "Serviços em Campo",
+      id: "tecnico_gas",
+        name: "Técnico Instalador",
+        role: "Instalação & Manutenção",
+        focus: "Mangueiras de Gás e Visitas",
+        icon: ActivitySquare,
+        color: "from-orange-400 to-red-500",
+        textColor: "text-orange-400",
+        bgColor: "bg-orange-400/10",
+        borderColor: "border-orange-400/20",
+        description: "Técnico responsável pela instalação de mangueiras de gás na rua, garantindo segurança e qualidade no atendimento aos clientes finais.",
+        tags: ["Instalação", "Serviços", "Segurança"],
+        email: "vaga_aberta@ramaflow.com",
+        phone: "(11) 90000-0000",
+        joined: "Em breve",
+        autonomy: "Serviços externos e roteamento",
+        careerPlan: "Líder de Equipe Técnica, supervisionando outros instaladores.",
+        strategicFocus: ["Qualidade da Instalação", "Segurança", "Satisfação do Cliente"],
+        goals: ["Zerar vazamentos ou retornos", "Cumprir 100% da agenda de visitas", "Manter avaliação 5 estrelas"],
+        children: []
+      },
+
   ];
 
   const renderNode = (nodeId: string) => {
