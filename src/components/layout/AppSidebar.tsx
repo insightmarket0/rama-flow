@@ -164,8 +164,15 @@ export function AppSidebar() {
       }
     }
 
+    if (user?.email === "william@rama.com") {
+      if (!["home", "operacao", "marketing", "gestao"].includes(group.id)) {
+        return null;
+      }
+    }
+
     return modifiedGroup;
   }).filter(Boolean) as typeof NAV_GROUPS;
+
 
   if (user?.email === "mara@hotmail.com") {
     const maraOrder = ["home", "expedicao", "operacao", "gestao"];

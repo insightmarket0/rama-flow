@@ -24,7 +24,7 @@ export default function Equipe() {
       careerPlan: "Expansão internacional e escalabilidade de novos modelos de negócio.",
       strategicFocus: ["Governança", "Fusões e Aquisições", "Estratégia de Longo Prazo"],
       goals: ["Dobrar o faturamento anual", "Estruturar novos canais de distribuição", "Garantir a visão estratégica"],
-      children: ["anderson"]
+      children: ["anderson", "alyson"]
     },
     {
       id: "anderson",
@@ -45,7 +45,7 @@ export default function Equipe() {
       careerPlan: "Consolidação como Chief Operating Officer (COO) e Chief Financial Officer (CFO).",
       strategicFocus: ["Otimização de Custos", "Estruturação de Equipes", "KPIs Financeiros"],
       goals: ["Reduzir custos operacionais em 15%", "Aumentar a margem de lucro líquida", "Escalar a capacidade de atendimento"],
-      children: ["william", "alyson", "mara", "tecnico_gas"]
+      children: ["william", "mara", "tecnico_gas"]
     },
     {
       departmentBadge: "Equipe de Marketing",

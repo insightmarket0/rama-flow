@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { FaTiktok } from "react-icons/fa";
 import { AreaChart, Area, ResponsiveContainer, YAxis } from "recharts";
 import {
   TrendingUp,
@@ -89,15 +90,101 @@ const ASSETS = [
 
 export default function Marketing() {
 
-  const [socialMetrics, setSocialMetrics] = useState({
-    instagram: { 
-      followers: 135145, likes: 42500, comments: 8200, followersGrowth: 1.2,
-      history: [{ name: "1", value: 133000 }, { name: "2", value: 134000 }, { name: "3", value: 134500 }, { name: "4", value: 135145 }]
-    },
-    tiktok: { 
-      followers: 241800, likes: 89200, comments: 14500, followersGrowth: 5.4,
-      history: [{ name: "1", value: 230000 }, { name: "2", value: 235000 }, { name: "3", value: 239000 }, { name: "4", value: 241800 }]
+  const [isSalesModalOpen, setIsSalesModalOpen] = useState(false);
+  const [salesForm, setSalesForm] = useState({ vendas: 0, vendasGrowth: 0 });
+
+  const handleEditSales = () => {
+    setSalesForm({ vendas: marketingBudget.vendas || 0, vendasGrowth: marketingBudget.vendasGrowth || 0 });
+    setIsSalesModalOpen(true);
+  };
+
+  const handleSaveSales = () => {
+    const updated = { ...marketingBudget, vendas: salesForm.vendas, vendasGrowth: salesForm.vendasGrowth };
+    setMarketingBudget(updated);
+    localStorage.setItem("rama_marketing_budget", JSON.stringify(updated));
+    setIsSalesModalOpen(false);
+  };
+
+
+  const [isScalingActive, setIsScalingActive] = useState(false);
+  const [isNewMonthPromptOpen, setIsNewMonthPromptOpen] = useState(false);
+  const [approvals, setApprovals] = useState([
+    { id: 1, title: 'Cachê Extra: Virgínia', campaign: 'Campanha Black Friday', amount: 15000, description: 'Cachê adicional aprovado em reunião com diretoria para fechar 3 stories e 1 reel.' },
+    { id: 2, title: 'Boost Meta Ads', campaign: 'Escala de Criativo #04', amount: 5000, description: 'Injeção de verba para escalar criativo validado com ROAS > 4.' }
+  ]);
+  const [isCreateApprovalModalOpen, setIsCreateApprovalModalOpen] = useState(false);
+  const [approvalForm, setApprovalForm] = useState({ title: '', campaign: '', amount: 0, description: '' });
+  const [approvalDetails, setApprovalDetails] = useState(null);
+
+  React.useEffect(() => {
+    const savedApprovals = localStorage.getItem("rama_approvals");
+    if (savedApprovals) {
+      try { setApprovals(JSON.parse(savedApprovals)); } catch(e){}
     }
+  }, []);
+
+  const handleCreateApproval = () => {
+    const newApproval = { ...approvalForm, id: Date.now() };
+    const updated = [...approvals, newApproval];
+    setApprovals(updated);
+    localStorage.setItem("rama_approvals", JSON.stringify(updated));
+    setIsCreateApprovalModalOpen(false);
+    setApprovalForm({ title: '', campaign: '', amount: 0, description: '' });
+  };
+
+  const handleApprove = (id, amount) => {
+    const updated = approvals.filter(a => a.id !== id);
+    setApprovals(updated);
+    localStorage.setItem("rama_approvals", JSON.stringify(updated));
+    
+    // Add to spent budget
+    const updatedBudget = { ...marketingBudget, gasto: marketingBudget.gasto + amount };
+    setMarketingBudget(updatedBudget);
+    localStorage.setItem("rama_marketing_budget", JSON.stringify(updatedBudget));
+    setApprovalDetails(null);
+  };
+
+  const handleReject = (id) => {
+    const updated = approvals.filter(a => a.id !== id);
+    setApprovals(updated);
+    localStorage.setItem("rama_approvals", JSON.stringify(updated));
+    setApprovalDetails(null);
+  };
+
+  const handleSplitChange = (key, newValue) => {
+    const currentSplit = marketingBudget.budgetSplit || { trafego: 60, influenciadores: 25, seeding: 15 };
+    const oldVal = currentSplit[key];
+    let delta = newValue - oldVal;
+    
+    if (newValue > 100) newValue = 100;
+    if (newValue < 0) newValue = 0;
+    
+    const others = ['trafego', 'influenciadores', 'seeding'].filter(k => k !== key);
+    const otherTotal = currentSplit[others[0]] + currentSplit[others[1]];
+
+    let newForm = { ...currentSplit, [key]: newValue };
+
+    if (otherTotal === 0) {
+       const remainder = 100 - newValue;
+       newForm[others[0]] = Math.round(remainder / 2);
+       newForm[others[1]] = remainder - newForm[others[0]];
+    } else {
+       const remainder = 100 - newValue;
+       let val0 = Math.round((currentSplit[others[0]] / otherTotal) * remainder);
+       let val1 = remainder - val0;
+       newForm[others[0]] = val0;
+       newForm[others[1]] = val1;
+    }
+    
+    const updated = { ...marketingBudget, budgetSplit: newForm };
+    setMarketingBudget(updated);
+    localStorage.setItem("rama_marketing_budget", JSON.stringify(updated));
+  };
+
+
+  const [socialMetrics, setSocialMetrics] = useState({
+    instagram: { followers: 135145, likes: 42500, comments: 8200, followersGrowth: 1.2, history: [{name:"M-4", value: 120000}, {name:"M-3", value: 125000}, {name:"M-2", value: 130000}, {name:"M-1", value: 135145}] },
+    tiktok: { followers: 241800, likes: 89200, comments: 14500, followersGrowth: 5.4, history: [{name:"M-4", value: 190000}, {name:"M-3", value: 210000}, {name:"M-2", value: 230000}, {name:"M-1", value: 241800}] }
   });
   const [isSocialModalOpen, setIsSocialModalOpen] = useState(false);
   const [editingSocial, setEditingSocial] = useState("instagram");
@@ -106,22 +193,13 @@ export default function Marketing() {
   React.useEffect(() => {
     const saved = localStorage.getItem("rama_social_metrics");
     if (saved) {
-      try { 
-        const parsed = JSON.parse(saved);
-        if (parsed.instagram && parsed.instagram.history) {
-          setSocialMetrics(parsed); 
-        }
-      } catch (e) {}
+      try { setSocialMetrics(JSON.parse(saved)); } catch (e) {}
     }
   }, []);
 
   const handleEditSocial = (platform) => {
     setEditingSocial(platform);
-    setSocialForm({
-      followers: socialMetrics[platform].followers,
-      likes: socialMetrics[platform].likes,
-      comments: socialMetrics[platform].comments
-    });
+    setSocialForm(socialMetrics[platform]);
     setIsSocialModalOpen(true);
   };
 
@@ -131,17 +209,13 @@ export default function Marketing() {
     if (oldFollowers > 0 && socialForm.followers !== oldFollowers) {
       growth = (((socialForm.followers - oldFollowers) / oldFollowers) * 100);
     } else {
-      growth = socialMetrics[editingSocial].followersGrowth; 
+      growth = socialMetrics[editingSocial].followersGrowth; // keep old if no change
     }
-    const newHistory = [...socialMetrics[editingSocial].history, { name: "Novo", value: socialForm.followers }];
-    if (newHistory.length > 10) newHistory.shift();
-
     const updated = {
       ...socialMetrics,
       [editingSocial]: {
         ...socialForm,
-        followersGrowth: parseFloat(Number(growth).toFixed(1)),
-        history: newHistory
+        followersGrowth: parseFloat(Number(growth).toFixed(1))
       }
     };
     setSocialMetrics(updated);
@@ -152,6 +226,90 @@ export default function Marketing() {
   const formatK = (num) => {
     if (num >= 1000) return (num / 1000).toFixed(1) + "K";
     return num.toString();
+  };
+
+  
+  // --- BUDGET & SALES STATES ---
+  const getCurrentMonthStr = () => {
+    const months = ['janeiro', 'fevereiro', 'marco', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+    return months[new Date().getMonth()];
+  };
+
+  const getMonthName = (monthStr) => {
+    if (!monthStr) return "";
+    const map = {
+      janeiro: 'Janeiro', fevereiro: 'Fevereiro', marco: 'Março',
+      abril: 'Abril', maio: 'Maio', junho: 'Junho',
+      julho: 'Julho', agosto: 'Agosto', setembro: 'Setembro',
+      outubro: 'Outubro', novembro: 'Novembro', dezembro: 'Dezembro'
+    };
+    return map[monthStr] || monthStr;
+  };
+
+  const [marketingBudget, setMarketingBudget] = useState(() => {
+    const saved = localStorage.getItem("rama_marketing_budget");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.currentMonth !== getCurrentMonthStr()) {
+        parsed.needsMonthUpdate = true;
+      }
+      return parsed;
+    }
+    return {
+      currentMonth: getCurrentMonthStr(),
+      total: 150000,
+      gasto: 87540,
+      vendas: 450000,
+      vendasGrowth: 15,
+      history: [],
+      budgetSplit: { trafego: 52, cache: 48, seeding: 0 }
+    };
+  });
+
+  const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
+  const [budgetForm, setBudgetForm] = useState({ total: 0, gasto: 0 });
+  
+  // NOTE: isNewMonthPromptOpen and isScalingActive were already injected by inject_hooks_final.cjs!
+  // Let's NOT duplicate them if they exist! Wait, inject_hooks_final injected them!
+  // Let's just define the handlers for Budget!
+
+  const handleEditBudget = () => {
+    setBudgetForm({ total: marketingBudget.total, gasto: marketingBudget.gasto });
+    setIsBudgetModalOpen(true);
+  };
+
+  const handleSaveBudget = () => {
+    const updated = { ...marketingBudget, total: budgetForm.total, gasto: budgetForm.gasto };
+    setMarketingBudget(updated);
+    localStorage.setItem("rama_marketing_budget", JSON.stringify(updated));
+    setIsBudgetModalOpen(false);
+  };
+
+  const handleConfirmNewMonth = (keepSameBudget) => {
+    const newHistory = [...(marketingBudget.history || [])];
+    if (marketingBudget.total > 0 || marketingBudget.gasto > 0) {
+      newHistory.push({
+        month: marketingBudget.currentMonth,
+        total: marketingBudget.total,
+        gasto: marketingBudget.gasto
+      });
+    }
+    const updated = {
+      ...marketingBudget,
+      currentMonth: getCurrentMonthStr(),
+      total: keepSameBudget ? marketingBudget.total : 0,
+      gasto: 0,
+      history: newHistory
+    };
+    delete updated.needsMonthUpdate;
+    setMarketingBudget(updated);
+    localStorage.setItem("rama_marketing_budget", JSON.stringify(updated));
+    // The state setter for isNewMonthPromptOpen is already defined!
+    setIsNewMonthPromptOpen(false);
+    if (!keepSameBudget) {
+      setBudgetForm({ total: 0, gasto: 0 });
+      setIsBudgetModalOpen(true);
+    }
   };
 
   const [activeTab, setActiveTab] = useState<"orcamento" | "cockpit" | "roadmap" | "crm" | "performance">("cockpit");
@@ -186,7 +344,7 @@ export default function Marketing() {
         {/* Tabs de Navegação Estilo Pill */}
         <div className="flex items-center gap-2 mt-2 shrink-0 overflow-x-auto no-scrollbar">
           {[
-            { id: "cockpit", label: "Cockpit Executivo" },
+            { id: "cockpit", label: "Visão Analítica" },
             { id: "orcamento", label: "Orçamento e Investimentos" },
             { id: "roadmap", label: "Creative Studio (Roteiros)" },
             { id: "crm", label: "CRM Influenciadores" },
@@ -233,7 +391,6 @@ export default function Marketing() {
                         </div>
                         <button onClick={() => handleEditSocial('instagram')} className="bg-white/5 hover:bg-white/10 text-gray-400 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase transition-colors border border-white/10 flex items-center gap-1">Lançar +</button>
                       </div>
-                      
                       <div className="flex items-end gap-3 mb-4 mt-2">
                         <div>
                           <span className="text-[9px] font-medium tracking-widest uppercase text-gray-500 block mb-0.5">Seguidores Totais</span>
@@ -243,7 +400,6 @@ export default function Marketing() {
                           </div>
                         </div>
                       </div>
-
                       <div className="grid grid-cols-2 gap-2 mb-4">
                         <div className="bg-[#111] border border-white/5 rounded-lg p-2.5 flex flex-col justify-between">
                           <div className="flex items-center gap-1.5 mb-1">
@@ -260,7 +416,6 @@ export default function Marketing() {
                           <span className="text-white text-sm font-bold">{formatK(socialMetrics.instagram.comments)}</span>
                         </div>
                       </div>
-
                       <div className="mt-auto pt-3 border-t border-white/5 flex-1 min-h-[80px] flex flex-col relative">
                         <span className="text-[9px] font-medium tracking-widest uppercase text-gray-600 absolute top-2 left-0 z-10">Evolução de Audiência</span>
                         <ResponsiveContainer width="100%" height="100%">
@@ -278,65 +433,58 @@ export default function Marketing() {
                       </div>
                     </div>
 
-{/* TIKTOK COMPACTO */}
-                    <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-4 relative overflow-hidden flex flex-col">
+                    
+                    {/* TIKTOK COMPACTO */}
+                    <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-4 relative overflow-hidden flex flex-col h-[320px]">
                       <div className="absolute -right-10 -top-10 w-24 h-24 bg-cyan-500/10 rounded-full blur-[30px] pointer-events-none"></div>
-                      <div className="flex items-center justify-between mb-4 relative z-10">
+                      <div className="flex items-center justify-between mb-2 relative z-10">
                         <div className="flex items-center gap-2">
                           <div className="p-1.5 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg">
-                            <PlayCircle className="w-4 h-4 text-white" />
+                            <FaTiktok className="w-4 h-4 text-white" />
                           </div>
                           <h3 className="text-white text-sm font-semibold tracking-tight">TikTok</h3>
                         </div>
-                        <span className="text-[10px] text-gray-500">ÚÚltimos 7 dias</span>
+                        <button onClick={() => handleEditSocial('tiktok')} className="bg-white/5 hover:bg-white/10 text-gray-400 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase transition-colors border border-white/10 flex items-center gap-1">Lançar +</button>
                       </div>
-                      
-                      <div className="flex items-end gap-3 mb-4">
+                      <div className="flex items-end gap-3 mb-4 mt-2">
                         <div>
-                          <span className="text-[9px] font-medium tracking-widest uppercase text-gray-500 block mb-0.5">Seguidores</span>
+                          <span className="text-[9px] font-medium tracking-widest uppercase text-gray-500 block mb-0.5">Seguidores Totais</span>
                           <div className="flex items-center gap-2">
-                            <span className="text-xl font-bold text-white">{socialMetrics.tiktok.followers.toLocaleString('pt-BR')}</span>
+                            <span className="text-2xl font-bold text-white">{socialMetrics.tiktok.followers.toLocaleString('pt-BR')}</span>
                             <span className="text-emerald-400 text-[10px] font-medium flex items-center bg-emerald-400/10 px-1.5 py-0.5 rounded"><ArrowUpRight className="w-2.5 h-2.5 mr-0.5" /> {socialMetrics.tiktok.followersGrowth > 0 ? '+' : ''}{socialMetrics.tiktok.followersGrowth}%</span>
                           </div>
                         </div>
                       </div>
-
                       <div className="grid grid-cols-2 gap-2 mb-4">
-                        <div className="bg-[#111] border border-white/5 rounded-lg p-2 flex items-center justify-between">
-                          <div className="flex items-center gap-1.5">
+                        <div className="bg-[#111] border border-white/5 rounded-lg p-2.5 flex flex-col justify-between">
+                          <div className="flex items-center gap-1.5 mb-1">
                             <Heart className="w-3 h-3 text-gray-500" />
-                            <span className="text-[10px] text-gray-400">Likes</span>
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Likes (Mês)</span>
                           </div>
-                          <span className="text-white text-xs font-medium">{formatK(socialMetrics.tiktok.likes)}</span>
+                          <span className="text-white text-sm font-bold">{formatK(socialMetrics.tiktok.likes)}</span>
                         </div>
-                        <div className="bg-[#111] border border-white/5 rounded-lg p-2 flex items-center justify-between">
-                          <div className="flex items-center gap-1.5">
+                        <div className="bg-[#111] border border-white/5 rounded-lg p-2.5 flex flex-col justify-between">
+                          <div className="flex items-center gap-1.5 mb-1">
                             <MessageCircle className="w-3 h-3 text-gray-500" />
-                            <span className="text-[10px] text-gray-400">Coment.</span>
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Comentários</span>
                           </div>
-                          <span className="text-white text-xs font-medium">{formatK(socialMetrics.tiktok.comments)}</span>
+                          <span className="text-white text-sm font-bold">{formatK(socialMetrics.tiktok.comments)}</span>
                         </div>
                       </div>
-
-                      <div className="mt-auto pt-3 border-t border-white/5">
-                        <span className="text-[9px] font-medium tracking-widest uppercase text-gray-500 mb-2 block">Top Videos (Views)</span>
-                        <div className="space-y-2">
-                          {[
-                            { title: "Review da Cadeira", views: "340K", growth: "+15%" },
-                            { title: "Como montar em 5 min", views: "210K", growth: "+8%" },
-                            { title: "Trend da Empresa", views: "195K", growth: "+4%" }
-                          ].map((post, i) => (
-                            <div key={i} className="flex items-center justify-between group cursor-pointer hover:bg-white/5 p-1 -mx-1 rounded transition-colors">
-                              <div className="flex items-center gap-2.5">
-                                <div className="w-6 h-6 bg-[#1a1a1a] rounded border border-white/5 flex items-center justify-center shrink-0">
-                                  <FileVideo className="w-3 h-3 text-gray-600 group-hover:text-white transition-colors" />
-                                </div>
-                                <span className="text-[11px] text-gray-400 group-hover:text-gray-200 transition-colors truncate max-w-[100px]">{post.title}</span>
-                              </div>
-                              <span className="text-[10px] font-semibold text-white">{post.views}</span>
-                            </div>
-                          ))}
-                        </div>
+                      <div className="mt-auto pt-3 border-t border-white/5 flex-1 min-h-[80px] flex flex-col relative">
+                        <span className="text-[9px] font-medium tracking-widest uppercase text-gray-600 absolute top-2 left-0 z-10">Evolução de Audiência</span>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={socialMetrics.tiktok.history}>
+                            <defs>
+                              <linearGradient id="colorTikTok" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4}/>
+                                <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+                              </linearGradient>
+                            </defs>
+                            <Area type="monotone" dataKey="value" stroke="#06b6d4" strokeWidth={2} fillOpacity={1} fill="url(#colorTikTok)" />
+                            <YAxis domain={['dataMin', 'dataMax']} hide />
+                          </AreaChart>
+                        </ResponsiveContainer>
                       </div>
                     </div>
                   </div>
@@ -642,34 +790,34 @@ export default function Marketing() {
           {activeTab === "orcamento" && (
             <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar pb-6 mt-4">
             <div className="grid grid-cols-4 gap-3 shrink-0">
-              <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors">
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div className="flex justify-between mb-1.5">
-                  <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">Orçamento</span>
-                  <DollarSign className="w-3.5 h-3.5 text-gray-600" />
+                              <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors cursor-pointer" onClick={handleEditBudget}>
+                  <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="flex justify-between mb-1.5 items-center">
+                    <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">Orçamento ({getMonthName(marketingBudget.currentMonth)})</span>
+                    <button className="bg-white/5 hover:bg-white/10 text-gray-400 px-2 py-0.5 rounded text-[9px] font-medium transition-colors border border-white/5 uppercase">Edit</button>
+                  </div>
+                  <div className="flex items-end justify-between mt-auto">
+                    <span className="text-lg font-semibold text-white tracking-tight">R$ {marketingBudget.total.toLocaleString('pt-BR')}</span>
+                    <span className="text-[10px] text-gray-400">{Math.round((marketingBudget.gasto/marketingBudget.total)*100 || 0)}% gasto</span>
+                  </div>
+                  <div className="w-full h-1 bg-[#1a1a1a] rounded-full mt-2 overflow-hidden relative">
+                    <div className="h-full bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)] transition-all duration-500 relative z-10" style={{ width: `${Math.min((marketingBudget.gasto/marketingBudget.total)*100 || 0, 100)}%` }}></div>
+                  </div>
                 </div>
-                <div className="flex items-end justify-between">
-                  <span className="text-lg font-semibold text-white tracking-tight">{currentKPI.orcamento}</span>
-                  <span className="text-[10px] text-gray-500">{currentKPI.percentGasto}% gasto</span>
-                </div>
-                <div className="w-full h-1 bg-[#1a1a1a] rounded-full mt-2 overflow-hidden">
-                  <div className="h-full bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)] transition-all duration-500" style={{ width: `${currentKPI.percentGasto}%` }}></div>
-                </div>
-              </div>
 
-              <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors">
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div className="flex justify-between mb-1.5">
-                  <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">Vendas do Site</span>
-                  <ShoppingBag className="w-3.5 h-3.5 text-cyan-600" />
+<div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors">
+                  <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="flex justify-between mb-1.5 items-center">
+                    <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">Vendas do Site</span>
+                    <button onClick={handleEditSales} className="bg-white/5 hover:bg-white/10 text-gray-400 px-2 py-0.5 rounded text-[9px] font-medium transition-colors border border-white/5 uppercase flex items-center gap-1">Lançar +</button>
+                  </div>
+                  <div className="flex items-center gap-2 mt-auto">
+                    <span className="text-lg font-semibold text-white tracking-tight">R$ {(marketingBudget.vendas || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <span className="flex items-center text-cyan-400 text-[10px] font-medium bg-cyan-500/10 px-1.5 py-0.5 rounded-full border border-cyan-500/20">
+                      <ArrowUpRight className="w-2.5 h-2.5 mr-0.5" /> {marketingBudget.vendasGrowth || 0}%
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 mt-auto">
-                  <span className="text-lg font-semibold text-white tracking-tight">{currentKPI.vendasSite}</span>
-                  <span className="flex items-center text-cyan-400 text-[10px] font-medium bg-cyan-500/10 px-1.5 py-0.5 rounded-full border border-cyan-500/20">
-                    <ArrowUpRight className="w-2.5 h-2.5 mr-0.5" /> {currentKPI.vendasTrend}%
-                  </span>
-                </div>
-              </div>
 
               <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors">
                 <div className="flex justify-between mb-1.5">
@@ -685,112 +833,169 @@ export default function Marketing() {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-[#111] to-[#0a0a0a] border border-white/5 hover:border-cyan-500/30 transition-all rounded-2xl p-3.5 flex items-center justify-between cursor-pointer group shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
-                <div>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <Flame className="w-3.5 h-3.5 text-cyan-400 drop-shadow-[0_0_5px_rgba(6,182,212,0.8)]" />
-                    <span className="text-white text-xs font-medium tracking-wide">Modo Scaling</span>
+                                              <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors">
+                  <div className="flex justify-between mb-1.5">
+                    <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">CPA (Custo Acq.)</span>
+                    <Activity className="w-3.5 h-3.5 text-gray-600" />
                   </div>
-                  <p className="text-[10px] text-gray-400 leading-tight">Injetar verba automática<br/>na campanha vencedora.</p>
+                  <div className="flex items-center gap-2 mt-auto">
+                    <span className="text-lg font-semibold text-white tracking-tight">{currentKPI?.cpa || "R$ 12,50"}</span>
+                    <span className="flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded-full border text-emerald-400 bg-emerald-400/10 border-emerald-400/20">
+                      <ArrowDownRight className="w-2.5 h-2.5 mr-0.5" /> 8%
+                    </span>
+                  </div>
                 </div>
-              </div>
+
+<div 
+                  onClick={() => setIsScalingActive(!isScalingActive)}
+                  className={`bg-[#0a0a0a] border ${isScalingActive ? 'border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.15)]' : 'border-white/5'} rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden cursor-pointer transition-all duration-300 group`}
+                >
+                  <div className={`absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent ${isScalingActive ? 'via-cyan-500' : 'via-white/10'} to-transparent transition-colors`} ></div>
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <div className={`p-1.5 rounded-lg ${isScalingActive ? 'bg-cyan-500/20' : 'bg-white/5'} transition-colors`}>
+                        <Flame className={`w-4 h-4 ${isScalingActive ? 'text-cyan-400 drop-shadow-[0_0_5px_rgba(6,182,212,0.8)]' : 'text-gray-500'} transition-all`} />
+                      </div>
+                      <span className={`text-xs font-bold uppercase tracking-widest ${isScalingActive ? 'text-cyan-400' : 'text-gray-400'}`}>Modo Scaling</span>
+                    </div>
+                    <div className={`w-8 h-4 rounded-full flex items-center px-0.5 transition-colors ${isScalingActive ? 'bg-cyan-500' : 'bg-[#222]'}`}>
+                      <div className={`w-3 h-3 bg-white rounded-full transition-transform ${isScalingActive ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                    </div>
+                  </div>
+                  <div className="mt-auto">
+                    {isScalingActive ? (
+                      <div className="flex flex-col gap-1">
+                        <span className="text-white text-xs font-semibold">Automação Ativa</span>
+                        <p className="text-[9px] text-cyan-400/80 leading-tight">Injetando +20% de verba se o CPA &lt; R$ 15,00.</p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-1">
+                        <span className="text-gray-400 text-xs font-semibold">Pausado</span>
+                        <p className="text-[9px] text-gray-600 leading-tight">Clique para ligar as regras de automação de campanhas.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
             </div>
 
-            {/* Painéis Corporativos */}
+              {/* Painéis Corporativos */}
             <div className="mt-6 flex flex-col gap-6 max-w-full pb-4">
               
               {/* Split Superior: Distribuição & Aprovações */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
                 
                 {/* 1. Distribuição de Verba (Burn Rate & Split) */}
-                <div className="lg:col-span-7 bg-[#0a0a0a] border border-white/5 rounded-2xl p-5 flex flex-col">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-white text-sm font-semibold tracking-tight">Split de Investimentos</h3>
-                    <span className="text-xs text-gray-500 font-medium tracking-widest uppercase">Julho / 2026</span>
+                
+                  <div className="lg:col-span-7 bg-[#0a0a0a] border border-white/5 rounded-2xl p-5 flex flex-col relative overflow-hidden group">
+                    <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div className="flex items-center justify-between mb-6 relative z-10">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-white text-sm font-semibold tracking-tight">Divisão do Orçamento (Onde investimos)</h3>
+                        <span className="bg-white/5 text-gray-400 px-2 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase border border-white/5">Interativo</span>
+                      </div>
+                      <span className="text-xs text-gray-500 font-medium tracking-widest uppercase">{getMonthName(marketingBudget.currentMonth)}</span>
+                    </div>
+                    
+                    <div className="space-y-6 mt-auto relative z-10">
+                      <div>
+                        <div className="flex justify-between text-xs mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]"></span>
+                            <span className="text-gray-300 font-medium">Tráfego Pago (Meta/TikTok)</span>
+                          </div>
+                          <span className="text-white font-bold text-sm">{marketingBudget.budgetSplit?.trafego || 0}%</span>
+                        </div>
+                        <div className="relative w-full h-3 bg-[#1a1a1a] rounded-full overflow-hidden hover:bg-[#222] transition-colors cursor-ew-resize">
+                          <div className="h-full bg-cyan-500 transition-all duration-75 pointer-events-none" style={{ width: `${marketingBudget.budgetSplit?.trafego || 0}%` }}></div>
+                          <input 
+                            type="range" min="0" max="100" 
+                            value={marketingBudget.budgetSplit?.trafego || 0}
+                            onChange={(e) => handleSplitChange('trafego', parseInt(e.target.value))}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize m-0 p-0"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <div className="flex justify-between text-xs mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span>
+                            <span className="text-gray-300 font-medium">Cachê (Influenciadores)</span>
+                          </div>
+                          <span className="text-white font-bold text-sm">{marketingBudget.budgetSplit?.influenciadores || 0}%</span>
+                        </div>
+                        <div className="relative w-full h-3 bg-[#1a1a1a] rounded-full overflow-hidden hover:bg-[#222] transition-colors cursor-ew-resize">
+                          <div className="h-full bg-purple-500 transition-all duration-75 pointer-events-none" style={{ width: `${marketingBudget.budgetSplit?.influenciadores || 0}%` }}></div>
+                          <input 
+                            type="range" min="0" max="100" 
+                            value={marketingBudget.budgetSplit?.influenciadores || 0}
+                            onChange={(e) => handleSplitChange('influenciadores', parseInt(e.target.value))}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize m-0 p-0"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <div className="flex justify-between text-xs mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)]"></span>
+                            <span className="text-gray-300 font-medium">Envio de Produtos (Seeding)</span>
+                          </div>
+                          <span className="text-white font-bold text-sm">{marketingBudget.budgetSplit?.seeding || 0}%</span>
+                        </div>
+                        <div className="relative w-full h-3 bg-[#1a1a1a] rounded-full overflow-hidden hover:bg-[#222] transition-colors cursor-ew-resize">
+                          <div className="h-full bg-orange-500 transition-all duration-75 pointer-events-none" style={{ width: `${marketingBudget.budgetSplit?.seeding || 0}%` }}></div>
+                          <input 
+                            type="range" min="0" max="100" 
+                            value={marketingBudget.budgetSplit?.seeding || 0}
+                            onChange={(e) => handleSplitChange('seeding', parseInt(e.target.value))}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize m-0 p-0"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   
-                  <div className="space-y-5 mt-auto">
-                    <div>
-                      <div className="flex justify-between text-xs mb-1.5">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]"></span>
-                          <span className="text-gray-300 font-medium">Tráfego Pago (Meta/TikTok)</span>
-                        </div>
-                        <span className="text-white font-bold">60%</span>
+                  {/* 2. Pipeline de Aprovações (Corporate Workflow) */}
+                  <div className="lg:col-span-5 bg-[#0a0a0a] border border-white/5 rounded-2xl p-5 flex flex-col relative overflow-hidden group">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-white text-sm font-semibold tracking-tight">Aprovações Pendentes</h3>
+                        <button onClick={() => setIsCreateApprovalModalOpen(true)} className="bg-white/5 hover:bg-white/10 text-gray-400 px-2 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase transition-colors border border-white/5 flex items-center gap-1">Criar +</button>
                       </div>
-                      <div className="w-full h-2 bg-[#1a1a1a] rounded-full overflow-hidden">
-                        <div className="h-full bg-cyan-500" style={{ width: '60%' }}></div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <div className="flex justify-between text-xs mb-1.5">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span>
-                          <span className="text-gray-300 font-medium">Cachê Base (Influenciadores)</span>
-                        </div>
-                        <span className="text-white font-bold">25%</span>
-                      </div>
-                      <div className="w-full h-2 bg-[#1a1a1a] rounded-full overflow-hidden">
-                        <div className="h-full bg-purple-500" style={{ width: '25%' }}></div>
+                      <div className="px-2 py-0.5 bg-yellow-500/10 border border-yellow-500/20 rounded-full flex items-center gap-1.5">
+                        <Clock className="w-3 h-3 text-yellow-500" />
+                        <span className="text-[10px] text-yellow-500 font-bold uppercase tracking-widest">{approvals.length} Ações</span>
                       </div>
                     </div>
                     
-                    <div>
-                      <div className="flex justify-between text-xs mb-1.5">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)]"></span>
-                          <span className="text-gray-300 font-medium">Seeding & Envio de Produtos</span>
+                    <div className="space-y-3 mt-auto max-h-[180px] overflow-y-auto custom-scrollbar pr-1">
+                      {approvals.length === 0 ? (
+                        <div className="text-center py-8">
+                          <CheckCircle2 className="w-8 h-8 text-emerald-500/50 mx-auto mb-2" />
+                          <p className="text-gray-500 text-xs">Tudo aprovado! Nenhuma pendência.</p>
                         </div>
-                        <span className="text-white font-bold">15%</span>
-                      </div>
-                      <div className="w-full h-2 bg-[#1a1a1a] rounded-full overflow-hidden">
-                        <div className="h-full bg-amber-500" style={{ width: '15%' }}></div>
-                      </div>
+                      ) : approvals.map(app => (
+                        <div key={app.id} className="bg-[#111] border border-white/5 rounded-xl p-3 flex flex-col gap-2 hover:border-white/10 transition-colors cursor-pointer" onClick={() => setApprovalDetails(app)}>
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h4 className="text-white text-xs font-bold">{app.title}</h4>
+                              <span className="text-[10px] text-gray-500">{app.campaign}</span>
+                            </div>
+                            <span className="text-cyan-400 font-bold text-xs bg-cyan-400/10 px-1.5 py-0.5 rounded">R$ {app.amount.toLocaleString('pt-BR')}</span>
+                          </div>
+                          <div className="flex justify-between items-center mt-1 border-t border-white/5 pt-2">
+                            <span className="text-[9px] text-gray-600 uppercase tracking-widest font-bold">Ver Detalhes</span>
+                            <div className="flex gap-2">
+                              <button onClick={(e) => { e.stopPropagation(); handleReject(app.id); }} className="text-[9px] font-bold px-2 py-1 bg-white/5 hover:bg-red-500/20 hover:text-red-400 rounded uppercase text-gray-400 transition-colors">Rejeitar</button>
+                              <button onClick={(e) => { e.stopPropagation(); handleApprove(app.id, app.amount); }} className="text-[9px] font-bold px-2 py-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded uppercase hover:bg-cyan-500 hover:text-white transition-colors">Aprovar</button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
-
-                {/* 2. Pipeline de Aprovações (Corporate Workflow) */}
-                <div className="lg:col-span-5 bg-[#0a0a0a] border border-white/5 rounded-2xl p-5 flex flex-col">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-white text-sm font-semibold tracking-tight">Aprovações Pendentes</h3>
-                    <div className="px-2 py-0.5 bg-yellow-500/10 border border-yellow-500/20 rounded-full flex items-center gap-1.5">
-                      <Clock className="w-3 h-3 text-yellow-500" />
-                      <span className="text-[10px] text-yellow-500 font-bold uppercase tracking-widest">3 Ações</span>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3 mt-1 flex-1 overflow-y-auto custom-scrollbar pr-1">
-                    <div className="bg-[#111] border border-white/5 p-3 rounded-xl flex flex-col gap-2 relative overflow-hidden group hover:border-yellow-500/30 transition-all">
-                      <div className="flex justify-between items-start">
-                        <span className="text-xs text-white font-medium">Cachê Extra: Virgínia</span>
-                        <span className="text-xs font-bold text-gray-300">R$ 15.000</span>
-                      </div>
-                      <div className="flex items-center justify-between mt-1">
-                        <span className="text-[10px] text-gray-500">Campanha Black Friday</span>
-                        <div className="flex gap-2">
-                          <button className="text-[9px] font-bold px-2 py-1 bg-white/5 hover:bg-white/10 rounded uppercase text-gray-400">Rejeitar</button>
-                          <button className="text-[9px] font-bold px-2 py-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded uppercase hover:bg-cyan-500/20">Aprovar</button>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-[#111] border border-white/5 p-3 rounded-xl flex flex-col gap-2 relative overflow-hidden group hover:border-yellow-500/30 transition-all">
-                      <div className="flex justify-between items-start">
-                        <span className="text-xs text-white font-medium">Boost Meta Ads</span>
-                        <span className="text-xs font-bold text-gray-300">R$ 5.000</span>
-                      </div>
-                      <div className="flex items-center justify-between mt-1">
-                        <span className="text-[10px] text-gray-500">Escala de Criativo #04</span>
-                        <div className="flex gap-2">
-                          <button className="text-[9px] font-bold px-2 py-1 bg-white/5 hover:bg-white/10 rounded uppercase text-gray-400">Rejeitar</button>
-                          <button className="text-[9px] font-bold px-2 py-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded uppercase hover:bg-cyan-500/20">Aprovar</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
               </div>
 
@@ -800,6 +1005,83 @@ export default function Marketing() {
       </div>
 
       </div>
+
+      
+
+      {/* Modals para Aprovações */}
+      {isCreateApprovalModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsCreateApprovalModalOpen(false)}></div>
+          <div className="bg-[#111] border border-[#222] rounded-2xl p-6 relative z-10 w-full max-w-md shadow-2xl flex flex-col gap-4">
+            <div className="flex justify-between items-center border-b border-white/10 pb-3">
+              <h3 className="text-white font-semibold">Nova Solicitação</h3>
+              <button onClick={() => setIsCreateApprovalModalOpen(false)} className="text-gray-500 hover:text-white">x</button>
+            </div>
+            
+            <div className="space-y-4 mt-2">
+              <div>
+                <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Título da Despesa</label>
+                <input type="text" value={approvalForm.title} onChange={e => setApprovalForm({...approvalForm, title: e.target.value})} placeholder="Ex: Cachê Virgínia" className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyan-500 outline-none" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Campanha/Setor</label>
+                  <input type="text" value={approvalForm.campaign} onChange={e => setApprovalForm({...approvalForm, campaign: e.target.value})} placeholder="Ex: Black Friday" className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyan-500 outline-none" />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Valor Solicitado (R$)</label>
+                  <input type="number" value={approvalForm.amount} onChange={e => setApprovalForm({...approvalForm, amount: parseInt(e.target.value) || 0})} className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyan-500 outline-none" />
+                </div>
+              </div>
+              <div>
+                <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Justificativa / Detalhes</label>
+                <textarea value={approvalForm.description} onChange={e => setApprovalForm({...approvalForm, description: e.target.value})} rows="3" placeholder="Explique o motivo do orçamento extra..." className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyan-500 outline-none resize-none"></textarea>
+              </div>
+            </div>
+
+            <button onClick={handleCreateApproval} className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-sm py-2.5 rounded-lg mt-2 transition-colors">
+              Criar Solicitação
+            </button>
+          </div>
+        </div>
+      )}
+
+      {approvalDetails && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setApprovalDetails(null)}></div>
+          <div className="bg-[#111] border border-white/10 rounded-2xl p-6 relative z-10 w-full max-w-sm shadow-2xl flex flex-col gap-4">
+            <div className="flex justify-between items-start border-b border-white/10 pb-4 mb-2">
+              <div>
+                <h3 className="text-white font-bold text-lg leading-tight">{approvalDetails.title}</h3>
+                <span className="text-cyan-400 text-xs font-semibold uppercase tracking-widest">{approvalDetails.campaign}</span>
+              </div>
+              <button onClick={() => setApprovalDetails(null)} className="text-gray-500 hover:text-white p-1">x</button>
+            </div>
+            
+            <div className="bg-black/50 p-4 rounded-xl border border-white/5 mb-2">
+              <span className="text-[10px] uppercase font-bold text-gray-500 block mb-2">Justificativa</span>
+              <p className="text-gray-300 text-sm leading-relaxed">{approvalDetails.description || 'Nenhum detalhe adicional fornecido.'}</p>
+            </div>
+
+            <div className="flex items-center justify-between bg-cyan-500/10 border border-cyan-500/20 p-4 rounded-xl">
+              <span className="text-xs uppercase font-bold text-cyan-500">Valor Solicitado</span>
+              <span className="text-xl font-bold text-white">R$ {approvalDetails.amount.toLocaleString('pt-BR')}</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 mt-4">
+              <button onClick={() => handleReject(approvalDetails.id)} className="w-full bg-transparent border border-white/10 hover:bg-red-500/20 hover:border-red-500/30 text-white hover:text-red-400 font-bold text-sm py-3 rounded-xl transition-colors">
+                Rejeitar
+              </button>
+              <button onClick={() => handleApprove(approvalDetails.id, approvalDetails.amount)} className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-sm py-3 rounded-xl transition-colors">
+                Aprovar & Lançar
+              </button>
+            </div>
+            <p className="text-[10px] text-center text-gray-500 mt-2">
+              Ao aprovar, o valor de R$ {approvalDetails.amount.toLocaleString('pt-BR')} será adicionado automaticamente ao "Gasto" do seu Orçamento atual.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* OVERLAY: BRAND VAULT */}
       {isBrandVaultOpen && (
@@ -864,9 +1146,38 @@ export default function Marketing() {
           </div>
         </div>
       )}
-    </div>
+    
+
+      {isSalesModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsSalesModalOpen(false)}></div>
+          <div className="bg-[#111] border border-[#222] rounded-2xl p-6 relative z-10 w-full max-w-sm shadow-2xl flex flex-col gap-4">
+            <div className="flex justify-between items-center border-b border-white/10 pb-3">
+              <h3 className="text-white font-semibold flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4 text-cyan-400" />
+                Vendas do Site
+              </h3>
+              <button onClick={() => setIsSalesModalOpen(false)} className="text-gray-500 hover:text-white">x</button>
+            </div>
+            
+            <div className="space-y-4 mt-2">
+              <div>
+                <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Total em Vendas (R$)</label>
+                <input type="number" value={salesForm.vendas} onChange={e => setSalesForm({...salesForm, vendas: parseFloat(e.target.value) || 0})} className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyan-500 outline-none" />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Crescimento (%)</label>
+                <input type="number" value={salesForm.vendasGrowth} onChange={e => setSalesForm({...salesForm, vendasGrowth: parseFloat(e.target.value) || 0})} className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyan-500 outline-none" />
+              </div>
+            </div>
+
+            <button onClick={handleSaveSales} className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-sm py-2.5 rounded-lg mt-2 transition-colors">
+              Salvar Vendas
+            </button>
+          </div>
+        </div>
+      )}
+
+</div>
   );
 }
-
-
-

@@ -140,7 +140,6 @@ export function MainLayout({ children }: MainLayoutProps) {
 
       const { error: dbError } = await supabase
         .from('profiles')
-        .update({ full_name: editName })
         .update({ full_name: editName, role: editRole })
         .eq('user_id', user.id);
         
