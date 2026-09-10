@@ -1,71 +1,66 @@
-import React, { useMemo } from "react";
-import { format, isSameDay, parseISO } from "date-fns";
+﻿import React, { useMemo } from "react";
+import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useSmartContractInstallments } from "@/hooks/useSmartContractInstallments";
 import { useInstallments } from "@/hooks/useInstallments";
-import { useRecurringExpenseInstallments } from "@/hooks/useRecurringExpenseInstallments";
-import { useRecurringExpenses } from "@/hooks/useRecurringExpenses";
 import { formatCurrencyBRL } from "@/lib/format";
-import { CalendarIcon, CheckCircle2, AlertCircle } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { CheckCircle2 } from "lucide-react";
+
+// Helpers matching PaymentManagementTab
+const parseLocalDate = (dateStr: string) => {
+  if (!dateStr) return new Date();
+  const [year, month, day] = dateStr.split('T')[0].split('-');
+  return new Date(Number(year), Number(month) - 1, Number(day));
+};
+
+const getUrgencyLevel = (dueDateStr: string | null) => {
+  if (!dueDateStr) return "future";
+  const due = parseLocalDate(dueDateStr);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  due.setHours(0, 0, 0, 0);
+  
+  const diffTime = due.getTime() - today.getTime();
+  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) return "overdue";
+  if (diffDays === 0) return "today";
+  if (diffDays <= 7) return "week";
+  if (diffDays <= 15) return "month";
+  return "future";
+};
 
 export function PainelPagamentosHoje() {
+  const { upcomingInstallments = [] } = useSmartContractInstallments();
   const { installments = [] } = useInstallments();
-  const { upcomingInstallments: recurringInstallments = [] } = useRecurringExpenseInstallments();
-  const { data: rawRecurringExpenses = [] } = useRecurringExpenses();
 
   const { todayTotal, todayBills } = useMemo(() => {
-    const today = new Date();
-    const todayDay = today.getDate();
+    // Pegamos apenas as que vencem hoje (diffDays === 0)
 
-    const combined = [
-      ...installments.filter(i => i.status !== 'pago' && i.due_date).map(i => ({
-        id: i.id,
-        // @ts-ignore
-        description: `Pedido de Compra #${i.order?.order_number || ''}`,
-        value: Number(i.value),
-        dueDate: new Date(`${i.due_date}T12:00:00`),
-        type: 'var',
-        status: i.status
-      })),
-      ...recurringInstallments.filter(i => {
-        if (i.status === 'pago' || !i.due_date) return false;
-        const val = Number(i.value || (i.recurring_expense as any)?.amount || 0);
-        return val !== 5000;
-      }).map(i => ({
-        id: i.id,
-        // @ts-ignore
-        description: i.recurring_expense?.description || i.recurring_expense?.name || 'Despesa Fixa',
-        value: Number(i.value || (i.recurring_expense as any)?.amount || 0),
-        dueDate: new Date(`${i.due_date}T12:00:00`),
-        type: 'fix',
-        status: i.status
-      }))
-    ];
+    const fixBills = upcomingInstallments
+      .filter((inst: any) => getUrgencyLevel(inst.due_date) === "today")
+      .map((inst: any) => ({
+        id: inst.id,
+        description: inst.smart_contract?.name || "Conta Fixa",
+        value: Number(inst.value || 0),
+        type: 'fix'
+      }));
 
-    // Fallback: se estamos rodando local e a Edge Function não rodou, a parcela não existe.
-    // Vamos buscar direto da tabela mãe (recurring_expenses) se o due_day for hoje.
-    rawRecurringExpenses.forEach(raw => {
-      if (raw.due_day === todayDay) {
-        // Verifica se já não existe na lista 'combined'
-        const alreadyExists = combined.some(b => b.type === 'fix' && b.description === (raw.description || raw.name));
-        if (!alreadyExists && Number(raw.amount || 0) !== 5000) {
-          combined.push({
-            id: `fallback-${raw.id}`,
-            description: raw.description || raw.name || 'Despesa Fixa',
-            value: Number(raw.amount || 0),
-            dueDate: today,
-            type: 'fix',
-            status: 'pendente'
-          });
-        }
-      }
-    });
+    const varBills = installments
+      .filter((inst: any) => inst.status !== 'pago' && inst.due_date && getUrgencyLevel(inst.due_date) === "today")
+      .map((inst: any) => ({
+        id: inst.id,
+        description: `Pedido de Compra #${inst.order?.order_number || ''}`,
+        value: Number(inst.value || 0),
+        type: 'var'
+      }));
 
-    const todayItems = combined.filter(bill => isSameDay(bill.dueDate, today)).sort((a, b) => b.value - a.value);
+    const todayItems = [...fixBills, ...varBills].sort((a, b) => b.value - a.value);
+
     const total = todayItems.reduce((acc, b) => acc + b.value, 0);
 
     return { todayTotal: total, todayBills: todayItems };
-  }, [installments, recurringInstallments, rawRecurringExpenses]);
+  }, [upcomingInstallments, installments]);
 
   return (
     <div className="col-span-1 md:col-span-2 flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -100,7 +95,7 @@ export function PainelPagamentosHoje() {
               </div>
             ) : (
               <div className="space-y-3 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
-                {todayBills.map(bill => (
+                {todayBills.map((bill: any) => (
                   <div key={bill.id} className="flex items-center justify-between p-4 rounded-2xl bg-[#1A1A1D] border border-white/5 hover:border-white/10 transition-colors">
                     <div className="flex items-center gap-3">
                       <div className={`w-2 h-2 rounded-full ${bill.type === 'fix' ? 'bg-[#00FF00]' : 'bg-cyan-400'}`} />
@@ -124,3 +119,7 @@ export function PainelPagamentosHoje() {
     </div>
   );
 }
+
+// Trigger HMR
+
+// Trigger HMR again

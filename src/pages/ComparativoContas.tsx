@@ -1,12 +1,11 @@
-import React, { useMemo, useState } from "react";
+﻿import React, { useMemo, useState } from "react";
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend
 } from "recharts";
 import { format, addWeeks, startOfWeek, isSameWeek, parseISO, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useInstallments } from "@/hooks/useInstallments";
-import { useRecurringExpenseInstallments } from "@/hooks/useRecurringExpenseInstallments";
-import { useRecurringExpenses } from "@/hooks/useRecurringExpenses";
+import { useSmartContractInstallments } from "@/hooks/useSmartContractInstallments";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { formatCurrencyBRL } from "@/lib/format";
@@ -14,14 +13,12 @@ import { TrendingUp, TrendingDown, Wallet, Activity, Calendar as CalendarIcon } 
 
 export default function ComparativoContas() {
   const { installments = [] } = useInstallments();
-  const { upcomingInstallments: recurringInstallments = [] } = useRecurringExpenseInstallments();
-  const { data: rawRecurringExpenses = [] } = useRecurringExpenses();
+  const { upcomingInstallments = [] } = useSmartContractInstallments();
   const [date, setDate] = useState<Date | undefined>(new Date());
 
   const { chartData, totals, allBills } = useMemo(() => {
     const today = new Date();
-    const todayDay = today.getDate();
-    const weeks = [];
+    const weeks: Date[] = [];
     let currentWeek = startOfWeek(today, { weekStartsOn: 1 });
     
     for (let i = 0; i < 6; i++) {
@@ -41,32 +38,19 @@ export default function ComparativoContas() {
         return isSameWeek(dueDate, weekStart, { weekStartsOn: 1 });
       }).reduce((sum, inst) => sum + Number(inst.value || 0), 0);
 
-      const fixTotal = recurringInstallments.filter(inst => {
-        if (!inst.due_date || inst.status === "pago") return false;
-        const val = Number(inst.value || (inst as any).recurring_expense?.amount || 0);
-        if (val === 5000) return false; // Hide the ghost 5000 bill
+      const fixTotal = upcomingInstallments.filter((inst: any) => {
+        if (!inst.due_date) return false; // status 'pago' já foi filtrado no hook, mas garantimos
         const dueDate = parseISO(inst.due_date);
         return isSameWeek(dueDate, weekStart, { weekStartsOn: 1 });
-      }).reduce((sum, inst) => sum + Number(inst.value || (inst as any).recurring_expense?.amount || 0), 0);
-
-      // Include raw fallback for today in fixTotal if it belongs to this week
-      const fallbackFix = rawRecurringExpenses.reduce((sum, raw) => {
-        if (raw.due_day === todayDay && Number(raw.amount || 0) !== 5000) {
-           const alreadyExists = recurringInstallments.some(inst => inst.recurring_expense_id === raw.id);
-           if (!alreadyExists && isSameWeek(today, weekStart, { weekStartsOn: 1 })) {
-              return sum + Number(raw.amount || 0);
-           }
-        }
-        return sum;
-      }, 0);
+      }).reduce((sum, inst: any) => sum + Number(inst.value || 0), 0);
 
       totalVar += varTotal;
-      totalFix += (fixTotal + fallbackFix);
+      totalFix += fixTotal;
 
       return {
         name: weekStr,
         "Variáveis": varTotal,
-        "Fixas": fixTotal + fallbackFix
+        "Fixas": fixTotal
       };
     });
 
@@ -75,166 +59,128 @@ export default function ComparativoContas() {
         id: i.id,
         // @ts-ignore
         description: `Pedido de Compra #${i.order?.order_number || ''}`,
-        value: Number(i.value || (i.recurring_expense as any)?.amount || 0),
-        dueDate: new Date(`${i.due_date}T12:00:00`),
+        value: Number(i.value || 0),
+        dueDate: parseISO(i.due_date),
         type: 'var'
       })),
-      ...recurringInstallments.filter(i => {
-        if (i.status === 'pago' || !i.due_date) return false;
-        const val = Number(i.value || (i.recurring_expense as any)?.amount || 0);
-        return val !== 5000; // Hide the ghost 5000 bill
-      }).map(i => ({
+      ...upcomingInstallments.filter((i: any) => i.due_date).map((i: any) => ({
         id: i.id,
-        // @ts-ignore
-        description: i.recurring_expense?.description || i.recurring_expense?.name || 'Despesa Fixa',
-        value: Number(i.value || (i.recurring_expense as any)?.amount || 0),
-        dueDate: new Date(`${i.due_date}T12:00:00`),
+        description: i.smart_contract?.name || 'Despesa Fixa',
+        value: Number(i.value || 0),
+        dueDate: parseISO(i.due_date),
         type: 'fix'
       }))
     ];
 
-    rawRecurringExpenses.forEach(raw => {
-      if (raw.due_day === todayDay && Number(raw.amount || 0) !== 5000) {
-        const alreadyExists = combined.some(b => b.type === 'fix' && b.description === (raw.description || raw.name));
-        if (!alreadyExists) {
-          combined.push({
-            id: `fallback-${raw.id}`,
-            // @ts-ignore
-            description: raw.description || raw.name || 'Despesa Fixa',
-            value: Number(raw.amount || 0),
-            dueDate: today,
-            type: 'fix'
-          });
-        }
-      }
-    });
-    
-    const todayTotal = combined
-      .filter(bill => isSameDay(bill.dueDate, today))
-      .reduce((acc, b) => acc + b.value, 0);
-      
     return { 
       chartData: data, 
-      totals: { var: totalVar, fix: totalFix, all: totalVar + totalFix, today: todayTotal },
-      allBills: combined
+      totals: { totalVar, totalFix, total: totalVar + totalFix },
+      allBills: combined 
     };
-  }, [installments, recurringInstallments]);
+  }, [installments, upcomingInstallments]);
 
-  // Filtrar as contas para o dia selecionado no calendário
+  const todayBillsTotal = useMemo(() => {
+    return allBills
+      .filter(bill => isSameDay(bill.dueDate, new Date()))
+      .reduce((sum, bill) => sum + bill.value, 0);
+  }, [allBills]);
+
   const selectedDayBills = useMemo(() => {
     if (!date) return [];
-    return allBills
-      .filter(bill => isSameDay(bill.dueDate, date))
-      .sort((a, b) => b.value - a.value);
+    return allBills.filter(bill => isSameDay(bill.dueDate, date));
   }, [allBills, date]);
 
-  // Customizar dias com eventos (contas) no calendário
-  const modifiers = {
-    hasFixas: allBills.filter(b => b.type === 'fix').map(b => b.dueDate),
-    hasVariaveis: allBills.filter(b => b.type === 'var').map(b => b.dueDate),
-  };
-
-  const modifiersStyles = {
-    hasFixas: { borderBottom: '2px solid #00FF00' },
-    hasVariaveis: { borderBottom: '2px solid #22d3ee' },
-  };
-
   return (
-    <div className="animate-in fade-in duration-700 pb-10 w-full max-w-[1400px] flex flex-col xl:flex-row gap-6 items-start">
-      
-      {/* Lado Esquerdo - Mantendo as dimensões exatas de antes (max-w-5xl) */}
-      <div className="w-full xl:max-w-5xl space-y-6">
-        <div className="mb-2">
-          <p className="text-gray-500 font-medium text-xs tracking-widest uppercase flex items-center gap-2">
-            <Activity className="h-4 w-4 text-cyan-400" /> Análise Financeira
+    <div className="flex-1 flex flex-col xl:flex-row gap-6 p-6 h-[calc(100vh-64px)] overflow-y-auto">
+      {/* Lado Esquerdo - Gráfico e Cards */}
+      <div className="flex-1 flex flex-col gap-6 max-w-7xl mx-auto w-full">
+        <div className="flex flex-col gap-2">
+          <p className="text-cyan-400 font-bold text-[10px] tracking-[0.2em] uppercase flex items-center gap-2">
+            <Activity className="w-3 h-3" /> Análise Financeira
           </p>
           <h1 className="text-2xl font-light text-white mt-1">Comparativo de Contas</h1>
         </div>
 
-        {/* KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="bg-gradient-to-br from-[#00FF00]/20 to-[#1A1A1D] border-[#00FF00]/30 rounded-2xl shadow-[0_0_20px_rgba(0,255,0,0.1)] overflow-hidden relative group">
-            <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
-              <CalendarIcon className="h-16 w-16 text-[#00FF00]" />
-            </div>
-            <CardContent className="p-6 relative z-10">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="w-2 h-2 rounded-full bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,1)] animate-pulse"></span>
-                <p className="text-sm text-[#00FF00] font-bold tracking-wide uppercase">Para Pagar Hoje</p>
+        {/* Top KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-[#111111]/80 backdrop-blur-sm border-[#00FF00]/30 shadow-[0_0_20px_rgba(0,255,0,0.05)] rounded-2xl">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-[#00FF00] text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.8)] animate-pulse"></div>
+                Para Pagar Hoje
+                <CalendarIcon className="w-4 h-4 ml-auto opacity-50" />
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-light text-white tracking-tight">
+                {formatCurrencyBRL(todayBillsTotal)}
               </div>
-              <h2 className="text-3xl font-bold text-white tracking-tight drop-shadow-md">
-                {formatCurrencyBRL(totals.today)}
-              </h2>
-              <div className="mt-4 text-xs text-gray-400 font-medium">
-                Vencimentos do dia atual (Fixo + Var)
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-[#1A1A1D] border-white/5 rounded-2xl shadow-xl overflow-hidden relative">
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-              <Wallet className="h-16 w-16" />
-            </div>
-            <CardContent className="p-6 relative z-10">
-              <p className="text-sm text-gray-400 font-medium tracking-wide uppercase mb-1">Previsão Total (6 Semanas)</p>
-              <h2 className="text-3xl font-light text-white tracking-tight">
-                {formatCurrencyBRL(totals.all)}
-              </h2>
-              <div className="mt-4 flex items-center text-xs text-gray-500">
-                <span className="flex items-center text-[#00FF00] mr-2">
-                  <TrendingUp className="h-3 w-3 mr-1" />
-                </span>
-                Impacto financeiro futuro
-              </div>
+              <p className="text-gray-500 text-xs mt-1">Vencimentos do dia atual (Fixo + Var)</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-[#1A1A1D] border-white/5 rounded-2xl shadow-xl overflow-hidden relative">
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-              <TrendingDown className="h-16 w-16 text-cyan-400" />
-            </div>
-            <CardContent className="p-6 relative z-10">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]"></span>
-                <p className="text-sm text-gray-400 font-medium tracking-wide uppercase">Contas Variáveis</p>
+          <Card className="bg-[#111111]/80 backdrop-blur-sm border-white/5 rounded-2xl">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-gray-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+                Previsão Total (6 Semanas)
+                <Wallet className="w-4 h-4 ml-auto opacity-50" />
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-light text-white tracking-tight">
+                {formatCurrencyBRL(totals.total)}
               </div>
-              <h2 className="text-3xl font-light text-cyan-400 tracking-tight">
-                {formatCurrencyBRL(totals.var)}
-              </h2>
-              <div className="mt-4 text-xs text-gray-500">
-                Pedidos de Compra (Fornecedores)
-              </div>
+              <p className="text-[#00FF00] text-xs mt-1 flex items-center gap-1">
+                <TrendingUp className="w-3 h-3" /> Impacto financeiro futuro
+              </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-[#1A1A1D] border-white/5 rounded-2xl shadow-xl overflow-hidden relative">
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-              <TrendingUp className="h-16 w-16 text-[#00FF00]" />
-            </div>
-            <CardContent className="p-6 relative z-10">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="w-2 h-2 rounded-full bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.8)]"></span>
-                <p className="text-sm text-gray-400 font-medium tracking-wide uppercase">Contas Fixas</p>
+          <Card className="bg-[#111111]/80 backdrop-blur-sm border-white/5 rounded-2xl">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-cyan-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-cyan-400"></div>
+                Contas Variáveis
+                <TrendingDown className="w-4 h-4 ml-auto opacity-50" />
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-light text-cyan-400 tracking-tight">
+                {formatCurrencyBRL(totals.totalVar)}
               </div>
-              <h2 className="text-3xl font-light text-[#00FF00] tracking-tight">
-                {formatCurrencyBRL(totals.fix)}
-              </h2>
-              <div className="mt-4 text-xs text-gray-500">
-                Despesas Operacionais Recorrentes
+              <p className="text-gray-500 text-xs mt-1">Pedidos de Compra (Fornecedores)</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-[#111111]/80 backdrop-blur-sm border-white/5 rounded-2xl">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-[#00FF00] text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#00FF00]"></div>
+                Contas Fixas
+                <TrendingUp className="w-4 h-4 ml-auto opacity-50" />
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-light text-[#00FF00] tracking-tight">
+                {formatCurrencyBRL(totals.totalFix)}
               </div>
+              <p className="text-gray-500 text-xs mt-1">Despesas Operacionais Recorrentes</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Gráfico Principal */}
-        <Card className="bg-[#1A1A1D] border-white/5 rounded-2xl shadow-2xl h-full min-h-[450px]">
-          <CardHeader className="pb-4 border-b border-white/5">
-            <CardTitle className="text-lg font-light text-white flex items-center justify-between">
-              Projeção de Saídas
-              <span className="text-xs font-normal text-gray-500 bg-white/5 px-3 py-1 rounded-full">Próximas 6 semanas</span>
-            </CardTitle>
+        {/* Main Chart Area */}
+        <Card className="bg-[#111111]/80 backdrop-blur-sm border-white/5 rounded-3xl overflow-hidden flex-1 min-h-[400px] flex flex-col">
+          <CardHeader className="border-b border-white/5 bg-white/[0.02] py-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base font-light text-white">Projeção de Saídas</CardTitle>
+              <div className="bg-white/5 px-3 py-1 rounded-full text-xs text-gray-400 font-medium tracking-wide">
+                Próximas 6 semanas
+              </div>
+            </div>
           </CardHeader>
-          <CardContent className="pt-6">
-            <div className="h-[350px] w-full">
+          <CardContent className="p-6 flex-1 flex flex-col">
+            <div className="flex-1 min-h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
                   <defs>
@@ -247,18 +193,18 @@ export default function ComparativoContas() {
                       <stop offset="95%" stopColor="#00FF00" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff0a" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
                   <XAxis 
                     dataKey="name" 
-                    stroke="#ffffff40" 
-                    fontSize={11} 
+                    stroke="rgba(255,255,255,0.2)"
+                    tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11 }}
                     tickLine={false}
                     axisLine={false}
                     dy={10}
                   />
                   <YAxis 
-                    stroke="#ffffff40" 
-                    fontSize={11} 
+                    stroke="rgba(255,255,255,0.2)"
+                    tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11 }}
                     tickLine={false}
                     axisLine={false}
                     tickFormatter={(value) => `R$ ${(value/1000).toFixed(0)}k`}
