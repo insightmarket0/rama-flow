@@ -64,14 +64,14 @@ const getMarketplaceStyle = (marketplace: string) => {
   }
 };
 
-// ---- MOCKS AGREGADOS PARA DEMONSTRAï¿½!Ã’O ----
+// ---- MOCKS AGREGADOS PARA DEMONSTRAÃ¯Â¿Â½!Ãƒâ€™O ----
 
 const MOCK_ANNOUNCEMENTS = [
   {
     id: "ann_1",
-    creator: { full_name: "Anderson â¬¢ SupervisÃ£o" },
+    creator: { full_name: "Anderson Ã¢Â¬Â¢ SupervisÃƒÂ£o" },
     title: "Cuidado com os itens de vidro!",
-    content: "Lembrete: A partir de hoje, Ã© obrigatÃ³rio usar plÃ¡stico bolha duplo em todos os itens frÃ¡geis.",
+    content: "Lembrete: A partir de hoje, ÃƒÂ© obrigatÃƒÂ³rio usar plÃƒÂ¡stico bolha duplo em todos os itens frÃƒÂ¡geis.",
     is_pinned: true,
   }
 ];
@@ -79,15 +79,15 @@ const MOCK_ANNOUNCEMENTS = [
 const MOCK_REMINDERS = [
   {
     id: "rem_1",
-    title: "ReposiÃ§Ã£o de Insumos: Caixa Parda 30x20x10",
-    description: "O almoxarifado separou as caixas solicitadas. EstÃ£o a caminho da bancada 2.",
+    title: "ReposiÃƒÂ§ÃƒÂ£o de Insumos: Caixa Parda 30x20x10",
+    description: "O almoxarifado separou as caixas solicitadas. EstÃƒÂ£o a caminho da bancada 2.",
     due_date: new Date(new Date().setHours(17, 0, 0, 0)).toISOString(),
     status: "pendente",
   },
   {
     id: "rem_2",
-    title: "Estoque CrÃ­tico: Fita Adesiva",
-    description: "AtenÃ§Ã£o: Restam apenas 3 rolos de fita. O pedido de compra jÃ¡ foi aprovado.",
+    title: "Estoque CrÃƒÂ­tico: Fita Adesiva",
+    description: "AtenÃƒÂ§ÃƒÂ£o: Restam apenas 3 rolos de fita. O pedido de compra jÃƒÂ¡ foi aprovado.",
     due_date: new Date(new Date().setHours(10, 0, 0, 0)).toISOString(),
     status: "pendente",
   }
@@ -98,14 +98,8 @@ const MOCK_ADJUSTMENTS = [
     id: "adj_1",
     marketplace: "Mercado Livre",
     sku: "KITGAS001",
-    description: "DivergÃªncia Corrigida: O anÃºncio foi pausado e o estoque atualizado. Pode desmontar o pacote.",
+    description: "Divergência Corrigida: O anúncio foi pausado e o estoque atualizado. Pode desmontar o pacote.",
   },
-  {
-    id: "adj_2",
-    marketplace: "Geral",
-    sku: "RGUARDANAPO",
-    description: "Falta de item solucionada. O pacote do guardanapo foi enviado para sua bancada para concluir o despacho.",
-  }
 ];
 
 const getQuoteOfTheDay = (email?: string) => {
@@ -115,7 +109,7 @@ const getQuoteOfTheDay = (email?: string) => {
   const oneDay = 1000 * 60 * 60 * 24;
   const dayOfYear = Math.floor(diff / oneDay);
   
-  // Exibir versÃ­culos bÃ­blicos apenas para a conta do RogÃ©rio e da Mara
+  // Exibir versÃƒÂ­culos bÃƒÂ­blicos apenas para a conta do RogÃƒÂ©rio e da Mara
   if (email === "suporte.ramamagazine@gmail.com" || email === "mara@hotmail.com") {
     return BIBLE_VERSES[dayOfYear % BIBLE_VERSES.length];
   }
@@ -139,7 +133,7 @@ const ExpedicaoTracker = () => {
   
   const dispatches = [
     { name: "Flex (ML/Shopee)", time: "13:00", minutes: 13 * 60, color: "#00FF00" },
-    { name: "ML AgÃªncia", time: "16:00", minutes: 16 * 60, color: "#FFE600" },
+    { name: "ML AgÃƒÂªncia", time: "16:00", minutes: 16 * 60, color: "#FFE600" },
     { name: "Shopee/Amz/Mag", time: "17:00", minutes: 17 * 60, color: "#EE4D2D" },
   ];
   
@@ -182,7 +176,7 @@ const ExpedicaoTracker = () => {
         </div>
       </div>
 
-      {/* Centro: RelÃ³gio AnalÃ³gico (Menor) */}
+      {/* Centro: RelÃƒÂ³gio AnalÃƒÂ³gico (Menor) */}
       <div className="relative w-[220px] h-[135px] flex flex-col items-center justify-start overflow-hidden z-10 shrink-0">
         <svg className="absolute top-0 w-[220px] h-[220px]" viewBox="0 0 300 300">
           <g stroke="currentColor" strokeWidth="2">
@@ -205,7 +199,7 @@ const ExpedicaoTracker = () => {
 
         <div className="absolute top-[35%] flex flex-col items-center justify-center w-full">
           <span className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.1em] mb-0.5">
-            HorÃ¡rio Local
+            HorÃƒÂ¡rio Local
           </span>
           <div className="text-white text-5xl font-bold tracking-tighter" style={{ fontVariantNumeric: 'tabular-nums' }}>
             {hours.toString().padStart(2, '0')}:{minutes.toString().padStart(2, '0')}
@@ -216,7 +210,7 @@ const ExpedicaoTracker = () => {
         </div>
       </div>
       
-      {/* Direita: Indicador de OperaÃ§Ã£o */}
+      {/* Direita: Indicador de OperaÃƒÂ§ÃƒÂ£o */}
       <div className="flex flex-col items-center justify-center z-10 w-full md:w-auto mt-4 md:mt-0">
         <div className="relative flex items-center justify-center w-12 h-12 rounded-full bg-[#111] border border-white/10 shadow-[inset_0_0_15px_rgba(255,255,255,0.02)]">
           <div className="absolute inset-0 rounded-full border border-[#00FF00]/40 animate-[spin_3s_linear_infinite]" style={{ borderTopColor: 'transparent', borderLeftColor: 'transparent' }} />
@@ -234,14 +228,14 @@ const ExpedicaoTracker = () => {
 
 const MuralExpedicao = ({ user }: { user: any }) => {
   const [notes, setNotes] = useState([
-    { id: 1, text: "Lembrete: A partir de hoje, Ã© obrigatÃ³rio usar plÃ¡stico bolha duplo em todos os itens frÃ¡geis.", author: "RogÃ©rio", date: "Hoje" },
+    { id: 1, text: "Lembrete: A partir de hoje, ÃƒÂ© obrigatÃƒÂ³rio usar plÃƒÂ¡stico bolha duplo em todos os itens frÃƒÂ¡geis.", author: "RogÃƒÂ©rio", date: "Hoje" },
     { id: 2, text: "Verificar se as caixas da Shopee chegaram.", author: "Mara", date: "Ontem" }
   ]);
   const [newNote, setNewNote] = useState("");
 
   const handlePost = () => {
     if (newNote.trim()) {
-      setNotes([{id: Date.now(), text: newNote, author: user?.user_metadata?.full_name || "ExpediÃ§Ã£o", date: "Agora"}, ...notes]);
+      setNotes([{id: Date.now(), text: newNote, author: user?.user_metadata?.full_name || "ExpediÃƒÂ§ÃƒÂ£o", date: "Agora"}, ...notes]);
       setNewNote("");
     }
   };
@@ -251,7 +245,7 @@ const MuralExpedicao = ({ user }: { user: any }) => {
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-[#00FF00] font-bold tracking-tighter text-xl uppercase flex items-center gap-2">
           <Megaphone className="h-5 w-5" strokeWidth={3} />
-          Mural da ExpediÃ§Ã£o
+          Mural da ExpediÃƒÂ§ÃƒÂ£o
         </h3>
         <span className="text-[#00FF00] text-[10px] font-bold tracking-widest uppercase border border-[#00FF00]/20 px-2 py-0.5 rounded-full">
           Avisos Internos
@@ -298,11 +292,11 @@ export default function MeuDia() {
   const { user } = useAuth();
   const navigate = useNavigate();
   
-  // Extrai e formata o nome do usuÃ¡rio logado
+  // Extrai e formata o nome do usuÃƒÂ¡rio logado
   const rawName = user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Equipe";
   const currentUserName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
 
-  // SaudaÃ§Ã£o de acordo com o horÃ¡rio
+  // SaudaÃƒÂ§ÃƒÂ£o de acordo com o horÃƒÂ¡rio
   const currentHour = new Date().getHours();
   let greeting = "Bom dia";
   if (currentHour >= 12 && currentHour < 18) {
@@ -363,11 +357,11 @@ export default function MeuDia() {
           <div className="flex flex-col space-y-1 mt-6 text-2xl md:text-3xl font-light text-gray-400">
             {user?.email === "mara@hotmail.com" ? (
               <div onClick={() => navigate('/expedicao')} className="hover:text-white transition-colors cursor-pointer flex items-center group">
-                Portal de ExpediÃ§Ã£o <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">Ir</span>
+                Portal de ExpediÃƒÂ§ÃƒÂ£o <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">Ir</span>
               </div>
             ) : (
               <div className="hover:text-white transition-colors cursor-pointer flex items-center group">
-                UrgÃªncias <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">{reminders.length}</span>
+                UrgÃƒÂªncias <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">{reminders.length}</span>
               </div>
             )}
             <div onClick={() => navigate('/lembretes')} className="hover:text-white transition-colors cursor-pointer flex items-center group">
@@ -398,11 +392,11 @@ export default function MeuDia() {
           <div className="col-span-1 md:col-span-2 aspect-[2/1] rounded-[2rem] bg-[#111111] flex flex-col items-center justify-center border border-white/5 shadow-2xl p-8 mt-4">
             <CheckCircle2 className="h-20 w-20 text-[#00FF00] mb-6 drop-shadow-[0_0_15px_rgba(0,255,0,0.4)]" />
             <h3 className="text-3xl font-light text-white mb-2 tracking-wide">Tudo zerado</h3>
-            <p className="text-gray-500 text-center text-lg">Seu foco operacional estÃ¡ limpo.</p>
+            <p className="text-gray-500 text-center text-lg">Seu foco operacional estÃƒÂ¡ limpo.</p>
           </div>
         )}
 
-        {(user?.email === "livia@hotmail.com" || currentUserName.startsWith("RogÃ©rio")) ? (
+        {(user?.email === "livia@hotmail.com" || currentUserName.startsWith("RogÃƒÂ©rio")) ? (
           <PainelPagamentosHoje />
         ) : (
           user?.email !== "mara@hotmail.com" && announcements.length > 0 && (
@@ -452,50 +446,73 @@ export default function MeuDia() {
 
         <ExpedicaoTracker />
 
-        {(user?.email === "mara@hotmail.com" || currentUserName.startsWith("RogÃ©rio")) ? (
+        {(user?.email === "mara@hotmail.com" || currentUserName.startsWith("RogÃƒÂ©rio")) ? (
           <MuralExpedicao user={user} />
         ) : (
           <>
-            {/* 3. Cards de Ajustes / Mensagens (Estética Glass/Branding) */}
-            {adjustments.length > 0 && adjustments.map((ticket, idx) => (
-              <div 
-                key={ticket.id} 
-                onClick={() => setActiveChatTicket(ticket)}
-                className="col-span-1 bg-[#111111] hover:bg-[#151515] rounded-[24px] p-3 flex items-center gap-4 border border-white/5 shadow-xl cursor-pointer transition-all group hover:border-white/10 relative z-20"
-              >
-                <div className="w-14 h-14 rounded-[20px] bg-white/5 flex flex-col items-center justify-center shrink-0 border border-white/10 group-hover:bg-white/10 transition-colors">
-                  <MessageSquare className="w-5 h-5 text-gray-300 mb-0.5" />
-                  <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Chat</span>
+            {/* 3.1. Card Fixo de PrÃ©via de Mensagens */}
+            <div 
+              onClick={() => setActiveChatTicket({ marketplace: 'Suporte Interno', sku: 'MSG-001', description: 'OlÃ¡! HÃ¡ um aviso importante sobre o faturamento de ontem. Por favor, verifique quando puder.' })}
+              className="col-span-1 bg-[#111111] hover:bg-[#151515] rounded-[24px] p-3 flex items-center gap-4 border border-white/5 shadow-xl cursor-pointer transition-all group hover:border-white/10 relative z-20"
+            >
+              <div className="w-14 h-14 rounded-[20px] bg-white/5 flex flex-col items-center justify-center shrink-0 border border-white/10 group-hover:bg-white/10 transition-colors">
+                <MessageSquare className="w-5 h-5 text-gray-300 mb-0.5" />
+                <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Chat</span>
+              </div>
+              
+              <div className="flex-1 overflow-hidden flex flex-col justify-center">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest border flex items-center gap-1 bg-cyan-500/10 text-cyan-400 border-cyan-500/20">
+                    <MessageSquare className="w-2.5 h-2.5" />
+                    Novas Mensagens
+                  </span>
+                  <span className="text-gray-500 text-[9px] font-bold uppercase tracking-widest truncate">
+                    Equipe
+                  </span>
                 </div>
-                
-                <div className="flex-1 overflow-hidden flex flex-col justify-center">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest border flex items-center gap-1 ${getMarketplaceStyle(ticket.marketplace)}`}>
+                <p className="text-gray-300 font-medium text-xs leading-snug truncate">
+                  OlÃ¡! HÃ¡ um aviso importante sobre o faturamento de ontem.
+                </p>
+              </div>
+              
+              <button 
+                className="bg-white/5 group-hover:bg-cyan-500/20 group-hover:text-cyan-400 text-gray-400 w-12 h-12 rounded-[18px] transition-all flex items-center justify-center border border-transparent shrink-0"
+              >
+                <MessageSquare className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* 3.2. Cards de Ajustes (O AVISO ORIGINAL) */}
+            {adjustments.length > 0 && adjustments.map((ticket, idx) => (
+              <div key={ticket.id} className="col-span-1 rounded-2xl p-5 flex flex-col justify-between bg-gradient-to-b from-[#18181A] to-[#111111] border border-white/5 shadow-xl relative group">
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border flex items-center gap-1.5 ${getMarketplaceStyle(ticket.marketplace)}`}>
                       {getMarketplaceLogo(ticket.marketplace)}
                       {ticket.marketplace}
                     </span>
-                    <span className="text-gray-500 text-[9px] font-bold uppercase tracking-widest truncate">
-                      {ticket.sku}
+                    <span className="text-gray-500 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1">
+                      <Tag className="h-2.5 w-2.5" /> {ticket.sku}
                     </span>
                   </div>
-                  <p className="text-gray-300 font-medium text-xs leading-snug truncate">
+                  
+                  <p className="text-gray-300 font-light text-sm leading-relaxed mb-4 line-clamp-3">
                     {ticket.description}
                   </p>
                 </div>
                 
                 <button 
-                  onClick={(e) => { e.stopPropagation(); handleResolveAdjustment(ticket.id) }}
-                  className="bg-white/5 hover:bg-[#00FF00] hover:text-black text-gray-400 w-12 h-12 rounded-[18px] transition-all flex items-center justify-center border border-transparent hover:border-[#00FF00]/50 shrink-0"
-                  title="Marcar Resolvido"
+                  onClick={() => handleResolveAdjustment(ticket.id)}
+                  className="w-full bg-white/5 hover:bg-[#00FF00] hover:text-black text-white px-4 py-2 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-2 group-hover:shadow-[0_0_15px_rgba(0,255,0,0.2)]"
                 >
-                  <CheckCircle2 className="h-5 w-5" />
+                  Marcar Resolvido <CheckCircle2 className="h-3 w-3" />
                 </button>
               </div>
             ))}
           </>
         )}
 
-        {/* 4. Card de Desempenho RÃ¡pido */}
+        {/* 4. Card de Desempenho RÃƒÂ¡pido */}
         {!isNothingPending && (
           <div className="col-span-1 md:col-span-2 bg-[#1A1A1A] rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between border border-white/5 relative overflow-hidden">
              <div className="relative z-10 flex items-center gap-4">
@@ -508,7 +525,7 @@ export default function MeuDia() {
                 </div>
              </div>
              <div className="relative z-10 flex gap-6 mt-4 sm:mt-0">
-               {(user?.email === "mara@hotmail.com" || currentUserName.startsWith("RogÃ©rio")) && (
+               {(user?.email === "mara@hotmail.com" || currentUserName.startsWith("RogÃƒÂ©rio")) && (
                  <div className="text-center">
                    <div className="text-3xl font-extrabold text-[#00FF00] tracking-tighter leading-none">{reminders.length + adjustments.length}</div>
                    <div className="text-[9px] font-bold text-[#00FF00] uppercase tracking-widest mt-1">Casos Abertos</div>
@@ -521,7 +538,7 @@ export default function MeuDia() {
       </div>
 
     
-      {/* MODAL DE CHAT DA DIVERGÊNCIA */}
+      {/* MODAL DE CHAT DA DIVERGÃŠNCIA */}
       {activeChatTicket && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="bg-[#0a0a0a] border border-[#222] rounded-[32px] w-full max-w-lg overflow-hidden flex flex-col shadow-2xl h-[600px] animate-in zoom-in-95 duration-200">
@@ -544,7 +561,7 @@ export default function MeuDia() {
             {/* Mensagens */}
             <div className="flex-1 p-5 overflow-y-auto custom-scrollbar flex flex-col gap-4">
               <div className="flex justify-center mb-2">
-                <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Início da Conversa</span>
+                <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">InÃ­cio da Conversa</span>
               </div>
               
               <div className="flex gap-3">
@@ -553,7 +570,7 @@ export default function MeuDia() {
                 </div>
                 <div className="bg-[#1a1a1a] border border-[#333] rounded-2xl rounded-tl-sm p-3 max-w-[85%]">
                   <p className="text-gray-300 text-sm">{activeChatTicket.description}</p>
-                  <span className="text-[9px] text-gray-500 mt-1 block">Sistema • Agora</span>
+                  <span className="text-[9px] text-gray-500 mt-1 block">Sistema â€¢ Agora</span>
                 </div>
               </div>
             </div>
@@ -576,6 +593,7 @@ export default function MeuDia() {
     </div>
   );
 }
+
 
 
 
