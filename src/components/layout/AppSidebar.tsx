@@ -199,7 +199,7 @@ export function AppSidebar() {
           <div className="mb-6 flex flex-col items-center justify-center group cursor-pointer hover:scale-110 transition-transform duration-300">
             <Sparkles className={`h-6 w-6 transition-colors ${isMarketing ? 'text-cyan-400 group-hover:text-cyan-300 drop-shadow-[0_0_10px_rgba(6,182,212,0.3)]' : 'text-primary group-hover:text-white'}`} />
           </div>
-          <div className="flex-1 flex flex-col items-center gap-2 overflow-y-auto w-full px-2 custom-scrollbar hide-scrollbar">
+          <div className="flex-1 flex flex-col items-center gap-2 w-full px-2 relative z-50">
 
 
 
@@ -330,5 +330,6 @@ export function AppSidebar() {
     </>
   );
 }
+
 
 
