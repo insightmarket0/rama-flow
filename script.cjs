@@ -1,38 +1,33 @@
-﻿const fs = require('fs');
-const file = 'src/pages/Marketing.tsx';
-let content = fs.readFileSync(file, 'utf8');
+const fs = require('fs');
+const content = fs.readFileSync('src/pages/Marketing.tsx', 'utf-8');
 
-const startIndex = content.indexOf('{/* Social Media Tracker');
-if (startIndex === -1) {
-  console.log('Could not find start');
-  process.exit(1);
+// Find the cockpit block content we want to move
+const cockpitBlockRegex = /\{\/\* INSTAGRAM COMPACTO \*\/\}([\s\S]*?)\{\/\* TIKTOK COMPACTO \*\/\}([\s\S]*?)<\/AreaChart>\s*<\/ResponsiveContainer>\s*<\/div>\s*<\/div>/;
+const match = content.match(cockpitBlockRegex);
+if (!match) {
+    console.log('Block not found');
+    process.exit(1);
 }
+const extractedBlock = '{/* INSTAGRAM COMPACTO */}' + match[1] + '{/* TIKTOK COMPACTO */}' + match[2] + '</AreaChart>\n                        </ResponsiveContainer>\n                      </div>\n                    </div>';
 
-const matchStr = '              </div>\n            </div>\n          )}\n          {/* TAB 1: CREATIVE STUDIO';
-const endIndex = content.indexOf(matchStr);
-if (endIndex === -1) {
-  console.log('Could not find end');
-  process.exit(1);
-}
+// Find the entire activeTab === "cockpit" block to remove
+const cockpitTabRegex = /\{\/\* TAB 0: COCKPIT EXECUTIVO \*\/\}\s*\{activeTab === "cockpit" && \([\s\S]*?\{\/\* TIKTOK COMPACTO \*\/\}[\s\S]*?<\/div>\s*<\/div>\s*<\/div>\s*<\/div>\s*<\/div>\s*<\/div>\s*\)\}\s*/;
+let newContent = content.replace(cockpitTabRegex, '');
 
-const blockStart = startIndex;
-const blockEnd = endIndex; // Right before the </div> that closes the grid
+// Find where to inject it in Orcamento tab (before Painéis Corporativos)
+const targetRegex = /(<\/div>\s*)(?=\{\/\* PainǸis Corporativos \*\/\})/;
+const injection = `<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">\n${extractedBlock}\n</div>\n\n`;
 
-const instaBlock = content.slice(blockStart, blockEnd);
+newContent = newContent.replace(targetRegex, '$1' + injection);
 
-const newInstaBlock = instaBlock.replace('lg:col-span-4', 'lg:col-span-6');
+// Also remove "cockpit" from TABS array
+newContent = newContent.replace(/\{\s*id:\s*"cockpit",\s*label:\s*"Visǜo Analtica"\s*\},\s*/, '');
+// And handle any non-escaped character issues
+newContent = newContent.replace(/\{\s*id:\s*"cockpit",\s*label:\s*"Visão Analítica"\s*\},\s*/, '');
+newContent = newContent.replace(/\{\s*id:\s*"cockpit",\s*label:\s*".*?"\s*\},\s*/, '');
 
-let newTikTokBlock = newInstaBlock
-  .replace('{/* Social Media Tracker (Direita, 4 colunas) */}', '{/* TikTok Tracker */}')
-  .replace('Instagram Performance', 'TikTok Performance')
-  .replace('<Instagram ', '<PlayCircle ')
-  .replace('from-purple-500 to-pink-500', 'from-cyan-500 to-blue-500')
-  .replace('bg-purple-500/10', 'bg-cyan-500/10')
-  .replace('135.145', '241.800')
-  .replace('42.5K', '89.2K')
-  .replace('8.2K', '14.5K');
+// Change activeTab initial state to orcamento
+newContent = newContent.replace(/useState<"orcamento" \| "cockpit" \| "roadmap" \| "crm" \| "performance">\("cockpit"\)/, 'useState<"orcamento" | "cockpit" | "roadmap" | "crm" | "performance">("orcamento")');
 
-const finalContent = content.slice(0, blockStart) + newInstaBlock + newTikTokBlock + content.slice(blockEnd);
-
-fs.writeFileSync(file, finalContent, 'utf8');
+fs.writeFileSync('src/pages/Marketing.tsx', newContent, 'utf-8');
 console.log('Done');
