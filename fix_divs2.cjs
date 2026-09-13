@@ -1,18 +1,9 @@
 ﻿const fs = require('fs');
-let content = fs.readFileSync('src/pages/Marketing.tsx', 'utf8');
+let content = fs.readFileSync('src/pages/Marketing.tsx', 'utf-8');
+const lines = content.split('\n');
 
-let lines = content.split('\n');
-lines.splice(377, 1); // remove the bad one
-
-// Find the end cockpit )}
-let lastCockpitIdx = -1;
-for (let i = 0; i < lines.length; i++) {
-    if (lines[i] && lines[i].includes('        )}')) {
-        lastCockpitIdx = i;
-    }
-}
-if (lastCockpitIdx !== -1) {
-    lines.splice(lastCockpitIdx, 0, '          </div>');
-    fs.writeFileSync('src/pages/Marketing.tsx', lines.join('\n'), 'utf8');
-    console.log("Added to " + lastCockpitIdx);
+// We want to remove the two extra </div>
+// Let's print lines 830 to 840 to see exactly which ones to remove.
+for(let i=828; i<=838; i++) {
+  console.log(i + ': ' + lines[i]);
 }

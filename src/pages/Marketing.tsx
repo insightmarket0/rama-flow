@@ -329,7 +329,7 @@ export default function Marketing() {
   return (
     <div className="flex flex-col h-full w-full pl-24 bg-[#040809] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#071618] via-[#040809] to-[#020404] font-sans pb-20 md:pb-0 overflow-hidden relative">
       
-      <div className="p-4 md:p-5 max-w-[1400px] w-full mx-auto h-full flex flex-col gap-4 relative z-10">
+      <div className="p-2 md:p-3 max-w-[1400px] w-full mx-auto h-full flex flex-col gap-2 relative z-10">
         
         {/* Header Compacto Premium */}
         <div className="flex items-center justify-between shrink-0">
@@ -337,7 +337,7 @@ export default function Marketing() {
             <h1 className="text-xl font-semibold text-white tracking-tight flex items-center gap-2">
               MARKETING & <span className="text-cyan-400 font-light">GROWTH</span>
             </h1>
-            <p className="text-gray-400 text-xs mt-0.5">Gestão integrada de campanhas, CRM e aquisição.</p>
+            
           </div>
           
         </div>
@@ -345,7 +345,7 @@ export default function Marketing() {
         {/* Tabs de Navegação Estilo Pill */}
         <div className="flex items-center gap-2 mt-2 shrink-0 overflow-x-auto no-scrollbar">
           {[
-            { id: "cockpit", label: "Visão Analítica" },
+            
             { id: "orcamento", label: "Orçamento e Investimentos" },
             { id: "roadmap", label: "Creative Studio (Roteiros)" },
             { id: "crm", label: "CRM Influenciadores" },
@@ -663,7 +663,7 @@ export default function Marketing() {
 
           {/* TAB 4: OR!AMENTO */}
           {activeTab === "orcamento" && (
-            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar pb-6 mt-4">
+            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar pb-2 mt-1">
             <div className="grid grid-cols-4 gap-3 shrink-0">
                               <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors">
                   <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -832,11 +832,8 @@ export default function Marketing() {
                     </div>
                   </div>
 
-
-            </div>
-
               {/* Painéis Corporativos */}
-            <div className="mt-6 flex flex-col gap-6 max-w-full pb-4">
+            <div className="mt-3 flex flex-col gap-3 max-w-full pb-2">
               
               {/* Split Superior: Distribuição & Aprovações */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
