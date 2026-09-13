@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { 
+﻿import React, { useState, useEffect } from "react";
+import { MessageSquare, X, Send, 
   Zap, 
   Megaphone, 
   CheckCircle2, 
@@ -19,15 +19,15 @@ import {
   LayoutGrid,
   Heart
 } from "lucide-react";
-import { RamaDoDiaWidget } from "@/components/RamaDoDiaWidget";
-import { PainelPagamentosHoje } from "@/components/finance/PainelPagamentosHoje";
-import { parseISO, isBefore, format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
-import { RAP_QUOTES, BIBLE_VERSES } from "@/lib/quotes";
-import { SiMercadopago, SiShopee } from "react-icons/si";
-import { FaAmazon } from "react-icons/fa";
+import { MessageSquare, X, Send, RamaDoDiaWidget } from "@/components/RamaDoDiaWidget";
+import { MessageSquare, X, Send, PainelPagamentosHoje } from "@/components/finance/PainelPagamentosHoje";
+import { MessageSquare, X, Send, parseISO, isBefore, format } from "date-fns";
+import { MessageSquare, X, Send, ptBR } from "date-fns/locale";
+import { MessageSquare, X, Send, useAuth } from "@/hooks/useAuth";
+import { MessageSquare, X, Send, useNavigate } from "react-router-dom";
+import { MessageSquare, X, Send, RAP_QUOTES, BIBLE_VERSES } from "@/lib/quotes";
+import { MessageSquare, X, Send, SiMercadopago, SiShopee } from "react-icons/si";
+import { MessageSquare, X, Send, FaAmazon } from "react-icons/fa";
 
 const getMarketplaceLogo = (marketplace?: string) => {
   if (!marketplace) return <Store className="h-3.5 w-3.5 opacity-70 shrink-0" />;
@@ -64,14 +64,14 @@ const getMarketplaceStyle = (marketplace: string) => {
   }
 };
 
-// ---- MOCKS AGREGADOS PARA DEMONSTRA�!ÒO ----
+// ---- MOCKS AGREGADOS PARA DEMONSTRAï¿½!Ã’O ----
 
 const MOCK_ANNOUNCEMENTS = [
   {
     id: "ann_1",
-    creator: { full_name: "Anderson ⬢ Supervisão" },
+    creator: { full_name: "Anderson â¬¢ SupervisÃ£o" },
     title: "Cuidado com os itens de vidro!",
-    content: "Lembrete: A partir de hoje, é obrigatório usar plástico bolha duplo em todos os itens frágeis.",
+    content: "Lembrete: A partir de hoje, Ã© obrigatÃ³rio usar plÃ¡stico bolha duplo em todos os itens frÃ¡geis.",
     is_pinned: true,
   }
 ];
@@ -79,15 +79,15 @@ const MOCK_ANNOUNCEMENTS = [
 const MOCK_REMINDERS = [
   {
     id: "rem_1",
-    title: "Reposição de Insumos: Caixa Parda 30x20x10",
-    description: "O almoxarifado separou as caixas solicitadas. Estão a caminho da bancada 2.",
+    title: "ReposiÃ§Ã£o de Insumos: Caixa Parda 30x20x10",
+    description: "O almoxarifado separou as caixas solicitadas. EstÃ£o a caminho da bancada 2.",
     due_date: new Date(new Date().setHours(17, 0, 0, 0)).toISOString(),
     status: "pendente",
   },
   {
     id: "rem_2",
-    title: "Estoque Crítico: Fita Adesiva",
-    description: "Atenção: Restam apenas 3 rolos de fita. O pedido de compra já foi aprovado.",
+    title: "Estoque CrÃ­tico: Fita Adesiva",
+    description: "AtenÃ§Ã£o: Restam apenas 3 rolos de fita. O pedido de compra jÃ¡ foi aprovado.",
     due_date: new Date(new Date().setHours(10, 0, 0, 0)).toISOString(),
     status: "pendente",
   }
@@ -98,7 +98,7 @@ const MOCK_ADJUSTMENTS = [
     id: "adj_1",
     marketplace: "Mercado Livre",
     sku: "KITGAS001",
-    description: "Divergência Corrigida: O anúncio foi pausado e o estoque atualizado. Pode desmontar o pacote.",
+    description: "DivergÃªncia Corrigida: O anÃºncio foi pausado e o estoque atualizado. Pode desmontar o pacote.",
   },
   {
     id: "adj_2",
@@ -115,7 +115,7 @@ const getQuoteOfTheDay = (email?: string) => {
   const oneDay = 1000 * 60 * 60 * 24;
   const dayOfYear = Math.floor(diff / oneDay);
   
-  // Exibir versículos bíblicos apenas para a conta do Rogério e da Mara
+  // Exibir versÃ­culos bÃ­blicos apenas para a conta do RogÃ©rio e da Mara
   if (email === "suporte.ramamagazine@gmail.com" || email === "mara@hotmail.com") {
     return BIBLE_VERSES[dayOfYear % BIBLE_VERSES.length];
   }
@@ -139,7 +139,7 @@ const ExpedicaoTracker = () => {
   
   const dispatches = [
     { name: "Flex (ML/Shopee)", time: "13:00", minutes: 13 * 60, color: "#00FF00" },
-    { name: "ML Agência", time: "16:00", minutes: 16 * 60, color: "#FFE600" },
+    { name: "ML AgÃªncia", time: "16:00", minutes: 16 * 60, color: "#FFE600" },
     { name: "Shopee/Amz/Mag", time: "17:00", minutes: 17 * 60, color: "#EE4D2D" },
   ];
   
@@ -182,7 +182,7 @@ const ExpedicaoTracker = () => {
         </div>
       </div>
 
-      {/* Centro: Relógio Analógico (Menor) */}
+      {/* Centro: RelÃ³gio AnalÃ³gico (Menor) */}
       <div className="relative w-[220px] h-[135px] flex flex-col items-center justify-start overflow-hidden z-10 shrink-0">
         <svg className="absolute top-0 w-[220px] h-[220px]" viewBox="0 0 300 300">
           <g stroke="currentColor" strokeWidth="2">
@@ -205,7 +205,7 @@ const ExpedicaoTracker = () => {
 
         <div className="absolute top-[35%] flex flex-col items-center justify-center w-full">
           <span className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.1em] mb-0.5">
-            Horário Local
+            HorÃ¡rio Local
           </span>
           <div className="text-white text-5xl font-bold tracking-tighter" style={{ fontVariantNumeric: 'tabular-nums' }}>
             {hours.toString().padStart(2, '0')}:{minutes.toString().padStart(2, '0')}
@@ -216,7 +216,7 @@ const ExpedicaoTracker = () => {
         </div>
       </div>
       
-      {/* Direita: Indicador de Operação */}
+      {/* Direita: Indicador de OperaÃ§Ã£o */}
       <div className="flex flex-col items-center justify-center z-10 w-full md:w-auto mt-4 md:mt-0">
         <div className="relative flex items-center justify-center w-12 h-12 rounded-full bg-[#111] border border-white/10 shadow-[inset_0_0_15px_rgba(255,255,255,0.02)]">
           <div className="absolute inset-0 rounded-full border border-[#00FF00]/40 animate-[spin_3s_linear_infinite]" style={{ borderTopColor: 'transparent', borderLeftColor: 'transparent' }} />
@@ -227,20 +227,71 @@ const ExpedicaoTracker = () => {
           Operando
         </span>
       </div>
+      {/* MODAL DE CHAT DA DIVERGÊNCIA */}
+      {activeChatTicket && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#0a0a0a] border border-[#222] rounded-[32px] w-full max-w-lg overflow-hidden flex flex-col shadow-2xl h-[600px] animate-in zoom-in-95 duration-200">
+            {/* Header do Chat */}
+            <div className="p-4 border-b border-[#222] flex justify-between items-center bg-[#111]">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-[16px] bg-white/5 flex items-center justify-center border border-white/10">
+                  {getMarketplaceLogo(activeChatTicket.marketplace)}
+                </div>
+                <div>
+                  <h2 className="text-white font-bold text-sm">{activeChatTicket.marketplace}</h2>
+                  <p className="text-[10px] text-gray-400 font-mono tracking-widest">{activeChatTicket.sku}</p>
+                </div>
+              </div>
+              <button onClick={(e) => { e.stopPropagation(); setActiveChatTicket(null); }} className="text-gray-400 hover:text-white bg-white/5 p-2 rounded-full transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* Mensagens */}
+            <div className="flex-1 p-5 overflow-y-auto custom-scrollbar flex flex-col gap-4">
+              <div className="flex justify-center mb-2">
+                <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Início da Conversa</span>
+              </div>
+              
+              <div className="flex gap-3">
+                <div className="w-8 h-8 rounded-[12px] bg-red-500/10 flex items-center justify-center border border-red-500/20 shrink-0">
+                  <AlertTriangle className="w-4 h-4 text-red-400" />
+                </div>
+                <div className="bg-[#1a1a1a] border border-[#333] rounded-2xl rounded-tl-sm p-3 max-w-[85%]">
+                  <p className="text-gray-300 text-sm">{activeChatTicket.description}</p>
+                  <span className="text-[9px] text-gray-500 mt-1 block">Sistema • Agora</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Input do Chat */}
+            <div className="p-4 border-t border-[#222] bg-[#111] flex gap-2">
+              <input 
+                type="text" 
+                placeholder="Digite sua mensagem para a equipe..." 
+                className="flex-1 bg-black border border-[#333] rounded-full px-4 text-sm text-white focus:outline-none focus:border-cyan-500"
+              />
+              <button className="w-10 h-10 bg-cyan-600 hover:bg-cyan-500 rounded-full flex items-center justify-center text-white transition-colors shrink-0">
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 const MuralExpedicao = ({ user }: { user: any }) => {
   const [notes, setNotes] = useState([
-    { id: 1, text: "Lembrete: A partir de hoje, é obrigatório usar plástico bolha duplo em todos os itens frágeis.", author: "Rogério", date: "Hoje" },
+    { id: 1, text: "Lembrete: A partir de hoje, Ã© obrigatÃ³rio usar plÃ¡stico bolha duplo em todos os itens frÃ¡geis.", author: "RogÃ©rio", date: "Hoje" },
     { id: 2, text: "Verificar se as caixas da Shopee chegaram.", author: "Mara", date: "Ontem" }
   ]);
   const [newNote, setNewNote] = useState("");
 
   const handlePost = () => {
     if (newNote.trim()) {
-      setNotes([{id: Date.now(), text: newNote, author: user?.user_metadata?.full_name || "Expedição", date: "Agora"}, ...notes]);
+      setNotes([{id: Date.now(), text: newNote, author: user?.user_metadata?.full_name || "ExpediÃ§Ã£o", date: "Agora"}, ...notes]);
       setNewNote("");
     }
   };
@@ -250,7 +301,7 @@ const MuralExpedicao = ({ user }: { user: any }) => {
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-[#00FF00] font-bold tracking-tighter text-xl uppercase flex items-center gap-2">
           <Megaphone className="h-5 w-5" strokeWidth={3} />
-          Mural da Expedição
+          Mural da ExpediÃ§Ã£o
         </h3>
         <span className="text-[#00FF00] text-[10px] font-bold tracking-widest uppercase border border-[#00FF00]/20 px-2 py-0.5 rounded-full">
           Avisos Internos
@@ -288,6 +339,57 @@ const MuralExpedicao = ({ user }: { user: any }) => {
           Postar
         </button>
       </div>
+      {/* MODAL DE CHAT DA DIVERGÊNCIA */}
+      {activeChatTicket && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#0a0a0a] border border-[#222] rounded-[32px] w-full max-w-lg overflow-hidden flex flex-col shadow-2xl h-[600px] animate-in zoom-in-95 duration-200">
+            {/* Header do Chat */}
+            <div className="p-4 border-b border-[#222] flex justify-between items-center bg-[#111]">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-[16px] bg-white/5 flex items-center justify-center border border-white/10">
+                  {getMarketplaceLogo(activeChatTicket.marketplace)}
+                </div>
+                <div>
+                  <h2 className="text-white font-bold text-sm">{activeChatTicket.marketplace}</h2>
+                  <p className="text-[10px] text-gray-400 font-mono tracking-widest">{activeChatTicket.sku}</p>
+                </div>
+              </div>
+              <button onClick={(e) => { e.stopPropagation(); setActiveChatTicket(null); }} className="text-gray-400 hover:text-white bg-white/5 p-2 rounded-full transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* Mensagens */}
+            <div className="flex-1 p-5 overflow-y-auto custom-scrollbar flex flex-col gap-4">
+              <div className="flex justify-center mb-2">
+                <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Início da Conversa</span>
+              </div>
+              
+              <div className="flex gap-3">
+                <div className="w-8 h-8 rounded-[12px] bg-red-500/10 flex items-center justify-center border border-red-500/20 shrink-0">
+                  <AlertTriangle className="w-4 h-4 text-red-400" />
+                </div>
+                <div className="bg-[#1a1a1a] border border-[#333] rounded-2xl rounded-tl-sm p-3 max-w-[85%]">
+                  <p className="text-gray-300 text-sm">{activeChatTicket.description}</p>
+                  <span className="text-[9px] text-gray-500 mt-1 block">Sistema • Agora</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Input do Chat */}
+            <div className="p-4 border-t border-[#222] bg-[#111] flex gap-2">
+              <input 
+                type="text" 
+                placeholder="Digite sua mensagem para a equipe..." 
+                className="flex-1 bg-black border border-[#333] rounded-full px-4 text-sm text-white focus:outline-none focus:border-cyan-500"
+              />
+              <button className="w-10 h-10 bg-cyan-600 hover:bg-cyan-500 rounded-full flex items-center justify-center text-white transition-colors shrink-0">
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -296,11 +398,11 @@ export default function MeuDia() {
   const { user } = useAuth();
   const navigate = useNavigate();
   
-  // Extrai e formata o nome do usuário logado
+  // Extrai e formata o nome do usuÃ¡rio logado
   const rawName = user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Equipe";
   const currentUserName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
 
-  // Saudação de acordo com o horário
+  // SaudaÃ§Ã£o de acordo com o horÃ¡rio
   const currentHour = new Date().getHours();
   let greeting = "Bom dia";
   if (currentHour >= 12 && currentHour < 18) {
@@ -311,6 +413,7 @@ export default function MeuDia() {
 
   const [announcements, setAnnouncements] = useState(MOCK_ANNOUNCEMENTS);
   const [reminders, setReminders] = useState(MOCK_REMINDERS);
+  const [activeChatTicket, setActiveChatTicket] = useState<any>(null);
   const [adjustments, setAdjustments] = useState(MOCK_ADJUSTMENTS);
 
   const todayDate = format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR });
@@ -360,11 +463,11 @@ export default function MeuDia() {
           <div className="flex flex-col space-y-1 mt-6 text-2xl md:text-3xl font-light text-gray-400">
             {user?.email === "mara@hotmail.com" ? (
               <div onClick={() => navigate('/expedicao')} className="hover:text-white transition-colors cursor-pointer flex items-center group">
-                Portal de Expedição <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">Ir</span>
+                Portal de ExpediÃ§Ã£o <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">Ir</span>
               </div>
             ) : (
               <div className="hover:text-white transition-colors cursor-pointer flex items-center group">
-                Urgências <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">{reminders.length}</span>
+                UrgÃªncias <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">{reminders.length}</span>
               </div>
             )}
             <div onClick={() => navigate('/lembretes')} className="hover:text-white transition-colors cursor-pointer flex items-center group">
@@ -395,11 +498,11 @@ export default function MeuDia() {
           <div className="col-span-1 md:col-span-2 aspect-[2/1] rounded-[2rem] bg-[#111111] flex flex-col items-center justify-center border border-white/5 shadow-2xl p-8 mt-4">
             <CheckCircle2 className="h-20 w-20 text-[#00FF00] mb-6 drop-shadow-[0_0_15px_rgba(0,255,0,0.4)]" />
             <h3 className="text-3xl font-light text-white mb-2 tracking-wide">Tudo zerado</h3>
-            <p className="text-gray-500 text-center text-lg">Seu foco operacional está limpo.</p>
+            <p className="text-gray-500 text-center text-lg">Seu foco operacional estÃ¡ limpo.</p>
           </div>
         )}
 
-        {(user?.email === "livia@hotmail.com" || currentUserName.startsWith("Rogério")) ? (
+        {(user?.email === "livia@hotmail.com" || currentUserName.startsWith("RogÃ©rio")) ? (
           <PainelPagamentosHoje />
         ) : (
           user?.email !== "mara@hotmail.com" && announcements.length > 0 && (
@@ -449,11 +552,11 @@ export default function MeuDia() {
 
         <ExpedicaoTracker />
 
-        {(user?.email === "mara@hotmail.com" || currentUserName.startsWith("Rogério")) ? (
+        {(user?.email === "mara@hotmail.com" || currentUserName.startsWith("RogÃ©rio")) ? (
           <MuralExpedicao user={user} />
         ) : (
           <>
-            {/* 3. Cards de Ajustes (Estética Glass/Branding) */}
+            {/* 3. Cards de Ajustes (EstÃ©tica Glass/Branding) */}
             {adjustments.length > 0 && adjustments.map((ticket, idx) => (
               <div key={ticket.id} className="col-span-1 rounded-2xl p-5 flex flex-col justify-between bg-gradient-to-b from-[#18181A] to-[#111111] border border-white/5 shadow-xl relative group">
                 <div>
@@ -483,7 +586,7 @@ export default function MeuDia() {
           </>
         )}
 
-        {/* 4. Card de Desempenho Rápido */}
+        {/* 4. Card de Desempenho RÃ¡pido */}
         {!isNothingPending && (
           <div className="col-span-1 md:col-span-2 bg-[#1A1A1A] rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between border border-white/5 relative overflow-hidden">
              <div className="relative z-10 flex items-center gap-4">
@@ -496,7 +599,7 @@ export default function MeuDia() {
                 </div>
              </div>
              <div className="relative z-10 flex gap-6 mt-4 sm:mt-0">
-               {(user?.email === "mara@hotmail.com" || currentUserName.startsWith("Rogério")) && (
+               {(user?.email === "mara@hotmail.com" || currentUserName.startsWith("RogÃ©rio")) && (
                  <div className="text-center">
                    <div className="text-3xl font-extrabold text-[#00FF00] tracking-tighter leading-none">{reminders.length + adjustments.length}</div>
                    <div className="text-[9px] font-bold text-[#00FF00] uppercase tracking-widest mt-1">Casos Abertos</div>
@@ -507,7 +610,62 @@ export default function MeuDia() {
         )}
 
       </div>
+      {/* MODAL DE CHAT DA DIVERGÊNCIA */}
+      {activeChatTicket && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#0a0a0a] border border-[#222] rounded-[32px] w-full max-w-lg overflow-hidden flex flex-col shadow-2xl h-[600px] animate-in zoom-in-95 duration-200">
+            {/* Header do Chat */}
+            <div className="p-4 border-b border-[#222] flex justify-between items-center bg-[#111]">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-[16px] bg-white/5 flex items-center justify-center border border-white/10">
+                  {getMarketplaceLogo(activeChatTicket.marketplace)}
+                </div>
+                <div>
+                  <h2 className="text-white font-bold text-sm">{activeChatTicket.marketplace}</h2>
+                  <p className="text-[10px] text-gray-400 font-mono tracking-widest">{activeChatTicket.sku}</p>
+                </div>
+              </div>
+              <button onClick={(e) => { e.stopPropagation(); setActiveChatTicket(null); }} className="text-gray-400 hover:text-white bg-white/5 p-2 rounded-full transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* Mensagens */}
+            <div className="flex-1 p-5 overflow-y-auto custom-scrollbar flex flex-col gap-4">
+              <div className="flex justify-center mb-2">
+                <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Início da Conversa</span>
+              </div>
+              
+              <div className="flex gap-3">
+                <div className="w-8 h-8 rounded-[12px] bg-red-500/10 flex items-center justify-center border border-red-500/20 shrink-0">
+                  <AlertTriangle className="w-4 h-4 text-red-400" />
+                </div>
+                <div className="bg-[#1a1a1a] border border-[#333] rounded-2xl rounded-tl-sm p-3 max-w-[85%]">
+                  <p className="text-gray-300 text-sm">{activeChatTicket.description}</p>
+                  <span className="text-[9px] text-gray-500 mt-1 block">Sistema • Agora</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Input do Chat */}
+            <div className="p-4 border-t border-[#222] bg-[#111] flex gap-2">
+              <input 
+                type="text" 
+                placeholder="Digite sua mensagem para a equipe..." 
+                className="flex-1 bg-black border border-[#333] rounded-full px-4 text-sm text-white focus:outline-none focus:border-cyan-500"
+              />
+              <button className="w-10 h-10 bg-cyan-600 hover:bg-cyan-500 rounded-full flex items-center justify-center text-white transition-colors shrink-0">
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+
+
+
 
