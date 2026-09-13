@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect } from "react";
-import { MessageSquare, X, Send, 
+import { 
   Zap, 
   Megaphone, 
   CheckCircle2, 
@@ -18,16 +18,16 @@ import { MessageSquare, X, Send,
   Trees,
   LayoutGrid,
   Heart
-} from "lucide-react";
-import { MessageSquare, X, Send, RamaDoDiaWidget } from "@/components/RamaDoDiaWidget";
-import { MessageSquare, X, Send, PainelPagamentosHoje } from "@/components/finance/PainelPagamentosHoje";
-import { MessageSquare, X, Send, parseISO, isBefore, format } from "date-fns";
-import { MessageSquare, X, Send, ptBR } from "date-fns/locale";
-import { MessageSquare, X, Send, useAuth } from "@/hooks/useAuth";
-import { MessageSquare, X, Send, useNavigate } from "react-router-dom";
-import { MessageSquare, X, Send, RAP_QUOTES, BIBLE_VERSES } from "@/lib/quotes";
-import { MessageSquare, X, Send, SiMercadopago, SiShopee } from "react-icons/si";
-import { MessageSquare, X, Send, FaAmazon } from "react-icons/fa";
+, MessageSquare, X, Send } from "lucide-react";
+import { RamaDoDiaWidget } from "@/components/RamaDoDiaWidget";
+import { PainelPagamentosHoje } from "@/components/finance/PainelPagamentosHoje";
+import { parseISO, isBefore, format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { RAP_QUOTES, BIBLE_VERSES } from "@/lib/quotes";
+import { SiMercadopago, SiShopee } from "react-icons/si";
+import { FaAmazon } from "react-icons/fa";
 
 const getMarketplaceLogo = (marketplace?: string) => {
   if (!marketplace) return <Store className="h-3.5 w-3.5 opacity-70 shrink-0" />;
@@ -664,6 +664,8 @@ export default function MeuDia() {
     </div>
   );
 }
+
+
 
 
 

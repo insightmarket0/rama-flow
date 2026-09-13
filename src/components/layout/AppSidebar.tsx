@@ -193,6 +193,7 @@ export function AppSidebar() {
   };
 
   return (
+    <>
       <aside className="fixed left-3 top-3 bottom-3 w-[72px] flex flex-col z-50">
         <div className="bg-[#111] border border-[#222] w-full h-full rounded-[40px] py-6 flex flex-col items-center shadow-2xl relative">
           <div className="mb-6 flex flex-col items-center justify-center group cursor-pointer hover:scale-110 transition-transform duration-300">
@@ -329,4 +330,5 @@ export function AppSidebar() {
     </>
   );
 }
+
 
