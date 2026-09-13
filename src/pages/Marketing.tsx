@@ -721,63 +721,117 @@ export default function Marketing() {
                   </div>
                 </div>
 
-              <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors">
-                <div className="flex justify-between mb-1.5">
-                  <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">CPA (Custo Acq.)</span>
-                  <Activity className="w-3.5 h-3.5 text-gray-600" />
-                </div>
-                <div className="flex items-center gap-2 mt-auto">
-                  <span className="text-lg font-semibold text-white tracking-tight">{currentKPI.cpa}</span>
-                  <span className={`flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded-full border ${currentKPI.cpaTrend > 0 ? 'text-red-400 bg-red-400/10 border-red-400/20' : 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20'}`}>
-                    {currentKPI.cpaTrend > 0 ? <ArrowUpRight className="w-2.5 h-2.5 mr-0.5" /> : <ArrowDownRight className="w-2.5 h-2.5 mr-0.5" />}
-                    {Math.abs(currentKPI.cpaTrend)}%
-                  </span>
-                </div>
-              </div>
-
-                                              <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors">
-                  <div className="flex justify-between mb-1.5">
-                    <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">CPA (Custo Acq.)</span>
-                    <Activity className="w-3.5 h-3.5 text-gray-600" />
-                  </div>
-                  <div className="flex items-center gap-2 mt-auto">
-                    <span className="text-lg font-semibold text-white tracking-tight">{currentKPI?.cpa || "R$ 12,50"}</span>
-                    <span className="flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded-full border text-emerald-400 bg-emerald-400/10 border-emerald-400/20">
-                      <ArrowDownRight className="w-2.5 h-2.5 mr-0.5" /> 8%
-                    </span>
-                  </div>
-                </div>
-
-<div 
-                  onClick={() => setIsScalingActive(!isScalingActive)}
-                  className={`bg-[#0a0a0a] border ${isScalingActive ? 'border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.15)]' : 'border-white/5'} rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden cursor-pointer transition-all duration-300 group`}
-                >
-                  <div className={`absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent ${isScalingActive ? 'via-cyan-500' : 'via-white/10'} to-transparent transition-colors`} ></div>
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex items-center gap-1.5">
-                      <div className={`p-1.5 rounded-lg ${isScalingActive ? 'bg-cyan-500/20' : 'bg-white/5'} transition-colors`}>
-                        <Flame className={`w-4 h-4 ${isScalingActive ? 'text-cyan-400 drop-shadow-[0_0_5px_rgba(6,182,212,0.8)]' : 'text-gray-500'} transition-all`} />
+              {/* INSTAGRAM COMPACTO */}
+                    <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-4 relative overflow-hidden flex flex-col h-[320px]">
+                      <div className="absolute -right-10 -top-10 w-24 h-24 bg-purple-500/10 rounded-full blur-[30px] pointer-events-none"></div>
+                      <div className="flex items-center justify-between mb-2 relative z-10">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
+                            <Instagram className="w-4 h-4 text-white" />
+                          </div>
+                          <h3 className="text-white text-sm font-semibold tracking-tight">Instagram</h3>
+                        </div>
+                        <button onClick={() => handleEditSocial('instagram')} className="bg-white/5 hover:bg-white/10 text-gray-400 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase transition-colors border border-white/10 flex items-center gap-1">Lançar +</button>
                       </div>
-                      <span className={`text-xs font-bold uppercase tracking-widest ${isScalingActive ? 'text-cyan-400' : 'text-gray-400'}`}>Modo Scaling</span>
+                      <div className="flex items-end gap-3 mb-4 mt-2">
+                        <div>
+                          <span className="text-[9px] font-medium tracking-widest uppercase text-gray-500 block mb-0.5">Seguidores Totais</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl font-bold text-white">{socialMetrics.instagram.followers.toLocaleString('pt-BR')}</span>
+                            <span className="text-emerald-400 text-[10px] font-medium flex items-center bg-emerald-400/10 px-1.5 py-0.5 rounded"><ArrowUpRight className="w-2.5 h-2.5 mr-0.5" /> {socialMetrics.instagram.followersGrowth > 0 ? '+' : ''}{socialMetrics.instagram.followersGrowth}%</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 mb-4">
+                        <div className="bg-[#111] border border-white/5 rounded-lg p-2.5 flex flex-col justify-between">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <Heart className="w-3 h-3 text-gray-500" />
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Likes (Mês)</span>
+                          </div>
+                          <span className="text-white text-sm font-bold">{formatK(socialMetrics.instagram.likes)}</span>
+                        </div>
+                        <div className="bg-[#111] border border-white/5 rounded-lg p-2.5 flex flex-col justify-between">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <MessageCircle className="w-3 h-3 text-gray-500" />
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Comentários</span>
+                          </div>
+                          <span className="text-white text-sm font-bold">{formatK(socialMetrics.instagram.comments)}</span>
+                        </div>
+                      </div>
+                      <div className="mt-auto pt-3 border-t border-white/5 flex-1 min-h-[80px] flex flex-col relative">
+                        <span className="text-[9px] font-medium tracking-widest uppercase text-gray-600 absolute top-2 left-0 z-10">Evolução de Audiência</span>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={socialMetrics.instagram.history}>
+                            <defs>
+                              <linearGradient id="colorInsta" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#d946ef" stopOpacity={0.4}/>
+                                <stop offset="95%" stopColor="#d946ef" stopOpacity={0}/>
+                              </linearGradient>
+                            </defs>
+                            <Area type="monotone" dataKey="value" stroke="#d946ef" strokeWidth={2} fillOpacity={1} fill="url(#colorInsta)" />
+                            <YAxis domain={['dataMin', 'dataMax']} hide />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
                     </div>
-                    <div className={`w-8 h-4 rounded-full flex items-center px-0.5 transition-colors ${isScalingActive ? 'bg-cyan-500' : 'bg-[#222]'}`}>
-                      <div className={`w-3 h-3 bg-white rounded-full transition-transform ${isScalingActive ? 'translate-x-4' : 'translate-x-0'}`}></div>
+
+                    
+                    
+{/* TIKTOK COMPACTO */}
+                    <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-4 relative overflow-hidden flex flex-col h-[320px]">
+                      <div className="absolute -right-10 -top-10 w-24 h-24 bg-cyan-500/10 rounded-full blur-[30px] pointer-events-none"></div>
+                      <div className="flex items-center justify-between mb-2 relative z-10">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg">
+                            <FaTiktok className="w-4 h-4 text-white" />
+                          </div>
+                          <h3 className="text-white text-sm font-semibold tracking-tight">TikTok</h3>
+                        </div>
+                        <button onClick={() => handleEditSocial('tiktok')} className="bg-white/5 hover:bg-white/10 text-gray-400 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase transition-colors border border-white/10 flex items-center gap-1">Lançar +</button>
+                      </div>
+                      <div className="flex items-end gap-3 mb-4 mt-2">
+                        <div>
+                          <span className="text-[9px] font-medium tracking-widest uppercase text-gray-500 block mb-0.5">Seguidores Totais</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl font-bold text-white">{socialMetrics.tiktok.followers.toLocaleString('pt-BR')}</span>
+                            <span className="text-emerald-400 text-[10px] font-medium flex items-center bg-emerald-400/10 px-1.5 py-0.5 rounded"><ArrowUpRight className="w-2.5 h-2.5 mr-0.5" /> {socialMetrics.tiktok.followersGrowth > 0 ? '+' : ''}{socialMetrics.tiktok.followersGrowth}%</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 mb-4">
+                        <div className="bg-[#111] border border-white/5 rounded-lg p-2.5 flex flex-col justify-between">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <Heart className="w-3 h-3 text-gray-500" />
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Likes (Mês)</span>
+                          </div>
+                          <span className="text-white text-sm font-bold">{formatK(socialMetrics.tiktok.likes)}</span>
+                        </div>
+                        <div className="bg-[#111] border border-white/5 rounded-lg p-2.5 flex flex-col justify-between">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <MessageCircle className="w-3 h-3 text-gray-500" />
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Comentários</span>
+                          </div>
+                          <span className="text-white text-sm font-bold">{formatK(socialMetrics.tiktok.comments)}</span>
+                        </div>
+                      </div>
+                      <div className="mt-auto pt-3 border-t border-white/5 flex-1 min-h-[80px] flex flex-col relative">
+                        <span className="text-[9px] font-medium tracking-widest uppercase text-gray-600 absolute top-2 left-0 z-10">Evolução de Audiência</span>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={socialMetrics.tiktok.history}>
+                            <defs>
+                              <linearGradient id="colorTikTok" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4}/>
+                                <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+                              </linearGradient>
+                            </defs>
+                            <Area type="monotone" dataKey="value" stroke="#06b6d4" strokeWidth={2} fillOpacity={1} fill="url(#colorTikTok)" />
+                            <YAxis domain={['dataMin', 'dataMax']} hide />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
                     </div>
                   </div>
-                  <div className="mt-auto">
-                    {isScalingActive ? (
-                      <div className="flex flex-col gap-1">
-                        <span className="text-white text-xs font-semibold">Automação Ativa</span>
-                        <p className="text-[9px] text-cyan-400/80 leading-tight">Injetando +20% de verba se o CPA &lt; R$ 15,00.</p>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col gap-1">
-                        <span className="text-gray-400 text-xs font-semibold">Pausado</span>
-                        <p className="text-[9px] text-gray-600 leading-tight">Clique para ligar as regras de automação de campanhas.</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
+
 
             </div>
 
