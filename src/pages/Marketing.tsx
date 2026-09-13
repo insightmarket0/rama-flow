@@ -76,10 +76,10 @@ const CAMPAIGNS_ROADMAP = [
 ];
 
 const CRM_PARTNERS = [
-  { id: 1, avatar: "https://i.pravatar.cc/150?u=1", name: "@tech_influencer", niche: "Tecnologia", status: "Postado", base: "R$ 500", upside: "15%", tracking: "TECH15", roi: "R$ 4.250", roiColor: "text-emerald-500", whitelisted: true, cpa: "R$ 15,20", tier: "A", rightsExp: "120" },
-  { id: 2, avatar: "https://i.pravatar.cc/150?u=2", name: "Maria Clara", niche: "Lifestyle", status: "Aguardando Roteiro", base: "Permuta", upside: "10%", tracking: "MARIA10", roi: "R$ 0", roiColor: "text-gray-500", whitelisted: false, cpa: "-", tier: "C", rightsExp: "10" },
-  { id: 3, avatar: "https://i.pravatar.cc/150?u=3", name: "Lucas Dev", niche: "Programação", status: "Aprovação Interna", base: "R$ 300", upside: "R$ 50/venda", tracking: "UTM_LUCAS", roi: "R$ 2.100", roiColor: "text-emerald-500", whitelisted: true, cpa: "R$ 22,00", tier: "A", rightsExp: "60" },
-  { id: 4, avatar: "https://i.pravatar.cc/150?u=4", name: "Revenda Sul", niche: "B2B", status: "Refação", base: "R$ 1.000", upside: "20%", tracking: "REVENDASUL", roi: "R$ 0", roiColor: "text-gray-500", whitelisted: false, cpa: "-", tier: "B", rightsExp: "5" }
+  { id: 1, avatar: "https://i.pravatar.cc/150?u=1", name: "@tech_influencer", niche: "Tecnologia", status: "Postado", base: "R$ 500", seedingCost: "R$ 0", upside: "15%", tracking: "TECH15", roi: "R$ 4.250", roiColor: "text-emerald-500", whitelisted: true, cpa: "R$ 15,20", tier: "A", rightsExp: "120" },
+  { id: 2, avatar: "https://i.pravatar.cc/150?u=2", name: "Maria Clara", niche: "Lifestyle", status: "Aguardando Roteiro", base: "Permuta", seedingCost: "R$ 150", upside: "10%", tracking: "MARIA10", roi: "R$ 12.500", roiColor: "text-emerald-500", whitelisted: false, cpa: "R$ 8,50", tier: "C", rightsExp: "10" },
+  { id: 3, avatar: "https://i.pravatar.cc/150?u=3", name: "Lucas Dev", niche: "Programação", status: "Aprovação Interna", base: "R$ 300", seedingCost: "R$ 50", upside: "R$ 50/venda", tracking: "UTM_LUCAS", roi: "R$ 2.100", roiColor: "text-emerald-500", whitelisted: true, cpa: "R$ 22,00", tier: "A", rightsExp: "60" },
+  { id: 4, avatar: "https://i.pravatar.cc/150?u=4", name: "Revenda Sul", niche: "B2B", status: "Refação", base: "R$ 1.000", seedingCost: "R$ 0", upside: "20%", tracking: "REVENDASUL", roi: "R$ 0", roiColor: "text-gray-500", whitelisted: false, cpa: "-", tier: "B", rightsExp: "5" }
 ];
 
 const ASSETS = [
@@ -312,7 +312,7 @@ export default function Marketing() {
     }
   };
 
-  const [activeTab, setActiveTab] = useState<"orcamento" | "cockpit" | "roadmap" | "crm" | "performance">("cockpit");
+  const [activeTab, setActiveTab] = useState<"orcamento" | "cockpit" | "roadmap" | "crm" | "performance">("orcamento");
   const [viewScope, setViewScope] = useState<"global" | "marca_propria">("global");
   const [isBrandVaultOpen, setIsBrandVaultOpen] = useState(false);
   const [zoom, setZoom] = useState<"semana" | "mes" | "trimestre">("mes");
@@ -344,7 +344,6 @@ export default function Marketing() {
         {/* Tabs de Navegação Estilo Pill */}
         <div className="flex items-center gap-2 mt-2 shrink-0 overflow-x-auto no-scrollbar">
           {[
-            { id: "cockpit", label: "Visão Analítica" },
             { id: "orcamento", label: "Orçamento e Investimentos" },
             { id: "roadmap", label: "Creative Studio (Roteiros)" },
             { id: "crm", label: "CRM Influenciadores" },
@@ -367,132 +366,6 @@ export default function Marketing() {
         {/* Tab Content Flex-Grow para preencher e rolar apenas dentro */}
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
           
-          {/* TAB 0: COCKPIT EXECUTIVO */}
-          {activeTab === "cockpit" && (
-            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar pb-6">
-              <div className="grid grid-cols-12 gap-4 min-h-full">
-                
-                {/* --- NOVA LINHA DO COCKPIT --- */}
-
-                {/* Social Media & TikTok Trackers (Compactos) */}
-                <div className="col-span-12 lg:col-span-8 flex flex-col gap-4 mt-2">
-                  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    
-                    
-                    {/* INSTAGRAM COMPACTO */}
-                    <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-4 relative overflow-hidden flex flex-col h-[320px]">
-                      <div className="absolute -right-10 -top-10 w-24 h-24 bg-purple-500/10 rounded-full blur-[30px] pointer-events-none"></div>
-                      <div className="flex items-center justify-between mb-2 relative z-10">
-                        <div className="flex items-center gap-2">
-                          <div className="p-1.5 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
-                            <Instagram className="w-4 h-4 text-white" />
-                          </div>
-                          <h3 className="text-white text-sm font-semibold tracking-tight">Instagram</h3>
-                        </div>
-                        <button onClick={() => handleEditSocial('instagram')} className="bg-white/5 hover:bg-white/10 text-gray-400 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase transition-colors border border-white/10 flex items-center gap-1">Lançar +</button>
-                      </div>
-                      <div className="flex items-end gap-3 mb-4 mt-2">
-                        <div>
-                          <span className="text-[9px] font-medium tracking-widest uppercase text-gray-500 block mb-0.5">Seguidores Totais</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl font-bold text-white">{socialMetrics.instagram.followers.toLocaleString('pt-BR')}</span>
-                            <span className="text-emerald-400 text-[10px] font-medium flex items-center bg-emerald-400/10 px-1.5 py-0.5 rounded"><ArrowUpRight className="w-2.5 h-2.5 mr-0.5" /> {socialMetrics.instagram.followersGrowth > 0 ? '+' : ''}{socialMetrics.instagram.followersGrowth}%</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 mb-4">
-                        <div className="bg-[#111] border border-white/5 rounded-lg p-2.5 flex flex-col justify-between">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <Heart className="w-3 h-3 text-gray-500" />
-                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Likes (Mês)</span>
-                          </div>
-                          <span className="text-white text-sm font-bold">{formatK(socialMetrics.instagram.likes)}</span>
-                        </div>
-                        <div className="bg-[#111] border border-white/5 rounded-lg p-2.5 flex flex-col justify-between">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <MessageCircle className="w-3 h-3 text-gray-500" />
-                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Comentários</span>
-                          </div>
-                          <span className="text-white text-sm font-bold">{formatK(socialMetrics.instagram.comments)}</span>
-                        </div>
-                      </div>
-                      <div className="mt-auto pt-3 border-t border-white/5 flex-1 min-h-[80px] flex flex-col relative">
-                        <span className="text-[9px] font-medium tracking-widest uppercase text-gray-600 absolute top-2 left-0 z-10">Evolução de Audiência</span>
-                        <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart data={socialMetrics.instagram.history}>
-                            <defs>
-                              <linearGradient id="colorInsta" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#d946ef" stopOpacity={0.4}/>
-                                <stop offset="95%" stopColor="#d946ef" stopOpacity={0}/>
-                              </linearGradient>
-                            </defs>
-                            <Area type="monotone" dataKey="value" stroke="#d946ef" strokeWidth={2} fillOpacity={1} fill="url(#colorInsta)" />
-                            <YAxis domain={['dataMin', 'dataMax']} hide />
-                          </AreaChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </div>
-
-                    
-                    {/* TIKTOK COMPACTO */}
-                    <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-4 relative overflow-hidden flex flex-col h-[320px]">
-                      <div className="absolute -right-10 -top-10 w-24 h-24 bg-cyan-500/10 rounded-full blur-[30px] pointer-events-none"></div>
-                      <div className="flex items-center justify-between mb-2 relative z-10">
-                        <div className="flex items-center gap-2">
-                          <div className="p-1.5 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg">
-                            <FaTiktok className="w-4 h-4 text-white" />
-                          </div>
-                          <h3 className="text-white text-sm font-semibold tracking-tight">TikTok</h3>
-                        </div>
-                        <button onClick={() => handleEditSocial('tiktok')} className="bg-white/5 hover:bg-white/10 text-gray-400 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase transition-colors border border-white/10 flex items-center gap-1">Lançar +</button>
-                      </div>
-                      <div className="flex items-end gap-3 mb-4 mt-2">
-                        <div>
-                          <span className="text-[9px] font-medium tracking-widest uppercase text-gray-500 block mb-0.5">Seguidores Totais</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl font-bold text-white">{socialMetrics.tiktok.followers.toLocaleString('pt-BR')}</span>
-                            <span className="text-emerald-400 text-[10px] font-medium flex items-center bg-emerald-400/10 px-1.5 py-0.5 rounded"><ArrowUpRight className="w-2.5 h-2.5 mr-0.5" /> {socialMetrics.tiktok.followersGrowth > 0 ? '+' : ''}{socialMetrics.tiktok.followersGrowth}%</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 mb-4">
-                        <div className="bg-[#111] border border-white/5 rounded-lg p-2.5 flex flex-col justify-between">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <Heart className="w-3 h-3 text-gray-500" />
-                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Likes (Mês)</span>
-                          </div>
-                          <span className="text-white text-sm font-bold">{formatK(socialMetrics.tiktok.likes)}</span>
-                        </div>
-                        <div className="bg-[#111] border border-white/5 rounded-lg p-2.5 flex flex-col justify-between">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <MessageCircle className="w-3 h-3 text-gray-500" />
-                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Comentários</span>
-                          </div>
-                          <span className="text-white text-sm font-bold">{formatK(socialMetrics.tiktok.comments)}</span>
-                        </div>
-                      </div>
-                      <div className="mt-auto pt-3 border-t border-white/5 flex-1 min-h-[80px] flex flex-col relative">
-                        <span className="text-[9px] font-medium tracking-widest uppercase text-gray-600 absolute top-2 left-0 z-10">Evolução de Audiência</span>
-                        <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart data={socialMetrics.tiktok.history}>
-                            <defs>
-                              <linearGradient id="colorTikTok" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4}/>
-                                <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
-                              </linearGradient>
-                            </defs>
-                            <Area type="monotone" dataKey="value" stroke="#06b6d4" strokeWidth={2} fillOpacity={1} fill="url(#colorTikTok)" />
-                            <YAxis domain={['dataMin', 'dataMax']} hide />
-                          </AreaChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-          </div>
-            </div>
-          )}
-
           {/* TAB 1: CREATIVE STUDIO (Master-Detail / Notion Style) */}
           {activeTab === "roadmap" && (
             <div className="flex-1 overflow-hidden flex gap-4 mt-4 h-full">
@@ -699,13 +572,16 @@ export default function Marketing() {
                           </span>
                         </td>
                         <td className="px-4 py-2 text-xs text-gray-300">{partner.base}</td>
-                        <td className="px-4 py-2 text-xs text-emerald-400/80 font-medium">{partner.upside}</td>
+                        <td className="px-4 py-2 text-xs text-gray-400">{partner.seedingCost}</td>
+                        <td className="px-4 py-2">
+                          <div className="text-[10px] text-gray-500">Upside: <span className="text-emerald-400/80 font-medium">{partner.upside}</span></div>
+                          <div className="text-xs font-bold text-white mt-0.5">{partner.roi}</div>
+                        </td>
                         <td className="px-4 py-2">
                           <span className="text-[10px] font-mono text-blue-400/80 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">{partner.tracking}</span>
                         </td>
                         <td className="px-4 py-2 text-right">
-                          <div className={`text-xs font-semibold ${partner.roiColor}`}>{partner.roi}</div>
-                          <div className="text-[9px] text-gray-500 mt-0.5">CPA: {partner.cpa}</div>
+                          <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-md text-[10px] font-bold">{partner.cpa !== '-' ? partner.cpa : 'N/A'}</span>
                         </td>
                       </tr>
                     ))}
@@ -713,295 +589,9 @@ export default function Marketing() {
                 </table>
               </div>
             </div>
-              {/* 3. Tabela de ROI de Influenciadores */}
-              <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden flex flex-col">
-                <div className="p-5 border-b border-white/5 flex justify-between items-center bg-[#0d0d0d]">
-                  <div>
-                    <h3 className="text-white text-sm font-semibold tracking-tight">Scorecard & ROI de Influenciadores</h3>
-                    <p className="text-[10px] text-gray-500 mt-1">Análise de retorno financeiro por parceria ativa.</p>
-                  </div>
-                  <button className="bg-transparent border border-white/10 hover:border-white/20 text-gray-300 px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5">
-                    <Download className="w-3.5 h-3.5" /> Exportar
-                  </button>
-                </div>
-                
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-[#111] border-b border-white/5">
-                        <th className="py-3 px-5 text-[10px] font-medium tracking-widest text-gray-500 uppercase">Creator</th>
-                        <th className="py-3 px-5 text-[10px] font-medium tracking-widest text-gray-500 uppercase">Custo (Cachê)</th>
-                        <th className="py-3 px-5 text-[10px] font-medium tracking-widest text-gray-500 uppercase">Custo (Seeding)</th>
-                        <th className="py-3 px-5 text-[10px] font-medium tracking-widest text-gray-500 uppercase">Receita (Cupom)</th>
-                        <th className="py-3 px-5 text-[10px] font-medium tracking-widest text-gray-500 uppercase text-right">eCPA Final</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      <tr className="hover:bg-white/[0.02] transition-colors">
-                        <td className="py-3 px-5">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 p-0.5">
-                              <div className="w-full h-full bg-[#111] rounded-full border border-black overflow-hidden flex items-center justify-center">
-                                <User className="w-4 h-4 text-white" />
-                              </div>
-                            </div>
-                            <div>
-                              <p className="text-xs font-medium text-white">@mariasilva</p>
-                              <p className="text-[9px] text-emerald-400 flex items-center gap-0.5 mt-0.5"><Target className="w-2.5 h-2.5" /> Alta Conversão</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-5 text-xs text-gray-300">R$ 2.000</td>
-                        <td className="py-3 px-5 text-xs text-gray-300">R$ 150 <span className="text-[9px] text-gray-600">(1 Kit)</span></td>
-                        <td className="py-3 px-5 text-xs font-bold text-white">R$ 12.500</td>
-                        <td className="py-3 px-5 text-right">
-                          <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-md text-[10px] font-bold">R$ 8,50</span>
-                        </td>
-                      </tr>
-                      <tr className="hover:bg-white/[0.02] transition-colors">
-                        <td className="py-3 px-5">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-500 to-gray-700 p-0.5">
-                              <div className="w-full h-full bg-[#111] rounded-full border border-black overflow-hidden flex items-center justify-center">
-                                <User className="w-4 h-4 text-white" />
-                              </div>
-                            </div>
-                            <div>
-                              <p className="text-xs font-medium text-white">@carlosfit</p>
-                              <p className="text-[9px] text-yellow-500 flex items-center gap-0.5 mt-0.5"><AlertCircle className="w-2.5 h-2.5" /> Atenção</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-5 text-xs text-gray-300">R$ 0 <span className="text-[9px] text-gray-500">(Permuta)</span></td>
-                        <td className="py-3 px-5 text-xs text-gray-300">R$ 450 <span className="text-[9px] text-gray-600">(3 Kits)</span></td>
-                        <td className="py-3 px-5 text-xs font-bold text-white">R$ 800</td>
-                        <td className="py-3 px-5 text-right">
-                          <span className="px-2 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded-md text-[10px] font-bold">R$ 45,00</span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
               </div>
             </div>
           )}
-
-          {/* TAB 4: OR�!AMENTO */}
-          {activeTab === "orcamento" && (
-            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar pb-6 mt-4">
-            <div className="grid grid-cols-4 gap-3 shrink-0">
-                              <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors cursor-pointer" onClick={handleEditBudget}>
-                  <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <div className="flex justify-between mb-1.5 items-center">
-                    <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">Orçamento ({getMonthName(marketingBudget.currentMonth)})</span>
-                    <button className="bg-white/5 hover:bg-white/10 text-gray-400 px-2 py-0.5 rounded text-[9px] font-medium transition-colors border border-white/5 uppercase">Edit</button>
-                  </div>
-                  <div className="flex items-end justify-between mt-auto">
-                    <span className="text-lg font-semibold text-white tracking-tight">R$ {marketingBudget.total.toLocaleString('pt-BR')}</span>
-                    <span className="text-[10px] text-gray-400">{Math.round((marketingBudget.gasto/marketingBudget.total)*100 || 0)}% gasto</span>
-                  </div>
-                  <div className="w-full h-1 bg-[#1a1a1a] rounded-full mt-2 overflow-hidden relative">
-                    <div className="h-full bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)] transition-all duration-500 relative z-10" style={{ width: `${Math.min((marketingBudget.gasto/marketingBudget.total)*100 || 0, 100)}%` }}></div>
-                  </div>
-                </div>
-
-<div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors">
-                  <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <div className="flex justify-between mb-1.5 items-center">
-                    <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">Vendas do Site</span>
-                    <button onClick={handleEditSales} className="bg-white/5 hover:bg-white/10 text-gray-400 px-2 py-0.5 rounded text-[9px] font-medium transition-colors border border-white/5 uppercase flex items-center gap-1">Lançar +</button>
-                  </div>
-                  <div className="flex items-center gap-2 mt-auto">
-                    <span className="text-lg font-semibold text-white tracking-tight">R$ {(marketingBudget.vendas || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                    <span className="flex items-center text-cyan-400 text-[10px] font-medium bg-cyan-500/10 px-1.5 py-0.5 rounded-full border border-cyan-500/20">
-                      <ArrowUpRight className="w-2.5 h-2.5 mr-0.5" /> {marketingBudget.vendasGrowth || 0}%
-                    </span>
-                  </div>
-                </div>
-
-              <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors">
-                <div className="flex justify-between mb-1.5">
-                  <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">CPA (Custo Acq.)</span>
-                  <Activity className="w-3.5 h-3.5 text-gray-600" />
-                </div>
-                <div className="flex items-center gap-2 mt-auto">
-                  <span className="text-lg font-semibold text-white tracking-tight">{currentKPI.cpa}</span>
-                  <span className={`flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded-full border ${currentKPI.cpaTrend > 0 ? 'text-red-400 bg-red-400/10 border-red-400/20' : 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20'}`}>
-                    {currentKPI.cpaTrend > 0 ? <ArrowUpRight className="w-2.5 h-2.5 mr-0.5" /> : <ArrowDownRight className="w-2.5 h-2.5 mr-0.5" />}
-                    {Math.abs(currentKPI.cpaTrend)}%
-                  </span>
-                </div>
-              </div>
-
-                                              <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors">
-                  <div className="flex justify-between mb-1.5">
-                    <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">CPA (Custo Acq.)</span>
-                    <Activity className="w-3.5 h-3.5 text-gray-600" />
-                  </div>
-                  <div className="flex items-center gap-2 mt-auto">
-                    <span className="text-lg font-semibold text-white tracking-tight">{currentKPI?.cpa || "R$ 12,50"}</span>
-                    <span className="flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded-full border text-emerald-400 bg-emerald-400/10 border-emerald-400/20">
-                      <ArrowDownRight className="w-2.5 h-2.5 mr-0.5" /> 8%
-                    </span>
-                  </div>
-                </div>
-
-<div 
-                  onClick={() => setIsScalingActive(!isScalingActive)}
-                  className={`bg-[#0a0a0a] border ${isScalingActive ? 'border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.15)]' : 'border-white/5'} rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden cursor-pointer transition-all duration-300 group`}
-                >
-                  <div className={`absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent ${isScalingActive ? 'via-cyan-500' : 'via-white/10'} to-transparent transition-colors`} ></div>
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex items-center gap-1.5">
-                      <div className={`p-1.5 rounded-lg ${isScalingActive ? 'bg-cyan-500/20' : 'bg-white/5'} transition-colors`}>
-                        <Flame className={`w-4 h-4 ${isScalingActive ? 'text-cyan-400 drop-shadow-[0_0_5px_rgba(6,182,212,0.8)]' : 'text-gray-500'} transition-all`} />
-                      </div>
-                      <span className={`text-xs font-bold uppercase tracking-widest ${isScalingActive ? 'text-cyan-400' : 'text-gray-400'}`}>Modo Scaling</span>
-                    </div>
-                    <div className={`w-8 h-4 rounded-full flex items-center px-0.5 transition-colors ${isScalingActive ? 'bg-cyan-500' : 'bg-[#222]'}`}>
-                      <div className={`w-3 h-3 bg-white rounded-full transition-transform ${isScalingActive ? 'translate-x-4' : 'translate-x-0'}`}></div>
-                    </div>
-                  </div>
-                  <div className="mt-auto">
-                    {isScalingActive ? (
-                      <div className="flex flex-col gap-1">
-                        <span className="text-white text-xs font-semibold">Automação Ativa</span>
-                        <p className="text-[9px] text-cyan-400/80 leading-tight">Injetando +20% de verba se o CPA &lt; R$ 15,00.</p>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col gap-1">
-                        <span className="text-gray-400 text-xs font-semibold">Pausado</span>
-                        <p className="text-[9px] text-gray-600 leading-tight">Clique para ligar as regras de automação de campanhas.</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-            </div>
-
-              {/* Painéis Corporativos */}
-            <div className="mt-6 flex flex-col gap-6 max-w-full pb-4">
-              
-              {/* Split Superior: Distribuição & Aprovações */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                
-                {/* 1. Distribuição de Verba (Burn Rate & Split) */}
-                
-                  <div className="lg:col-span-7 bg-[#0a0a0a] border border-white/5 rounded-2xl p-5 flex flex-col relative overflow-hidden group">
-                    <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div className="flex items-center justify-between mb-6 relative z-10">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-white text-sm font-semibold tracking-tight">Divisão do Orçamento (Onde investimos)</h3>
-                        <span className="bg-white/5 text-gray-400 px-2 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase border border-white/5">Interativo</span>
-                      </div>
-                      <span className="text-xs text-gray-500 font-medium tracking-widest uppercase">{getMonthName(marketingBudget.currentMonth)}</span>
-                    </div>
-                    
-                    <div className="space-y-6 mt-auto relative z-10">
-                      <div>
-                        <div className="flex justify-between text-xs mb-2">
-                          <div className="flex items-center gap-2">
-                            <span className="w-2.5 h-2.5 rounded bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]"></span>
-                            <span className="text-gray-300 font-medium">Tráfego Pago (Meta/TikTok)</span>
-                          </div>
-                          <span className="text-white font-bold text-sm">{marketingBudget.budgetSplit?.trafego || 0}%</span>
-                        </div>
-                        <div className="relative w-full h-3 bg-[#1a1a1a] rounded-full overflow-hidden hover:bg-[#222] transition-colors cursor-ew-resize">
-                          <div className="h-full bg-cyan-500 transition-all duration-75 pointer-events-none" style={{ width: `${marketingBudget.budgetSplit?.trafego || 0}%` }}></div>
-                          <input 
-                            type="range" min="0" max="100" 
-                            value={marketingBudget.budgetSplit?.trafego || 0}
-                            onChange={(e) => handleSplitChange('trafego', parseInt(e.target.value))}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize m-0 p-0"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <div className="flex justify-between text-xs mb-2">
-                          <div className="flex items-center gap-2">
-                            <span className="w-2.5 h-2.5 rounded bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span>
-                            <span className="text-gray-300 font-medium">Cachê (Influenciadores)</span>
-                          </div>
-                          <span className="text-white font-bold text-sm">{marketingBudget.budgetSplit?.influenciadores || 0}%</span>
-                        </div>
-                        <div className="relative w-full h-3 bg-[#1a1a1a] rounded-full overflow-hidden hover:bg-[#222] transition-colors cursor-ew-resize">
-                          <div className="h-full bg-purple-500 transition-all duration-75 pointer-events-none" style={{ width: `${marketingBudget.budgetSplit?.influenciadores || 0}%` }}></div>
-                          <input 
-                            type="range" min="0" max="100" 
-                            value={marketingBudget.budgetSplit?.influenciadores || 0}
-                            onChange={(e) => handleSplitChange('influenciadores', parseInt(e.target.value))}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize m-0 p-0"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <div className="flex justify-between text-xs mb-2">
-                          <div className="flex items-center gap-2">
-                            <span className="w-2.5 h-2.5 rounded bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)]"></span>
-                            <span className="text-gray-300 font-medium">Envio de Produtos (Seeding)</span>
-                          </div>
-                          <span className="text-white font-bold text-sm">{marketingBudget.budgetSplit?.seeding || 0}%</span>
-                        </div>
-                        <div className="relative w-full h-3 bg-[#1a1a1a] rounded-full overflow-hidden hover:bg-[#222] transition-colors cursor-ew-resize">
-                          <div className="h-full bg-orange-500 transition-all duration-75 pointer-events-none" style={{ width: `${marketingBudget.budgetSplit?.seeding || 0}%` }}></div>
-                          <input 
-                            type="range" min="0" max="100" 
-                            value={marketingBudget.budgetSplit?.seeding || 0}
-                            onChange={(e) => handleSplitChange('seeding', parseInt(e.target.value))}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize m-0 p-0"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* 2. Pipeline de Aprovações (Corporate Workflow) */}
-                  <div className="lg:col-span-5 bg-[#0a0a0a] border border-white/5 rounded-2xl p-5 flex flex-col relative overflow-hidden group">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-white text-sm font-semibold tracking-tight">Aprovações Pendentes</h3>
-                        <button onClick={() => setIsCreateApprovalModalOpen(true)} className="bg-white/5 hover:bg-white/10 text-gray-400 px-2 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase transition-colors border border-white/5 flex items-center gap-1">Criar +</button>
-                      </div>
-                      <div className="px-2 py-0.5 bg-yellow-500/10 border border-yellow-500/20 rounded-full flex items-center gap-1.5">
-                        <Clock className="w-3 h-3 text-yellow-500" />
-                        <span className="text-[10px] text-yellow-500 font-bold uppercase tracking-widest">{approvals.length} Ações</span>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-3 mt-auto max-h-[180px] overflow-y-auto custom-scrollbar pr-1">
-                      {approvals.length === 0 ? (
-                        <div className="text-center py-8">
-                          <CheckCircle2 className="w-8 h-8 text-emerald-500/50 mx-auto mb-2" />
-                          <p className="text-gray-500 text-xs">Tudo aprovado! Nenhuma pendência.</p>
-                        </div>
-                      ) : approvals.map(app => (
-                        <div key={app.id} className="bg-[#111] border border-white/5 rounded-xl p-3 flex flex-col gap-2 hover:border-white/10 transition-colors cursor-pointer" onClick={() => setApprovalDetails(app)}>
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h4 className="text-white text-xs font-bold">{app.title}</h4>
-                              <span className="text-[10px] text-gray-500">{app.campaign}</span>
-                            </div>
-                            <span className="text-cyan-400 font-bold text-xs bg-cyan-400/10 px-1.5 py-0.5 rounded">R$ {app.amount.toLocaleString('pt-BR')}</span>
-                          </div>
-                          <div className="flex justify-between items-center mt-1 border-t border-white/5 pt-2">
-                            <span className="text-[9px] text-gray-600 uppercase tracking-widest font-bold">Ver Detalhes</span>
-                            <div className="flex gap-2">
-                              <button onClick={(e) => { e.stopPropagation(); handleReject(app.id); }} className="text-[9px] font-bold px-2 py-1 bg-white/5 hover:bg-red-500/20 hover:text-red-400 rounded uppercase text-gray-400 transition-colors">Rejeitar</button>
-                              <button onClick={(e) => { e.stopPropagation(); handleApprove(app.id, app.amount); }} className="text-[9px] font-bold px-2 py-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded uppercase hover:bg-cyan-500 hover:text-white transition-colors">Aprovar</button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-              </div>
-
-            </div>
-          </div>
-        )}
       </div>
 
       </div>
