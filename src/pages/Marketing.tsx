@@ -720,6 +720,12 @@ export default function Marketing() {
 
 
 
+                    </div>
+            </div>
+          )}
+      </div>
+      </div>
+
       {/* Modals para Aprovações */}
       {isCreateApprovalModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center">
