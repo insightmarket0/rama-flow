@@ -203,7 +203,7 @@ export function AppSidebar() {
 
 
 
-        <div className="bg-[#1C1C1E] border border-white/5 rounded-[40px] p-2.5 flex flex-col items-center gap-3 shadow-2xl relative">
+
           
           {filteredNavGroups.map((group) => {
             const active = isGroupActive(group);
@@ -329,3 +329,4 @@ export function AppSidebar() {
     </>
   );
 }
+
