@@ -76,10 +76,10 @@ const CAMPAIGNS_ROADMAP = [
 ];
 
 const CRM_PARTNERS = [
-  { id: 1, avatar: "https://i.pravatar.cc/150?u=1", name: "@tech_influencer", niche: "Tecnologia", status: "Postado", base: "R$ 500", upside: "15%", tracking: "TECH15", roi: "R$ 4.250", roiColor: "text-emerald-500", whitelisted: true, cpa: "R$ 15,20", tier: "A", rightsExp: "120" },
-  { id: 2, avatar: "https://i.pravatar.cc/150?u=2", name: "Maria Clara", niche: "Lifestyle", status: "Aguardando Roteiro", base: "Permuta", upside: "10%", tracking: "MARIA10", roi: "R$ 0", roiColor: "text-gray-500", whitelisted: false, cpa: "-", tier: "C", rightsExp: "10" },
-  { id: 3, avatar: "https://i.pravatar.cc/150?u=3", name: "Lucas Dev", niche: "Programação", status: "Aprovação Interna", base: "R$ 300", upside: "R$ 50/venda", tracking: "UTM_LUCAS", roi: "R$ 2.100", roiColor: "text-emerald-500", whitelisted: true, cpa: "R$ 22,00", tier: "A", rightsExp: "60" },
-  { id: 4, avatar: "https://i.pravatar.cc/150?u=4", name: "Revenda Sul", niche: "B2B", status: "Refação", base: "R$ 1.000", upside: "20%", tracking: "REVENDASUL", roi: "R$ 0", roiColor: "text-gray-500", whitelisted: false, cpa: "-", tier: "B", rightsExp: "5" }
+  { id: 1, avatar: "https://i.pravatar.cc/150?u=1", name: "@tech_influencer", niche: "Tecnologia", status: "Postado", base: "R$ 500", upside: "15%", tracking: "TECH15", roi: "R$ 4.250", roiColor: "text-emerald-500", whitelisted: true, cpa: "R$ 15,20", tier: "A", rightsExp: "120", seeding: "R$ 150 (1 kit)" },
+  { id: 2, avatar: "https://i.pravatar.cc/150?u=2", name: "Maria Clara", niche: "Lifestyle", status: "Aguardando Roteiro", base: "Permuta", upside: "10%", tracking: "MARIA10", roi: "R$ 0", roiColor: "text-gray-500", whitelisted: false, cpa: "-", tier: "C", rightsExp: "10", seeding: "R$ 0" },
+  { id: 3, avatar: "https://i.pravatar.cc/150?u=3", name: "Lucas Dev", niche: "Programação", status: "Aprovação Interna", base: "R$ 300", upside: "R$ 50/venda", tracking: "UTM_LUCAS", roi: "R$ 2.100", roiColor: "text-emerald-500", whitelisted: true, cpa: "R$ 22,00", tier: "A", rightsExp: "60", seeding: "R$ 450 (3 kits)" },
+  { id: 4, avatar: "https://i.pravatar.cc/150?u=4", name: "Revenda Sul", niche: "B2B", status: "Refação", base: "R$ 1.000", upside: "20%", tracking: "REVENDASUL", roi: "R$ 0", roiColor: "text-gray-500", whitelisted: false, cpa: "-", tier: "B", rightsExp: "5", seeding: "R$ 0" }
 ];
 
 const ASSETS = [
@@ -528,9 +528,10 @@ export default function Marketing() {
                       <th className="px-4 py-2.5 text-[10px] uppercase font-semibold text-gray-400">Nicho</th>
                       <th className="px-4 py-2.5 text-[10px] uppercase font-semibold text-gray-400">Status</th>
                       <th className="px-4 py-2.5 text-[10px] uppercase font-semibold text-gray-400">Base Fixa</th>
-                      <th className="px-4 py-2.5 text-[10px] uppercase font-semibold text-gray-400">Upside (Comissão)</th>
+                      <th className="px-4 py-2.5 text-[10px] uppercase font-semibold text-gray-400">Upside</th>
+                      <th className="px-4 py-2.5 text-[10px] uppercase font-semibold text-gray-400">Custo (Seeding)</th>
                       <th className="px-4 py-2.5 text-[10px] uppercase font-semibold text-gray-400">Cupom / UTM</th>
-                      <th className="px-4 py-2.5 text-[10px] uppercase font-semibold text-gray-400 text-right">ROI</th>
+                      <th className="px-4 py-2.5 text-[10px] uppercase font-semibold text-gray-400 text-right">Receita (Cupom) / eCPA</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#222]">
@@ -575,6 +576,7 @@ export default function Marketing() {
                         </td>
                         <td className="px-4 py-2 text-xs text-gray-300">{partner.base}</td>
                         <td className="px-4 py-2 text-xs text-emerald-400/80 font-medium">{partner.upside}</td>
+                        <td className="px-4 py-2 text-xs text-gray-400">{partner.seeding}</td>
                         <td className="px-4 py-2">
                           <span className="text-[10px] font-mono text-blue-400/80 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">{partner.tracking}</span>
                         </td>
@@ -588,80 +590,10 @@ export default function Marketing() {
                 </table>
               </div>
             </div>
-              {/* 3. Tabela de ROI de Influenciadores */}
-              <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden flex flex-col">
-                <div className="p-5 border-b border-white/5 flex justify-between items-center bg-[#0d0d0d]">
-                  <div>
-                    <h3 className="text-white text-sm font-semibold tracking-tight">Scorecard & ROI de Influenciadores</h3>
-                    <p className="text-[10px] text-gray-500 mt-1">Análise de retorno financeiro por parceria ativa.</p>
-                  </div>
-                  <button className="bg-transparent border border-white/10 hover:border-white/20 text-gray-300 px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5">
-                    <Download className="w-3.5 h-3.5" /> Exportar
-                  </button>
-                </div>
-                
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-[#111] border-b border-white/5">
-                        <th className="py-3 px-5 text-[10px] font-medium tracking-widest text-gray-500 uppercase">Creator</th>
-                        <th className="py-3 px-5 text-[10px] font-medium tracking-widest text-gray-500 uppercase">Custo (Cachê)</th>
-                        <th className="py-3 px-5 text-[10px] font-medium tracking-widest text-gray-500 uppercase">Custo (Seeding)</th>
-                        <th className="py-3 px-5 text-[10px] font-medium tracking-widest text-gray-500 uppercase">Receita (Cupom)</th>
-                        <th className="py-3 px-5 text-[10px] font-medium tracking-widest text-gray-500 uppercase text-right">eCPA Final</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      <tr className="hover:bg-white/[0.02] transition-colors">
-                        <td className="py-3 px-5">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 p-0.5">
-                              <div className="w-full h-full bg-[#111] rounded-full border border-black overflow-hidden flex items-center justify-center">
-                                <User className="w-4 h-4 text-white" />
-                              </div>
-                            </div>
-                            <div>
-                              <p className="text-xs font-medium text-white">@mariasilva</p>
-                              <p className="text-[9px] text-emerald-400 flex items-center gap-0.5 mt-0.5"><Target className="w-2.5 h-2.5" /> Alta Conversão</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-5 text-xs text-gray-300">R$ 2.000</td>
-                        <td className="py-3 px-5 text-xs text-gray-300">R$ 150 <span className="text-[9px] text-gray-600">(1 Kit)</span></td>
-                        <td className="py-3 px-5 text-xs font-bold text-white">R$ 12.500</td>
-                        <td className="py-3 px-5 text-right">
-                          <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-md text-[10px] font-bold">R$ 8,50</span>
-                        </td>
-                      </tr>
-                      <tr className="hover:bg-white/[0.02] transition-colors">
-                        <td className="py-3 px-5">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-500 to-gray-700 p-0.5">
-                              <div className="w-full h-full bg-[#111] rounded-full border border-black overflow-hidden flex items-center justify-center">
-                                <User className="w-4 h-4 text-white" />
-                              </div>
-                            </div>
-                            <div>
-                              <p className="text-xs font-medium text-white">@carlosfit</p>
-                              <p className="text-[9px] text-yellow-500 flex items-center gap-0.5 mt-0.5"><AlertCircle className="w-2.5 h-2.5" /> Atenção</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-5 text-xs text-gray-300">R$ 0 <span className="text-[9px] text-gray-500">(Permuta)</span></td>
-                        <td className="py-3 px-5 text-xs text-gray-300">R$ 450 <span className="text-[9px] text-gray-600">(3 Kits)</span></td>
-                        <td className="py-3 px-5 text-xs font-bold text-white">R$ 800</td>
-                        <td className="py-3 px-5 text-right">
-                          <span className="px-2 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded-md text-[10px] font-bold">R$ 45,00</span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
+          </div>
+        )}
 
-          {/* TAB 4: OR!AMENTO */}
+          {/* TAB 4: ORÇAMENTO */}
           {activeTab === "orcamento" && (
             <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar pb-2 mt-1">
             <div className="grid grid-cols-4 gap-3 shrink-0">
