@@ -268,6 +268,7 @@ export default function Marketing() {
 
   const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
   const [budgetForm, setBudgetForm] = useState({ total: 0, gasto: 0 });
+  const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
   
   // NOTE: isNewMonthPromptOpen and isScalingActive were already injected by inject_hooks_final.cjs!
   // Let's NOT duplicate them if they exist! Wait, inject_hooks_final injected them!
