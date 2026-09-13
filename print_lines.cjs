@@ -1,6 +1,5 @@
 ﻿const fs = require('fs');
-let content = fs.readFileSync('src/pages/Marketing.tsx', 'utf8');
-let lines = content.split('\n');
-for (let i = 1000; i < 1025; i++) {
-  if (lines[i] !== undefined) console.log(`${i+1}: ${lines[i]}`);
+let currentLines = fs.readFileSync('src/pages/Marketing.tsx', 'utf-8').split('\n');
+for (let i = 718; i < 728; i++) {
+    console.log((i+1) + ': ' + currentLines[i]);
 }
