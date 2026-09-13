@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { NavLink, useLocation } from "react-router-dom";
 import { 
   FileText,
@@ -38,7 +39,7 @@ const NAV_GROUPS = [
   {
     id: "home",
     icon: Home,
-    title: "Início",
+    title: "InÃ­cio",
     mainLink: "/meu-dia",
     subItems: [] // Sem sub-itens, clica direto
   },
@@ -46,7 +47,7 @@ const NAV_GROUPS = [
   {
     id: "operacao",
     icon: Zap,
-    title: "Operação",
+    title: "OperaÃ§Ã£o",
     subItems: [
       { title: "Mural de Ajustes", url: "/mural-ajustes", icon: ClipboardList },
       { title: "Mural de Alinhamento", url: "/mural-alinhamento", icon: Megaphone },
@@ -60,7 +61,7 @@ const NAV_GROUPS = [
     subItems: [
       { title: "Contas Fixas", url: "/contas-fixas", icon: CalendarPlus },
       { title: "Pedidos de Compras (Novo)", url: "/pedidos-compras", icon: ShoppingCart },
-      { title: "Análise Financeira (Novo)", url: "/comparativo", icon: LineChart },
+      { title: "AnÃ¡lise Financeira (Novo)", url: "/comparativo", icon: LineChart },
       { title: "Faturamento e Lucros", url: "/dashboard-financeiro", icon: LineChart },
       { title: "Dashboard Pedidos", url: "/dashboard", icon: LayoutDashboard },
       { title: "Fornecedores", url: "/fornecedores", icon: Users },
@@ -70,9 +71,9 @@ const NAV_GROUPS = [
   {
     id: "expedicao",
     icon: Package,
-    title: "Expedição",
+    title: "ExpediÃ§Ã£o",
     subItems: [
-      { title: "Portal de Expedição", url: "/expedicao", icon: LayoutDashboard },
+      { title: "Portal de ExpediÃ§Ã£o", url: "/expedicao", icon: LayoutDashboard },
       { title: "Central de Compras", url: "/suprimentos", icon: ShoppingCart },
     ]
   },
@@ -90,10 +91,10 @@ const NAV_GROUPS = [
   {
     id: "gestao",
     icon: LineChart,
-    title: "Gestão",
+    title: "GestÃ£o",
     subItems: [
               { title: "Business Plan", url: "/business-plan", icon: FileText },
-        { title: "Metas e Visão", url: "/metas", icon: Target },
+        { title: "Metas e VisÃ£o", url: "/metas", icon: Target },
       { title: "Playbooks (SOPs)", url: "/playbooks", icon: BookOpen },
       { title: "Instaladores Externos", url: "/instaladores", icon: Truck },
     ]
@@ -103,7 +104,7 @@ const NAV_GROUPS = [
     icon: Users,
     title: "Equipe",
     subItems: [
-      { title: "Gestão de Equipe", url: "/equipe", icon: Users },
+      { title: "GestÃ£o de Equipe", url: "/equipe", icon: Users },
     ]
   }
 ];
@@ -123,7 +124,7 @@ export function AppSidebar() {
           .or('status.eq.pendente,status.is.null');
         
         if (error) {
-          // Fallback para visualização se a tabela não existir
+          // Fallback para visualizaÃ§Ã£o se a tabela nÃ£o existir
           setPendingPurchases(1);
         } else {
           setPendingPurchases(count || 0);
@@ -185,23 +186,23 @@ export function AppSidebar() {
     });
   }
 
-  // Helper para checar se algum sub-item do grupo está ativo
+  // Helper para checar se algum sub-item do grupo estÃ¡ ativo
   const isGroupActive = (group: typeof NAV_GROUPS[0]) => {
     if (group.mainLink === location.pathname) return true;
     return group.subItems.some(item => location.pathname === item.url);
   };
 
   return (
-    <>
-      {/* Container Principal da Sidebar (Fixo à esquerda) */}
-      <aside className="fixed left-0 top-0 h-screen w-24 flex flex-col items-center py-6 z-50">
-        
-        {/* Logo Solta no Topo */}
-        <div className="mb-8 flex flex-col items-center justify-center group cursor-pointer hover:scale-110 transition-transform duration-300">
-          <Sparkles className={`h-8 w-8 transition-colors ${isMarketing ? 'text-cyan-400 group-hover:text-cyan-300 drop-shadow-[0_0_10px_rgba(6,182,212,0.3)]' : 'text-primary group-hover:text-white'}`} />
-        </div>
+      <aside className="fixed left-3 top-3 bottom-3 w-[72px] flex flex-col z-50">
+        <div className="bg-[#111] border border-[#222] w-full h-full rounded-[40px] py-6 flex flex-col items-center shadow-2xl relative">
+          <div className="mb-6 flex flex-col items-center justify-center group cursor-pointer hover:scale-110 transition-transform duration-300">
+            <Sparkles className={`h-6 w-6 transition-colors ${isMarketing ? 'text-cyan-400 group-hover:text-cyan-300 drop-shadow-[0_0_10px_rgba(6,182,212,0.3)]' : 'text-primary group-hover:text-white'}`} />
+          </div>
+          <div className="flex-1 flex flex-col items-center gap-2 overflow-y-auto w-full px-2 custom-scrollbar hide-scrollbar">
 
-        {/* Pill Dock (A Cápsula) */}
+
+
+
         <div className="bg-[#1C1C1E] border border-white/5 rounded-[40px] p-2.5 flex flex-col items-center gap-3 shadow-2xl relative">
           
           {filteredNavGroups.map((group) => {
@@ -215,13 +216,13 @@ export function AppSidebar() {
                 onMouseEnter={() => setHoveredGroup(group.id)}
                 onMouseLeave={() => setHoveredGroup(null)}
               >
-                {/* Botão Principal da Cápsula */}
+                {/* BotÃ£o Principal da CÃ¡psula */}
                 {group.subItems.length <= 1 ? (
-                  // Link direto (Home ou Único Item)
+                  // Link direto (Home ou Ãšnico Item)
                   <NavLink
                     to={group.subItems.length === 1 ? group.subItems[0].url : group.mainLink!}
                     title={group.title}
-                    className={`h-12 w-12 rounded-full flex items-center justify-center transition-all duration-300 relative ${
+                    className={`h-12 w-12 rounded-[18px] flex items-center justify-center transition-all duration-300 relative ${
                       active 
                         ? group.special 
                           ? "bg-[#00FF00] text-black shadow-[0_0_20px_rgba(0,255,0,0.5)]" 
@@ -241,9 +242,9 @@ export function AppSidebar() {
                     )}
                   </NavLink>
                 ) : (
-                  // Botão que abre menu (Outros)
+                  // BotÃ£o que abre menu (Outros)
                   <button
-                    className={`h-12 w-12 rounded-full flex items-center justify-center transition-all duration-300 relative ${
+                    className={`h-12 w-12 rounded-[18px] flex items-center justify-center transition-all duration-300 relative ${
                       active 
                         ? isMarketing
                           ? "bg-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]"
@@ -304,17 +305,25 @@ export function AppSidebar() {
             );
           })}
 
-          {/* Separador */}
-          <div className="w-8 h-px bg-white/10 my-1" />
+          </div>
 
-          {/* Botão de Sair (Logout) no fundo da pílula */}
-          <button 
-            onClick={signOut}
-            className="h-12 w-12 rounded-full flex items-center justify-center text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-            title="Sair"
-          >
-            <LogOut className="h-5 w-5" />
-          </button>
+          {/* Fundo da Sidebar (Avatar e Logout) */}
+          <div className="mt-auto pt-4 flex flex-col items-center gap-3 w-full px-2">
+            <button 
+              onClick={signOut}
+              className="h-10 w-10 rounded-[18px] flex items-center justify-center text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+              title="Sair"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+            
+            <Avatar className="h-10 w-10 border-2 border-[#222] rounded-[18px] mt-1 mb-2 hover:border-[#444] transition-colors cursor-pointer">
+              <AvatarImage src={user?.user_metadata?.avatar_url || (user?.email?.includes('mara') ? '/mara.png' : user?.email?.includes('rogerio') ? '/rogerio.png' : undefined)} />
+              <AvatarFallback className="bg-[#333] text-white text-xs font-bold">
+                {user?.email?.charAt(0).toUpperCase() || 'U'}
+              </AvatarFallback>
+            </Avatar>
+          </div>
         </div>
       </aside>
     </>
