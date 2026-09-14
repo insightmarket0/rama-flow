@@ -1,5 +1,11 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { NavLink, useLocation } from "react-router-dom";
 import { 
   FileText,
@@ -16,6 +22,7 @@ import {
   Wallet, 
   Calendar, 
   CalendarPlus,
+  User,
   Users,
   LogOut,
   Sparkles,
@@ -318,12 +325,26 @@ export function AppSidebar() {
               <LogOut className="h-4 w-4" />
             </button>
             
-            <Avatar className="h-10 w-10 border-2 border-[#222] rounded-[18px] mt-1 mb-2 hover:border-[#444] transition-colors cursor-pointer">
-              <AvatarImage src={user?.user_metadata?.avatar_url || (user?.email?.includes('mara') ? '/mara.png' : user?.email?.includes('rogerio') ? '/rogerio.png' : undefined)} />
-              <AvatarFallback className="bg-[#333] text-white text-xs font-bold">
-                {user?.email?.charAt(0).toUpperCase() || 'U'}
-              </AvatarFallback>
-            </Avatar>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="h-10 w-10 border-2 border-[#222] rounded-[18px] mt-1 mb-2 hover:border-[#444] transition-colors cursor-pointer outline-none">
+                  <AvatarImage src={user?.user_metadata?.avatar_url || (user?.email?.includes('mara') ? '/mara.png' : user?.email?.includes('rogerio') ? '/rogerio.png' : undefined)} />
+                  <AvatarFallback className="bg-[#2A2A2A] text-white text-xs font-bold">
+                    {user?.email?.charAt(0).toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" side="right" sideOffset={16} className="w-56 bg-[#1C1C1E] border-white/10 text-white rounded-xl shadow-2xl p-2 z-[100]">
+                <div className="flex flex-col space-y-1 p-2 mb-2 border-b border-white/5">
+                  <p className="text-sm font-semibold text-white truncate">{user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || "Usuário"}</p>
+                  <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+                </div>
+                <DropdownMenuItem onSelect={() => window.dispatchEvent(new CustomEvent('open-profile-modal'))} className="focus:bg-[#252528] focus:text-white cursor-pointer rounded-lg py-2.5">
+                  <User className="mr-2 h-4 w-4 text-gray-400" />
+                  <span>Meu Perfil</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </aside>
