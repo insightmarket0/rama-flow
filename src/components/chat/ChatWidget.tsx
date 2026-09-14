@@ -155,6 +155,11 @@ export function ChatWidget() {
   const [isRecording, setIsRecording] = useState(false);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
+  useEffect(() => {
+    const handleOpenChat = () => setIsOpen(true);
+    window.addEventListener('open-global-chat', handleOpenChat);
+    return () => window.removeEventListener('open-global-chat', handleOpenChat);
+  }, []);
 
   const handleSendApproval = () => {
     const newMsg = {
@@ -173,20 +178,10 @@ export function ChatWidget() {
 
   return (
     <>
-      {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-10 right-10 h-14 w-14 bg-[#00FF00] text-black rounded-full shadow-[0_0_20px_rgba(0,255,0,0.3)] hover:shadow-[0_0_30px_rgba(0,255,0,0.5)] flex items-center justify-center transition-all hover:scale-110 z-[100] animate-in zoom-in duration-300"
-        >
-          <MessageCircle className="h-6 w-6" />
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold h-5 w-5 rounded-full flex items-center justify-center border-2 border-[#111315]">
-            8
-          </span>
-        </button>
-      )}
 
       {isOpen && (
-        <div className="fixed bottom-10 right-10 w-[800px] h-[600px] max-w-[calc(100vw-4rem)] max-h-[calc(100vh-4rem)] bg-[#111315]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl flex overflow-hidden z-[100] animate-in slide-in-from-bottom-8 duration-300">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="w-[800px] h-[600px] max-w-[calc(100vw-4rem)] max-h-[calc(100vh-4rem)] bg-[#111315]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl flex overflow-hidden animate-in zoom-in-95 duration-200">
           
           {/* Sidebar */}
           <div className="w-64 bg-[#1A1D21]/50 border-r border-white/5 flex flex-col hidden sm:flex shrink-0">
@@ -369,7 +364,7 @@ export function ChatWidget() {
                 )}
               </div>
             </div>
-          </div>
+        </div>
         </div>
       )}
     </>
