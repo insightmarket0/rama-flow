@@ -168,7 +168,7 @@ export function AppSidebar() {
       }
       if (group.id === "operacao") {
         modifiedGroup.subItems = modifiedGroup.subItems.filter(
-          item => item.url !== "/mural-ajustes" && item.url !== "/mural-alinhamento"
+          item => item.url !== "/mural-ajustes"
         );
       }
     }

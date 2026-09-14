@@ -371,9 +371,6 @@ export default function MeuDia() {
                 <div onClick={() => navigate('/mural-ajustes')} className="hover:text-white transition-colors cursor-pointer flex items-center group">
                   Ajustes <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">{adjustments.length}</span>
                 </div>
-                <div onClick={() => navigate('/mural-alinhamento')} className="hover:text-white transition-colors cursor-pointer flex items-center group">
-                  Alinhamento <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">2</span>
-                </div>
               </>
             )}
           </div>
@@ -400,21 +397,27 @@ export default function MeuDia() {
         {(user?.email === "livia@hotmail.com" || currentUserName.startsWith("Rogério")) ? (
           <PainelPagamentosHoje />
         ) : (
-          user?.email !== "mara@hotmail.com" && announcements.length > 0 && (
+          user?.email !== "mara@hotmail.com" && (
             <div className="col-span-1 md:col-span-2 bg-[#111111] border-l-4 border-[#00FF00] rounded-2xl p-5 group relative shadow-lg h-fit">
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-[#00FF00] font-bold tracking-tighter text-xl uppercase flex items-center gap-2">
                   <Megaphone className="h-5 w-5" strokeWidth={3} />
-                  Mural
+                  Mural de Alinhamento
                 </h3>
                 <span className="text-[#00FF00] text-[10px] font-bold tracking-widest uppercase border border-[#00FF00]/20 px-2 py-0.5 rounded-full">
                   Prioridade
                 </span>
               </div>
               
+              
               <div className="space-y-3">
-                {announcements.map(ann => (
+                {announcements.length === 0 ? (
+                  <div className="text-gray-500 text-sm italic text-center py-4 bg-black/20 rounded-xl">
+                    Nenhum aviso no momento.
+                  </div>
+                ) : (
+                  announcements.map(ann => (
                   <div key={ann.id} className="bg-black/30 rounded-xl p-4 border border-white/5 hover:bg-black/50 transition-colors">
                     <div>
                       <div className="flex items-center gap-2 mb-2 text-gray-400 font-bold text-[10px] uppercase tracking-wider">
