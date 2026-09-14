@@ -1105,75 +1105,119 @@ export default function Marketing() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-4 overflow-y-auto max-h-[70vh] custom-scrollbar grid grid-cols-2 gap-4">
-              <div className="col-span-2 flex gap-4 items-center mb-2">
-                <Avatar className="w-16 h-16 rounded border border-[#333]">
-                  <AvatarImage src={editingCrmPartner.avatar} />
-                  <AvatarFallback className="bg-[#222] text-white rounded">?</AvatarFallback>
+            <div className="p-6 overflow-y-auto max-h-[75vh] custom-scrollbar space-y-6">
+              {/* Profile Image Section */}
+              <div className="flex gap-5 items-center">
+                <Avatar className="w-20 h-20 rounded-full border-2 border-[#333] shadow-lg">
+                  <AvatarImage src={editingCrmPartner.avatar} className="object-cover" />
+                  <AvatarFallback className="bg-[#1a1a1a] text-white rounded-full text-xl font-bold">?</AvatarFallback>
                 </Avatar>
-                <div className="flex-1">
-                  <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">URL da Foto (Avatar)</label>
-                  <input type="text" value={editingCrmPartner.avatar} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, avatar: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded text-white text-sm p-2 focus:border-cyan-500 outline-none" />
+                <div className="flex-1 space-y-2">
+                  <div>
+                    <h3 className="text-white text-sm font-semibold tracking-tight">Foto do Perfil</h3>
+                    <p className="text-[10px] text-gray-500">Recomendado: 400x400px (JPG, PNG)</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      id="avatar-upload"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const url = URL.createObjectURL(file);
+                          setEditingCrmPartner({...editingCrmPartner, avatar: url});
+                        }
+                      }} 
+                    />
+                    <label htmlFor="avatar-upload" className="cursor-pointer bg-white/5 hover:bg-white/10 border border-white/10 transition-colors rounded-lg text-gray-300 text-xs px-4 py-2 flex items-center gap-2 w-max shadow-sm">
+                      <ImageIcon className="w-4 h-4" />
+                      Fazer Upload
+                    </label>
+                    {editingCrmPartner.avatar && !editingCrmPartner.avatar.includes('pravatar') && (
+                      <span className="text-[10px] text-emerald-500 font-medium bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Upload pronto</span>
+                    )}
+                  </div>
                 </div>
               </div>
-              
-              <div>
-                <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Nome do Parceiro</label>
-                <input type="text" value={editingCrmPartner.name} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, name: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded text-white text-sm p-2 focus:border-cyan-500 outline-none" />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Nicho</label>
-                <input type="text" value={editingCrmPartner.niche} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, niche: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded text-white text-sm p-2 focus:border-cyan-500 outline-none" />
-              </div>
-              
-              <div>
-                <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Status</label>
-                <input type="text" value={editingCrmPartner.status} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, status: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded text-white text-sm p-2 focus:border-cyan-500 outline-none" />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Tier (A, B, C)</label>
-                <input type="text" value={editingCrmPartner.tier} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, tier: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded text-white text-sm p-2 focus:border-cyan-500 outline-none" />
-              </div>
 
-              <div>
-                <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Base Fixa</label>
-                <input type="text" value={editingCrmPartner.base} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, base: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded text-white text-sm p-2 focus:border-cyan-500 outline-none" />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Upside</label>
-                <input type="text" value={editingCrmPartner.upside} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, upside: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded text-white text-sm p-2 focus:border-cyan-500 outline-none" />
-              </div>
+              {/* Form Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
+                <div className="col-span-2 md:col-span-1">
+                  <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1.5 block">Nome do Parceiro</label>
+                  <input type="text" value={editingCrmPartner.name} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, name: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded-lg text-white text-sm px-3 py-2.5 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none shadow-inner" />
+                </div>
+                <div className="col-span-2 md:col-span-1">
+                  <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1.5 block">Nicho</label>
+                  <input type="text" value={editingCrmPartner.niche} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, niche: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded-lg text-white text-sm px-3 py-2.5 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none shadow-inner" />
+                </div>
+                
+                <div className="col-span-2 md:col-span-1">
+                  <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1.5 block">Status</label>
+                  <select value={editingCrmPartner.status} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, status: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded-lg text-white text-sm px-3 py-2.5 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none shadow-inner appearance-none cursor-pointer">
+                    <option value="Postado">Postado</option>
+                    <option value="Aprovação Interna">Aprovação Interna</option>
+                    <option value="Aguardando Roteiro">Aguardando Roteiro</option>
+                    <option value="Refação">Refação</option>
+                  </select>
+                </div>
+                <div className="col-span-2 md:col-span-1">
+                  <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1.5 block">Tier</label>
+                  <select value={editingCrmPartner.tier} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, tier: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded-lg text-white text-sm px-3 py-2.5 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none shadow-inner appearance-none cursor-pointer">
+                    <option value="A">Tier A</option>
+                    <option value="B">Tier B</option>
+                    <option value="C">Tier C</option>
+                  </select>
+                </div>
 
-              <div>
-                <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Custo (Seeding)</label>
-                <input type="text" value={editingCrmPartner.seeding} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, seeding: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded text-white text-sm p-2 focus:border-cyan-500 outline-none" />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Cupom / UTM</label>
-                <input type="text" value={editingCrmPartner.tracking} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, tracking: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded text-white text-sm p-2 focus:border-cyan-500 outline-none" />
-              </div>
+                <div className="col-span-2 border-t border-[#222] my-1"></div>
 
-              <div>
-                <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Receita (Cupom)</label>
-                <input type="text" value={editingCrmPartner.roi} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, roi: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded text-white text-sm p-2 focus:border-cyan-500 outline-none" />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">eCPA Final</label>
-                <input type="text" value={editingCrmPartner.cpa} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, cpa: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded text-white text-sm p-2 focus:border-cyan-500 outline-none" />
-              </div>
-              
-              <div>
-                <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Cor da Receita (Ex: text-emerald-500)</label>
-                <input type="text" value={editingCrmPartner.roiColor} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, roiColor: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded text-white text-sm p-2 focus:border-cyan-500 outline-none" />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Expiração (Dias)</label>
-                <input type="text" value={editingCrmPartner.rightsExp} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, rightsExp: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded text-white text-sm p-2 focus:border-cyan-500 outline-none" />
-              </div>
+                <div className="col-span-2 md:col-span-1">
+                  <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1.5 block">Base Fixa</label>
+                  <input type="text" value={editingCrmPartner.base} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, base: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded-lg text-white text-sm px-3 py-2.5 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none shadow-inner" />
+                </div>
+                <div className="col-span-2 md:col-span-1">
+                  <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1.5 block">Upside</label>
+                  <input type="text" value={editingCrmPartner.upside} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, upside: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded-lg text-white text-sm px-3 py-2.5 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none shadow-inner" />
+                </div>
 
+                <div className="col-span-2 md:col-span-1">
+                  <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1.5 block">Custo (Seeding)</label>
+                  <input type="text" value={editingCrmPartner.seeding} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, seeding: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded-lg text-white text-sm px-3 py-2.5 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none shadow-inner" />
+                </div>
+                <div className="col-span-2 md:col-span-1">
+                  <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1.5 block">Cupom / UTM</label>
+                  <input type="text" value={editingCrmPartner.tracking} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, tracking: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded-lg text-white text-sm px-3 py-2.5 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none shadow-inner" />
+                </div>
+
+                <div className="col-span-2 border-t border-[#222] my-1"></div>
+
+                <div className="col-span-2 md:col-span-1">
+                  <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1.5 block">Receita (Cupom)</label>
+                  <input type="text" value={editingCrmPartner.roi} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, roi: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded-lg text-white text-sm px-3 py-2.5 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none shadow-inner" />
+                </div>
+                <div className="col-span-2 md:col-span-1">
+                  <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1.5 block">eCPA Final</label>
+                  <input type="text" value={editingCrmPartner.cpa} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, cpa: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded-lg text-white text-sm px-3 py-2.5 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none shadow-inner" />
+                </div>
+                
+                <div className="col-span-2 md:col-span-1">
+                  <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1.5 block">Cor da Receita (Ex: text-emerald-500)</label>
+                  <select value={editingCrmPartner.roiColor} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, roiColor: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded-lg text-white text-sm px-3 py-2.5 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none shadow-inner appearance-none cursor-pointer">
+                    <option value="text-emerald-500">Verde (Positivo)</option>
+                    <option value="text-gray-500">Cinza (Neutro)</option>
+                    <option value="text-red-500">Vermelho (Negativo)</option>
+                  </select>
+                </div>
+                <div className="col-span-2 md:col-span-1">
+                  <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1.5 block">Expiração (Dias)</label>
+                  <input type="text" value={editingCrmPartner.rightsExp} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, rightsExp: e.target.value})} className="w-full bg-[#111] border border-[#222] rounded-lg text-white text-sm px-3 py-2.5 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none shadow-inner" />
+                </div>
+              </div>
             </div>
-            <div className="p-4 border-t border-[#222] bg-[#0a0a0a] flex justify-end gap-2">
-              <button onClick={() => setIsCrmModalOpen(false)} className="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors">Cancelar</button>
+            <div className="p-5 border-t border-[#222] bg-[#0a0a0a] flex justify-end gap-3 rounded-b-xl relative z-20">
+              <button onClick={() => setIsCrmModalOpen(false)} className="px-5 py-2.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Cancelar</button>
               <button onClick={handleSaveCrmPartner} className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-sm font-semibold transition-colors">Salvar Alterações</button>
             </div>
           </div>
