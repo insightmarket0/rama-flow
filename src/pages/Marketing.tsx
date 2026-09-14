@@ -147,6 +147,8 @@ export default function Marketing() {
 
   const [scripts, setScripts] = useState(INITIAL_SCRIPTS);
   const [activeScriptId, setActiveScriptId] = useState(1);
+  const [isNewScriptModalOpen, setIsNewScriptModalOpen] = useState(false);
+  const [newScriptForm, setNewScriptForm] = useState({ title: '', category: 'TikTok & UGC', description: '' });
 
   const handleEditCrmPartner = (partner: any) => {
     setEditingCrmPartner({ ...partner });
@@ -442,18 +444,8 @@ export default function Marketing() {
                 <div className="p-4 border-b border-white/5 bg-[#111]/50 flex items-center justify-between sticky top-0 z-10 backdrop-blur-md">
                   <h3 className="text-white text-sm font-semibold tracking-tight">Suas Estratégias</h3>
                   <button className="text-cyan-400 hover:text-cyan-300 transition-colors p-1" onClick={() => {
-                    const newScript = {
-                      id: Date.now(),
-                      category: "TikTok & UGC",
-                      title: 'Novo Roteiro',
-                      status: "Em Rascunho",
-                      statusColor: "text-yellow-500 bg-yellow-500/10",
-                      date: new Date().toLocaleDateString('pt-BR'),
-                      description: "Descrição do seu novo roteiro",
-                      blocks: []
-                    };
-                    setScripts([...scripts, newScript]);
-                    setActiveScriptId(newScript.id);
+                    setNewScriptForm({ title: 'Novo Roteiro', category: 'TikTok & UGC', description: '' });
+                    setIsNewScriptModalOpen(true);
                   }}>
                     <Plus className="w-4 h-4" />
                   </button>
@@ -1077,6 +1069,81 @@ export default function Marketing() {
             <p className="text-[10px] text-center text-gray-500 mt-2">
               Ao aprovar, o valor de R$ {approvalDetails.amount.toLocaleString('pt-BR')} será adicionado automaticamente ao "Gasto" do seu Orçamento atual.
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* NEW SCRIPT MODAL */}
+      {isNewScriptModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl w-full max-w-md flex flex-col shadow-2xl">
+            <div className="p-5 flex justify-between items-center border-b border-white/5">
+              <h2 className="text-white font-semibold text-lg tracking-tight">Novo Roteiro</h2>
+              <button onClick={() => setIsNewScriptModalOpen(false)} className="text-gray-500 hover:text-white transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-5">
+              <div>
+                <label className="text-[9px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Título da Estratégia</label>
+                <input 
+                  type="text" 
+                  value={newScriptForm.title} 
+                  onChange={(e) => setNewScriptForm({...newScriptForm, title: e.target.value})} 
+                  placeholder="Ex: Unboxing de Produto..."
+                  className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2.5 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none" 
+                />
+              </div>
+              
+              <div>
+                <label className="text-[9px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Plataforma (Categoria)</label>
+                <select 
+                  value={newScriptForm.category} 
+                  onChange={(e) => setNewScriptForm({...newScriptForm, category: e.target.value})} 
+                  className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2.5 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none appearance-none cursor-pointer"
+                >
+                  <option value="TikTok & UGC">TikTok & UGC</option>
+                  <option value="Instagram">Instagram (Reels / Stories)</option>
+                  <option value="Shopee">Shopee (Live / Ads)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[9px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Descrição do Roteiro (Opcional)</label>
+                <textarea 
+                  value={newScriptForm.description} 
+                  onChange={(e) => setNewScriptForm({...newScriptForm, description: e.target.value})} 
+                  placeholder="Ex: Roteiro focado em mostrar os benefícios..."
+                  className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2.5 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none resize-none min-h-[80px]"
+                />
+              </div>
+            </div>
+
+            <div className="p-5 flex justify-end gap-3 border-t border-white/5">
+              <button onClick={() => setIsNewScriptModalOpen(false)} className="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors">
+                Cancelar
+              </button>
+              <button 
+                onClick={() => {
+                  const newScript = {
+                    id: Date.now(),
+                    category: newScriptForm.category,
+                    title: newScriptForm.title || "Novo Roteiro",
+                    status: "Em Rascunho",
+                    statusColor: "text-yellow-500 bg-yellow-500/10",
+                    date: new Date().toLocaleDateString('pt-BR'),
+                    description: newScriptForm.description,
+                    blocks: []
+                  };
+                  setScripts([...scripts, newScript]);
+                  setActiveScriptId(newScript.id);
+                  setIsNewScriptModalOpen(false);
+                }}
+                className="px-6 py-2 bg-cyan-500 hover:bg-cyan-600 text-black font-bold text-sm rounded-lg transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+                Criar Roteiro
+              </button>
+            </div>
           </div>
         </div>
       )}
