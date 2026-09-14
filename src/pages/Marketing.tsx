@@ -1134,7 +1134,11 @@ export default function Marketing() {
                     statusColor: "text-yellow-500 bg-yellow-500/10",
                     date: new Date().toLocaleDateString('pt-BR'),
                     description: newScriptForm.description,
-                    blocks: []
+                    blocks: [
+                      { id: Date.now() + 1, title: "1. O Gancho (Hook - 0 a 3 seg)", icon: "FileText", color: "pink", content: "<p class=\\"italic text-gray-500 mb-2\\">// Escreva aqui a ação inicial ou visual chamativo.</p>\\"Sua fala principal do gancho aqui...\\"" },
+                      { id: Date.now() + 2, title: "2. Desenvolvimento (Provas e Features)", icon: "PlayCircle", color: "cyan", content: "<ul class=\\"list-disc list-inside space-y-2\\"><li><strong>Cena 1:</strong> Mostre o produto em uso...</li><li><strong>Fala:</strong> \\"Explique o principal benefício aqui...\\"</li></ul>" },
+                      { id: Date.now() + 3, title: "3. Call to Action (CTA)", icon: "ShoppingBag", color: "emerald", content: "<p class=\\"italic text-gray-500 mb-2\\">// Aponte para o link ou produto.</p>\\"Chamada final para ação, ex: Clica no link da bio!\\"" }
+                    ]
                   };
                   setScripts([...scripts, newScript]);
                   setActiveScriptId(newScript.id);
