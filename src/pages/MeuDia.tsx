@@ -9,7 +9,7 @@ import {
   CalendarDays,
   ArrowRight,
   Sparkles,
-  Háandshake,
+  Handshake,
   Truck,
   Package,
   Settings2,
@@ -17,8 +17,8 @@ import {
   Sprout,
   Trees,
   LayoutGrid,
-  Háeart
-, MessageSquare, X, Send } from "lucide-react";
+  Heart,
+  MessageSquare, X, Send, MessageCircle, ChevronRight } from "lucide-react";
 import { RamaDoDiaWidget } from "@/components/RamaDoDiaWidget";
 import { PainelPagamentosHoje } from "@/components/finance/PainelPagamentosHoje";
 import { parseISO, isBefore, format } from "date-fns";
@@ -452,36 +452,38 @@ export default function MeuDia() {
             {/* 3.1. Card Fixo de Prévia de Mensagens */}
             <div 
               onClick={() => window.dispatchEvent(new CustomEvent('open-global-chat'))}
-              className="col-span-1 bg-gradient-to-r from-[#0a0a0a] to-[#111111] hover:from-[#111111] hover:to-[#161616] rounded-2xl p-4 flex items-center gap-4 border border-[#222] hover:border-[#ccff00]/40 shadow-lg cursor-pointer transition-all duration-300 group relative z-20 overflow-hidden"
+              className="col-span-1 bg-[#121214] hover:bg-[#18181B] rounded-3xl p-5 flex items-center gap-5 border border-white/5 hover:border-white/10 shadow-lg cursor-pointer transition-all duration-500 group relative overflow-hidden"
             >
-              {/* Neon glow effect on hover */}
-              <div className="absolute inset-0 bg-[#ccff00]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+              {/* Subtle inner glow */}
+              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
               
-              <div className="w-14 h-14 rounded-xl bg-[#161616] flex flex-col items-center justify-center shrink-0 border border-[#333] group-hover:border-[#ccff00]/50 group-hover:shadow-[0_0_15px_rgba(204,255,0,0.2)] transition-all duration-300 relative z-10">
-                <MessageSquare className="w-5 h-5 text-gray-400 group-hover:text-[#ccff00] transition-colors mb-0.5" />
-                <span className="text-[8px] font-bold text-gray-500 group-hover:text-[#ccff00]/80 uppercase tracking-widest transition-colors">Chat</span>
-              </div>
-              
-              <div className="flex-1 overflow-hidden flex flex-col justify-center relative z-10">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="px-2.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5 bg-[#ccff00] text-black shadow-[0_0_10px_rgba(204,255,0,0.3)]">
-                    <div className="w-1.5 h-1.5 rounded-full bg-black animate-pulse"></div>
-                    Novas Mensagens
-                  </span>
-                  <span className="text-gray-500 text-[10px] font-medium uppercase tracking-widest truncate">
-                    Equipe
-                  </span>
+              <div className="relative shrink-0">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#1E1E20] to-[#111] flex items-center justify-center border border-white/10 group-hover:scale-105 transition-transform duration-500 shadow-inner relative overflow-hidden">
+                   <div className="absolute inset-0 bg-emerald-500/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                   <MessageCircle className="w-6 h-6 text-gray-400 group-hover:text-white transition-colors relative z-10" />
                 </div>
-                <p className="text-gray-200 font-medium text-[13px] leading-snug truncate group-hover:text-white transition-colors">
-                  Olá! Há um aviso importante sobre o faturamento...
-                </p>
+                {/* Notification Badge */}
+                <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#FF3B30] border-2 border-[#121214] rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-lg animate-in zoom-in">
+                  3
+                </div>
               </div>
               
-              <button 
-                className="bg-[#161616] group-hover:bg-[#ccff00] text-gray-500 group-hover:text-black w-10 h-10 rounded-full transition-all duration-300 flex items-center justify-center border border-[#333] group-hover:border-[#ccff00] shrink-0 relative z-10 shadow-lg group-hover:shadow-[0_0_15px_rgba(204,255,0,0.4)]"
-              >
-                <MessageSquare className="h-4 w-4" />
-              </button>
+              <div className="flex-1 min-w-0 flex flex-col justify-center">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
+                    Chat da Equipe
+                  </span>
+                  <div className="w-1 h-1 rounded-full bg-white/20" />
+                  <span className="text-[10px] text-gray-500 font-medium">Agora</span>
+                </div>
+                <h3 className="text-white font-medium text-[13px] leading-tight truncate mb-1">
+                  Fahema: <span className="text-gray-400 font-normal">Os novos criativos já estão na pasta...</span>
+                </h3>
+              </div>
+              
+              <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 duration-300">
+                <ChevronRight className="w-4 h-4 text-white/50 group-hover:text-white" />
+              </div>
             </div>
 
             {/* 3.2. Cards de Ajustes (O AVISO ORIGINAL) */}
