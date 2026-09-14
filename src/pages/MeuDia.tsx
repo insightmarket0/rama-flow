@@ -396,6 +396,8 @@ export default function MeuDia() {
           </div>
         )}
 
+        <ExpedicaoTracker />
+
         {(user?.email === "livia@hotmail.com" || currentUserName.startsWith("RogÃƒÂ©rio")) ? (
           <PainelPagamentosHoje />
         ) : (
@@ -443,8 +445,6 @@ export default function MeuDia() {
           </div>
           )
         )}
-
-        <ExpedicaoTracker />
 
         {(user?.email === "mara@hotmail.com" || currentUserName.startsWith("RogÃƒÂ©rio")) ? (
           <MuralExpedicao user={user} />
