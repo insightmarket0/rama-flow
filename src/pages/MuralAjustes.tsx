@@ -352,6 +352,201 @@ export default function MuralAjustes() {
                     Marcar Resolvido
                   </button>
                 )}
+    assignee_name: 'livre'
+  });
+
+  const handleCreateTicket = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.description) return;
+    
+    const newTicket = {
+      id: Math.random().toString(),
+      creator_id: user?.id || "user_manager",
+      creator_name: userName,
+      assignee_id: formData.assignee_name === 'livre' ? null : `user_${formData.assignee_name.toLowerCase()}`,
+      assignee_name: formData.assignee_name === 'livre' ? null : formData.assignee_name,
+      marketplace: formData.marketplace,
+      sku: formData.sku,
+      link: formData.link,
+      description: formData.description,
+      status: "pendente",
+      priority: formData.priority,
+      created_at: new Date().toISOString()
+    };
+    
+    setTickets([newTicket, ...tickets]);
+    setIsModalOpen(false);
+    setFormData({ marketplace: 'Mercado Livre', sku: '', description: '', priority: 'normal', assignee_name: 'livre' });
+  };
+
+  const handleResolve = (id: string) => {
+    // Na vida real: await updateTicketStatus(id, 'resolvido')
+    setTickets(tickets.map(t => t.id === id ? { ...t, status: 'resolvido', resolved_by: 'Você' } : t));
+  };
+
+  const filteredTickets = tickets.filter(t => {
+    if (filter === "todos") return true;
+    return t.marketplace.toLowerCase() === filter.toLowerCase();
+  });
+
+  return (
+    <div className="flex-1 p-4 md:p-8 pt-6 animate-in fade-in duration-500">
+      
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+        <div>
+          <h2 className="text-4xl font-light tracking-tight text-white flex items-center gap-3 mb-2">
+            <AlertCircle className="h-8 w-8 text-[#00FF00] drop-shadow-[0_0_10px_rgba(0,255,0,0.3)]" />
+            Mural de Ajustes Rápidos
+          </h2>
+          <p className="text-gray-500 font-medium text-[10px] tracking-widest uppercase">
+            CORREÇÃO DE ERROS E OTIMIZAÇÃO DE ANÚNCIOS
+          </p>
+        </div>
+        
+        <div className="flex gap-4 items-center">
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 group-focus-within:text-[#00FF00] transition-colors" />
+            <input 
+              type="text" 
+              placeholder="Buscar SKU ou tarefa..." 
+              className="pl-10 pr-4 py-2.5 bg-[#0a0a0a] border border-white/5 rounded-xl text-sm text-white focus:outline-none focus:border-[#00FF00]/50 focus:shadow-[0_0_10px_rgba(0,255,0,0.1)] transition-all w-64"
+            />
+          </div>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 bg-[#00FF00] hover:bg-[#00FF00]/80 text-black px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(0,255,0,0.3)] hover:shadow-[0_0_20px_rgba(0,255,0,0.4)]"
+          >
+            <Plus className="h-4 w-4" />
+            Novo Ticket
+          </button>
+        </div>
+      </div>
+
+      {/* Tabs / Filters */}
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+        {['Todos', 'Shopee', 'Mercado Livre', 'Amazon', 'Geral'].map((m) => {
+          const count = m === 'Todos' 
+            ? tickets.length 
+            : tickets.filter(t => (t.marketplace || '').toLowerCase() === m.toLowerCase()).length;
+          const isActive = filter === m.toLowerCase();
+
+          return (
+            <button 
+              key={m}
+              onClick={() => setFilter(m.toLowerCase())}
+              className={`px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all flex items-center gap-2 ${
+                isActive 
+                  ? 'bg-white/10 text-white border-b-2 border-[#00FF00]' 
+                  : 'text-gray-500 hover:text-gray-300 hover:bg-white/5 border-b-2 border-transparent'
+              }`}
+            >
+              {m !== 'Todos' && getMarketplaceLogo(m)}
+              {m}
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${isActive ? 'bg-[#00FF00]/20 text-[#00FF00]' : 'bg-white/5 text-gray-500'}`}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Grid de Tickets */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {filteredTickets.map((ticket) => {
+          const isResolved = ticket.status === 'resolvido';
+          
+          return (
+            <div 
+              key={ticket.id} 
+              className={`bg-[#111111]/80 backdrop-blur-sm rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 group ${
+                isResolved 
+                  ? 'opacity-50 border border-[#00FF00]/20' 
+                  : `border-x border-b border-white/5 border-t-2 ${getMarketplaceCardStyle(ticket.marketplace)}`
+              }`}
+            >
+              <div>
+                <div className="flex items-center justify-between mb-5">
+                  <span className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border flex items-center gap-2 ${getMarketplaceStyle(ticket.marketplace)}`}>
+                    {getMarketplaceLogo(ticket.marketplace)}
+                    {ticket.marketplace}
+                  </span>
+                  
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="text-[10px] font-bold text-gray-400 flex items-center gap-1.5 bg-white/5 px-2 py-0.5 rounded-full">
+                      {ticket.creator_name || 'Sistema'}
+                    </span>
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-gray-600 flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      Hoje
+                    </span>
+                  </div>
+                </div>
+                
+                {(ticket.sku || ticket.link) && (
+                  <div className="flex items-center gap-3 mb-4 bg-[#050505]/80 w-fit px-3 py-1.5 rounded-lg border border-white/5 shadow-inner">
+                    <div className={`h-2 w-2 rounded-full shrink-0 ${ticket.priority === 'critico' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse' : 'bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.6)]'}`} title={ticket.priority === 'critico' ? 'Crítico / Risco' : 'Normal / Estético'} />
+                    
+                    <div className="h-3 w-[1px] bg-white/10" />
+
+                    <div className="flex items-center gap-1.5 text-[#00FF00] font-bold tracking-widest text-xs uppercase">
+                      <Tag className="h-3.5 w-3.5 opacity-80" />
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[#00FF00]/40 font-medium">{ticket.sku ? "SKU" : "LINK"}</span>
+                        <a href={ticket.link || `https://seller.shopee.com.br/portal/product/list?search=${ticket.sku}`} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors drop-shadow-[0_0_8px_rgba(0,255,0,0.2)]">
+                          {ticket.sku || "Acessar Anúncio"}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                <p className="text-gray-300 text-sm mb-6 leading-relaxed flex items-start gap-3">
+                  <MessageSquare className="h-4 w-4 mt-0.5 text-gray-600 shrink-0" />
+                  <span className={isResolved ? "line-through text-gray-500" : ""}>{ticket.description}</span>
+                </p>
+              </div>
+              
+              <div className="pt-5 border-t border-white/5 flex items-center justify-between gap-4 mt-auto">
+                {/* Avatar / Assignee */}
+                <div className="flex items-center gap-3 shrink-0">
+                  {ticket.assignee_name ? (
+                    <div className="flex items-center gap-2">
+                      <div className={`h-8 w-8 rounded-full border flex items-center justify-center text-[10px] font-bold tracking-wider ${getAvatarStyle(ticket.assignee_name)}`}>
+                        {ticket.assignee_name.substring(0, 2).toUpperCase()}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Designado para</span>
+                        <span className="text-xs text-gray-300 font-medium">{ticket.assignee_name}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-600 text-[10px] font-bold">
+                        --
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Status</span>
+                        <span className="text-xs text-gray-500 font-medium italic">Livre</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {isResolved ? (
+                  <div className="text-[#00FF00]/70 text-[10px] uppercase tracking-widest font-bold flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Resolvido por {ticket.resolved_by}
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => handleResolve(ticket.id)}
+                    className="flex-1 py-2.5 px-4 bg-transparent hover:bg-[#00FF00]/10 border border-white/10 hover:border-[#00FF00]/50 text-gray-400 hover:text-[#00FF00] text-xs font-bold uppercase tracking-widest rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group/btn"
+                  >
+                    <CheckCircle2 className="h-4 w-4 group-hover/btn:scale-110 group-hover/btn:drop-shadow-[0_0_8px_rgba(0,255,0,0.5)] transition-all" />
+                    Marcar Resolvido
+                  </button>
+                )}
               </div>
             </div>
           );
@@ -363,10 +558,8 @@ export default function MuralAjustes() {
             <p>Nenhum ajuste pendente para este canal.</p>
           </div>
         )}
-      </div>
-
-
         </div>
+      </div>
         
         {/* Lado Direito: Feed de Auditoria */}
         <div className="w-full xl:w-[350px] shrink-0 bg-[#0A0A0A] border border-[#222] rounded-3xl p-6 shadow-2xl flex flex-col h-full sticky top-6">
