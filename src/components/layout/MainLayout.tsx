@@ -8,11 +8,11 @@ import { GlobalAlerts } from "./GlobalAlerts";
 import { FeatureAnnouncementModal } from "./FeatureAnnouncementModal";
 import { RamaDoDiaWidget } from "@/components/RamaDoDiaWidget";
 import { ChatWidget } from "@/components/chat/ChatWidget";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronDown, Bell, User as UserIcon, Settings } from "lucide-react";
 import {
   DropdownMenu,
