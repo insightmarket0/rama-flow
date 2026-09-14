@@ -64,14 +64,14 @@ const getMarketplaceStyle = (marketplace: string) => {
   }
 };
 
-// ---- MOCKS AGREGADOS PARA DEMONSTRAÃ¯Â¿Â½!Ãƒâ€™O ----
+// ---- MOCKS AGREGADOS PARA DEMONSTRAé!òO ----
 
 const MOCK_ANNOUNCEMENTS = [
   {
     id: "ann_1",
-    creator: { full_name: "Anderson Ã¢Â¬Â¢ SupervisÃƒÂ£o" },
+    creator: { full_name: "Anderson - Supervisão" },
     title: "Cuidado com os itens de vidro!",
-    content: "Lembrete: A partir de hoje, ÃƒÂ© obrigatÃƒÂ³rio usar plÃƒÂ¡stico bolha duplo em todos os itens frÃƒÂ¡geis.",
+    content: "Lembrete: A partir de hoje, é obrigatório usar plástico bolha duplo em todos os itens frágeis.",
     is_pinned: true,
   }
 ];
@@ -79,15 +79,15 @@ const MOCK_ANNOUNCEMENTS = [
 const MOCK_REMINDERS = [
   {
     id: "rem_1",
-    title: "ReposiÃƒÂ§ÃƒÂ£o de Insumos: Caixa Parda 30x20x10",
-    description: "O almoxarifado separou as caixas solicitadas. EstÃƒÂ£o a caminho da bancada 2.",
+    title: "Reposição de Insumos: Caixa Parda 30x20x10",
+    description: "O almoxarifado separou as caixas solicitadas. Estão a caminho da bancada 2.",
     due_date: new Date(new Date().setHours(17, 0, 0, 0)).toISOString(),
     status: "pendente",
   },
   {
     id: "rem_2",
-    title: "Estoque CrÃƒÂ­tico: Fita Adesiva",
-    description: "AtenÃƒÂ§ÃƒÂ£o: Restam apenas 3 rolos de fita. O pedido de compra jÃƒÂ¡ foi aprovado.",
+    title: "Estoque Crítico: Fita Adesiva",
+    description: "Atenção: Restam apenas 3 rolos de fita. O pedido de compra já foi aprovado.",
     due_date: new Date(new Date().setHours(10, 0, 0, 0)).toISOString(),
     status: "pendente",
   }
@@ -109,7 +109,7 @@ const getQuoteOfTheDay = (email?: string) => {
   const oneDay = 1000 * 60 * 60 * 24;
   const dayOfYear = Math.floor(diff / oneDay);
   
-  // Exibir versÃƒÂ­culos bÃƒÂ­blicos apenas para a conta do RogÃƒÂ©rio e da Mara
+  // Exibir versículos bíblicos apenas para a conta do Rogério e da Mara
   if (email === "suporte.ramamagazine@gmail.com" || email === "mara@hotmail.com") {
     return BIBLE_VERSES[dayOfYear % BIBLE_VERSES.length];
   }
@@ -119,7 +119,7 @@ const getQuoteOfTheDay = (email?: string) => {
 
 // -------------------------------------------
 
-const ExpedicaoTracker = () => {
+const ExpediçãoTracker = () => {
   const [now, setNow] = useState(new Date());
   
   useEffect(() => {
@@ -133,7 +133,7 @@ const ExpedicaoTracker = () => {
   
   const dispatches = [
     { name: "Flex (ML/Shopee)", time: "13:00", minutes: 13 * 60, color: "#00FF00" },
-    { name: "ML AgÃƒÂªncia", time: "16:00", minutes: 16 * 60, color: "#FFE600" },
+    { name: "ML Agência", time: "16:00", minutes: 16 * 60, color: "#FFE600" },
     { name: "Shopee/Amz/Mag", time: "17:00", minutes: 17 * 60, color: "#EE4D2D" },
   ];
   
@@ -176,7 +176,7 @@ const ExpedicaoTracker = () => {
         </div>
       </div>
 
-      {/* Centro: RelÃƒÂ³gio AnalÃƒÂ³gico (Menor) */}
+      {/* Centro: Relógio Analógico (Menor) */}
       <div className="relative w-[220px] h-[135px] flex flex-col items-center justify-start overflow-hidden z-10 shrink-0">
         <svg className="absolute top-0 w-[220px] h-[220px]" viewBox="0 0 300 300">
           <g stroke="currentColor" strokeWidth="2">
@@ -199,7 +199,7 @@ const ExpedicaoTracker = () => {
 
         <div className="absolute top-[35%] flex flex-col items-center justify-center w-full">
           <span className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.1em] mb-0.5">
-            HorÃƒÂ¡rio Local
+            Horário Local
           </span>
           <div className="text-white text-5xl font-bold tracking-tighter" style={{ fontVariantNumeric: 'tabular-nums' }}>
             {hours.toString().padStart(2, '0')}:{minutes.toString().padStart(2, '0')}
@@ -210,7 +210,7 @@ const ExpedicaoTracker = () => {
         </div>
       </div>
       
-      {/* Direita: Indicador de OperaÃƒÂ§ÃƒÂ£o */}
+      {/* Direita: Indicador de Operação */}
       <div className="flex flex-col items-center justify-center z-10 w-full md:w-auto mt-4 md:mt-0">
         <div className="relative flex items-center justify-center w-12 h-12 rounded-full bg-[#111] border border-white/10 shadow-[inset_0_0_15px_rgba(255,255,255,0.02)]">
           <div className="absolute inset-0 rounded-full border border-[#00FF00]/40 animate-[spin_3s_linear_infinite]" style={{ borderTopColor: 'transparent', borderLeftColor: 'transparent' }} />
@@ -218,7 +218,7 @@ const ExpedicaoTracker = () => {
           <Zap className="w-5 h-5 text-[#00FF00] drop-shadow-[0_0_5px_rgba(0,255,0,0.8)] z-10" />
         </div>
         <span className="text-[9px] font-bold tracking-widest text-[#00FF00] uppercase mt-2 animate-pulse">
-          Operando
+          Operação
         </span>
       </div>
 
@@ -226,16 +226,16 @@ const ExpedicaoTracker = () => {
   );
 };
 
-const MuralExpedicao = ({ user }: { user: any }) => {
+const MuralExpedição = ({ user }: { user: any }) => {
   const [notes, setNotes] = useState([
-    { id: 1, text: "Lembrete: A partir de hoje, ÃƒÂ© obrigatÃƒÂ³rio usar plÃƒÂ¡stico bolha duplo em todos os itens frÃƒÂ¡geis.", author: "RogÃƒÂ©rio", date: "Hoje" },
+    { id: 1, text: "Lembrete: A partir de hoje, é obrigatório usar plástico bolha duplo em todos os itens frágeis.", author: "Rogério", date: "Hoje" },
     { id: 2, text: "Verificar se as caixas da Shopee chegaram.", author: "Mara", date: "Ontem" }
   ]);
   const [newNote, setNewNote] = useState("");
 
   const handlePost = () => {
     if (newNote.trim()) {
-      setNotes([{id: Date.now(), text: newNote, author: user?.user_metadata?.full_name || "ExpediÃƒÂ§ÃƒÂ£o", date: "Agora"}, ...notes]);
+      setNotes([{id: Date.now(), text: newNote, author: user?.user_metadata?.full_name || "Expedição", date: "Agora"}, ...notes]);
       setNewNote("");
     }
   };
@@ -245,7 +245,7 @@ const MuralExpedicao = ({ user }: { user: any }) => {
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-[#00FF00] font-bold tracking-tighter text-xl uppercase flex items-center gap-2">
           <Megaphone className="h-5 w-5" strokeWidth={3} />
-          Mural da ExpediÃƒÂ§ÃƒÂ£o
+          Mural da Expedição
         </h3>
         <span className="text-[#00FF00] text-[10px] font-bold tracking-widest uppercase border border-[#00FF00]/20 px-2 py-0.5 rounded-full">
           Avisos Internos
@@ -292,11 +292,11 @@ export default function MeuDia() {
   const { user } = useAuth();
   const navigate = useNavigate();
   
-  // Extrai e formata o nome do usuÃƒÂ¡rio logado
+  // Extrai e formata o nome do usuário logado
   const rawName = user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Equipe";
   const currentUserName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
 
-  // SaudaÃƒÂ§ÃƒÂ£o de acordo com o horÃƒÂ¡rio
+  // Saudação de acordo com o horário
   const currentHour = new Date().getHours();
   let greeting = "Bom dia";
   if (currentHour >= 12 && currentHour < 18) {
@@ -337,7 +337,7 @@ export default function MeuDia() {
         <div className="flex items-center gap-2 mb-6">
           <div className="w-3 h-3 rounded-full bg-[#00FF00] shadow-[0_0_10px_#00FF00] animate-pulse" />
           <span className="text-[#00FF00] text-[10px] font-bold tracking-[0.2em] uppercase opacity-80">
-            Resumo Operacional
+            Resumo Operaçãonal
           </span>
         </div>
 
@@ -356,11 +356,11 @@ export default function MeuDia() {
           <div className="flex flex-col space-y-1 mt-6 text-2xl md:text-3xl font-light text-gray-400">
             {user?.email === "mara@hotmail.com" ? (
               <div onClick={() => navigate('/expedicao')} className="hover:text-white transition-colors cursor-pointer flex items-center group">
-                Portal de ExpediÃƒÂ§ÃƒÂ£o <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">Ir</span>
+                Portal de Expedição <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">Ir</span>
               </div>
             ) : (
               <div className="hover:text-white transition-colors cursor-pointer flex items-center group">
-                UrgÃƒÂªncias <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">{reminders.length}</span>
+                Urgências <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">{reminders.length}</span>
               </div>
             )}
             <div onClick={() => navigate('/lembretes')} className="hover:text-white transition-colors cursor-pointer flex items-center group">
@@ -391,13 +391,13 @@ export default function MeuDia() {
           <div className="col-span-1 md:col-span-2 aspect-[2/1] rounded-[2rem] bg-[#111111] flex flex-col items-center justify-center border border-white/5 shadow-2xl p-8 mt-4">
             <CheckCircle2 className="h-20 w-20 text-[#00FF00] mb-6 drop-shadow-[0_0_15px_rgba(0,255,0,0.4)]" />
             <h3 className="text-3xl font-light text-white mb-2 tracking-wide">Tudo zerado</h3>
-            <p className="text-gray-500 text-center text-lg">Seu foco operacional estÃƒÂ¡ limpo.</p>
+            <p className="text-gray-500 text-center text-lg">Seu foco operacional está limpo.</p>
           </div>
         )}
 
-        <ExpedicaoTracker />
+        <ExpediçãoTracker />
 
-        {(user?.email === "livia@hotmail.com" || currentUserName.startsWith("RogÃƒÂ©rio")) ? (
+        {(user?.email === "livia@hotmail.com" || currentUserName.startsWith("Rogério")) ? (
           <PainelPagamentosHoje />
         ) : (
           user?.email !== "mara@hotmail.com" && announcements.length > 0 && (
@@ -445,8 +445,8 @@ export default function MeuDia() {
           )
         )}
 
-        {(user?.email === "mara@hotmail.com" || currentUserName.startsWith("RogÃƒÂ©rio")) ? (
-          <MuralExpedicao user={user} />
+        {(user?.email === "mara@hotmail.com" || currentUserName.startsWith("Rogério")) ? (
+          <MuralExpedição user={user} />
         ) : (
           <>
             {/* 3.1. Card Fixo de Prévia de Mensagens */}
@@ -514,7 +514,7 @@ export default function MeuDia() {
           </>
         )}
 
-        {/* 4. Card de Desempenho RÃƒÂ¡pido */}
+        {/* 4. Card de Desempenho Rápido */}
         {!isNothingPending && (
           <div className="col-span-1 md:col-span-2 bg-[#1A1A1A] rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between border border-white/5 relative overflow-hidden">
              <div className="relative z-10 flex items-center gap-4">
@@ -527,7 +527,7 @@ export default function MeuDia() {
                 </div>
              </div>
              <div className="relative z-10 flex gap-6 mt-4 sm:mt-0">
-               {(user?.email === "mara@hotmail.com" || currentUserName.startsWith("RogÃƒÂ©rio")) && (
+               {(user?.email === "mara@hotmail.com" || currentUserName.startsWith("Rogério")) && (
                  <div className="text-center">
                    <div className="text-3xl font-extrabold text-[#00FF00] tracking-tighter leading-none">{reminders.length + adjustments.length}</div>
                    <div className="text-[9px] font-bold text-[#00FF00] uppercase tracking-widest mt-1">Casos Abertos</div>
