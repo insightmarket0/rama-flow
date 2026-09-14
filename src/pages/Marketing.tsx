@@ -578,15 +578,26 @@ export default function Marketing() {
                         </td>
                         <td className="px-4 py-2 text-xs text-gray-400">{partner.niche}</td>
                         <td className="px-4 py-2">
-                          <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded border ${
-                            partner.status === 'Postado' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                            partner.status === 'Aprovação Interna' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                            partner.status === 'Aguardando Roteiro' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
-                            partner.status === 'Refação' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                            'bg-gray-500/10 text-gray-400 border-gray-500/20'
-                          }`}>
-                            {partner.status}
-                          </span>
+                          <select
+                            value={partner.status}
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) => {
+                              const newStatus = e.target.value;
+                              setCrmPartners(crmPartners.map(p => p.id === partner.id ? { ...p, status: newStatus } : p));
+                            }}
+                            className={`appearance-none cursor-pointer outline-none inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded border transition-colors ${
+                              partner.status === 'Postado' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20' :
+                              partner.status === 'Aprovação Interna' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500/20' :
+                              partner.status === 'Aguardando Roteiro' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20 hover:bg-purple-500/20' :
+                              partner.status === 'Refação' ? 'bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20' :
+                              'bg-gray-500/10 text-gray-400 border-gray-500/20 hover:bg-gray-500/20'
+                            }`}
+                          >
+                            <option value="Postado" className="bg-[#111] text-emerald-400">Postado</option>
+                            <option value="Aprovação Interna" className="bg-[#111] text-blue-400">Aprovação Interna</option>
+                            <option value="Aguardando Roteiro" className="bg-[#111] text-purple-400">Aguardando Roteiro</option>
+                            <option value="Refação" className="bg-[#111] text-red-400">Refação</option>
+                          </select>
                         </td>
                         <td className="px-4 py-2 text-xs text-gray-300">{partner.base}</td>
                         <td className="px-4 py-2 text-xs text-emerald-400/80 font-medium">{partner.upside}</td>
