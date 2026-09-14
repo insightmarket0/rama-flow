@@ -37,7 +37,8 @@ import {
   ShoppingBag,
   PlayCircle,
   FileText,
-  PenTool
+  PenTool,
+  Trash2
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -546,6 +547,7 @@ export default function Marketing() {
                       <th className="px-4 py-2.5 text-[10px] uppercase font-semibold text-gray-400">Custo (Seeding)</th>
                       <th className="px-4 py-2.5 text-[10px] uppercase font-semibold text-gray-400">Cupom / UTM</th>
                       <th className="px-4 py-2.5 text-[10px] uppercase font-semibold text-gray-400 text-right">Receita (Cupom) / eCPA</th>
+                      <th className="pr-4 py-2.5 w-10"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#222]">
@@ -608,6 +610,18 @@ export default function Marketing() {
                         <td className="px-4 py-2 text-right">
                           <div className={`text-xs font-semibold ${partner.roiColor}`}>{partner.roi}</div>
                           <div className="text-[9px] text-gray-500 mt-0.5">CPA: {partner.cpa}</div>
+                        </td>
+                        <td className="pr-4 py-2 text-right">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCrmPartners(crmPartners.filter(p => p.id !== partner.id));
+                            }}
+                            className="text-gray-500 hover:text-red-500 hover:bg-red-500/10 p-1.5 rounded transition-colors inline-flex"
+                            title="Excluir parceiro"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </td>
                       </tr>
                     ))}
