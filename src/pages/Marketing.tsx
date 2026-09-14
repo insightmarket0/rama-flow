@@ -534,25 +534,25 @@ export default function Marketing() {
           {/* TAB 2: CRM */}
           {activeTab === "crm" && (
             <div className="flex-1 flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-2">
-              <div className="bg-[#111] border border-[#222] rounded-lg overflow-hidden flex flex-col shrink-0">
+              <div className="bg-[#0d0d0d] border border-white/5 rounded-xl overflow-hidden flex flex-col shrink-0 shadow-lg">
               <div className="overflow-auto flex-1 custom-scrollbar">
                 <table className="w-full text-left">
-                  <thead className="bg-[#141414] sticky top-0 z-10">
-                    <tr className="border-b border-[#222]">
-                      <th className="px-4 py-2.5 text-[10px] uppercase font-semibold text-gray-400">Parceiro</th>
-                      <th className="px-4 py-2.5 text-[10px] uppercase font-semibold text-gray-400">Nicho</th>
-                      <th className="px-4 py-2.5 text-[10px] uppercase font-semibold text-gray-400">Status</th>
-                      <th className="px-4 py-2.5 text-[10px] uppercase font-semibold text-gray-400">Base Fixa</th>
-                      <th className="px-4 py-2.5 text-[10px] uppercase font-semibold text-gray-400">Upside</th>
-                      <th className="px-4 py-2.5 text-[10px] uppercase font-semibold text-gray-400">Custo (Seeding)</th>
-                      <th className="px-4 py-2.5 text-[10px] uppercase font-semibold text-gray-400">Cupom / UTM</th>
-                      <th className="px-4 py-2.5 text-[10px] uppercase font-semibold text-gray-400 text-right">Receita (Cupom) / eCPA</th>
-                      <th className="pr-4 py-2.5 w-10"></th>
+                  <thead className="bg-[#0d0d0d] sticky top-0 z-10">
+                    <tr className="border-b border-white/5">
+                      <th className="px-4 py-3 text-[9px] uppercase tracking-wider font-semibold text-gray-500">Parceiro</th>
+                      <th className="px-4 py-3 text-[9px] uppercase tracking-wider font-semibold text-gray-500">Nicho</th>
+                      <th className="px-4 py-3 text-[9px] uppercase tracking-wider font-semibold text-gray-500">Status</th>
+                      <th className="px-4 py-3 text-[9px] uppercase tracking-wider font-semibold text-gray-500">Base Fixa</th>
+                      <th className="px-4 py-3 text-[9px] uppercase tracking-wider font-semibold text-gray-500">Upside</th>
+                      <th className="px-4 py-3 text-[9px] uppercase tracking-wider font-semibold text-gray-500">Custo (Seeding)</th>
+                      <th className="px-4 py-3 text-[9px] uppercase tracking-wider font-semibold text-gray-500">Cupom / UTM</th>
+                      <th className="px-4 py-3 text-[9px] uppercase tracking-wider font-semibold text-gray-500 text-right">Receita (Cupom) / eCPA</th>
+                      <th className="pr-4 py-3 w-10"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#222]">
+                  <tbody className="divide-y divide-white/[0.03]">
                     {crmPartners.map(partner => (
-                      <tr key={partner.id} onClick={() => handleEditCrmPartner(partner)} className="hover:bg-[#161616] cursor-pointer transition-colors">
+                      <tr key={partner.id} onClick={() => handleEditCrmPartner(partner)} className="hover:bg-white/[0.02] cursor-pointer transition-colors">
                         <td className="px-4 py-2 flex items-center gap-2">
                           <div className="relative">
                             <Avatar className="w-8 h-8 rounded border border-[#333]">
