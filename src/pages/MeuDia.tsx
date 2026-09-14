@@ -450,9 +450,9 @@ export default function MeuDia() {
           <MuralExpedicao user={user} />
         ) : (
           <>
-            {/* 3.1. Card Fixo de PrÃ©via de Mensagens */}
+            {/* 3.1. Card Fixo de Prévia de Mensagens */}
             <div 
-              onClick={() => setActiveChatTicket({ marketplace: 'Suporte Interno', sku: 'MSG-001', description: 'OlÃ¡! HÃ¡ um aviso importante sobre o faturamento de ontem. Por favor, verifique quando puder.' })}
+              onClick={() => setActiveChatTicket({ marketplace: 'Suporte Interno', sku: 'MSG-001', description: 'Olá! Há um aviso importante sobre o faturamento de ontem. Por favor, verifique quando puder.' })}
               className="col-span-1 bg-[#111111] hover:bg-[#151515] rounded-[24px] p-3 flex items-center gap-4 border border-white/5 shadow-xl cursor-pointer transition-all group hover:border-white/10 relative z-20"
             >
               <div className="w-14 h-14 rounded-[20px] bg-white/5 flex flex-col items-center justify-center shrink-0 border border-white/10 group-hover:bg-white/10 transition-colors">
@@ -471,7 +471,7 @@ export default function MeuDia() {
                   </span>
                 </div>
                 <p className="text-gray-300 font-medium text-xs leading-snug truncate">
-                  OlÃ¡! HÃ¡ um aviso importante sobre o faturamento de ontem.
+                  Olá! Há um aviso importante sobre o faturamento de ontem.
                 </p>
               </div>
               
