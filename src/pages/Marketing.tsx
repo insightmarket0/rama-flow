@@ -89,6 +89,53 @@ const ASSETS = [
   { id: 3, type: "Vídeo", name: "Reels_Inverno.mp4", size: "45 MB" },
 ];
 
+const INITIAL_SCRIPTS = [
+  {
+    id: 1,
+    category: "TikTok & UGC",
+    title: 'Unboxing "Ferramenta X"',
+    status: "Roteiro Pronto",
+    statusColor: "text-emerald-400 bg-emerald-400/10",
+    date: "2h atrás",
+    description: "Criador focado em marcenaria vai demonstrar o torque e bateria do equipamento recém lançado.",
+    blocks: [
+      { id: 1, title: "1. O Gancho (Hook - 0 a 3 seg)", icon: "FileText", color: "pink", content: "<p class=\"italic text-gray-500 mb-2\">// O criador recebe a caixa misteriosa. Ele abre com expressão de choque para a câmera.</p>\"Eu duvidei que essa ferramenta aguentaria o tranco da minha marcenaria, mas olha o que veio nessa caixa da [Nome da Marca].\"" },
+      { id: 2, title: "2. Desenvolvimento (Provas e Features)", icon: "PlayCircle", color: "cyan", content: "<ul class=\"list-disc list-inside space-y-2\"><li><strong>Cena 1:</strong> Mostrar o torque furando uma madeira maciça (Angulo fechado na broca).</li><li><strong>Cena 2:</strong> Mostrar a bateria (Mencionar que dura 20h direto).</li><li><strong>Fala:</strong> \"O torque disso aqui é absurdo. Ela atravessa peroba rosa como se fosse manteiga, e a bateria não me deixa na mão no meio do projeto.\"</li></ul>" },
+      { id: 3, title: "3. Call to Action (CTA)", icon: "ShoppingBag", color: "emerald", content: "<p class=\"italic text-gray-500 mb-2\">// Apontar para baixo (link da bio/carrinho) segurando a ferramenta.</p>\"Se você é marceneiro ou faz DIY, isso aqui é investimento. Clica no link da minha bio que eu consegui um cupom de 15% de desconto lá na loja deles na Shopee!\"" }
+    ]
+  },
+  {
+    id: 2,
+    category: "TikTok & UGC",
+    title: 'Hook: "Perdi dinheiro..."',
+    status: "Em Rascunho",
+    statusColor: "text-yellow-500 bg-yellow-500/10",
+    date: "Ontem",
+    description: "Ideia rápida para um hook chamativo.",
+    blocks: []
+  },
+  {
+    id: 3,
+    category: "Instagram",
+    title: 'Brief: @marceneiromoderno',
+    status: "Aguardando",
+    statusColor: "text-cyan-400 bg-cyan-400/10",
+    date: "15/Ago",
+    description: "Briefing para envio de produto.",
+    blocks: []
+  },
+  {
+    id: 4,
+    category: "Shopee",
+    title: 'Mega Campanha 9.9',
+    status: "Alta Priori.",
+    statusColor: "text-red-400 bg-red-400/10",
+    date: "09/09",
+    description: "Roteiro principal da live 9.9.",
+    blocks: []
+  }
+];
+
 export default function Marketing() {
 
   const [isSalesModalOpen, setIsSalesModalOpen] = useState(false);
@@ -97,6 +144,9 @@ export default function Marketing() {
   const [crmPartners, setCrmPartners] = useState(CRM_PARTNERS);
   const [isCrmModalOpen, setIsCrmModalOpen] = useState(false);
   const [editingCrmPartner, setEditingCrmPartner] = useState<any>(null);
+
+  const [scripts, setScripts] = useState(INITIAL_SCRIPTS);
+  const [activeScriptId, setActiveScriptId] = useState(1);
 
   const handleEditCrmPartner = (partner: any) => {
     setEditingCrmPartner({ ...partner });
@@ -391,143 +441,146 @@ export default function Marketing() {
               <div className="w-[320px] flex-shrink-0 bg-[#0a0a0a] border border-white/5 rounded-2xl flex flex-col overflow-hidden h-full">
                 <div className="p-4 border-b border-white/5 bg-[#111]/50 flex items-center justify-between sticky top-0 z-10 backdrop-blur-md">
                   <h3 className="text-white text-sm font-semibold tracking-tight">Suas Estratégias</h3>
-                  <button className="text-cyan-400 hover:text-cyan-300 transition-colors p-1"><Plus className="w-4 h-4" /></button>
+                  <button className="text-cyan-400 hover:text-cyan-300 transition-colors p-1" onClick={() => {
+                    const newScript = {
+                      id: Date.now(),
+                      category: "TikTok & UGC",
+                      title: 'Novo Roteiro',
+                      status: "Em Rascunho",
+                      statusColor: "text-yellow-500 bg-yellow-500/10",
+                      date: new Date().toLocaleDateString('pt-BR'),
+                      description: "Descrição do seu novo roteiro",
+                      blocks: []
+                    };
+                    setScripts([...scripts, newScript]);
+                    setActiveScriptId(newScript.id);
+                  }}>
+                    <Plus className="w-4 h-4" />
+                  </button>
                 </div>
                 
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-6">
-                  
-                  {/* Category: TikTok */}
-                  <div>
-                    <div className="flex items-center gap-2 mb-2 px-2">
-                      <PlayCircle className="w-3.5 h-3.5 text-pink-400" />
-                      <span className="text-xs font-bold uppercase tracking-widest text-gray-500">TikTok & UGC</span>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="bg-white/[0.08] border border-white/20 rounded-lg p-3 cursor-pointer flex flex-col gap-1.5 relative overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all hover:bg-white/[0.12]">
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-pink-500 rounded-l-lg"></div>
-                        <span className="text-white text-xs font-medium ml-1">Unboxing "Ferramenta X"</span>
-                        <div className="flex justify-between items-center ml-1">
-                          <span className="text-[9px] text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">Roteiro Pronto</span>
-                          <span className="text-[9px] text-gray-500">2h atrás</span>
-                        </div>
+                  {Array.from(new Set(scripts.map(s => s.category))).map(category => (
+                    <div key={category}>
+                      <div className="flex items-center gap-2 mb-2 px-2">
+                        {category.includes('TikTok') ? <PlayCircle className="w-3.5 h-3.5 text-pink-400" /> : category.includes('Instagram') ? <Instagram className="w-3.5 h-3.5 text-purple-400" /> : <ShoppingBag className="w-3.5 h-3.5 text-orange-400" />}
+                        <span className="text-xs font-bold uppercase tracking-widest text-gray-500">{category}</span>
                       </div>
-                      <div className="hover:bg-white/5 border border-transparent rounded-lg p-2.5 cursor-pointer flex flex-col gap-1.5 transition-colors">
-                        <span className="text-gray-300 text-xs font-medium ml-1">Hook: "Perdi dinheiro..."</span>
-                        <div className="flex justify-between items-center ml-1">
-                          <span className="text-[9px] text-yellow-500 bg-yellow-500/10 px-1.5 py-0.5 rounded">Em Rascunho</span>
-                          <span className="text-[9px] text-gray-500">Ontem</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Category: Instagram */}
-                  <div>
-                    <div className="flex items-center gap-2 mb-2 px-2">
-                      <Instagram className="w-3.5 h-3.5 text-purple-400" />
-                      <span className="text-xs font-bold uppercase tracking-widest text-gray-500">Instagram</span>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="hover:bg-white/5 border border-transparent rounded-lg p-2.5 cursor-pointer flex flex-col gap-1.5 transition-colors">
-                        <span className="text-gray-300 text-xs font-medium ml-1">Brief: @marceneiromoderno</span>
-                        <div className="flex justify-between items-center ml-1">
-                          <span className="text-[9px] text-cyan-400 bg-cyan-400/10 px-1.5 py-0.5 rounded">Aguardando</span>
-                          <span className="text-[9px] text-gray-500">15/Ago</span>
-                        </div>
+                      <div className="space-y-1">
+                        {scripts.filter(s => s.category === category).map(script => (
+                          <div 
+                            key={script.id}
+                            onClick={() => setActiveScriptId(script.id)}
+                            className={`border rounded-lg p-2.5 cursor-pointer flex flex-col gap-1.5 relative overflow-hidden transition-all ${activeScriptId === script.id ? 'bg-white/[0.08] border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.5)]' : 'hover:bg-white/5 border-transparent'}`}
+                          >
+                            {activeScriptId === script.id && <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-500 rounded-l-lg"></div>}
+                            <span className="text-gray-200 text-xs font-medium ml-1">{script.title}</span>
+                            <div className="flex justify-between items-center ml-1">
+                              <span className={`text-[9px] px-1.5 py-0.5 rounded ${script.statusColor}`}>{script.status}</span>
+                              <span className="text-[9px] text-gray-500">{script.date}</span>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  </div>
-
-                  {/* Category: Shopee */}
-                  <div>
-                    <div className="flex items-center gap-2 mb-2 px-2">
-                      <ShoppingBag className="w-3.5 h-3.5 text-orange-400" />
-                      <span className="text-xs font-bold uppercase tracking-widest text-gray-500">Shopee</span>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="hover:bg-white/5 border border-transparent rounded-lg p-2.5 cursor-pointer flex flex-col gap-1.5 transition-colors">
-                        <span className="text-gray-300 text-xs font-medium ml-1">Mega Campanha 9.9</span>
-                        <div className="flex justify-between items-center ml-1">
-                          <span className="text-[9px] text-red-400 bg-red-400/10 px-1.5 py-0.5 rounded flex items-center gap-1"><Flame className="w-2.5 h-2.5" /> Alta Priori.</span>
-                          <span className="text-[9px] text-gray-500">09/09</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
+                  ))}
                 </div>
               </div>
 
               {/* DETAIL PANEL (Right Content Editor) */}
-              <div className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-2xl flex flex-col overflow-hidden h-full relative">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-pink-500/5 rounded-full blur-[80px] pointer-events-none"></div>
-                
-                {/* Editor Header */}
-                <div className="p-8 border-b border-white/5 flex flex-col gap-4 relative z-10">
-                  <div className="flex justify-between items-start">
-                    <div className="flex gap-2">
-                      <span className="text-[10px] font-bold tracking-widest uppercase text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-md">Roteiro Pronto</span>
-                      <span className="text-[10px] font-bold tracking-widest uppercase text-gray-400 bg-white/5 px-2 py-1 rounded-md flex items-center gap-1"><PlayCircle className="w-3 h-3" /> TikTok UGC</span>
+              {(() => {
+                const activeScript = scripts.find(s => s.id === activeScriptId);
+                if (!activeScript) return <div className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-2xl flex items-center justify-center text-gray-500">Selecione um roteiro</div>;
+                return (
+                <div className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-2xl flex flex-col overflow-hidden h-full relative">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-[80px] pointer-events-none"></div>
+                  
+                  {/* Editor Header */}
+                  <div className="p-8 border-b border-white/5 flex flex-col gap-4 relative z-10">
+                    <div className="flex justify-between items-start">
+                      <div className="flex gap-2">
+                        <span className={`text-[10px] font-bold tracking-widest uppercase px-2 py-1 rounded-md ${activeScript.statusColor}`}>{activeScript.status}</span>
+                        <span className="text-[10px] font-bold tracking-widest uppercase text-gray-400 bg-white/5 px-2 py-1 rounded-md flex items-center gap-1">
+                          {activeScript.category.includes('TikTok') ? <PlayCircle className="w-3 h-3" /> : activeScript.category.includes('Instagram') ? <Instagram className="w-3 h-3" /> : <ShoppingBag className="w-3 h-3" />}
+                          {activeScript.category}
+                        </span>
+                      </div>
+                      <button 
+                        onClick={() => {}}
+                        className="bg-cyan-500 hover:bg-cyan-600 text-black text-xs font-bold px-4 py-2 rounded-lg transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+                        Salvar Roteiro
+                      </button>
                     </div>
-                    <button className="bg-cyan-500 hover:bg-cyan-600 text-black text-xs font-bold px-4 py-2 rounded-lg transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)]">
-                      Salvar Roteiro
-                    </button>
+                    <input 
+                      value={activeScript.title}
+                      onChange={(e) => setScripts(scripts.map(s => s.id === activeScriptId ? {...s, title: e.target.value} : s))}
+                      className="text-4xl font-extrabold text-white tracking-tight mt-3 mb-1 bg-transparent border-none outline-none w-full"
+                    />
+                    <textarea 
+                      value={activeScript.description}
+                      onChange={(e) => setScripts(scripts.map(s => s.id === activeScriptId ? {...s, description: e.target.value} : s))}
+                      className="text-gray-400 text-base max-w-3xl leading-relaxed bg-transparent border-none outline-none w-full resize-none min-h-[40px]"
+                    />
                   </div>
-                  <h2 className="text-4xl font-extrabold text-white tracking-tight mt-3 mb-1">Unboxing "Ferramenta X"</h2>
-                  <p className="text-gray-400 text-base max-w-3xl leading-relaxed">Criador focado em marcenaria vai demonstrar o torque e bateria do equipamento recém lançado.</p>
-                </div>
 
-                {/* Editor Body (Notion-like) */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-8 relative z-10">
-                  <div className="max-w-2xl space-y-8">
-                    
-                    {/* Block 1 */}
-                    <div className="group">
-                      <h4 className="flex items-center gap-2 text-pink-400 font-semibold mb-3">
-                        <span className="bg-pink-500/20 p-1 rounded"><FileText className="w-4 h-4" /></span> 
-                        1. O Gancho (Hook - 0 a 3 seg)
-                      </h4>
-                      <div className="pl-4 border-l-2 border-pink-500/30 hover:border-pink-500 text-gray-300 text-[15px] leading-relaxed outline-none transition-colors" contentEditable suppressContentEditableWarning>
-                        <p className="italic text-gray-500 mb-2">// O criador recebe a caixa misteriosa. Ele abre com expressão de choque para a câmera.</p>
-                        "Eu duvidei que essa ferramenta aguentaria o tranco da minha marcenaria, mas olha o que veio nessa caixa da [Nome da Marca]."
+                  {/* Editor Body */}
+                  <div className="flex-1 overflow-y-auto custom-scrollbar p-8 relative z-10">
+                    <div className="max-w-2xl space-y-8">
+                      {activeScript.blocks.map(block => (
+                        <div key={block.id} className="group relative">
+                          <button 
+                            onClick={() => {
+                              setScripts(scripts.map(s => {
+                                if (s.id !== activeScriptId) return s;
+                                return {...s, blocks: s.blocks.filter(b => b.id !== block.id)};
+                              }));
+                            }}
+                            className="absolute -left-8 top-1 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-500 transition-all p-1"
+                            title="Remover Bloco"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                          <input 
+                            value={block.title}
+                            onChange={(e) => {
+                              setScripts(scripts.map(s => {
+                                if (s.id !== activeScriptId) return s;
+                                return {...s, blocks: s.blocks.map(b => b.id === block.id ? {...b, title: e.target.value} : b)};
+                              }));
+                            }}
+                            className={`flex items-center gap-2 text-${block.color}-400 font-semibold mb-3 bg-transparent border-none outline-none w-full`}
+                          />
+                          <div 
+                            className={`pl-4 border-l-2 border-${block.color}-500/30 hover:border-${block.color}-500 text-gray-300 text-[15px] leading-relaxed outline-none transition-colors min-h-[20px]`}
+                            contentEditable 
+                            suppressContentEditableWarning
+                            onBlur={(e) => {
+                              setScripts(scripts.map(s => {
+                                if (s.id !== activeScriptId) return s;
+                                return {...s, blocks: s.blocks.map(b => b.id === block.id ? {...b, content: e.target.innerHTML} : b)};
+                              }));
+                            }}
+                            dangerouslySetInnerHTML={{__html: block.content}}
+                          />
+                        </div>
+                      ))}
+
+                      <div 
+                        onClick={() => {
+                          setScripts(scripts.map(s => {
+                            if (s.id !== activeScriptId) return s;
+                            const newBlock = { id: Date.now(), title: "Novo Bloco", icon: "FileText", color: "cyan", content: "Escreva aqui..." };
+                            return {...s, blocks: [...s.blocks, newBlock]};
+                          }));
+                        }}
+                        className="flex items-center gap-2 text-gray-500 text-xs mt-10 hover:text-white cursor-pointer transition-colors w-max"
+                      >
+                        <Plus className="w-4 h-4" /> Adicionar novo bloco de texto
                       </div>
                     </div>
-
-                    {/* Block 2 */}
-                    <div className="group">
-                      <h4 className="flex items-center gap-2 text-cyan-400 font-semibold mb-3">
-                        <span className="bg-cyan-500/20 p-1 rounded"><PlayCircle className="w-4 h-4" /></span> 
-                        2. Desenvolvimento (Provas e Features)
-                      </h4>
-                      <div className="pl-4 border-l-2 border-cyan-500/30 hover:border-cyan-500 text-gray-300 text-[15px] leading-relaxed outline-none transition-colors" contentEditable suppressContentEditableWarning>
-                        <ul className="list-disc list-inside space-y-2">
-                          <li><strong>Cena 1:</strong> Mostrar o torque furando uma madeira maciça (Angulo fechado na broca).</li>
-                          <li><strong>Cena 2:</strong> Mostrar a bateria (Mencionar que dura 20h direto).</li>
-                          <li><strong>Fala:</strong> "O torque disso aqui é absurdo. Ela atravessa peroba rosa como se fosse manteiga, e a bateria não me deixa na mão no meio do projeto."</li>
-                        </ul>
-                      </div>
-                    </div>
-
-                    {/* Block 3 */}
-                    <div className="group">
-                      <h4 className="flex items-center gap-2 text-emerald-400 font-semibold mb-3">
-                        <span className="bg-emerald-500/20 p-1 rounded"><ShoppingBag className="w-4 h-4" /></span> 
-                        3. Call to Action (CTA)
-                      </h4>
-                      <div className="pl-4 border-l-2 border-emerald-500/30 hover:border-emerald-500 text-gray-300 text-[15px] leading-relaxed outline-none transition-colors" contentEditable suppressContentEditableWarning>
-                        <p className="italic text-gray-500 mb-2">// Apontar para baixo (link da bio/carrinho) segurando a ferramenta.</p>
-                        "Se você é marceneiro ou faz DIY, isso aqui é investimento. Clica no link da minha bio que eu consegui um cupom de 15% de desconto lá na loja deles na Shopee!"
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-gray-500 text-xs mt-10 hover:text-white cursor-pointer transition-colors w-max">
-                      <Plus className="w-4 h-4" /> Adicionar novo bloco de texto
-                    </div>
-
                   </div>
                 </div>
-
-              </div>
+              )})}
             </div>
           )}
 
