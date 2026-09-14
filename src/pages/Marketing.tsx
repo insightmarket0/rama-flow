@@ -67,7 +67,7 @@ const CAMPAIGNS_ROADMAP = [
     ]
   },
   { 
-    id: 3, title: "SaldÃ£o", color: "bg-emerald-600", startDay: 20, endDay: 28,
+    id: 3, title: "Saldão", color: "bg-emerald-600", startDay: 20, endDay: 28,
     milestones: [
       { day: 20, label: "Start", status: "approved", owner: "Growth" }, 
       { day: 25, label: "Remarketing", status: "pending", owner: "Design" }
@@ -78,14 +78,14 @@ const CAMPAIGNS_ROADMAP = [
 const CRM_PARTNERS = [
   { id: 1, avatar: "https://i.pravatar.cc/150?u=1", name: "@tech_influencer", niche: "Tecnologia", status: "Postado", base: "R$ 500", upside: "15%", tracking: "TECH15", roi: "R$ 4.250", roiColor: "text-emerald-500", whitelisted: true, cpa: "R$ 15,20", tier: "A", rightsExp: "120", seeding: "R$ 150 (1 kit)" },
   { id: 2, avatar: "https://i.pravatar.cc/150?u=2", name: "Maria Clara", niche: "Lifestyle", status: "Aguardando Roteiro", base: "Permuta", upside: "10%", tracking: "MARIA10", roi: "R$ 0", roiColor: "text-gray-500", whitelisted: false, cpa: "-", tier: "C", rightsExp: "10", seeding: "R$ 0" },
-  { id: 3, avatar: "https://i.pravatar.cc/150?u=3", name: "Lucas Dev", niche: "ProgramaÃ§Ã£o", status: "AprovaÃ§Ã£o Interna", base: "R$ 300", upside: "R$ 50/venda", tracking: "UTM_LUCAS", roi: "R$ 2.100", roiColor: "text-emerald-500", whitelisted: true, cpa: "R$ 22,00", tier: "A", rightsExp: "60", seeding: "R$ 450 (3 kits)" },
-  { id: 4, avatar: "https://i.pravatar.cc/150?u=4", name: "Revenda Sul", niche: "B2B", status: "RefaÃ§Ã£o", base: "R$ 1.000", upside: "20%", tracking: "REVENDASUL", roi: "R$ 0", roiColor: "text-gray-500", whitelisted: false, cpa: "-", tier: "B", rightsExp: "5", seeding: "R$ 0" }
+  { id: 3, avatar: "https://i.pravatar.cc/150?u=3", name: "Lucas Dev", niche: "Programação", status: "Aprovação Interna", base: "R$ 300", upside: "R$ 50/venda", tracking: "UTM_LUCAS", roi: "R$ 2.100", roiColor: "text-emerald-500", whitelisted: true, cpa: "R$ 22,00", tier: "A", rightsExp: "60", seeding: "R$ 450 (3 kits)" },
+  { id: 4, avatar: "https://i.pravatar.cc/150?u=4", name: "Revenda Sul", niche: "B2B", status: "Refação", base: "R$ 1.000", upside: "20%", tracking: "REVENDASUL", roi: "R$ 0", roiColor: "text-gray-500", whitelisted: false, cpa: "-", tier: "B", rightsExp: "5", seeding: "R$ 0" }
 ];
 
 const ASSETS = [
   { id: 1, type: "Logo", name: "Principal_Claro.svg", size: "1.2 MB" },
   { id: 2, type: "Banner", name: "Capa_MercadoLivre.jpg", size: "4.5 MB" },
-  { id: 3, type: "VÃ­deo", name: "Reels_Inverno.mp4", size: "45 MB" },
+  { id: 3, type: "Vídeo", name: "Reels_Inverno.mp4", size: "45 MB" },
 ];
 
 export default function Marketing() {
@@ -123,8 +123,8 @@ export default function Marketing() {
   const [isScalingActive, setIsScalingActive] = useState(false);
   const [isNewMonthPromptOpen, setIsNewMonthPromptOpen] = useState(false);
   const [approvals, setApprovals] = useState([
-    { id: 1, title: 'CachÃª Extra: VirgÃ­nia', campaign: 'Campanha Black Friday', amount: 15000, description: 'CachÃª adicional aprovado em reuniÃ£o com diretoria para fechar 3 stories e 1 reel.' },
-    { id: 2, title: 'Boost Meta Ads', campaign: 'Escala de Criativo #04', amount: 5000, description: 'InjeÃ§Ã£o de verba para escalar criativo validado com ROAS > 4.' }
+    { id: 1, title: 'Cachê Extra: Virgínia', campaign: 'Campanha Black Friday', amount: 15000, description: 'Cachê adicional aprovado em reunião com diretoria para fechar 3 stories e 1 reel.' },
+    { id: 2, title: 'Boost Meta Ads', campaign: 'Escala de Criativo #04', amount: 5000, description: 'Injeção de verba para escalar criativo validado com ROAS > 4.' }
   ]);
   const [isCreateApprovalModalOpen, setIsCreateApprovalModalOpen] = useState(false);
   const [approvalForm, setApprovalForm] = useState({ title: '', campaign: '', amount: 0, description: '' });
@@ -252,7 +252,7 @@ export default function Marketing() {
   const getMonthName = (monthStr) => {
     if (!monthStr) return "";
     const map = {
-      janeiro: 'Janeiro', fevereiro: 'Fevereiro', marco: 'MarÃ§o',
+      janeiro: 'Janeiro', fevereiro: 'Fevereiro', marco: 'Março',
       abril: 'Abril', maio: 'Maio', junho: 'Junho',
       julho: 'Julho', agosto: 'Agosto', setembro: 'Setembro',
       outubro: 'Outubro', novembro: 'Novembro', dezembro: 'Dezembro'
@@ -356,11 +356,11 @@ export default function Marketing() {
           
         </div>
 
-        {/* Tabs de NavegaÃ§Ã£o Estilo Pill */}
+        {/* Tabs de Navegação Estilo Pill */}
         <div className="flex items-center gap-2 mt-2 shrink-0 overflow-x-auto no-scrollbar">
           {[
             
-            { id: "orcamento", label: "OrÃ§amento e Investimentos" },
+            { id: "orcamento", label: "Orçamento e Investimentos" },
             { id: "roadmap", label: "Creative Studio (Roteiros)" },
             { id: "crm", label: "CRM Influenciadores" },
           ].map((tab) => (
@@ -389,7 +389,7 @@ export default function Marketing() {
               {/* MASTER PANEL (Left Sidebar) */}
               <div className="w-[320px] flex-shrink-0 bg-[#0a0a0a] border border-white/5 rounded-2xl flex flex-col overflow-hidden h-full">
                 <div className="p-4 border-b border-white/5 bg-[#111]/50 flex items-center justify-between sticky top-0 z-10 backdrop-blur-md">
-                  <h3 className="text-white text-sm font-semibold tracking-tight">Suas EstratÃ©gias</h3>
+                  <h3 className="text-white text-sm font-semibold tracking-tight">Suas Estratégias</h3>
                   <button className="text-cyan-400 hover:text-cyan-300 transition-colors p-1"><Plus className="w-4 h-4" /></button>
                 </div>
                 
@@ -407,7 +407,7 @@ export default function Marketing() {
                         <span className="text-white text-xs font-medium ml-1">Unboxing "Ferramenta X"</span>
                         <div className="flex justify-between items-center ml-1">
                           <span className="text-[9px] text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">Roteiro Pronto</span>
-                          <span className="text-[9px] text-gray-500">2h atrÃ¡s</span>
+                          <span className="text-[9px] text-gray-500">2h atrás</span>
                         </div>
                       </div>
                       <div className="hover:bg-white/5 border border-transparent rounded-lg p-2.5 cursor-pointer flex flex-col gap-1.5 transition-colors">
@@ -473,7 +473,7 @@ export default function Marketing() {
                     </button>
                   </div>
                   <h2 className="text-4xl font-extrabold text-white tracking-tight mt-3 mb-1">Unboxing "Ferramenta X"</h2>
-                  <p className="text-gray-400 text-base max-w-3xl leading-relaxed">Criador focado em marcenaria vai demonstrar o torque e bateria do equipamento recÃ©m lanÃ§ado.</p>
+                  <p className="text-gray-400 text-base max-w-3xl leading-relaxed">Criador focado em marcenaria vai demonstrar o torque e bateria do equipamento recém lançado.</p>
                 </div>
 
                 {/* Editor Body (Notion-like) */}
@@ -487,7 +487,7 @@ export default function Marketing() {
                         1. O Gancho (Hook - 0 a 3 seg)
                       </h4>
                       <div className="pl-4 border-l-2 border-pink-500/30 hover:border-pink-500 text-gray-300 text-[15px] leading-relaxed outline-none transition-colors" contentEditable suppressContentEditableWarning>
-                        <p className="italic text-gray-500 mb-2">// O criador recebe a caixa misteriosa. Ele abre com expressÃ£o de choque para a cÃ¢mera.</p>
+                        <p className="italic text-gray-500 mb-2">// O criador recebe a caixa misteriosa. Ele abre com expressão de choque para a câmera.</p>
                         "Eu duvidei que essa ferramenta aguentaria o tranco da minha marcenaria, mas olha o que veio nessa caixa da [Nome da Marca]."
                       </div>
                     </div>
@@ -500,9 +500,9 @@ export default function Marketing() {
                       </h4>
                       <div className="pl-4 border-l-2 border-cyan-500/30 hover:border-cyan-500 text-gray-300 text-[15px] leading-relaxed outline-none transition-colors" contentEditable suppressContentEditableWarning>
                         <ul className="list-disc list-inside space-y-2">
-                          <li><strong>Cena 1:</strong> Mostrar o torque furando uma madeira maciÃ§a (Angulo fechado na broca).</li>
+                          <li><strong>Cena 1:</strong> Mostrar o torque furando uma madeira maciça (Angulo fechado na broca).</li>
                           <li><strong>Cena 2:</strong> Mostrar a bateria (Mencionar que dura 20h direto).</li>
-                          <li><strong>Fala:</strong> "O torque disso aqui Ã© absurdo. Ela atravessa peroba rosa como se fosse manteiga, e a bateria nÃ£o me deixa na mÃ£o no meio do projeto."</li>
+                          <li><strong>Fala:</strong> "O torque disso aqui é absurdo. Ela atravessa peroba rosa como se fosse manteiga, e a bateria não me deixa na mão no meio do projeto."</li>
                         </ul>
                       </div>
                     </div>
@@ -515,7 +515,7 @@ export default function Marketing() {
                       </h4>
                       <div className="pl-4 border-l-2 border-emerald-500/30 hover:border-emerald-500 text-gray-300 text-[15px] leading-relaxed outline-none transition-colors" contentEditable suppressContentEditableWarning>
                         <p className="italic text-gray-500 mb-2">// Apontar para baixo (link da bio/carrinho) segurando a ferramenta.</p>
-                        "Se vocÃª Ã© marceneiro ou faz DIY, isso aqui Ã© investimento. Clica no link da minha bio que eu consegui um cupom de 15% de desconto lÃ¡ na loja deles na Shopee!"
+                        "Se você é marceneiro ou faz DIY, isso aqui é investimento. Clica no link da minha bio que eu consegui um cupom de 15% de desconto lá na loja deles na Shopee!"
                       </div>
                     </div>
 
@@ -580,9 +580,9 @@ export default function Marketing() {
                         <td className="px-4 py-2">
                           <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded border ${
                             partner.status === 'Postado' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                            partner.status === 'AprovaÃ§Ã£o Interna' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                            partner.status === 'Aprovação Interna' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
                             partner.status === 'Aguardando Roteiro' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
-                            partner.status === 'RefaÃ§Ã£o' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                            partner.status === 'Refação' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
                             'bg-gray-500/10 text-gray-400 border-gray-500/20'
                           }`}>
                             {partner.status}
@@ -614,7 +614,7 @@ export default function Marketing() {
                               <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors">
                   <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   <div className="flex justify-between mb-1.5 items-center">
-                    <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">OrÃ§amento ({getMonthName(marketingBudget.currentMonth)})</span>
+                    <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">Orçamento ({getMonthName(marketingBudget.currentMonth)})</span>
                     <button onClick={handleEditBudget} className="bg-white/5 hover:bg-white/10 text-gray-400 px-2 py-0.5 rounded text-[9px] font-medium transition-colors border border-white/5 uppercase">Edit</button>
                   </div>
                   <div className="flex items-end justify-between mt-auto">
@@ -630,13 +630,13 @@ export default function Marketing() {
                       onClick={() => setIsHistoryExpanded(!isHistoryExpanded)} 
                       className="text-[9px] font-bold text-gray-500 hover:text-cyan-400 transition-colors uppercase tracking-widest mx-auto"
                     >
-                      {isHistoryExpanded ? "Esconder HistÃ³rico" : "Ver HistÃ³rico"}
+                      {isHistoryExpanded ? "Esconder Histórico" : "Ver Histórico"}
                     </button>
                     
                     {isHistoryExpanded && (
                       <div className="mt-3 space-y-2 max-h-32 overflow-y-auto custom-scrollbar pr-1">
                         {!marketingBudget.history || marketingBudget.history.length === 0 ? (
-                          <p className="text-[10px] text-gray-600 text-center py-2">Nenhum histÃ³rico salvo.</p>
+                          <p className="text-[10px] text-gray-600 text-center py-2">Nenhum histórico salvo.</p>
                         ) : (
                           marketingBudget.history.map((h, i) => (
                             <div key={i} className="flex justify-between items-center bg-[#111] p-2 rounded-lg border border-white/5">
@@ -657,7 +657,7 @@ export default function Marketing() {
                   <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   <div className="flex justify-between mb-1.5 items-center">
                     <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">Vendas do Site</span>
-                    <button onClick={handleEditSales} className="bg-white/5 hover:bg-white/10 text-gray-400 px-2 py-0.5 rounded text-[9px] font-medium transition-colors border border-white/5 uppercase flex items-center gap-1">LanÃ§ar +</button>
+                    <button onClick={handleEditSales} className="bg-white/5 hover:bg-white/10 text-gray-400 px-2 py-0.5 rounded text-[9px] font-medium transition-colors border border-white/5 uppercase flex items-center gap-1">Lançar +</button>
                   </div>
                   <div className="flex items-center gap-2 mt-auto">
                     <span className="text-lg font-semibold text-white tracking-tight">R$ {(marketingBudget.vendas || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
@@ -677,7 +677,7 @@ export default function Marketing() {
                           </div>
                           <h3 className="text-white text-sm font-semibold tracking-tight">Instagram</h3>
                         </div>
-                        <button onClick={() => handleEditSocial('instagram')} className="bg-white/5 hover:bg-white/10 text-gray-400 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase transition-colors border border-white/10 flex items-center gap-1">LanÃ§ar +</button>
+                        <button onClick={() => handleEditSocial('instagram')} className="bg-white/5 hover:bg-white/10 text-gray-400 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase transition-colors border border-white/10 flex items-center gap-1">Lançar +</button>
                       </div>
                       <div className="flex items-end gap-3 mb-4 mt-2">
                         <div>
@@ -692,20 +692,20 @@ export default function Marketing() {
                         <div className="bg-[#111] border border-white/5 rounded-lg p-2.5 flex flex-col justify-between">
                           <div className="flex items-center gap-1.5 mb-1">
                             <Heart className="w-3 h-3 text-gray-500" />
-                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Likes (MÃªs)</span>
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Likes (Mês)</span>
                           </div>
                           <span className="text-white text-sm font-bold">{formatK(socialMetrics.instagram.likes)}</span>
                         </div>
                         <div className="bg-[#111] border border-white/5 rounded-lg p-2.5 flex flex-col justify-between">
                           <div className="flex items-center gap-1.5 mb-1">
                             <MessageCircle className="w-3 h-3 text-gray-500" />
-                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">ComentÃ¡rios</span>
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Comentários</span>
                           </div>
                           <span className="text-white text-sm font-bold">{formatK(socialMetrics.instagram.comments)}</span>
                         </div>
                       </div>
                       <div className="mt-auto pt-3 border-t border-white/5 flex-1 min-h-[80px] flex flex-col relative">
-                        <span className="text-[9px] font-medium tracking-widest uppercase text-gray-600 absolute top-2 left-0 z-10">EvoluÃ§Ã£o de AudiÃªncia</span>
+                        <span className="text-[9px] font-medium tracking-widest uppercase text-gray-600 absolute top-2 left-0 z-10">Evolução de Audiência</span>
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={socialMetrics.instagram.history}>
                             <defs>
@@ -733,7 +733,7 @@ export default function Marketing() {
                           </div>
                           <h3 className="text-white text-sm font-semibold tracking-tight">TikTok</h3>
                         </div>
-                        <button onClick={() => handleEditSocial('tiktok')} className="bg-white/5 hover:bg-white/10 text-gray-400 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase transition-colors border border-white/10 flex items-center gap-1">LanÃ§ar +</button>
+                        <button onClick={() => handleEditSocial('tiktok')} className="bg-white/5 hover:bg-white/10 text-gray-400 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase transition-colors border border-white/10 flex items-center gap-1">Lançar +</button>
                       </div>
                       <div className="flex items-end gap-3 mb-4 mt-2">
                         <div>
@@ -748,20 +748,20 @@ export default function Marketing() {
                         <div className="bg-[#111] border border-white/5 rounded-lg p-2.5 flex flex-col justify-between">
                           <div className="flex items-center gap-1.5 mb-1">
                             <Heart className="w-3 h-3 text-gray-500" />
-                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Likes (MÃªs)</span>
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Likes (Mês)</span>
                           </div>
                           <span className="text-white text-sm font-bold">{formatK(socialMetrics.tiktok.likes)}</span>
                         </div>
                         <div className="bg-[#111] border border-white/5 rounded-lg p-2.5 flex flex-col justify-between">
                           <div className="flex items-center gap-1.5 mb-1">
                             <MessageCircle className="w-3 h-3 text-gray-500" />
-                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">ComentÃ¡rios</span>
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Comentários</span>
                           </div>
                           <span className="text-white text-sm font-bold">{formatK(socialMetrics.tiktok.comments)}</span>
                         </div>
                       </div>
                       <div className="mt-auto pt-3 border-t border-white/5 flex-1 min-h-[80px] flex flex-col relative">
-                        <span className="text-[9px] font-medium tracking-widest uppercase text-gray-600 absolute top-2 left-0 z-10">EvoluÃ§Ã£o de AudiÃªncia</span>
+                        <span className="text-[9px] font-medium tracking-widest uppercase text-gray-600 absolute top-2 left-0 z-10">Evolução de Audiência</span>
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={socialMetrics.tiktok.history}>
                             <defs>
@@ -778,19 +778,19 @@ export default function Marketing() {
                     </div>
                   </div>
 
-              {/* PainÃ©is Corporativos */}
+              {/* Painéis Corporativos */}
             <div className="mt-3 flex flex-col gap-3 max-w-full pb-2">
               
-              {/* Split Superior: DistribuiÃ§Ã£o & AprovaÃ§Ãµes */}
+              {/* Split Superior: Distribuição & Aprovações */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
                 
-                {/* 1. DistribuiÃ§Ã£o de Verba (Burn Rate & Split) */}
+                {/* 1. Distribuição de Verba (Burn Rate & Split) */}
                 
                   <div className="lg:col-span-7 bg-[#0a0a0a] border border-white/5 rounded-2xl p-5 flex flex-col relative overflow-hidden group">
                     <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div className="flex items-center justify-between mb-6 relative z-10">
                       <div className="flex items-center gap-2">
-                        <h3 className="text-white text-sm font-semibold tracking-tight">DivisÃ£o do OrÃ§amento (Onde investimos)</h3>
+                        <h3 className="text-white text-sm font-semibold tracking-tight">Divisão do Orçamento (Onde investimos)</h3>
                         <span className="bg-white/5 text-gray-400 px-2 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase border border-white/5">Interativo</span>
                       </div>
                       <span className="text-xs text-gray-500 font-medium tracking-widest uppercase">{getMonthName(marketingBudget.currentMonth)}</span>
@@ -801,7 +801,7 @@ export default function Marketing() {
                         <div className="flex justify-between text-xs mb-2">
                           <div className="flex items-center gap-2">
                             <span className="w-2.5 h-2.5 rounded bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]"></span>
-                            <span className="text-gray-300 font-medium">TrÃ¡fego Pago (Meta/TikTok)</span>
+                            <span className="text-gray-300 font-medium">Tráfego Pago (Meta/TikTok)</span>
                           </div>
                           <span className="text-white font-bold text-sm">{marketingBudget.budgetSplit?.trafego || 0}%</span>
                         </div>
@@ -820,7 +820,7 @@ export default function Marketing() {
                         <div className="flex justify-between text-xs mb-2">
                           <div className="flex items-center gap-2">
                             <span className="w-2.5 h-2.5 rounded bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span>
-                            <span className="text-gray-300 font-medium">CachÃª (Influenciadores)</span>
+                            <span className="text-gray-300 font-medium">Cachê (Influenciadores)</span>
                           </div>
                           <span className="text-white font-bold text-sm">{marketingBudget.budgetSplit?.influenciadores || 0}%</span>
                         </div>
@@ -856,16 +856,16 @@ export default function Marketing() {
                     </div>
                   </div>
                   
-                  {/* 2. Pipeline de AprovaÃ§Ãµes (Corporate Workflow) */}
+                  {/* 2. Pipeline de Aprovações (Corporate Workflow) */}
                   <div className="lg:col-span-5 bg-[#0a0a0a] border border-white/5 rounded-2xl p-5 flex flex-col relative overflow-hidden group">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
-                        <h3 className="text-white text-sm font-semibold tracking-tight">AprovaÃ§Ãµes Pendentes</h3>
+                        <h3 className="text-white text-sm font-semibold tracking-tight">Aprovações Pendentes</h3>
                         <button onClick={() => setIsCreateApprovalModalOpen(true)} className="bg-white/5 hover:bg-white/10 text-gray-400 px-2 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase transition-colors border border-white/5 flex items-center gap-1">Criar +</button>
                       </div>
                       <div className="px-2 py-0.5 bg-yellow-500/10 border border-yellow-500/20 rounded-full flex items-center gap-1.5">
                         <Clock className="w-3 h-3 text-yellow-500" />
-                        <span className="text-[10px] text-yellow-500 font-bold uppercase tracking-widest">{approvals.length} AÃ§Ãµes</span>
+                        <span className="text-[10px] text-yellow-500 font-bold uppercase tracking-widest">{approvals.length} Ações</span>
                       </div>
                     </div>
                     
@@ -873,7 +873,7 @@ export default function Marketing() {
                       {approvals.length === 0 ? (
                         <div className="text-center py-8">
                           <CheckCircle2 className="w-8 h-8 text-emerald-500/50 mx-auto mb-2" />
-                          <p className="text-gray-500 text-xs">Tudo aprovado! Nenhuma pendÃªncia.</p>
+                          <p className="text-gray-500 text-xs">Tudo aprovado! Nenhuma pendência.</p>
                         </div>
                       ) : approvals.map(app => (
                         <div key={app.id} className="bg-[#111] border border-white/5 rounded-xl p-3 flex flex-col gap-2 hover:border-white/10 transition-colors cursor-pointer" onClick={() => setApprovalDetails(app)}>
@@ -907,20 +907,20 @@ export default function Marketing() {
 
       
 
-      {/* Modals para AprovaÃ§Ãµes */}
+      {/* Modals para Aprovações */}
       {isCreateApprovalModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsCreateApprovalModalOpen(false)}></div>
           <div className="bg-[#111] border border-[#222] rounded-2xl p-6 relative z-10 w-full max-w-md shadow-2xl flex flex-col gap-4">
             <div className="flex justify-between items-center border-b border-white/10 pb-3">
-              <h3 className="text-white font-semibold">Nova SolicitaÃ§Ã£o</h3>
+              <h3 className="text-white font-semibold">Nova Solicitação</h3>
               <button onClick={() => setIsCreateApprovalModalOpen(false)} className="text-gray-500 hover:text-white">x</button>
             </div>
             
             <div className="space-y-4 mt-2">
               <div>
-                <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">TÃ­tulo da Despesa</label>
-                <input type="text" value={approvalForm.title} onChange={e => setApprovalForm({...approvalForm, title: e.target.value})} placeholder="Ex: CachÃª VirgÃ­nia" className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyan-500 outline-none" />
+                <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Título da Despesa</label>
+                <input type="text" value={approvalForm.title} onChange={e => setApprovalForm({...approvalForm, title: e.target.value})} placeholder="Ex: Cachê Virgínia" className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyan-500 outline-none" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -934,12 +934,12 @@ export default function Marketing() {
               </div>
               <div>
                 <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Justificativa / Detalhes</label>
-                <textarea value={approvalForm.description} onChange={e => setApprovalForm({...approvalForm, description: e.target.value})} rows="3" placeholder="Explique o motivo do orÃ§amento extra..." className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyan-500 outline-none resize-none"></textarea>
+                <textarea value={approvalForm.description} onChange={e => setApprovalForm({...approvalForm, description: e.target.value})} rows="3" placeholder="Explique o motivo do orçamento extra..." className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyan-500 outline-none resize-none"></textarea>
               </div>
             </div>
 
             <button onClick={handleCreateApproval} className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-sm py-2.5 rounded-lg mt-2 transition-colors">
-              Criar SolicitaÃ§Ã£o
+              Criar Solicitação
             </button>
           </div>
         </div>
@@ -972,11 +972,11 @@ export default function Marketing() {
                 Rejeitar
               </button>
               <button onClick={() => handleApprove(approvalDetails.id, approvalDetails.amount)} className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-sm py-3 rounded-xl transition-colors">
-                Aprovar & LanÃ§ar
+                Aprovar & Lançar
               </button>
             </div>
             <p className="text-[10px] text-center text-gray-500 mt-2">
-              Ao aprovar, o valor de R$ {approvalDetails.amount.toLocaleString('pt-BR')} serÃ¡ adicionado automaticamente ao "Gasto" do seu OrÃ§amento atual.
+              Ao aprovar, o valor de R$ {approvalDetails.amount.toLocaleString('pt-BR')} será adicionado automaticamente ao "Gasto" do seu Orçamento atual.
             </p>
           </div>
         </div>
@@ -1030,7 +1030,7 @@ export default function Marketing() {
                       <div className="flex justify-between mb-2">
                         {asset.type === 'Logo' && <ImageIcon className="w-4 h-4 text-gray-400" />}
                         {asset.type === 'Banner' && <LayoutGrid className="w-4 h-4 text-gray-400" />}
-                        {asset.type === 'VÃ­deo' && <FileVideo className="w-4 h-4 text-gray-400" />}
+                        {asset.type === 'Vídeo' && <FileVideo className="w-4 h-4 text-gray-400" />}
                         <Download className="w-3.5 h-3.5 text-gray-500" />
                       </div>
                       <div className="mt-auto">
