@@ -201,28 +201,24 @@ export function MainLayout({ children }: MainLayoutProps) {
                   {/* Pill do Perfil */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button className="flex items-center gap-4 bg-[#1C1C1E] hover:bg-[#252528] transition-colors border border-white/5 rounded-full pl-2 pr-4 py-2 shadow-lg group cursor-pointer outline-none">
-                        <Avatar className="h-10 w-10 border-none ring-0">
+                      <button className="flex items-center justify-center bg-[#1C1C1E] hover:bg-[#252528] transition-colors border border-white/5 rounded-full shadow-lg group cursor-pointer outline-none overflow-hidden h-10 w-10">
+                        <Avatar className="h-full w-full border-none ring-0">
                           { avatarUrl ? (
                             <AvatarImage src={avatarUrl} alt={fullName ?? undefined} />
                           ) : (
-                            <AvatarFallback className="bg-[#FFB703] text-black font-bold text-sm">
+                            <AvatarFallback className="bg-[#2A2A2A] text-white font-bold text-sm">
                               {initials()}
                             </AvatarFallback>
                           )}
                         </Avatar>
-                        
-                        <div className="flex flex-col items-start justify-center pr-2 text-left">
-                          <span className="text-sm font-semibold text-white tracking-wide leading-tight truncate max-w-[150px]">
-                            {fullName ?? user?.email?.split('@')[0] ?? 'Fahema Yesmin'}
-                          </span>
-                        </div>
-
-                        <ChevronDown className="h-4 w-4 text-gray-500 group-hover:text-white transition-colors ml-2" />
                       </button>
                     </DropdownMenuTrigger>
                     
                     <DropdownMenuContent align="end" className="w-56 bg-[#1C1C1E] border-white/10 text-white rounded-xl shadow-2xl p-2 z-[60]">
+                      <div className="flex flex-col space-y-1 p-2 mb-2 border-b border-white/5">
+                        <p className="text-sm font-semibold text-white truncate">{fullName ?? user?.email?.split('@')[0] ?? 'Fahema Yesmin'}</p>
+                        <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+                      </div>
                       <DropdownMenuItem onSelect={handleOpenProfile} className="focus:bg-[#252528] focus:text-white cursor-pointer rounded-lg py-2.5">
                         <UserIcon className="mr-2 h-4 w-4 text-gray-400" />
                         <span>Meu Perfil</span>
