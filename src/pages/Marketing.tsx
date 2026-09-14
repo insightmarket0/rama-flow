@@ -607,28 +607,34 @@ export default function Marketing() {
           </div>
         )}
 
-          {/* TAB 4: ORÃ‡AMENTO */}
+          {/* TAB 4: ORÇAMENTO */}
           {activeTab === "orcamento" && (
             <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar pb-2 mt-1">
-            <div className="grid grid-cols-4 gap-3 shrink-0">
-                              <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 shrink-0 items-stretch">
+              
+              {/* Coluna 1: Orçamento e Vendas */}
+              <div className="flex flex-col gap-3 h-full">
+                <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors flex-1 min-h-[150px]">
                   <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <div className="flex justify-between mb-1.5 items-center">
+                  <div className="flex justify-between mb-2 items-center">
                     <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">Orçamento ({getMonthName(marketingBudget.currentMonth)})</span>
                     <button onClick={handleEditBudget} className="bg-white/5 hover:bg-white/10 text-gray-400 px-2 py-0.5 rounded text-[9px] font-medium transition-colors border border-white/5 uppercase">Edit</button>
                   </div>
-                  <div className="flex items-end justify-between mt-auto">
-                    <span className="text-lg font-semibold text-white tracking-tight">R$ {marketingBudget.total.toLocaleString('pt-BR')}</span>
-                    <span className="text-[10px] text-gray-400">{Math.round((marketingBudget.gasto/marketingBudget.total)*100 || 0)}% gasto</span>
-                  </div>
-                  <div className="w-full h-1 bg-[#1a1a1a] rounded-full mt-2 overflow-hidden relative">
-                    <div className="h-full bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)] transition-all duration-500 relative z-10" style={{ width: `${Math.min((marketingBudget.gasto/marketingBudget.total)*100 || 0, 100)}%` }}></div>
+                  
+                  <div className="mt-auto">
+                    <div className="flex items-end justify-between mb-2">
+                      <span className="text-2xl font-semibold text-white tracking-tight">R$ {marketingBudget.total.toLocaleString('pt-BR')}</span>
+                      <span className="text-[10px] text-gray-400">{Math.round((marketingBudget.gasto/marketingBudget.total)*100 || 0)}% gasto</span>
+                    </div>
+                    <div className="w-full h-1 bg-[#1a1a1a] rounded-full overflow-hidden relative">
+                      <div className="h-full bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)] transition-all duration-500 relative z-10" style={{ width: `${Math.min((marketingBudget.gasto/marketingBudget.total)*100 || 0, 100)}%` }}></div>
+                    </div>
                   </div>
                   
-                  <div className="mt-3 flex flex-col border-t border-white/5 pt-2">
+                  <div className="mt-4 flex flex-col pt-3 border-t border-white/5 relative z-10">
                     <button 
                       onClick={() => setIsHistoryExpanded(!isHistoryExpanded)} 
-                      className="text-[9px] font-bold text-gray-500 hover:text-cyan-400 transition-colors uppercase tracking-widest mx-auto"
+                      className="text-[9px] font-bold text-gray-500 hover:text-cyan-400 transition-colors uppercase tracking-widest flex items-center justify-center w-full"
                     >
                       {isHistoryExpanded ? "Esconder Histórico" : "Ver Histórico"}
                     </button>
@@ -653,19 +659,20 @@ export default function Marketing() {
                   </div>
                 </div>
 
-<div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors">
+                <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors flex-1 min-h-[150px]">
                   <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <div className="flex justify-between mb-1.5 items-center">
+                  <div className="flex justify-between mb-2 items-center relative z-10">
                     <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">Vendas do Site</span>
-                    <button onClick={handleEditSales} className="bg-white/5 hover:bg-white/10 text-gray-400 px-2 py-0.5 rounded text-[9px] font-medium transition-colors border border-white/5 uppercase flex items-center gap-1">Lançar +</button>
+                    <button onClick={handleEditSales} className="bg-white/5 hover:bg-white/10 text-gray-400 px-3 py-1 rounded-full text-[9px] font-medium transition-colors border border-white/5 uppercase flex items-center gap-1">Lançar +</button>
                   </div>
-                  <div className="flex items-center gap-2 mt-auto">
-                    <span className="text-lg font-semibold text-white tracking-tight">R$ {(marketingBudget.vendas || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                    <span className="flex items-center text-cyan-400 text-[10px] font-medium bg-cyan-500/10 px-1.5 py-0.5 rounded-full border border-cyan-500/20">
+                  <div className="flex items-center gap-3 mt-auto relative z-10">
+                    <span className="text-2xl font-semibold text-white tracking-tight">R$ {(marketingBudget.vendas || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <span className="flex items-center text-cyan-400 text-[10px] font-medium bg-cyan-500/10 px-1.5 py-0.5 rounded border border-cyan-500/20">
                       <ArrowUpRight className="w-2.5 h-2.5 mr-0.5" /> {marketingBudget.vendasGrowth || 0}%
                     </span>
                   </div>
                 </div>
+              </div>
 
               {/* INSTAGRAM COMPACTO */}
                     <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-4 relative overflow-hidden flex flex-col h-[320px]">
