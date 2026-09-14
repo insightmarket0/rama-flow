@@ -9,7 +9,7 @@ import {
   CalendarDays,
   ArrowRight,
   Sparkles,
-  Handshake,
+  Háandshake,
   Truck,
   Package,
   Settings2,
@@ -17,10 +17,10 @@ import {
   Sprout,
   Trees,
   LayoutGrid,
-  Heart
+  Háeart
 , MessageSquare, X, Send } from "lucide-react";
 import { RamaDoDiaWidget } from "@/components/RamaDoDiaWidget";
-import { PainelPagamentosHoje } from "@/components/finance/PainelPagamentosHoje";
+import { PainelPagamentosHáoje } from "@/components/finance/PainelPagamentosHáoje";
 import { parseISO, isBefore, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/hooks/useAuth";
@@ -81,14 +81,14 @@ const MOCK_REMINDERS = [
     id: "rem_1",
     title: "ReposiÃƒÂ§ÃƒÂ£o de Insumos: Caixa Parda 30x20x10",
     description: "O almoxarifado separou as caixas solicitadas. EstÃƒÂ£o a caminho da bancada 2.",
-    due_date: new Date(new Date().setHours(17, 0, 0, 0)).toISOString(),
+    due_date: new Date(new Date().setHáours(17, 0, 0, 0)).toISOString(),
     status: "pendente",
   },
   {
     id: "rem_2",
     title: "Estoque CrÃƒÂ­tico: Fita Adesiva",
     description: "AtenÃƒÂ§ÃƒÂ£o: Restam apenas 3 rolos de fita. O pedido de compra jÃƒÂ¡ foi aprovado.",
-    due_date: new Date(new Date().setHours(10, 0, 0, 0)).toISOString(),
+    due_date: new Date(new Date().setHáours(10, 0, 0, 0)).toISOString(),
     status: "pendente",
   }
 ];
@@ -127,7 +127,7 @@ const ExpedicaoTracker = () => {
     return () => clearInterval(t);
   }, []);
 
-  const hours = now.getHours();
+  const hours = now.getHáours();
   const minutes = now.getMinutes();
   const currentTotalMinutes = hours * 60 + minutes;
   
@@ -142,7 +142,7 @@ const ExpedicaoTracker = () => {
   let remainingMinutes = nextDispatch.minutes - currentTotalMinutes;
   if (remainingMinutes < 0) remainingMinutes += 24 * 60; // Next day
   
-  const remainingHoursStr = Math.floor(remainingMinutes / 60).toString().padStart(2, '0');
+  const remainingHáoursStr = Math.floor(remainingMinutes / 60).toString().padStart(2, '0');
   const remainingMinsStr = (remainingMinutes % 60).toString().padStart(2, '0');
   
   const maxWindow = 180;
@@ -199,13 +199,13 @@ const ExpedicaoTracker = () => {
 
         <div className="absolute top-[35%] flex flex-col items-center justify-center w-full">
           <span className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.1em] mb-0.5">
-            HorÃƒÂ¡rio Local
+            HáorÃƒÂ¡rio Local
           </span>
           <div className="text-white text-5xl font-bold tracking-tighter" style={{ fontVariantNumeric: 'tabular-nums' }}>
             {hours.toString().padStart(2, '0')}:{minutes.toString().padStart(2, '0')}
           </div>
           <span className="text-[#00FF00] text-[9px] font-bold uppercase tracking-wider mt-1 bg-[#00FF00]/10 px-2 py-0.5 rounded-full">
-            Faltam {remainingHoursStr}h {remainingMinsStr}m
+            Faltam {remainingHáoursStr}h {remainingMinsStr}m
           </span>
         </div>
       </div>
@@ -228,7 +228,7 @@ const ExpedicaoTracker = () => {
 
 const MuralExpedicao = ({ user }: { user: any }) => {
   const [notes, setNotes] = useState([
-    { id: 1, text: "Lembrete: A partir de hoje, ÃƒÂ© obrigatÃƒÂ³rio usar plÃƒÂ¡stico bolha duplo em todos os itens frÃƒÂ¡geis.", author: "RogÃƒÂ©rio", date: "Hoje" },
+    { id: 1, text: "Lembrete: A partir de hoje, ÃƒÂ© obrigatÃƒÂ³rio usar plÃƒÂ¡stico bolha duplo em todos os itens frÃƒÂ¡geis.", author: "RogÃƒÂ©rio", date: "Háoje" },
     { id: 2, text: "Verificar se as caixas da Shopee chegaram.", author: "Mara", date: "Ontem" }
   ]);
   const [newNote, setNewNote] = useState("");
@@ -297,11 +297,11 @@ export default function MeuDia() {
   const currentUserName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
 
   // SaudaÃƒÂ§ÃƒÂ£o de acordo com o horÃƒÂ¡rio
-  const currentHour = new Date().getHours();
+  const currentHáour = new Date().getHáours();
   let greeting = "Bom dia";
-  if (currentHour >= 12 && currentHour < 18) {
+  if (currentHáour >= 12 && currentHáour < 18) {
     greeting = "Boa tarde";
-  } else if (currentHour >= 18 || currentHour < 5) {
+  } else if (currentHáour >= 18 || currentHáour < 5) {
     greeting = "Boa noite";
   }
 
@@ -397,7 +397,7 @@ export default function MeuDia() {
         )}
 
         {(user?.email === "livia@hotmail.com" || currentUserName.startsWith("RogÃƒÂ©rio")) ? (
-          <PainelPagamentosHoje />
+          <PainelPagamentosHáoje />
         ) : (
           user?.email !== "mara@hotmail.com" && announcements.length > 0 && (
             <div className="col-span-1 md:col-span-2 bg-[#111111] border-l-4 border-[#00FF00] rounded-2xl p-5 group relative shadow-lg h-fit">
@@ -453,32 +453,35 @@ export default function MeuDia() {
             {/* 3.1. Card Fixo de Prévia de Mensagens */}
             <div 
               onClick={() => setActiveChatTicket({ marketplace: 'Suporte Interno', sku: 'MSG-001', description: 'Olá! Há um aviso importante sobre o faturamento de ontem. Por favor, verifique quando puder.' })}
-              className="col-span-1 bg-[#111111] hover:bg-[#151515] rounded-[24px] p-3 flex items-center gap-4 border border-white/5 shadow-xl cursor-pointer transition-all group hover:border-white/10 relative z-20"
+              className="col-span-1 bg-gradient-to-r from-[#0a0a0a] to-[#111111] hover:from-[#111111] hover:to-[#161616] rounded-2xl p-4 flex items-center gap-4 border border-[#222] hover:border-[#ccff00]/40 shadow-lg cursor-pointer transition-all duration-300 group relative z-20 overflow-hidden"
             >
-              <div className="w-14 h-14 rounded-[20px] bg-white/5 flex flex-col items-center justify-center shrink-0 border border-white/10 group-hover:bg-white/10 transition-colors">
-                <MessageSquare className="w-5 h-5 text-gray-300 mb-0.5" />
-                <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Chat</span>
+              {/* Neon glow effect on hover */}
+              <div className="absolute inset-0 bg-[#ccff00]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+              
+              <div className="w-14 h-14 rounded-xl bg-[#161616] flex flex-col items-center justify-center shrink-0 border border-[#333] group-hover:border-[#ccff00]/50 group-hover:shadow-[0_0_15px_rgba(204,255,0,0.2)] transition-all duration-300 relative z-10">
+                <MessageSquare className="w-5 h-5 text-gray-400 group-hover:text-[#ccff00] transition-colors mb-0.5" />
+                <span className="text-[8px] font-bold text-gray-500 group-hover:text-[#ccff00]/80 uppercase tracking-widest transition-colors">Chat</span>
               </div>
               
-              <div className="flex-1 overflow-hidden flex flex-col justify-center">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest border flex items-center gap-1 bg-cyan-500/10 text-cyan-400 border-cyan-500/20">
-                    <MessageSquare className="w-2.5 h-2.5" />
+              <div className="flex-1 overflow-hidden flex flex-col justify-center relative z-10">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="px-2.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5 bg-[#ccff00] text-black shadow-[0_0_10px_rgba(204,255,0,0.3)]">
+                    <div className="w-1.5 h-1.5 rounded-full bg-black animate-pulse"></div>
                     Novas Mensagens
                   </span>
-                  <span className="text-gray-500 text-[9px] font-bold uppercase tracking-widest truncate">
+                  <span className="text-gray-500 text-[10px] font-medium uppercase tracking-widest truncate">
                     Equipe
                   </span>
                 </div>
-                <p className="text-gray-300 font-medium text-xs leading-snug truncate">
-                  Olá! Há um aviso importante sobre o faturamento de ontem.
+                <p className="text-gray-200 font-medium text-[13px] leading-snug truncate group-hover:text-white transition-colors">
+                  Olá! Há um aviso importante sobre o faturamento...
                 </p>
               </div>
               
               <button 
-                className="bg-white/5 group-hover:bg-cyan-500/20 group-hover:text-cyan-400 text-gray-400 w-12 h-12 rounded-[18px] transition-all flex items-center justify-center border border-transparent shrink-0"
+                className="bg-[#161616] group-hover:bg-[#ccff00] text-gray-500 group-hover:text-black w-10 h-10 rounded-full transition-all duration-300 flex items-center justify-center border border-[#333] group-hover:border-[#ccff00] shrink-0 relative z-10 shadow-lg group-hover:shadow-[0_0_15px_rgba(204,255,0,0.4)]"
               >
-                <MessageSquare className="h-5 w-5" />
+                <MessageSquare className="h-4 w-4" />
               </button>
             </div>
 
@@ -538,11 +541,11 @@ export default function MeuDia() {
       </div>
 
     
-      {/* MODAL DE CHAT DA DIVERGÃŠNCIA */}
+      {/* MODAL DE CHáAT DA DIVERGÃŠNCIA */}
       {activeChatTicket && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="bg-[#0a0a0a] border border-[#222] rounded-[32px] w-full max-w-lg overflow-hidden flex flex-col shadow-2xl h-[600px] animate-in zoom-in-95 duration-200">
-            {/* Header do Chat */}
+            {/* Háeader do Chat */}
             <div className="p-4 border-b border-[#222] flex justify-between items-center bg-[#111]">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-[16px] bg-white/5 flex items-center justify-center border border-white/10">
