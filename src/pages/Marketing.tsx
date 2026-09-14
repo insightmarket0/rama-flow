@@ -505,11 +505,24 @@ export default function Marketing() {
                           {activeScript.category}
                         </span>
                       </div>
-                      <button 
-                        onClick={() => {}}
-                        className="bg-cyan-500 hover:bg-cyan-600 text-black text-xs font-bold px-4 py-2 rounded-lg transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)]">
-                        Salvar Roteiro
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => {
+                            const newScripts = scripts.filter(s => s.id !== activeScriptId);
+                            setScripts(newScripts);
+                            if (newScripts.length > 0) setActiveScriptId(newScripts[0].id);
+                            else setActiveScriptId(0);
+                          }}
+                          className="text-gray-500 hover:text-red-500 bg-white/5 hover:bg-red-500/10 p-2 rounded-lg transition-colors"
+                          title="Excluir Roteiro">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => {}}
+                          className="bg-cyan-500 hover:bg-cyan-600 text-black text-xs font-bold px-4 py-2 rounded-lg transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+                          Salvar Roteiro
+                        </button>
+                      </div>
                     </div>
                     <input 
                       value={activeScript.title}
