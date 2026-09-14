@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { 
-  AlertCircle, 
+  AlertCircle,
+  Activity, 
   CheckCircle2, 
   Clock, 
   MessageSquare, 
