@@ -15,7 +15,6 @@ const RankingEquipe = lazy(() => import("./pages/RankingEquipe"));
 const Equipe = lazy(() => import("./pages/Equipe"));
 const PortalExpedicao = lazy(() => import("./pages/PortalExpedicao"));
 const Metas = lazy(() => import("./pages/Metas"));
-const MuralAlinhamento = lazy(() => import("./pages/MuralAlinhamento"));
 const Lembretes = lazy(() => import("./pages/Lembretes"));
 const MuralAjustes = lazy(() => import("./pages/MuralAjustes"));
 const GestaoInstaladores = lazy(() => import("./pages/GestaoInstaladores"));
