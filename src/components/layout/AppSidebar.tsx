@@ -25,6 +25,7 @@ import {
   User,
   Users,
   LogOut,
+  Bell,
   Sparkles,
   Home,
   MessageCircle,
@@ -317,6 +318,12 @@ export function AppSidebar() {
 
           {/* Fundo da Sidebar (Avatar e Logout) */}
           <div className="mt-auto pt-4 flex flex-col items-center gap-3 w-full px-2">
+            <button className="relative h-10 w-10 rounded-[18px] flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/10 transition-colors" title="Notificações">
+              <Bell className="h-4 w-4" />
+              <div className="absolute top-0 right-0 h-3 w-3 bg-[#FF5C5C] rounded-full flex items-center justify-center text-[8px] font-bold text-white shadow-sm border border-[#111]">
+                0
+              </div>
+            </button>
             <button 
               onClick={signOut}
               className="h-10 w-10 rounded-[18px] flex items-center justify-center text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"

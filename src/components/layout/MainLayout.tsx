@@ -193,25 +193,6 @@ export function MainLayout({ children }: MainLayoutProps) {
       <div className={`flex min-h-screen w-full ${location.pathname.startsWith('/marketing') ? '' : 'bg-background pl-24'}`}>
         <AppSidebar />
         <div className="flex flex-1 flex-col">
-          {/* Header Condicional (Só no Início) - Flutuante para não empurrar o layout */}
-          {isHomePage && (
-            <div className="absolute top-6 left-32 z-50 flex items-center gap-4">
-              {/* Pill de Notificações */}
-                  <button className="flex items-center gap-3 bg-[#1C1C1E] hover:bg-[#252528] transition-colors border border-white/5 rounded-full px-4 py-2.5 shadow-lg">
-                    <div className="relative">
-                      <Bell className="h-4 w-4 text-gray-400" />
-                    </div>
-                    <span className="text-sm text-gray-400 font-medium">Notifications</span>
-                    <div className="h-5 w-5 bg-[#FF5C5C] rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
-                      {/* TODO: Implement real notification count */}
-                      0
-                    </div>
-                  </button>
-
-
-            </div>
-          )}
-
           <main className={`flex flex-col flex-1 ${(location.pathname.startsWith('/marketing') || location.pathname === '/brand-book' || location.pathname === '/equipe' || location.pathname === '/expedicao' || location.pathname === '/instaladores') ? 'h-screen max-h-screen overflow-hidden' : 'p-6'}`}>
             <div key={location.pathname} className={`flex flex-col ${(location.pathname.startsWith('/marketing') || location.pathname === '/brand-book' || location.pathname === '/equipe' || location.pathname === '/expedicao' || location.pathname === '/instaladores') ? 'flex-1 min-h-0 overflow-hidden' : 'space-y-6'} animate-in fade-in slide-in-from-bottom-4 zoom-in-95 duration-300 ease-out`}>
               {(!location.pathname.startsWith('/marketing') && location.pathname !== '/brand-book' && location.pathname !== '/equipe' && location.pathname !== '/expedicao' && location.pathname !== '/instaladores') && <GlobalAlerts />}
