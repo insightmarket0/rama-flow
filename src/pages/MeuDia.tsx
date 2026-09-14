@@ -20,7 +20,7 @@ import {
   Háeart
 , MessageSquare, X, Send } from "lucide-react";
 import { RamaDoDiaWidget } from "@/components/RamaDoDiaWidget";
-import { PainelPagamentosHáoje } from "@/components/finance/PainelPagamentosHáoje";
+import { PainelPagamentosHoje } from "@/components/finance/PainelPagamentosHoje";
 import { parseISO, isBefore, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/hooks/useAuth";
@@ -81,14 +81,14 @@ const MOCK_REMINDERS = [
     id: "rem_1",
     title: "ReposiÃƒÂ§ÃƒÂ£o de Insumos: Caixa Parda 30x20x10",
     description: "O almoxarifado separou as caixas solicitadas. EstÃƒÂ£o a caminho da bancada 2.",
-    due_date: new Date(new Date().setHáours(17, 0, 0, 0)).toISOString(),
+    due_date: new Date(new Date().setHours(17, 0, 0, 0)).toISOString(),
     status: "pendente",
   },
   {
     id: "rem_2",
     title: "Estoque CrÃƒÂ­tico: Fita Adesiva",
     description: "AtenÃƒÂ§ÃƒÂ£o: Restam apenas 3 rolos de fita. O pedido de compra jÃƒÂ¡ foi aprovado.",
-    due_date: new Date(new Date().setHáours(10, 0, 0, 0)).toISOString(),
+    due_date: new Date(new Date().setHours(10, 0, 0, 0)).toISOString(),
     status: "pendente",
   }
 ];
@@ -127,7 +127,7 @@ const ExpedicaoTracker = () => {
     return () => clearInterval(t);
   }, []);
 
-  const hours = now.getHáours();
+  const hours = now.getHours();
   const minutes = now.getMinutes();
   const currentTotalMinutes = hours * 60 + minutes;
   
@@ -142,7 +142,7 @@ const ExpedicaoTracker = () => {
   let remainingMinutes = nextDispatch.minutes - currentTotalMinutes;
   if (remainingMinutes < 0) remainingMinutes += 24 * 60; // Next day
   
-  const remainingHáoursStr = Math.floor(remainingMinutes / 60).toString().padStart(2, '0');
+  const remainingHoursStr = Math.floor(remainingMinutes / 60).toString().padStart(2, '0');
   const remainingMinsStr = (remainingMinutes % 60).toString().padStart(2, '0');
   
   const maxWindow = 180;
@@ -199,13 +199,13 @@ const ExpedicaoTracker = () => {
 
         <div className="absolute top-[35%] flex flex-col items-center justify-center w-full">
           <span className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.1em] mb-0.5">
-            HáorÃƒÂ¡rio Local
+            HorÃƒÂ¡rio Local
           </span>
           <div className="text-white text-5xl font-bold tracking-tighter" style={{ fontVariantNumeric: 'tabular-nums' }}>
             {hours.toString().padStart(2, '0')}:{minutes.toString().padStart(2, '0')}
           </div>
           <span className="text-[#00FF00] text-[9px] font-bold uppercase tracking-wider mt-1 bg-[#00FF00]/10 px-2 py-0.5 rounded-full">
-            Faltam {remainingHáoursStr}h {remainingMinsStr}m
+            Faltam {remainingHoursStr}h {remainingMinsStr}m
           </span>
         </div>
       </div>
@@ -228,7 +228,7 @@ const ExpedicaoTracker = () => {
 
 const MuralExpedicao = ({ user }: { user: any }) => {
   const [notes, setNotes] = useState([
-    { id: 1, text: "Lembrete: A partir de hoje, ÃƒÂ© obrigatÃƒÂ³rio usar plÃƒÂ¡stico bolha duplo em todos os itens frÃƒÂ¡geis.", author: "RogÃƒÂ©rio", date: "Háoje" },
+    { id: 1, text: "Lembrete: A partir de hoje, ÃƒÂ© obrigatÃƒÂ³rio usar plÃƒÂ¡stico bolha duplo em todos os itens frÃƒÂ¡geis.", author: "RogÃƒÂ©rio", date: "Hoje" },
     { id: 2, text: "Verificar se as caixas da Shopee chegaram.", author: "Mara", date: "Ontem" }
   ]);
   const [newNote, setNewNote] = useState("");
@@ -297,11 +297,11 @@ export default function MeuDia() {
   const currentUserName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
 
   // SaudaÃƒÂ§ÃƒÂ£o de acordo com o horÃƒÂ¡rio
-  const currentHáour = new Date().getHáours();
+  const currentHour = new Date().getHours();
   let greeting = "Bom dia";
-  if (currentHáour >= 12 && currentHáour < 18) {
+  if (currentHour >= 12 && currentHour < 18) {
     greeting = "Boa tarde";
-  } else if (currentHáour >= 18 || currentHáour < 5) {
+  } else if (currentHour >= 18 || currentHour < 5) {
     greeting = "Boa noite";
   }
 
@@ -397,7 +397,7 @@ export default function MeuDia() {
         )}
 
         {(user?.email === "livia@hotmail.com" || currentUserName.startsWith("RogÃƒÂ©rio")) ? (
-          <PainelPagamentosHáoje />
+          <PainelPagamentosHoje />
         ) : (
           user?.email !== "mara@hotmail.com" && announcements.length > 0 && (
             <div className="col-span-1 md:col-span-2 bg-[#111111] border-l-4 border-[#00FF00] rounded-2xl p-5 group relative shadow-lg h-fit">
@@ -541,11 +541,11 @@ export default function MeuDia() {
       </div>
 
     
-      {/* MODAL DE CHáAT DA DIVERGÃŠNCIA */}
+      {/* MODAL DE CHAT DA DIVERGÃŠNCIA */}
       {activeChatTicket && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="bg-[#0a0a0a] border border-[#222] rounded-[32px] w-full max-w-lg overflow-hidden flex flex-col shadow-2xl h-[600px] animate-in zoom-in-95 duration-200">
-            {/* Háeader do Chat */}
+            {/* Header do Chat */}
             <div className="p-4 border-b border-[#222] flex justify-between items-center bg-[#111]">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-[16px] bg-white/5 flex items-center justify-center border border-white/10">
