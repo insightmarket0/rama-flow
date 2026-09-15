@@ -64,12 +64,12 @@ export function PainelPagamentosHoje() {
 
   return (
     <div className="col-span-1 md:col-span-2 flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="bg-[#111111] border border-[#00FF00]/20 rounded-3xl p-6 relative overflow-hidden shadow-[0_0_30px_rgba(0,255,0,0.05)]">
+      <div className="bg-[#111111] border border-[#00FF00]/20 rounded-3xl p-4 relative overflow-hidden shadow-[0_0_30px_rgba(0,255,0,0.05)]">
         
         {/* Glow de fundo */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#00FF00]/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/4 pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col md:flex-row md:items-start justify-between gap-6">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-start justify-between gap-4">
           
           {/* Header do Painel */}
           <div className="flex flex-col gap-2">
@@ -88,7 +88,7 @@ export function PainelPagamentosHoje() {
           {/* Lista de Contas */}
           <div className="flex-1 w-full md:max-w-md">
             {todayBills.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-6 border border-dashed border-white/10 rounded-2xl bg-white/[0.02]">
+              <div className="flex flex-col items-center justify-center p-4 border border-dashed border-white/10 rounded-2xl bg-white/[0.02]">
                 <CheckCircle2 className="h-8 w-8 text-gray-600 mb-2" />
                 <p className="text-gray-400 font-medium text-sm text-center">Nenhuma conta para pagar hoje.</p>
                 <p className="text-gray-600 text-xs text-center mt-1">Tudo em dia!</p>
