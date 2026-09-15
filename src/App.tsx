@@ -17,6 +17,7 @@ const PortalExpedicao = lazy(() => import("./pages/PortalExpedicao"));
 const Metas = lazy(() => import("./pages/Metas"));
 const Lembretes = lazy(() => import("./pages/Lembretes"));
 const MuralAjustes = lazy(() => import("./pages/MuralAjustes"));
+const SistemaDev = lazy(() => import("./pages/SistemaDev"));
 const GestaoInstaladores = lazy(() => import("./pages/GestaoInstaladores"));
 const BrandBook = lazy(() => import("./pages/BrandBook"));
 const Playbooks = lazy(() => import("./pages/Playbooks"));
@@ -130,6 +131,16 @@ const App = () => (
                 <ProtectedRoute>
                   <MainLayout>
                     <MuralAjustes />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/sistema-dev"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <SistemaDev />
                   </MainLayout>
                 </ProtectedRoute>
               }
