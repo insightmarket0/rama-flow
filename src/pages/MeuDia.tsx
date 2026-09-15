@@ -18,7 +18,7 @@ import {
   Trees,
   LayoutGrid,
   Heart,
-  MessageSquare, X, Plus, Send, MessageCircle, ChevronRight } from "lucide-react";
+  MessageSquare, X, Plus, Trash2, Send, MessageCircle, ChevronRight } from "lucide-react";
 import { RamaDoDiaWidget } from "@/components/RamaDoDiaWidget";
 import { PainelPagamentosHoje } from "@/components/finance/PainelPagamentosHoje";
 import { parseISO, isBefore, format } from "date-fns";
@@ -315,29 +315,43 @@ export default function MeuDia() {
 
   const todayDate = format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR });
 
+  const handleDeleteAnnouncement = (id: string) => {
+    setAnnouncements(prev => prev.filter(a => a.id !== id));
+  };
+
   const handleAcknowledge = (id: string) => {
-    setAnnouncements(announcements.map(a => {
-      if (a.id === id) {
-        // Prevent duplicate acks
-        const hasAck = a.acknowledgments?.some(ack => ack.user_id === (user?.id || 'anon'));
-        if (hasAck) return a;
-        
-        return {
-          ...a,
-          acknowledgments: [
-            ...(a.acknowledgments || []),
-            {
-              id: Math.random().toString(),
-              announcement_id: id,
-              user_id: user?.id || 'anon',
-              acknowledged_at: new Date().toISOString(),
-              user: { full_name: currentUserName }
-            }
-          ]
-        };
-      }
-      return a;
-    }));
+    const TOTAL_TEAM_MEMBERS = 4; // Auto-excluir após 4 visualizações
+    
+    setAnnouncements(prev => {
+      const updated = prev.map(a => {
+        if (a.id === id) {
+          const hasAck = a.acknowledgments?.some(ack => ack.user_id === (user?.id || 'anon'));
+          if (hasAck) return a;
+          
+          return {
+            ...a,
+            acknowledgments: [
+              ...(a.acknowledgments || []),
+              {
+                id: Math.random().toString(),
+                announcement_id: id,
+                user_id: user?.id || 'anon',
+                acknowledged_at: new Date().toISOString(),
+                user: { full_name: currentUserName }
+              }
+            ]
+          };
+        }
+        return a;
+      });
+      
+      return updated.filter(a => {
+        if (a.id === id && a.acknowledgments && a.acknowledgments.length >= TOTAL_TEAM_MEMBERS) {
+          return false; // Remove automatically
+        }
+        return true;
+      });
+    });
   };
 
   const handleCreateAnnouncement = (e: React.FormEvent) => {
@@ -555,12 +569,19 @@ export default function MeuDia() {
                   <Plus className="h-4 w-4" />
                 </button>
               </div>
-              {announcements.map((ann) => {
+              {announcements.slice(0, 1).map((ann) => {
                 const hasAck = ann.acknowledgments?.some(ack => ack.user_id === (user?.id || 'anon'));
                 return (
                 <div key={ann.id} className="rounded-2xl p-5 flex flex-col justify-between bg-gradient-to-b from-[#18181A] to-[#111111] border border-white/5 shadow-xl relative group">
                   <div>
-                    <div className="flex items-center gap-2 mb-4 flex-wrap">
+                    <div className="flex items-center gap-2 mb-4 flex-wrap relative pr-8">
+                      <button 
+                        onClick={() => handleDeleteAnnouncement(ann.id)}
+                        className="absolute right-0 top-0 text-gray-500 hover:text-red-500 transition-colors bg-white/5 hover:bg-red-500/10 p-1.5 rounded-lg"
+                        title="Excluir Aviso"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                       <span className="px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border border-white/10 bg-white/5 flex items-center gap-1.5 text-gray-300">
                         <Megaphone className="h-3 w-3 text-[#00FF00]" />
                         {ann.creator?.full_name || 'Equipe'}
@@ -576,7 +597,14 @@ export default function MeuDia() {
                     </p>
                     
                     {ann.acknowledgments && ann.acknowledgments.length > 0 && (
-                      <div className="flex items-center gap-2 mb-4 flex-wrap">
+                      <div className="flex items-center gap-2 mb-4 flex-wrap relative pr-8">
+                      <button 
+                        onClick={() => handleDeleteAnnouncement(ann.id)}
+                        className="absolute right-0 -top-2 text-gray-500 hover:text-red-500 transition-colors bg-white/5 hover:bg-red-500/10 p-1.5 rounded-lg"
+                        title="Excluir Aviso"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                         <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-1">
                           <CheckCircle2 className="h-3 w-3 text-[#00FF00]" /> Cientes:
                         </div>
