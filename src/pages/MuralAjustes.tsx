@@ -195,7 +195,7 @@ export default function MuralAjustes() {
   });
 
   return (
-    <div className="flex-1 px-4 md:px-8 pt-0 pb-4 animate-in fade-in duration-500 -mt-2 md:-mt-6">
+    <div className="flex-1 px-4 md:px-8 pt-0 pb-4 animate-in fade-in duration-500">
       
       {/* Container Layout com Feed na Lateral */}
       <div className="flex flex-col xl:flex-row gap-4 items-start">
@@ -204,11 +204,11 @@ export default function MuralAjustes() {
           {/* Header */}
           <div className="mb-3">
         <div>
-          <h2 className="text-3xl font-light tracking-tight text-white flex items-center gap-2 mb-1">
-            <AlertCircle className="h-6 w-6 text-[#00FF00] drop-shadow-[0_0_10px_rgba(0,255,0,0.3)]" />
+          <h2 className="text-2xl font-light tracking-tight text-white flex items-center gap-2 mb-1">
+            <AlertCircle className="h-5 w-5 text-[#00FF00] drop-shadow-[0_0_10px_rgba(0,255,0,0.3)]" />
             Mural de Ajustes Rápidos
           </h2>
-          <p className="text-gray-500 font-medium text-[10px] tracking-widest uppercase">
+          <p className="text-gray-500 font-medium text-[9px] tracking-widest uppercase">
             CORREÇÃO DE ERROS E OTIMIZAÇÃO DE ANÚNCIOS
           </p>
         </div>
@@ -229,7 +229,7 @@ export default function MuralAjustes() {
             <button 
               key={m}
               onClick={() => setFilter(m.toLowerCase())}
-              className={`px-4 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider whitespace-nowrap transition-all flex items-center gap-2 ${
+              className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all flex items-center gap-2 ${
                 isActive 
                   ? 'bg-white/10 text-white border-b-2 border-[#00FF00]' 
                   : 'text-gray-500 hover:text-gray-300 hover:bg-white/5 border-b-2 border-transparent'
@@ -237,7 +237,7 @@ export default function MuralAjustes() {
             >
               {m !== 'Todos' && getMarketplaceLogo(m)}
               {m}
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${isActive ? 'bg-[#00FF00]/20 text-[#00FF00]' : 'bg-white/5 text-gray-500'}`}>
+              <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold ${isActive ? 'bg-[#00FF00]/20 text-[#00FF00]' : 'bg-white/5 text-gray-500'}`}>
                 {count}
               </span>
             </button>
@@ -249,18 +249,18 @@ export default function MuralAjustes() {
         <div className="flex gap-4 items-center shrink-0">
 
           <div className="relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 group-focus-within:text-[#00FF00] transition-colors" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-500 group-focus-within:text-[#00FF00] transition-colors" />
             <input 
               type="text" 
               placeholder="Buscar SKU ou tarefa..." 
-              className="pl-10 pr-4 py-1.5 bg-[#0a0a0a] border border-white/5 rounded-xl text-sm text-white focus:outline-none focus:border-[#00FF00]/50 focus:shadow-[0_0_10px_rgba(0,255,0,0.1)] transition-all w-64"
+              className="pl-9 pr-3 py-1 bg-[#0a0a0a] border border-white/5 rounded-lg text-xs text-white focus:outline-none focus:border-[#00FF00]/50 focus:shadow-[0_0_10px_rgba(0,255,0,0.1)] transition-all w-64"
             />
           </div>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 bg-[#00FF00] hover:bg-[#00FF00]/80 text-black px-4 py-1.5 rounded-lg text-sm font-bold transition-all shadow-[0_0_15px_rgba(0,255,0,0.3)] hover:shadow-[0_0_20px_rgba(0,255,0,0.4)]"
+            className="flex items-center gap-2 bg-[#00FF00] hover:bg-[#00FF00]/80 text-black px-3 py-1 rounded-md text-xs font-bold transition-all shadow-[0_0_15px_rgba(0,255,0,0.3)] hover:shadow-[0_0_20px_rgba(0,255,0,0.4)]"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-3.5 w-3.5" />
             Novo Ticket
           </button>
         </div>
@@ -276,7 +276,7 @@ export default function MuralAjustes() {
           return (
             <div 
               key={ticket.id} 
-              className={`bg-[#111111]/80 backdrop-blur-sm rounded-xl p-4 flex flex-col justify-between transition-all duration-300 group ${
+              className={`bg-[#111111]/80 backdrop-blur-sm rounded-xl p-3 flex flex-col justify-between transition-all duration-300 group ${
                 isResolved 
                   ? 'opacity-50 border border-[#00FF00]/20' 
                   : `border-x border-b border-white/5 border-t-2 ${getMarketplaceCardStyle(ticket.marketplace)}`
@@ -284,19 +284,19 @@ export default function MuralAjustes() {
             >
               <div>
                 {/* Header (Status, Marketplace, SKU, Creator) */}
-                <div className="flex items-start justify-between mb-3">
+                <div className="flex items-start justify-between mb-2">
                   <div className="flex flex-col gap-1.5">
                     <div className="flex items-center gap-2">
                       <div className={`h-2 w-2 rounded-full shrink-0 ${ticket.priority === 'critico' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse' : 'bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.6)]'}`} title={ticket.priority === 'critico' ? 'Crítico / Risco' : 'Normal / Estético'} />
-                      <span className={`text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 ${textColor}`}>
+                      <span className={`text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5 ${textColor}`}>
                         {getMarketplaceLogo(ticket.marketplace)}
                         {ticket.marketplace}
                       </span>
                     </div>
                     
                     {(ticket.sku || ticket.link) && (
-                      <div className="flex items-center gap-1.5 text-white font-bold text-sm tracking-wide mt-1">
-                        <span className="text-gray-500 font-medium text-xs">{ticket.sku ? "SKU" : "LINK"}</span>
+                      <div className="flex items-center gap-1.5 text-white font-bold text-xs tracking-wide mt-1">
+                        <span className="text-gray-500 font-medium text-[10px]">{ticket.sku ? "SKU" : "LINK"}</span>
                         <a href={ticket.link || `https://seller.shopee.com.br/portal/product/list?search=${ticket.sku}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#00FF00] transition-colors">
                           {ticket.sku || "Acessar Anúncio"}
                         </a>
@@ -305,8 +305,8 @@ export default function MuralAjustes() {
                   </div>
                   
                   <div className="flex flex-col items-end gap-1">
-                    <span className="text-[10px] text-gray-500 font-medium">{ticket.creator_name?.split(' ')[0] || 'Sistema'}</span>
-                    <span className="text-[9px] text-gray-600 font-medium flex items-center gap-1">
+                    <span className="text-[9px] text-gray-500 font-medium">{ticket.creator_name?.split(' ')[0] || 'Sistema'}</span>
+                    <span className="text-[8px] text-gray-600 font-medium flex items-center gap-1">
                       <Clock className="h-3 w-3" />
                       Hoje
                     </span>
@@ -314,7 +314,7 @@ export default function MuralAjustes() {
                 </div>
                 
                 {/* Description */}
-                <p className="text-gray-300 text-[13px] leading-relaxed mb-4 font-light">
+                <p className="text-gray-300 text-xs leading-relaxed mb-3 font-light">
                   <span className={isResolved ? "line-through text-gray-500" : ""}>{ticket.description}</span>
                 </p>
               </div>
@@ -324,10 +324,10 @@ export default function MuralAjustes() {
                 <div className="flex items-center gap-2 shrink-0">
                   {ticket.assignee_name ? (
                     <>
-                      <div className={`h-6 w-6 rounded-full border flex items-center justify-center text-[9px] font-bold ${getAvatarStyle(ticket.assignee_name)}`}>
+                      <div className={`h-5 w-5 rounded-full border flex items-center justify-center text-[8px] font-bold ${getAvatarStyle(ticket.assignee_name)}`}>
                         {ticket.assignee_name.substring(0, 2).toUpperCase()}
                       </div>
-                      <span className="text-xs text-gray-400 font-medium">{ticket.assignee_name.split(' ')[0]}</span>
+                      <span className="text-[10px] text-gray-400 font-medium">{ticket.assignee_name.split(' ')[0]}</span>
                     </>
                   ) : (
                     <span className="text-xs text-gray-600 font-medium italic">Não atribuído</span>
@@ -335,15 +335,15 @@ export default function MuralAjustes() {
                 </div>
 
                 {isResolved ? (
-                  <span className="text-[#00FF00]/70 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5">
-                    <CheckCircle2 className="h-4 w-4" /> Resolvido
+                  <span className="text-[#00FF00]/70 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Resolvido
                   </span>
                 ) : (
                   <button 
                     onClick={() => handleResolve(ticket.id)}
-                    className="text-gray-500 hover:text-[#00FF00] transition-colors flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest group/btn"
+                    className="text-gray-500 hover:text-[#00FF00] transition-colors flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest group/btn"
                   >
-                    <CheckCircle2 className="h-4 w-4 group-hover/btn:scale-110 transition-transform" />
+                    <CheckCircle2 className="h-3.5 w-3.5 group-hover/btn:scale-110 transition-transform" />
                     Resolver
                   </button>
                 )}
