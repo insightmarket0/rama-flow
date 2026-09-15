@@ -177,7 +177,7 @@ const ExpediçãoTracker = () => {
       </div>
 
       {/* Centro: Relógio Analógico (Menor) */}
-      <div className="relative w-[220px] h-[135px] flex flex-col items-center justify-start overflow-hidden z-10 shrink-0">
+      <div className="relative w-[220px] h-[150px] mt-2 flex flex-col items-center justify-start overflow-hidden z-10 shrink-0">
         <svg className="absolute top-0 w-[220px] h-[220px]" viewBox="0 0 300 300">
           <g stroke="currentColor" strokeWidth="2">
             {[...Array(31)].map((_, i) => {
@@ -520,15 +520,15 @@ export default function MeuDia() {
             {/* 3.1. Card Fixo de Prévia de Mensagens */}
             <div 
               onClick={() => window.dispatchEvent(new CustomEvent('open-global-chat'))}
-              className="col-span-1 bg-[#121214] hover:bg-[#18181B] rounded-3xl p-5 flex items-center gap-5 border border-white/5 hover:border-white/10 shadow-lg cursor-pointer transition-all duration-500 group relative overflow-hidden h-fit"
+              className="col-span-1 bg-[#121214] hover:bg-[#18181B] rounded-3xl p-5 flex flex-col justify-center items-center gap-5 border border-white/5 hover:border-white/10 shadow-lg cursor-pointer transition-all duration-500 group relative overflow-hidden h-[340px]"
             >
               {/* Subtle inner glow */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
               
               <div className="relative shrink-0">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#1E1E20] to-[#111] flex items-center justify-center border border-white/10 group-hover:scale-105 transition-transform duration-500 shadow-inner relative overflow-hidden">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#1E1E20] to-[#111] flex items-center justify-center border border-white/10 group-hover:scale-105 transition-transform duration-500 shadow-inner relative overflow-hidden">
                    <div className="absolute inset-0 bg-emerald-500/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                   <MessageCircle className="w-6 h-6 text-gray-400 group-hover:text-white transition-colors relative z-10" />
+                   <MessageCircle className="w-8 h-8 text-gray-400 group-hover:text-white transition-colors relative z-10" />
                 </div>
                 {/* Notification Badge */}
                 <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#FF3B30] border-2 border-[#121214] rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-lg animate-in zoom-in">
@@ -536,7 +536,7 @@ export default function MeuDia() {
                 </div>
               </div>
               
-              <div className="flex-1 min-w-0 flex flex-col justify-center">
+              <div className="flex-1 min-w-0 flex flex-col justify-center items-center text-center mt-2">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
                     Chat da Equipe
@@ -555,7 +555,7 @@ export default function MeuDia() {
             </div>
 
             {/* 3.2. Cards do Mural de Alinhamento */}
-            <div id="mural-alinhamento" className="col-span-1 flex flex-col gap-4 h-fit">
+            <div id="mural-alinhamento" className="col-span-1 flex flex-col gap-4 h-[340px]">
               <div className="flex items-center justify-between">
                 <h3 className="text-white text-sm font-bold uppercase tracking-widest flex items-center gap-2">
                   <Megaphone className="h-4 w-4 text-[#00FF00]" />
@@ -572,7 +572,7 @@ export default function MeuDia() {
               {announcements.slice(0, 1).map((ann) => {
                 const hasAck = ann.acknowledgments?.some(ack => ack.user_id === (user?.id || 'anon'));
                 return (
-                <div key={ann.id} className="rounded-2xl p-5 flex flex-col justify-between bg-gradient-to-b from-[#18181A] to-[#111111] border border-white/5 shadow-xl relative group">
+                <div key={ann.id} className="rounded-2xl p-5 flex flex-col justify-between bg-gradient-to-b from-[#18181A] to-[#111111] border border-white/5 shadow-xl relative group flex-1 overflow-hidden">
                   <div>
                     <div className="flex items-center gap-2 mb-4 flex-wrap relative pr-8">
                       <button 
