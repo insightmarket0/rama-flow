@@ -152,12 +152,12 @@ const ExpediçãoTracker = () => {
   const circumference = 2 * Math.PI * radius;
 
   return (
-    <div className="col-span-1 md:col-span-2 flex flex-col md:flex-row items-center justify-between py-3 px-6 bg-[#050505] rounded-3xl border border-white/5 relative overflow-hidden shadow-2xl gap-6 min-h-[120px]">
+    <div className="col-span-1 md:col-span-2 flex flex-col md:flex-row items-center justify-between py-3 px-6 bg-[#050505] rounded-3xl border border-white/5 relative overflow-hidden shadow-2xl gap-6 min-h-[180px]">
       {/* Glow background */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[200px] bg-[#00FF00]/5 rounded-full blur-[80px] pointer-events-none" />
       
       {/* Esquerda: Avisos */}
-      <div className="flex flex-col items-start gap-1 z-10 w-full md:w-auto">
+      <div className="flex flex-col items-start gap-3 z-10 w-full md:w-auto">
         <div className="bg-[#111] border border-white/10 rounded-full px-4 py-1.5 flex items-center gap-2 shadow-lg backdrop-blur-md">
           <div className="w-1.5 h-1.5 rounded-full bg-[#00FF00] animate-pulse shadow-[0_0_8px_#00FF00]" />
           <span className="text-gray-300 text-xs tracking-wide">
@@ -166,7 +166,7 @@ const ExpediçãoTracker = () => {
         </div>
 
         {/* Fila compacta */}
-        <div className="flex flex-col gap-1 mt-1">
+        <div className="flex flex-col gap-2 mt-2">
           {dispatches.filter(d => d.name !== nextDispatch.name).map((d, i) => (
             <div key={i} className="flex items-center gap-2 opacity-70">
               <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: d.color }} />
@@ -177,8 +177,8 @@ const ExpediçãoTracker = () => {
       </div>
 
       {/* Centro: Relógio Analógico (Menor) */}
-      <div className="relative w-[180px] h-[120px] mt-0 flex flex-col items-center justify-start overflow-hidden z-10 shrink-0">
-        <svg className="absolute top-0 w-[180px] h-[180px]" viewBox="0 0 300 300">
+      <div className="relative w-[220px] h-[150px] mt-2 flex flex-col items-center justify-start overflow-hidden z-10 shrink-0">
+        <svg className="absolute top-0 w-[220px] h-[220px]" viewBox="0 0 300 300">
           <g stroke="currentColor" strokeWidth="2">
             {[...Array(31)].map((_, i) => {
               const angle = 180 + (i * 6);
@@ -197,11 +197,11 @@ const ExpediçãoTracker = () => {
           <circle cx="150" cy="150" r={radius} fill="none" stroke="#00FF00" strokeWidth="24" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference - ((progress / 100) * (circumference / 2))} transform="rotate(180 150 150)" className="transition-all duration-1000 ease-in-out drop-shadow-[0_0_15px_rgba(0,255,0,0.3)]" />
         </svg>
 
-        <div className="absolute top-[30%] flex flex-col items-center justify-center w-full">
+        <div className="absolute top-[35%] flex flex-col items-center justify-center w-full">
           <span className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.1em] mb-0.5">
             Horário Local
           </span>
-          <div className="text-white text-4xl font-bold tracking-tighter" style={{ fontVariantNumeric: 'tabular-nums' }}>
+          <div className="text-white text-5xl font-bold tracking-tighter" style={{ fontVariantNumeric: 'tabular-nums' }}>
             {hours.toString().padStart(2, '0')}:{minutes.toString().padStart(2, '0')}
           </div>
           <span className="text-[#00FF00] text-[9px] font-bold uppercase tracking-wider mt-1 bg-[#00FF00]/10 px-2 py-0.5 rounded-full">
@@ -520,7 +520,7 @@ export default function MeuDia() {
             {/* 3.1. Card Fixo de Prévia de Mensagens */}
             <div 
               onClick={() => window.dispatchEvent(new CustomEvent('open-global-chat'))}
-              className="col-span-1 bg-[#121214] hover:bg-[#18181B] rounded-3xl p-5 flex flex-col justify-center items-center gap-5 border border-white/5 hover:border-white/10 shadow-lg cursor-pointer transition-all duration-500 group relative overflow-hidden h-[250px]"
+              className="col-span-1 bg-[#121214] hover:bg-[#18181B] rounded-3xl p-5 flex flex-col justify-center items-center gap-5 border border-white/5 hover:border-white/10 shadow-lg cursor-pointer transition-all duration-500 group relative overflow-hidden h-[280px]"
             >
               {/* Subtle inner glow */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -555,7 +555,7 @@ export default function MeuDia() {
             </div>
 
             {/* 3.2. Cards do Mural de Alinhamento */}
-            <div id="mural-alinhamento" className="col-span-1 flex flex-col gap-4 h-[250px]">
+            <div id="mural-alinhamento" className="col-span-1 flex flex-col gap-4 h-[280px]">
               <div className="flex items-center justify-between">
                 <h3 className="text-white text-sm font-bold uppercase tracking-widest flex items-center gap-2">
                   <Megaphone className="h-4 w-4 text-[#00FF00]" />
@@ -573,7 +573,7 @@ export default function MeuDia() {
                 const hasAck = ann.acknowledgments?.some(ack => ack.user_id === (user?.id || 'anon'));
                 return (
                 <div key={ann.id} className="rounded-2xl p-5 flex flex-col justify-between bg-gradient-to-b from-[#18181A] to-[#111111] border border-white/5 shadow-xl relative group flex-1 overflow-hidden">
-                  <div>
+                  <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 mb-2 min-h-0">
                     <div className="flex items-center gap-2 mb-4 flex-wrap relative pr-8">
                       <button 
                         onClick={() => handleDeleteAnnouncement(ann.id)}
