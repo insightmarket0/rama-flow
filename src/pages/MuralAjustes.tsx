@@ -195,13 +195,13 @@ export default function MuralAjustes() {
   });
 
   return (
-    <div className="flex-1 p-4 md:p-8 pt-6 animate-in fade-in duration-500">
+    <div className="flex-1 p-4 md:px-8 md:py-4 animate-in fade-in duration-500">
       
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
         <div>
-          <h2 className="text-4xl font-light tracking-tight text-white flex items-center gap-3 mb-2">
-            <AlertCircle className="h-8 w-8 text-[#00FF00] drop-shadow-[0_0_10px_rgba(0,255,0,0.3)]" />
+          <h2 className="text-3xl font-light tracking-tight text-white flex items-center gap-2 mb-1">
+            <AlertCircle className="h-6 w-6 text-[#00FF00] drop-shadow-[0_0_10px_rgba(0,255,0,0.3)]" />
             Mural de Ajustes Rápidos
           </h2>
           <p className="text-gray-500 font-medium text-[10px] tracking-widest uppercase">
@@ -215,12 +215,12 @@ export default function MuralAjustes() {
             <input 
               type="text" 
               placeholder="Buscar SKU ou tarefa..." 
-              className="pl-10 pr-4 py-2.5 bg-[#0a0a0a] border border-white/5 rounded-xl text-sm text-white focus:outline-none focus:border-[#00FF00]/50 focus:shadow-[0_0_10px_rgba(0,255,0,0.1)] transition-all w-64"
+              className="pl-10 pr-4 py-1.5 bg-[#0a0a0a] border border-white/5 rounded-xl text-sm text-white focus:outline-none focus:border-[#00FF00]/50 focus:shadow-[0_0_10px_rgba(0,255,0,0.1)] transition-all w-64"
             />
           </div>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 bg-[#00FF00] hover:bg-[#00FF00]/80 text-black px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(0,255,0,0.3)] hover:shadow-[0_0_20px_rgba(0,255,0,0.4)]"
+            className="flex items-center gap-2 bg-[#00FF00] hover:bg-[#00FF00]/80 text-black px-4 py-1.5 rounded-lg text-sm font-bold transition-all shadow-[0_0_15px_rgba(0,255,0,0.3)] hover:shadow-[0_0_20px_rgba(0,255,0,0.4)]"
           >
             <Plus className="h-4 w-4" />
             Novo Ticket
@@ -229,7 +229,7 @@ export default function MuralAjustes() {
       </div>
 
       {/* Tabs / Filters */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+      <div className="flex gap-2 mb-4 overflow-x-auto pb-1 custom-scrollbar-thin">
         {['Todos', 'Shopee', 'Mercado Livre', 'Amazon', 'Geral'].map((m) => {
           const count = m === 'Todos' 
             ? tickets.length 
@@ -240,7 +240,7 @@ export default function MuralAjustes() {
             <button 
               key={m}
               onClick={() => setFilter(m.toLowerCase())}
-              className={`px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all flex items-center gap-2 ${
+              className={`px-4 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider whitespace-nowrap transition-all flex items-center gap-2 ${
                 isActive 
                   ? 'bg-white/10 text-white border-b-2 border-[#00FF00]' 
                   : 'text-gray-500 hover:text-gray-300 hover:bg-white/5 border-b-2 border-transparent'
@@ -257,17 +257,17 @@ export default function MuralAjustes() {
       </div>
 
             {/* Container Layout com Feed na Lateral */}
-      <div className="flex flex-col xl:flex-row gap-6 items-start">
+      <div className="flex flex-col xl:flex-row gap-4 items-start">
         {/* Lado Esquerdo: Grid de Tickets */}
         <div className="flex-1 w-full min-w-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
         {filteredTickets.map((ticket) => {
           const isResolved = ticket.status === 'resolvido';
           
           return (
             <div 
               key={ticket.id} 
-              className={`bg-[#111111]/80 backdrop-blur-sm rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 group ${
+              className={`bg-[#111111]/80 backdrop-blur-sm rounded-xl p-4 flex flex-col justify-between transition-all duration-300 group ${
                 isResolved 
                   ? 'opacity-50 border border-[#00FF00]/20' 
                   : `border-x border-b border-white/5 border-t-2 ${getMarketplaceCardStyle(ticket.marketplace)}`
