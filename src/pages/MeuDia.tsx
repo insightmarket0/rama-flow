@@ -152,7 +152,7 @@ const ExpediçãoTracker = () => {
   const circumference = 2 * Math.PI * radius;
 
   return (
-    <div className="col-span-1 md:col-span-2 flex flex-col md:flex-row items-center justify-between py-4 px-6 bg-[#050505] rounded-3xl border border-white/5 relative overflow-hidden shadow-2xl gap-6">
+    <div className="col-span-1 md:col-span-2 flex flex-col md:flex-row items-center justify-between py-4 px-6 bg-[#050505] rounded-3xl border border-white/5 relative overflow-hidden shadow-2xl gap-6 min-h-[200px]">
       {/* Glow background */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[200px] bg-[#00FF00]/5 rounded-full blur-[80px] pointer-events-none" />
       
