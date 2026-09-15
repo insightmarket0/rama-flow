@@ -441,7 +441,7 @@ export default function MeuDia() {
                       </button>
                     </div>
                   </div>
-                ))}
+                )))}
               </div>
             </div>
           </div>
