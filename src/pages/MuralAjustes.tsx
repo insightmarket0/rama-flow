@@ -198,11 +198,11 @@ export default function MuralAjustes() {
     <div className="flex-1 px-4 md:px-8 pt-0 pb-4 animate-in fade-in duration-500 -mt-2 md:-mt-6">
       
       {/* Container Layout com Feed na Lateral */}
-      <div className="flex flex-col xl:flex-row gap-6 items-start">
+      <div className="flex flex-col xl:flex-row gap-4 items-start">
         {/* Lado Esquerdo: Header + Actions + Grid */}
         <div className="flex-1 w-full min-w-0 flex flex-col">
           {/* Header */}
-          <div className="mb-4">
+          <div className="mb-3">
         <div>
           <h2 className="text-3xl font-light tracking-tight text-white flex items-center gap-2 mb-1">
             <AlertCircle className="h-6 w-6 text-[#00FF00] drop-shadow-[0_0_10px_rgba(0,255,0,0.3)]" />
@@ -216,9 +216,9 @@ export default function MuralAjustes() {
         </div>
 
       {/* Action Bar: Tabs + Search/Add */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-start gap-6 mb-6">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-start gap-4 mb-4">
         {/* Tabs / Filters */}
-        <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar-thin">
+        <div className="flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden">
         {['Todos', 'Shopee', 'Mercado Livre', 'Amazon', 'Geral'].map((m) => {
           const count = m === 'Todos' 
             ? tickets.length 
@@ -267,7 +267,7 @@ export default function MuralAjustes() {
       </div>
 
             {/* Grid de Tickets */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3">
                 {filteredTickets.map((ticket) => {
           const isResolved = ticket.status === 'resolvido';
           const mkStyle = getMarketplaceStyle(ticket.marketplace);
@@ -276,7 +276,7 @@ export default function MuralAjustes() {
           return (
             <div 
               key={ticket.id} 
-              className={`bg-[#111111]/80 backdrop-blur-sm rounded-xl p-5 flex flex-col justify-between transition-all duration-300 group ${
+              className={`bg-[#111111]/80 backdrop-blur-sm rounded-xl p-4 flex flex-col justify-between transition-all duration-300 group ${
                 isResolved 
                   ? 'opacity-50 border border-[#00FF00]/20' 
                   : `border-x border-b border-white/5 border-t-2 ${getMarketplaceCardStyle(ticket.marketplace)}`
@@ -284,7 +284,7 @@ export default function MuralAjustes() {
             >
               <div>
                 {/* Header (Status, Marketplace, SKU, Creator) */}
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start justify-between mb-3">
                   <div className="flex flex-col gap-1.5">
                     <div className="flex items-center gap-2">
                       <div className={`h-2 w-2 rounded-full shrink-0 ${ticket.priority === 'critico' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse' : 'bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.6)]'}`} title={ticket.priority === 'critico' ? 'Crítico / Risco' : 'Normal / Estético'} />
@@ -314,7 +314,7 @@ export default function MuralAjustes() {
                 </div>
                 
                 {/* Description */}
-                <p className="text-gray-300 text-[13px] leading-relaxed mb-6 font-light">
+                <p className="text-gray-300 text-[13px] leading-relaxed mb-4 font-light">
                   <span className={isResolved ? "line-through text-gray-500" : ""}>{ticket.description}</span>
                 </p>
               </div>
