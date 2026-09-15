@@ -115,16 +115,6 @@ const App = () => (
               }
             />
             <Route
-              path="/mural-alinhamento"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <MuralAlinhamento />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
               path="/lembretes"
               element={
                 <ProtectedRoute>
