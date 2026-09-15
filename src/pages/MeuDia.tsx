@@ -152,7 +152,7 @@ const ExpediçãoTracker = () => {
   const circumference = 2 * Math.PI * radius;
 
   return (
-    <div className="col-span-1 md:col-span-2 flex flex-col md:flex-row items-center justify-between py-4 px-6 bg-[#050505] rounded-3xl border border-white/5 relative overflow-hidden shadow-2xl gap-6 min-h-[200px]">
+    <div className="col-span-1 md:col-span-2 flex flex-col md:flex-row items-center justify-between py-3 px-6 bg-[#050505] rounded-3xl border border-white/5 relative overflow-hidden shadow-2xl gap-6 min-h-[170px]">
       {/* Glow background */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[200px] bg-[#00FF00]/5 rounded-full blur-[80px] pointer-events-none" />
       
@@ -520,15 +520,15 @@ export default function MeuDia() {
             {/* 3.1. Card Fixo de Prévia de Mensagens */}
             <div 
               onClick={() => window.dispatchEvent(new CustomEvent('open-global-chat'))}
-              className="col-span-1 bg-[#121214] hover:bg-[#18181B] rounded-3xl p-5 flex flex-col justify-center items-center gap-5 border border-white/5 hover:border-white/10 shadow-lg cursor-pointer transition-all duration-500 group relative overflow-hidden h-[340px]"
+              className="col-span-1 bg-[#121214] hover:bg-[#18181B] rounded-3xl p-5 flex flex-col justify-center items-center gap-5 border border-white/5 hover:border-white/10 shadow-lg cursor-pointer transition-all duration-500 group relative overflow-hidden h-[250px]"
             >
               {/* Subtle inner glow */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
               
               <div className="relative shrink-0">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#1E1E20] to-[#111] flex items-center justify-center border border-white/10 group-hover:scale-105 transition-transform duration-500 shadow-inner relative overflow-hidden">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#1E1E20] to-[#111] flex items-center justify-center border border-white/10 group-hover:scale-105 transition-transform duration-500 shadow-inner relative overflow-hidden">
                    <div className="absolute inset-0 bg-emerald-500/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                   <MessageCircle className="w-8 h-8 text-gray-400 group-hover:text-white transition-colors relative z-10" />
+                   <MessageCircle className="w-6 h-6 text-gray-400 group-hover:text-white transition-colors relative z-10" />
                 </div>
                 {/* Notification Badge */}
                 <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#FF3B30] border-2 border-[#121214] rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-lg animate-in zoom-in">
@@ -555,7 +555,7 @@ export default function MeuDia() {
             </div>
 
             {/* 3.2. Cards do Mural de Alinhamento */}
-            <div id="mural-alinhamento" className="col-span-1 flex flex-col gap-4 h-[340px]">
+            <div id="mural-alinhamento" className="col-span-1 flex flex-col gap-4 h-[250px]">
               <div className="flex items-center justify-between">
                 <h3 className="text-white text-sm font-bold uppercase tracking-widest flex items-center gap-2">
                   <Megaphone className="h-4 w-4 text-[#00FF00]" />
