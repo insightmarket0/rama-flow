@@ -195,10 +195,10 @@ export default function MuralAjustes() {
   });
 
   return (
-    <div className="flex-1 p-4 md:px-8 md:py-4 animate-in fade-in duration-500">
+    <div className="flex-1 px-4 md:px-8 pt-0 pb-4 animate-in fade-in duration-500 -mt-2 md:-mt-6">
       
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-4">
         <div>
           <h2 className="text-3xl font-light tracking-tight text-white flex items-center gap-2 mb-1">
             <AlertCircle className="h-6 w-6 text-[#00FF00] drop-shadow-[0_0_10px_rgba(0,255,0,0.3)]" />
