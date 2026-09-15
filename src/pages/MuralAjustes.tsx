@@ -198,7 +198,7 @@ export default function MuralAjustes() {
     <div className="flex-1 p-4 md:px-8 md:py-4 animate-in fade-in duration-500">
       
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+      <div className="mb-6">
         <div>
           <h2 className="text-3xl font-light tracking-tight text-white flex items-center gap-2 mb-1">
             <AlertCircle className="h-6 w-6 text-[#00FF00] drop-shadow-[0_0_10px_rgba(0,255,0,0.3)]" />
@@ -209,27 +209,12 @@ export default function MuralAjustes() {
           </p>
         </div>
         
-        <div className="flex gap-4 items-center">
-          <div className="relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 group-focus-within:text-[#00FF00] transition-colors" />
-            <input 
-              type="text" 
-              placeholder="Buscar SKU ou tarefa..." 
-              className="pl-10 pr-4 py-1.5 bg-[#0a0a0a] border border-white/5 rounded-xl text-sm text-white focus:outline-none focus:border-[#00FF00]/50 focus:shadow-[0_0_10px_rgba(0,255,0,0.1)] transition-all w-64"
-            />
-          </div>
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 bg-[#00FF00] hover:bg-[#00FF00]/80 text-black px-4 py-1.5 rounded-lg text-sm font-bold transition-all shadow-[0_0_15px_rgba(0,255,0,0.3)] hover:shadow-[0_0_20px_rgba(0,255,0,0.4)]"
-          >
-            <Plus className="h-4 w-4" />
-            Novo Ticket
-          </button>
         </div>
-      </div>
 
-      {/* Tabs / Filters */}
-      <div className="flex gap-2 mb-4 overflow-x-auto pb-1 custom-scrollbar-thin">
+      {/* Action Bar: Tabs + Search/Add */}
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
+        {/* Tabs / Filters */}
+        <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar-thin flex-1">
         {['Todos', 'Shopee', 'Mercado Livre', 'Amazon', 'Geral'].map((m) => {
           const count = m === 'Todos' 
             ? tickets.length 
@@ -254,6 +239,27 @@ export default function MuralAjustes() {
             </button>
           );
         })}
+      </div>
+
+        {/* Search & Actions */}
+        <div className="flex gap-4 items-center shrink-0">
+
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 group-focus-within:text-[#00FF00] transition-colors" />
+            <input 
+              type="text" 
+              placeholder="Buscar SKU ou tarefa..." 
+              className="pl-10 pr-4 py-1.5 bg-[#0a0a0a] border border-white/5 rounded-xl text-sm text-white focus:outline-none focus:border-[#00FF00]/50 focus:shadow-[0_0_10px_rgba(0,255,0,0.1)] transition-all w-64"
+            />
+          </div>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 bg-[#00FF00] hover:bg-[#00FF00]/80 text-black px-4 py-1.5 rounded-lg text-sm font-bold transition-all shadow-[0_0_15px_rgba(0,255,0,0.3)] hover:shadow-[0_0_20px_rgba(0,255,0,0.4)]"
+          >
+            <Plus className="h-4 w-4" />
+            Novo Ticket
+          </button>
+        </div>
       </div>
 
             {/* Container Layout com Feed na Lateral */}
