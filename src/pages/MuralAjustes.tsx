@@ -195,12 +195,12 @@ export default function MuralAjustes() {
   });
 
   return (
-    <div className="flex-1 px-4 md:px-8 pt-0 pb-4 animate-in fade-in duration-500">
+    <div className="flex-1 px-4 md:px-8 pt-0 pb-4 animate-in fade-in duration-500 h-screen max-h-screen overflow-hidden flex flex-col">
       
       {/* Container Layout com Feed na Lateral */}
-      <div className="flex flex-col xl:flex-row gap-4 items-start">
+      <div className="flex flex-col xl:flex-row gap-4 items-start flex-1 min-h-0 overflow-hidden">
         {/* Lado Esquerdo: Header + Actions + Grid */}
-        <div className="flex-1 w-full min-w-0 flex flex-col">
+        <div className="flex-1 w-full min-w-0 flex flex-col h-full overflow-y-auto [&::-webkit-scrollbar]:hidden pr-2">
           {/* Header */}
           <div className="mb-3">
         <div>
