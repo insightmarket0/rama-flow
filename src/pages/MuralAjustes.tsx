@@ -363,80 +363,78 @@ export default function MuralAjustes() {
       
         </div>
         {/* Lado Direito: Feed de Auditoria */}
-        <div className="w-full xl:w-[350px] shrink-0 bg-[#0A0A0A] border border-[#222] rounded-3xl p-6 shadow-2xl flex flex-col h-full sticky top-6">
-          <div className="flex items-center gap-3 mb-8">
-            <Activity className="h-5 w-5 text-gray-400" />
-            <h3 className="text-white font-bold text-lg tracking-tight">Feed de Auditoria</h3>
+        <div className="w-full xl:w-[320px] shrink-0 bg-[#070707] border border-white/5 rounded-2xl flex flex-col h-[calc(100vh-40px)] sticky top-4 shadow-2xl overflow-hidden">
+          <div className="flex items-center gap-2 p-4 border-b border-white/5 bg-[#0a0a0a]/50">
+            <Activity className="h-4 w-4 text-[#00FF00]" />
+            <h3 className="text-white font-bold text-xs tracking-widest uppercase">Feed de Auditoria</h3>
           </div>
           
-          <div className="flex-1 relative">
-            {/* Linha do Tempo */}
-            <div className="absolute left-[7px] top-2 bottom-2 w-px bg-white/5" />
-            
-            <div className="space-y-8 relative">
+          <div className="flex-1 p-5 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+            <div className="space-y-6 relative before:absolute before:inset-y-0 before:left-1.5 before:w-[1px] before:bg-white/5">
+              
               {/* Item 1 */}
               <div className="relative pl-6">
-                <div className="absolute left-0 top-1.5 w-3.5 h-3.5 rounded-full bg-[#00FF00] shadow-[0_0_10px_rgba(0,255,0,0.6)]" />
-                <p className="text-sm text-gray-300 leading-tight mb-2">
-                  <span className="text-white font-bold">Lucas</span> resolveu um ajuste de anúncio
+                <div className="absolute left-[3px] top-1.5 w-2 h-2 rounded-full bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.8)]" />
+                <p className="text-[11px] text-gray-400 leading-snug mb-1">
+                  <span className="text-white font-bold">Lucas</span> resolveu ajuste de anúncio
                 </p>
-                <div className="bg-white/5 border border-white/10 rounded-full px-3 py-1 w-fit mb-2">
-                  <span className="text-[10px] text-gray-400 font-medium">SKU: KITGAS001 (Mercado Livre)</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-gray-500">
-                  <Clock className="h-3 w-3" />
-                  <span className="text-[9px] font-bold uppercase tracking-widest">Há 5 min</span>
+                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider block mb-1.5 bg-white/5 w-fit px-2 py-0.5 rounded">
+                  SKU: KITGAS001
+                </span>
+                <div className="flex items-center gap-1 text-gray-600">
+                  <Clock className="h-2.5 w-2.5" />
+                  <span className="text-[8px] font-bold uppercase">Há 5 min</span>
                 </div>
               </div>
 
               {/* Item 2 */}
               <div className="relative pl-6">
-                <div className="absolute left-0 top-1.5 w-3.5 h-3.5 rounded-full bg-[#00FF00] shadow-[0_0_10px_rgba(0,255,0,0.6)]" />
-                <p className="text-sm text-gray-300 leading-tight mb-2">
-                  <span className="text-white font-bold">João</span> deu Ciente em um aviso crítico
+                <div className="absolute left-[3px] top-1.5 w-2 h-2 rounded-full bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.8)]" />
+                <p className="text-[11px] text-gray-400 leading-snug mb-1">
+                  <span className="text-white font-bold">João</span> deu Ciente em aviso crítico
                 </p>
-                <div className="bg-white/5 border border-white/10 rounded-full px-3 py-1 w-fit mb-2">
-                  <span className="text-[10px] text-gray-400 font-medium">Mural de Alinhamento</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-gray-500">
-                  <Clock className="h-3 w-3" />
-                  <span className="text-[9px] font-bold uppercase tracking-widest">Há 12 min</span>
+                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider block mb-1.5 bg-white/5 w-fit px-2 py-0.5 rounded">
+                  Mural Alinhamento
+                </span>
+                <div className="flex items-center gap-1 text-gray-600">
+                  <Clock className="h-2.5 w-2.5" />
+                  <span className="text-[8px] font-bold uppercase">Há 12 min</span>
                 </div>
               </div>
 
               {/* Item 3 */}
               <div className="relative pl-6">
-                <div className="absolute left-0 top-1.5 w-3.5 h-3.5 rounded-full bg-[#00FF00] shadow-[0_0_10px_rgba(0,255,0,0.6)]" />
-                <p className="text-sm text-gray-300 leading-tight mb-2">
-                  <span className="text-white font-bold">Lucas</span> concluiu uma urgência atrasada
+                <div className="absolute left-[3px] top-1.5 w-2 h-2 rounded-full bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.8)]" />
+                <p className="text-[11px] text-gray-400 leading-snug mb-1">
+                  <span className="text-white font-bold">Lucas</span> concluiu urgência
                 </p>
-                <div className="bg-white/5 border border-white/10 rounded-full px-3 py-1 w-fit mb-2">
-                  <span className="text-[10px] text-gray-400 font-medium">Atualizar foto do kit de gás</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-gray-500">
-                  <Clock className="h-3 w-3" />
-                  <span className="text-[9px] font-bold uppercase tracking-widest">Há 45 min</span>
+                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider block mb-1.5 bg-white/5 w-fit px-2 py-0.5 rounded">
+                  Atualizar foto
+                </span>
+                <div className="flex items-center gap-1 text-gray-600">
+                  <Clock className="h-2.5 w-2.5" />
+                  <span className="text-[8px] font-bold uppercase">Há 45 min</span>
                 </div>
               </div>
 
               {/* Item 4 */}
               <div className="relative pl-6">
-                <div className="absolute left-0 top-1.5 w-3.5 h-3.5 rounded-full bg-[#FF5C5C] shadow-[0_0_10px_rgba(255,92,92,0.6)] animate-pulse" />
-                <p className="text-sm text-gray-300 leading-tight mb-2">
-                  <span className="text-white font-bold">Sistema</span> emitiu alerta de SLA estourado
+                <div className="absolute left-[3px] top-1.5 w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+                <p className="text-[11px] text-gray-400 leading-snug mb-1">
+                  <span className="text-red-400 font-bold">Sistema</span> emitiu alerta SLA
                 </p>
-                <div className="bg-white/5 border border-white/10 rounded-full px-3 py-1 w-fit mb-2">
-                  <span className="text-[10px] text-gray-400 font-medium">João ainda não leu o aviso de Padrão de Imagens</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-gray-500">
-                  <Clock className="h-3 w-3" />
-                  <span className="text-[9px] font-bold uppercase tracking-widest">Há 2 horas</span>
+                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider block mb-1.5 bg-red-500/10 text-red-400 w-fit px-2 py-0.5 rounded">
+                  Aviso não lido
+                </span>
+                <div className="flex items-center gap-1 text-gray-600">
+                  <Clock className="h-2.5 w-2.5" />
+                  <span className="text-[8px] font-bold uppercase">Há 2 horas</span>
                 </div>
               </div>
             </div>
           </div>
           
-          <button className="w-full mt-8 py-3.5 rounded-xl border border-white/5 bg-[#111] hover:bg-white/5 text-gray-400 hover:text-white text-sm font-bold transition-colors">
+          <button className="p-3 border-t border-white/5 text-[9px] font-bold uppercase tracking-widest text-gray-500 hover:text-white bg-[#0a0a0a]/50 hover:bg-[#111] transition-colors">
             Ver Histórico Completo
           </button>
         </div>
