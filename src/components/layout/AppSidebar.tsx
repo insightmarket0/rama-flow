@@ -47,7 +47,7 @@ const NAV_GROUPS = [
   {
     id: "home",
     icon: Home,
-    title: "InÃ­cio",
+    title: "Início",
     mainLink: "/meu-dia",
     subItems: [] // Sem sub-itens, clica direto
   },
@@ -55,7 +55,7 @@ const NAV_GROUPS = [
   {
     id: "operacao",
     icon: Zap,
-    title: "OperaÃ§Ã£o",
+    title: "Operação",
     subItems: [
       { title: "Mural de Ajustes", url: "/mural-ajustes", icon: ClipboardList },{ title: "Workspace Pessoal", url: "/lembretes", icon: CheckSquare },
     ]
@@ -67,7 +67,7 @@ const NAV_GROUPS = [
     subItems: [
       { title: "Contas Fixas", url: "/contas-fixas", icon: CalendarPlus },
       { title: "Pedidos de Compras (Novo)", url: "/pedidos-compras", icon: ShoppingCart },
-      { title: "AnÃ¡lise Financeira (Novo)", url: "/comparativo", icon: LineChart },
+      { title: "Análise Financeira (Novo)", url: "/comparativo", icon: LineChart },
       { title: "Faturamento e Lucros", url: "/dashboard-financeiro", icon: LineChart },
       { title: "Dashboard Pedidos", url: "/dashboard", icon: LayoutDashboard },
       { title: "Fornecedores", url: "/fornecedores", icon: Users },
@@ -77,9 +77,9 @@ const NAV_GROUPS = [
   {
     id: "expedicao",
     icon: Package,
-    title: "ExpediÃ§Ã£o",
+    title: "Expedição",
     subItems: [
-      { title: "Portal de ExpediÃ§Ã£o", url: "/expedicao", icon: LayoutDashboard },
+      { title: "Portal de Expedição", url: "/expedicao", icon: LayoutDashboard },
       { title: "Central de Compras", url: "/suprimentos", icon: ShoppingCart },
     ]
   },
@@ -97,10 +97,10 @@ const NAV_GROUPS = [
   {
     id: "gestao",
     icon: LineChart,
-    title: "GestÃ£o",
+    title: "Gestão",
     subItems: [
               { title: "Business Plan", url: "/business-plan", icon: FileText },
-        { title: "Metas e VisÃ£o", url: "/metas", icon: Target },
+        { title: "Metas e Visão", url: "/metas", icon: Target },
       { title: "Playbooks (SOPs)", url: "/playbooks", icon: BookOpen },
       { title: "Instaladores Externos", url: "/instaladores", icon: Truck },
     ]
@@ -110,7 +110,7 @@ const NAV_GROUPS = [
     icon: Users,
     title: "Equipe",
     subItems: [
-      { title: "GestÃ£o de Equipe", url: "/equipe", icon: Users },
+      { title: "Gestão de Equipe", url: "/equipe", icon: Users },
     ]
   }
 ];
@@ -130,7 +130,7 @@ export function AppSidebar() {
           .or('status.eq.pendente,status.is.null');
         
         if (error) {
-          // Fallback para visualizaÃ§Ã£o se a tabela nÃ£o existir
+          // Fallback para visualização se a tabela não existir
           setPendingPurchases(1);
         } else {
           setPendingPurchases(count || 0);
@@ -192,7 +192,7 @@ export function AppSidebar() {
     });
   }
 
-  // Helper para checar se algum sub-item do grupo estÃ¡ ativo
+  // Helper para checar se algum sub-item do grupo está ativo
   const isGroupActive = (group: typeof NAV_GROUPS[0]) => {
     if (group.mainLink === location.pathname) return true;
     return group.subItems.some(item => location.pathname === item.url);
@@ -223,9 +223,9 @@ export function AppSidebar() {
                 onMouseEnter={() => setHoveredGroup(group.id)}
                 onMouseLeave={() => setHoveredGroup(null)}
               >
-                {/* BotÃ£o Principal da CÃ¡psula */}
+                {/* Botão Principal da Cápsula */}
                 {group.subItems.length <= 1 ? (
-                  // Link direto (Home ou Ãšnico Item)
+                  // Link direto (Home ou �anico Item)
                   <NavLink
                     to={group.subItems.length === 1 ? group.subItems[0].url : group.mainLink!}
                     title={group.title}
@@ -249,7 +249,7 @@ export function AppSidebar() {
                     )}
                   </NavLink>
                 ) : (
-                  // BotÃ£o que abre menu (Outros)
+                  // Botão que abre menu (Outros)
                   <button
                     className={`h-12 w-12 rounded-[18px] flex items-center justify-center transition-all duration-300 relative ${
                       active 
@@ -316,7 +316,7 @@ export function AppSidebar() {
 
           {/* Fundo da Sidebar (Avatar e Logout) */}
           <div className="mt-auto pt-4 flex flex-col items-center gap-3 w-full px-2">
-            <button className="relative h-10 w-10 rounded-[18px] flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/10 transition-colors" title="Notificações">
+            <button className="relative h-10 w-10 rounded-[18px] flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/10 transition-colors" title="Notifica��es">
               <Bell className="h-4 w-4" />
               <div className="absolute top-0 right-0 h-3 w-3 bg-[#FF5C5C] rounded-full flex items-center justify-center text-[8px] font-bold text-white shadow-sm border border-[#111]">
                 0
@@ -341,7 +341,7 @@ export function AppSidebar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" side="right" sideOffset={16} className="w-56 bg-[#1C1C1E] border-white/10 text-white rounded-xl shadow-2xl p-2 z-[100]">
                 <div className="flex flex-col space-y-1 p-2 mb-2 border-b border-white/5">
-                  <p className="text-sm font-semibold text-white truncate">{user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || "Usuário"}</p>
+                  <p className="text-sm font-semibold text-white truncate">{user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || "Usu�rio"}</p>
                   <p className="text-xs text-gray-400 truncate">{user?.email}</p>
                 </div>
                 <DropdownMenuItem onSelect={() => window.dispatchEvent(new CustomEvent('open-profile-modal'))} className="focus:bg-[#252528] focus:text-white cursor-pointer rounded-lg py-2.5">

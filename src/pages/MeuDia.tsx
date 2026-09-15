@@ -503,40 +503,86 @@ export default function MeuDia() {
           <MuralExpedição user={user} />
         ) : (
           <>
-            {/* 3.1. Card Fixo de Prévia de Mensagens */}
+            {/* 3.1. Card Fixo de Prévia de Mensagens (Redesenhado) */}
             <div 
               onClick={() => window.dispatchEvent(new CustomEvent('open-global-chat'))}
-              className="col-span-1 bg-[#121214] hover:bg-[#18181B] rounded-3xl p-5 flex items-center gap-5 border border-white/5 hover:border-white/10 shadow-lg cursor-pointer transition-all duration-500 group relative overflow-hidden"
+              className="col-span-1 rounded-3xl flex flex-col bg-gradient-to-b from-[#18181B] to-[#121214] border border-white/5 shadow-2xl relative group overflow-hidden cursor-pointer hover:border-indigo-500/30 transition-all duration-500"
             >
-              {/* Subtle inner glow */}
-              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-              
-              <div className="relative shrink-0">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#1E1E20] to-[#111] flex items-center justify-center border border-white/10 group-hover:scale-105 transition-transform duration-500 shadow-inner relative overflow-hidden">
-                   <div className="absolute inset-0 bg-emerald-500/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                   <MessageCircle className="w-6 h-6 text-gray-400 group-hover:text-white transition-colors relative z-10" />
+              {/* Header */}
+              <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between shrink-0 bg-white/[0.02]">
+                <div className="flex items-center gap-3">
+                   <div className="relative">
+                     <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                       <MessageCircle className="w-4 h-4 text-indigo-400" />
+                     </div>
+                     <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#FF3B30] rounded-full border-2 border-[#18181B]"></div>
+                   </div>
+                   <span className="text-white font-bold text-sm tracking-wide">Chat da Equipe</span>
                 </div>
-                {/* Notification Badge */}
-                <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#FF3B30] border-2 border-[#121214] rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-lg animate-in zoom-in">
-                  3
+                <span className="text-indigo-400 text-[10px] uppercase font-bold tracking-widest bg-indigo-500/10 px-2 py-1 rounded-md">3 Novas</span>
+              </div>
+
+              {/* Body: Messages List */}
+              <div className="flex-1 p-6 flex flex-col justify-end gap-6 overflow-hidden relative">
+                <div className="absolute inset-0 bg-gradient-to-t from-[#121214] via-transparent to-transparent z-10 pointer-events-none opacity-50"></div>
+                
+                {/* Message 1 */}
+                <div className="flex gap-4 relative z-20">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center shrink-0 border-2 border-[#18181B] shadow-lg text-white font-bold text-xs">
+                    F
+                  </div>
+                  <div className="flex flex-col">
+                     <div className="flex items-center gap-2 mb-1">
+                       <span className="text-gray-200 text-xs font-bold">Fahema</span>
+                       <span className="text-gray-600 text-[10px] font-medium">2m atrás</span>
+                     </div>
+                     <p className="text-gray-400 text-xs leading-relaxed font-medium">
+                       <span className="text-indigo-400 font-semibold">@Anderson</span> os novos criativos já estão na pasta da campanha! 🎉
+                     </p>
+                  </div>
+                </div>
+
+                {/* Message 2 */}
+                <div className="flex gap-4 relative z-20">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500 flex items-center justify-center shrink-0 border-2 border-[#18181B] shadow-lg text-white font-bold text-xs">
+                    W
+                  </div>
+                  <div className="flex flex-col">
+                     <div className="flex items-center gap-2 mb-1">
+                       <span className="text-gray-200 text-xs font-bold">Will Mendes</span>
+                       <span className="text-gray-600 text-[10px] font-medium">1m atrás</span>
+                     </div>
+                     <p className="text-gray-400 text-xs leading-relaxed font-medium">
+                       Perfeito, vou subir os anúncios no Meta Ads hoje à tarde sem falta.
+                     </p>
+                  </div>
+                </div>
+
+                {/* Message 3 */}
+                <div className="flex gap-4 relative z-20">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-orange-500 to-pink-500 flex items-center justify-center shrink-0 border-2 border-[#18181B] shadow-lg text-white font-bold text-xs">
+                    A
+                  </div>
+                  <div className="flex flex-col">
+                     <div className="flex items-center gap-2 mb-1">
+                       <span className="text-white text-xs font-bold">Anderson</span>
+                       <span className="text-indigo-400 text-[10px] font-bold">Agora</span>
+                     </div>
+                     <p className="text-white text-xs leading-relaxed font-semibold">
+                       Lembrem de pausar os conjuntos que não performaram no final de semana!
+                     </p>
+                  </div>
                 </div>
               </div>
-              
-              <div className="flex-1 min-w-0 flex flex-col justify-center">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
-                    Chat da Equipe
-                  </span>
-                  <div className="w-1 h-1 rounded-full bg-white/20" />
-                  <span className="text-[10px] text-gray-500 font-medium">Agora</span>
+
+              {/* Footer: Input */}
+              <div className="p-5 border-t border-white/5 bg-black/20 shrink-0 relative z-20">
+                <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-3 flex items-center justify-between group-hover:border-indigo-500/40 group-hover:bg-white/10 transition-all duration-300">
+                  <span className="text-gray-500 text-xs font-medium">Adicione um comentário...</span>
+                  <div className="w-7 h-7 rounded-full bg-indigo-500 hover:bg-indigo-400 flex items-center justify-center transition-colors shadow-[0_0_10px_rgba(99,102,241,0.3)]">
+                    <Send className="w-3.5 h-3.5 text-white ml-0.5" />
+                  </div>
                 </div>
-                <h3 className="text-white font-medium text-[13px] leading-tight truncate mb-1">
-                  Fahema: <span className="text-gray-400 font-normal">Os novos criativos já estão na pasta...</span>
-                </h3>
-              </div>
-              
-              <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 duration-300">
-                <ChevronRight className="w-4 h-4 text-white/50 group-hover:text-white" />
               </div>
             </div>
 
