@@ -434,11 +434,7 @@ export default function MeuDia() {
                   Ajustes <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">{adjustments.length}</span>
                 </div>
                 <div onClick={() => navigate('/marketing')} className="hover:text-white transition-colors cursor-pointer flex items-center group">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.8)] animate-pulse"></div>
-                    <span>MARKETING & <span className="text-[#00FF00]">GROWTH</span></span>
-                  </div>
-                  <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">Ir</span>
+                  Marketing & Growth <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">Ir</span>
                 </div>
               </>
             )}
