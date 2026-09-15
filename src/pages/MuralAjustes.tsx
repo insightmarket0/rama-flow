@@ -197,8 +197,12 @@ export default function MuralAjustes() {
   return (
     <div className="flex-1 px-4 md:px-8 pt-0 pb-4 animate-in fade-in duration-500 -mt-2 md:-mt-6">
       
-      {/* Header */}
-      <div className="mb-4">
+      {/* Container Layout com Feed na Lateral */}
+      <div className="flex flex-col xl:flex-row gap-6 items-start">
+        {/* Lado Esquerdo: Header + Actions + Grid */}
+        <div className="flex-1 w-full min-w-0 flex flex-col">
+          {/* Header */}
+          <div className="mb-4">
         <div>
           <h2 className="text-3xl font-light tracking-tight text-white flex items-center gap-2 mb-1">
             <AlertCircle className="h-6 w-6 text-[#00FF00] drop-shadow-[0_0_10px_rgba(0,255,0,0.3)]" />
@@ -212,9 +216,9 @@ export default function MuralAjustes() {
         </div>
 
       {/* Action Bar: Tabs + Search/Add */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-start gap-6 mb-6">
         {/* Tabs / Filters */}
-        <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar-thin flex-1">
+        <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar-thin">
         {['Todos', 'Shopee', 'Mercado Livre', 'Amazon', 'Geral'].map((m) => {
           const count = m === 'Todos' 
             ? tickets.length 
@@ -262,10 +266,7 @@ export default function MuralAjustes() {
         </div>
       </div>
 
-            {/* Container Layout com Feed na Lateral */}
-      <div className="flex flex-col xl:flex-row gap-4 items-start">
-        {/* Lado Esquerdo: Grid de Tickets */}
-        <div className="flex-1 w-full min-w-0">
+            {/* Grid de Tickets */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                 {filteredTickets.map((ticket) => {
           const isResolved = ticket.status === 'resolvido';
