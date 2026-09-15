@@ -493,7 +493,7 @@ export default function MeuDia() {
             </div>
 
             {/* 3.2. Cards do Mural de Alinhamento */}
-            <div id="mural-alinhamento" className="col-span-1 sm:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+            <div id="mural-alinhamento" className="col-span-1 flex flex-col gap-4">
               {announcements.map((ann) => (
                 <div key={ann.id} className="rounded-2xl p-5 flex flex-col justify-between bg-gradient-to-b from-[#18181A] to-[#111111] border border-white/5 shadow-xl relative group">
                   <div>
