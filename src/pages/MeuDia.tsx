@@ -366,87 +366,7 @@ export default function MeuDia() {
             <div onClick={() => navigate('/lembretes')} className="hover:text-white transition-colors cursor-pointer flex items-center group">
               Workspace <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">Ir</span>
             </div>
-            {user?.email !== "mara@hotmail.com" && (
-              <>
-                <div onClick={() => navigate('/mural-ajustes')} className="hover:text-white transition-colors cursor-pointer flex items-center group">
-                  Ajustes <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#00FF00] text-sm font-bold bg-[#00FF00]/10 px-3 py-1 rounded-full">{adjustments.length}</span>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* A Rama do Dia no canto inferior direito da coluna esquerda */}
-        <RamaDoDiaWidget />
-
-      </div>
-
-      {/* Coluna Direita: O Bento Grid */}
-      <div className="w-full lg:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-4 h-full overflow-y-auto custom-scrollbar pb-10 lg:pb-0 lg:pl-8">
-        
-        {isNothingPending && (
-          <div className="col-span-1 md:col-span-2 aspect-[2/1] rounded-[2rem] bg-[#111111] flex flex-col items-center justify-center border border-white/5 shadow-2xl p-8 mt-4">
-            <CheckCircle2 className="h-20 w-20 text-[#00FF00] mb-6 drop-shadow-[0_0_15px_rgba(0,255,0,0.4)]" />
-            <h3 className="text-3xl font-light text-white mb-2 tracking-wide">Tudo zerado</h3>
-            <p className="text-gray-500 text-center text-lg">Seu foco operacional está limpo.</p>
-          </div>
-        )}
-
-        <ExpediçãoTracker />
-
-        {(user?.email === "livia@hotmail.com" || currentUserName.startsWith("Rogério")) ? (
-          <PainelPagamentosHoje />
-        ) : (
-          user?.email !== "mara@hotmail.com" && (
-            <div className="col-span-1 md:col-span-2 bg-[#111111] border-l-4 border-[#00FF00] rounded-2xl p-5 group relative shadow-lg h-fit">
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-[#00FF00] font-bold tracking-tighter text-xl uppercase flex items-center gap-2">
-                  <Megaphone className="h-5 w-5" strokeWidth={3} />
-                  Mural de Alinhamento
-                </h3>
-                <span className="text-[#00FF00] text-[10px] font-bold tracking-widest uppercase border border-[#00FF00]/20 px-2 py-0.5 rounded-full">
-                  Prioridade
-                </span>
-              </div>
-              
-              
-              <div className="space-y-3">
-                {announcements.length === 0 ? (
-                  <div className="text-gray-500 text-sm italic text-center py-4 bg-black/20 rounded-xl">
-                    Nenhum aviso no momento.
-                  </div>
-                ) : (
-                  announcements.map(ann => (
-                  <div key={ann.id} className="bg-black/30 rounded-xl p-4 border border-white/5 hover:bg-black/50 transition-colors">
-                    <div>
-                      <div className="flex items-center gap-2 mb-2 text-gray-400 font-bold text-[10px] uppercase tracking-wider">
-                        <span>{ann.creator.full_name}</span>
-                        {ann.is_pinned && <AlertTriangle className="h-3 w-3 text-amber-500" />}
-                      </div>
-                      <h4 className="text-white font-extrabold text-lg mb-1 leading-tight tracking-tight">
-                        {ann.title}
-                      </h4>
-                    </div>
-                    
-                    <div className="flex items-end justify-between gap-4 mt-1">
-                      <p className="text-gray-400 font-medium text-xs mb-0">
-                        {ann.content}
-                      </p>
-                      <button 
-                        onClick={() => handleAcknowledge(ann.id)}
-                        className="bg-[#00FF00]/10 text-[#00FF00] border border-[#00FF00]/20 px-4 py-1.5 rounded-lg font-bold text-xs flex items-center gap-2 hover:bg-[#00FF00]/20 transition-colors w-fit shrink-0 mb-1"
-                      >
-                        Estou Ciente <CheckCircle2 className="h-3 w-3" />
-                      </button>
-                    </div>
-                  </div>
-                )))}
-              </div>
-            </div>
-          </div>
-          )
-        )}
+            {}
 
         {(user?.email === "mara@hotmail.com" || currentUserName.startsWith("Rogério")) ? (
           <MuralExpedição user={user} />
@@ -489,30 +409,31 @@ export default function MeuDia() {
               </div>
             </div>
 
-            {/* 3.2. Cards de Ajustes (O AVISO ORIGINAL) */}
-            {adjustments.length > 0 && adjustments.map((ticket, idx) => (
-              <div key={ticket.id} className="col-span-1 rounded-2xl p-5 flex flex-col justify-between bg-gradient-to-b from-[#18181A] to-[#111111] border border-white/5 shadow-xl relative group">
+            {/* 3.2. Cards do Mural de Alinhamento */}
+            {announcements.map((ann) => (
+              <div key={ann.id} className="col-span-1 rounded-2xl p-5 flex flex-col justify-between bg-gradient-to-b from-[#18181A] to-[#111111] border border-white/5 shadow-xl relative group">
                 <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border flex items-center gap-1.5 ${getMarketplaceStyle(ticket.marketplace)}`}>
-                      {getMarketplaceLogo(ticket.marketplace)}
-                      {ticket.marketplace}
+                  <div className="flex items-center gap-2 mb-4 flex-wrap">
+                    <span className="px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border border-white/10 bg-white/5 flex items-center gap-1.5 text-gray-300">
+                      <Megaphone className="h-3 w-3 text-[#00FF00]" />
+                      {ann.creator.full_name}
                     </span>
                     <span className="text-gray-500 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1">
-                      <Tag className="h-2.5 w-2.5" /> {ticket.sku}
+                      <Tag className="h-2.5 w-2.5" /> {ann.title}
                     </span>
+                    {ann.is_pinned && <AlertTriangle className="h-3 w-3 text-amber-500 ml-auto" />}
                   </div>
                   
                   <p className="text-gray-300 font-light text-sm leading-relaxed mb-4 line-clamp-3">
-                    {ticket.description}
+                    {ann.content}
                   </p>
                 </div>
                 
                 <button 
-                  onClick={() => handleResolveAdjustment(ticket.id)}
+                  onClick={() => handleAcknowledge(ann.id)}
                   className="w-full bg-white/5 hover:bg-[#00FF00] hover:text-black text-white px-4 py-2 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-2 group-hover:shadow-[0_0_15px_rgba(0,255,0,0.2)]"
                 >
-                  Marcar Resolvido <CheckCircle2 className="h-3 w-3" />
+                  Estou Ciente <CheckCircle2 className="h-3 w-3" />
                 </button>
               </div>
             ))}
