@@ -447,7 +447,7 @@ export default function MeuDia() {
       </div>
 
       {/* Coluna Direita: O Bento Grid */}
-      <div className="w-full lg:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-4 h-full overflow-y-auto custom-scrollbar pb-10 lg:pb-0 lg:pl-8">
+      <div className="w-full lg:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-4 h-full overflow-hidden pb-10 lg:pb-0 lg:pl-8">
         
         {isNothingPending && (
           <div className="col-span-1 md:col-span-2 aspect-[2/1] rounded-[2rem] bg-[#111111] flex flex-col items-center justify-center border border-white/5 shadow-2xl p-8 mt-4">
