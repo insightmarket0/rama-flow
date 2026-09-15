@@ -109,7 +109,7 @@ const INITIAL_SCRIPTS = [
     category: "TikTok & UGC",
     title: 'Hook: "Perdi dinheiro..."',
     status: "Em Rascunho",
-    statusColor: "text-yellow-500 bg-yellow-500/10",
+    statusColor: "text-[#00FF00] bg-[#00FF00]/10",
     date: "Ontem",
     description: "Ideia rápida para um hook chamativo.",
     blocks: []
@@ -119,7 +119,7 @@ const INITIAL_SCRIPTS = [
     category: "Instagram",
     title: 'Brief: @marceneiromoderno',
     status: "Aguardando",
-    statusColor: "text-cyan-400 bg-cyan-400/10",
+    statusColor: "text-[#00FF00] bg-[#00FF00]/10",
     date: "15/Ago",
     description: "Briefing para envio de produto.",
     blocks: []
@@ -402,7 +402,7 @@ export default function Marketing() {
         <div className="flex items-center justify-between shrink-0">
           <div>
             <h1 className="text-xl font-semibold text-white tracking-tight flex items-center gap-2">
-              MARKETING & <span className="text-cyan-400 font-light">GROWTH</span>
+              MARKETING & <span className="text-[#00FF00] font-light">GROWTH</span>
             </h1>
             
           </div>
@@ -443,7 +443,7 @@ export default function Marketing() {
               <div className="w-[320px] flex-shrink-0 bg-[#0a0a0a] border border-white/5 rounded-2xl flex flex-col overflow-hidden h-full">
                 <div className="p-4 border-b border-white/5 bg-[#111]/50 flex items-center justify-between sticky top-0 z-10 backdrop-blur-md">
                   <h3 className="text-white text-sm font-semibold tracking-tight">Suas Estratégias</h3>
-                  <button className="text-cyan-400 hover:text-cyan-300 transition-colors p-1" onClick={() => {
+                  <button className="text-[#00FF00] hover:text-cyan-300 transition-colors p-1" onClick={() => {
                     setNewScriptForm({ title: 'Novo Roteiro', category: 'TikTok & UGC', description: '' });
                     setIsNewScriptModalOpen(true);
                   }}>
@@ -465,7 +465,7 @@ export default function Marketing() {
                             onClick={() => setActiveScriptId(script.id)}
                             className={`border rounded-lg p-2.5 cursor-pointer flex flex-col gap-1.5 relative overflow-hidden transition-all ${activeScriptId === script.id ? 'bg-white/[0.08] border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.5)]' : 'hover:bg-white/5 border-transparent'}`}
                           >
-                            {activeScriptId === script.id && <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-500 rounded-l-lg"></div>}
+                            {activeScriptId === script.id && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#00FF00] rounded-l-lg"></div>}
                             <span className="text-gray-200 text-xs font-medium ml-1">{script.title}</span>
                             <div className="flex justify-between items-center ml-1">
                               <span className={`text-[9px] px-1.5 py-0.5 rounded ${script.statusColor}`}>{script.status}</span>
@@ -485,7 +485,7 @@ export default function Marketing() {
                 if (!activeScript) return <div className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-2xl flex items-center justify-center text-gray-500">Selecione um roteiro</div>;
                 return (
                 <div className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-2xl flex flex-col overflow-hidden h-full relative">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-[80px] pointer-events-none"></div>
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-[#00FF00]/5 rounded-full blur-[80px] pointer-events-none"></div>
                   
                   {/* Editor Header */}
                   <div className="p-8 border-b border-white/5 flex flex-col gap-4 relative z-10">
@@ -511,7 +511,7 @@ export default function Marketing() {
                         </button>
                         <button 
                           onClick={() => {}}
-                          className="bg-cyan-500 hover:bg-cyan-600 text-black text-xs font-bold px-4 py-2 rounded-lg transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+                          className="bg-[#00FF00] hover:bg-[#00FF00] text-black text-xs font-bold px-4 py-2 rounded-lg transition-colors shadow-[0_0_15px_rgba(0,255,0,0.3)]">
                           Salvar Roteiro
                         </button>
                       </div>
@@ -711,14 +711,14 @@ export default function Marketing() {
                       <span className="text-[10px] text-gray-400">{Math.round((marketingBudget.gasto/marketingBudget.total)*100 || 0)}% gasto</span>
                     </div>
                     <div className="w-full h-1 bg-[#1a1a1a] rounded-full overflow-hidden relative">
-                      <div className="h-full bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)] transition-all duration-500 relative z-10" style={{ width: `${Math.min((marketingBudget.gasto/marketingBudget.total)*100 || 0, 100)}%` }}></div>
+                      <div className="h-full bg-[#00FF00] shadow-[0_0_10px_rgba(0,255,0,0.5)] transition-all duration-500 relative z-10" style={{ width: `${Math.min((marketingBudget.gasto/marketingBudget.total)*100 || 0, 100)}%` }}></div>
                     </div>
                   </div>
                   
                   <div className="mt-4 flex flex-col pt-3 border-t border-white/5 relative z-10">
                     <button 
                       onClick={() => setIsHistoryExpanded(!isHistoryExpanded)} 
-                      className="text-[9px] font-bold text-gray-500 hover:text-cyan-400 transition-colors uppercase tracking-widest flex items-center justify-center w-full"
+                      className="text-[9px] font-bold text-gray-500 hover:text-[#00FF00] transition-colors uppercase tracking-widest flex items-center justify-center w-full"
                     >
                       {isHistoryExpanded ? "Esconder Histórico" : "Ver Histórico"}
                     </button>
@@ -751,7 +751,7 @@ export default function Marketing() {
                   </div>
                   <div className="flex items-center gap-3 mt-auto relative z-10">
                     <span className="text-2xl font-semibold text-white tracking-tight">R$ {(marketingBudget.vendas || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                    <span className="flex items-center text-cyan-400 text-[10px] font-medium bg-cyan-500/10 px-1.5 py-0.5 rounded border border-cyan-500/20">
+                    <span className="flex items-center text-[#00FF00] text-[10px] font-medium bg-[#00FF00]/10 px-1.5 py-0.5 rounded border border-[#00FF00]/20">
                       <ArrowUpRight className="w-2.5 h-2.5 mr-0.5" /> {marketingBudget.vendasGrowth || 0}%
                     </span>
                   </div>
@@ -816,7 +816,7 @@ export default function Marketing() {
                     
 {/* TIKTOK COMPACTO */}
                     <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-4 relative overflow-hidden flex flex-col h-[320px]">
-                      <div className="absolute -right-10 -top-10 w-24 h-24 bg-cyan-500/10 rounded-full blur-[30px] pointer-events-none"></div>
+                      <div className="absolute -right-10 -top-10 w-24 h-24 bg-[#00FF00]/10 rounded-full blur-[30px] pointer-events-none"></div>
                       <div className="flex items-center justify-between mb-2 relative z-10">
                         <div className="flex items-center gap-2">
                           <div className="p-1.5 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg">
@@ -891,13 +891,13 @@ export default function Marketing() {
                       <div>
                         <div className="flex justify-between text-xs mb-2">
                           <div className="flex items-center gap-2">
-                            <span className="w-2.5 h-2.5 rounded bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]"></span>
+                            <span className="w-2.5 h-2.5 rounded bg-[#00FF00] shadow-[0_0_8px_rgba(6,182,212,0.8)]"></span>
                             <span className="text-gray-300 font-medium">Tráfego Pago (Meta/TikTok)</span>
                           </div>
                           <span className="text-white font-bold text-sm">{marketingBudget.budgetSplit?.trafego || 0}%</span>
                         </div>
                         <div className="relative w-full h-3 bg-[#1a1a1a] rounded-full overflow-hidden hover:bg-[#222] transition-colors cursor-ew-resize">
-                          <div className="h-full bg-cyan-500 transition-all duration-75 pointer-events-none" style={{ width: `${marketingBudget.budgetSplit?.trafego || 0}%` }}></div>
+                          <div className="h-full bg-[#00FF00] transition-all duration-75 pointer-events-none" style={{ width: `${marketingBudget.budgetSplit?.trafego || 0}%` }}></div>
                           <input 
                             type="range" min="0" max="100" 
                             value={marketingBudget.budgetSplit?.trafego || 0}
@@ -954,9 +954,9 @@ export default function Marketing() {
                         <h3 className="text-white text-sm font-semibold tracking-tight">Aprovações Pendentes</h3>
                         <button onClick={() => setIsCreateApprovalModalOpen(true)} className="bg-white/5 hover:bg-white/10 text-gray-400 px-2 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase transition-colors border border-white/5 flex items-center gap-1">Criar +</button>
                       </div>
-                      <div className="px-2 py-0.5 bg-yellow-500/10 border border-yellow-500/20 rounded-full flex items-center gap-1.5">
-                        <Clock className="w-3 h-3 text-yellow-500" />
-                        <span className="text-[10px] text-yellow-500 font-bold uppercase tracking-widest">{approvals.length} Ações</span>
+                      <div className="px-2 py-0.5 bg-[#00FF00]/10 border border-[#00FF00]/20 rounded-full flex items-center gap-1.5">
+                        <Clock className="w-3 h-3 text-[#00FF00]" />
+                        <span className="text-[10px] text-[#00FF00] font-bold uppercase tracking-widest">{approvals.length} Ações</span>
                       </div>
                     </div>
                     
@@ -1011,25 +1011,25 @@ export default function Marketing() {
             <div className="space-y-4 mt-2">
               <div>
                 <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Título da Despesa</label>
-                <input type="text" value={approvalForm.title} onChange={e => setApprovalForm({...approvalForm, title: e.target.value})} placeholder="Ex: Cachê Virgínia" className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyan-500 outline-none" />
+                <input type="text" value={approvalForm.title} onChange={e => setApprovalForm({...approvalForm, title: e.target.value})} placeholder="Ex: Cachê Virgínia" className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-[#00FF00] outline-none" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Campanha/Setor</label>
-                  <input type="text" value={approvalForm.campaign} onChange={e => setApprovalForm({...approvalForm, campaign: e.target.value})} placeholder="Ex: Black Friday" className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyan-500 outline-none" />
+                  <input type="text" value={approvalForm.campaign} onChange={e => setApprovalForm({...approvalForm, campaign: e.target.value})} placeholder="Ex: Black Friday" className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-[#00FF00] outline-none" />
                 </div>
                 <div>
                   <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Valor Solicitado (R$)</label>
-                  <input type="number" value={approvalForm.amount} onChange={e => setApprovalForm({...approvalForm, amount: parseInt(e.target.value) || 0})} className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyan-500 outline-none" />
+                  <input type="number" value={approvalForm.amount} onChange={e => setApprovalForm({...approvalForm, amount: parseInt(e.target.value) || 0})} className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-[#00FF00] outline-none" />
                 </div>
               </div>
               <div>
                 <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Justificativa / Detalhes</label>
-                <textarea value={approvalForm.description} onChange={e => setApprovalForm({...approvalForm, description: e.target.value})} rows="3" placeholder="Explique o motivo do orçamento extra..." className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyan-500 outline-none resize-none"></textarea>
+                <textarea value={approvalForm.description} onChange={e => setApprovalForm({...approvalForm, description: e.target.value})} rows="3" placeholder="Explique o motivo do orçamento extra..." className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-[#00FF00] outline-none resize-none"></textarea>
               </div>
             </div>
 
-            <button onClick={handleCreateApproval} className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-sm py-2.5 rounded-lg mt-2 transition-colors">
+            <button onClick={handleCreateApproval} className="w-full bg-[#00FF00] hover:bg-[#00FF00] text-white font-bold text-sm py-2.5 rounded-lg mt-2 transition-colors">
               Criar Solicitação
             </button>
           </div>
@@ -1043,7 +1043,7 @@ export default function Marketing() {
             <div className="flex justify-between items-start border-b border-white/10 pb-4 mb-2">
               <div>
                 <h3 className="text-white font-bold text-lg leading-tight">{approvalDetails.title}</h3>
-                <span className="text-cyan-400 text-xs font-semibold uppercase tracking-widest">{approvalDetails.campaign}</span>
+                <span className="text-[#00FF00] text-xs font-semibold uppercase tracking-widest">{approvalDetails.campaign}</span>
               </div>
               <button onClick={() => setApprovalDetails(null)} className="text-gray-500 hover:text-white p-1">x</button>
             </div>
@@ -1092,7 +1092,7 @@ export default function Marketing() {
                   value={newScriptForm.title} 
                   onChange={(e) => setNewScriptForm({...newScriptForm, title: e.target.value})} 
                   placeholder="Ex: Unboxing de Produto..."
-                  className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2.5 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none" 
+                  className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2.5 focus:border-[#00FF00]/50 focus:bg-[#161616] transition-colors outline-none" 
                 />
               </div>
               
@@ -1101,7 +1101,7 @@ export default function Marketing() {
                 <select 
                   value={newScriptForm.category} 
                   onChange={(e) => setNewScriptForm({...newScriptForm, category: e.target.value})} 
-                  className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2.5 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none appearance-none cursor-pointer"
+                  className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2.5 focus:border-[#00FF00]/50 focus:bg-[#161616] transition-colors outline-none appearance-none cursor-pointer"
                 >
                   <option value="TikTok & UGC">TikTok & UGC</option>
                   <option value="Instagram">Instagram (Reels / Stories)</option>
@@ -1115,7 +1115,7 @@ export default function Marketing() {
                   value={newScriptForm.description} 
                   onChange={(e) => setNewScriptForm({...newScriptForm, description: e.target.value})} 
                   placeholder="Ex: Roteiro focado em mostrar os benefícios..."
-                  className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2.5 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none resize-none min-h-[80px]"
+                  className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2.5 focus:border-[#00FF00]/50 focus:bg-[#161616] transition-colors outline-none resize-none min-h-[80px]"
                 />
               </div>
             </div>
@@ -1131,7 +1131,7 @@ export default function Marketing() {
                     category: newScriptForm.category,
                     title: newScriptForm.title || "Novo Roteiro",
                     status: "Em Rascunho",
-                    statusColor: "text-yellow-500 bg-yellow-500/10",
+                    statusColor: "text-[#00FF00] bg-[#00FF00]/10",
                     date: new Date().toLocaleDateString('pt-BR'),
                     description: newScriptForm.description,
                     blocks: [
@@ -1144,7 +1144,7 @@ export default function Marketing() {
                   setActiveScriptId(newScript.id);
                   setIsNewScriptModalOpen(false);
                 }}
-                className="px-6 py-2 bg-cyan-500 hover:bg-cyan-600 text-black font-bold text-sm rounded-lg transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+                className="px-6 py-2 bg-[#00FF00] hover:bg-[#00FF00] text-black font-bold text-sm rounded-lg transition-colors shadow-[0_0_15px_rgba(0,255,0,0.3)]">
                 Criar Roteiro
               </button>
             </div>
@@ -1223,7 +1223,7 @@ export default function Marketing() {
           <div className="bg-[#111] border border-[#222] rounded-2xl p-6 relative z-10 w-full max-w-sm shadow-2xl flex flex-col gap-4">
             <div className="flex justify-between items-center border-b border-white/10 pb-3">
               <h3 className="text-white font-semibold flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4 text-cyan-400" />
+                <ShoppingBag className="w-4 h-4 text-[#00FF00]" />
                 Vendas do Site
               </h3>
               <button onClick={() => setIsSalesModalOpen(false)} className="text-gray-500 hover:text-white">x</button>
@@ -1232,15 +1232,15 @@ export default function Marketing() {
             <div className="space-y-4 mt-2">
               <div>
                 <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Total em Vendas (R$)</label>
-                <input type="number" value={salesForm.vendas} onChange={e => setSalesForm({...salesForm, vendas: parseFloat(e.target.value) || 0})} className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyan-500 outline-none" />
+                <input type="number" value={salesForm.vendas} onChange={e => setSalesForm({...salesForm, vendas: parseFloat(e.target.value) || 0})} className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-[#00FF00] outline-none" />
               </div>
               <div>
                 <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Crescimento (%)</label>
-                <input type="number" value={salesForm.vendasGrowth} onChange={e => setSalesForm({...salesForm, vendasGrowth: parseFloat(e.target.value) || 0})} className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyan-500 outline-none" />
+                <input type="number" value={salesForm.vendasGrowth} onChange={e => setSalesForm({...salesForm, vendasGrowth: parseFloat(e.target.value) || 0})} className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-[#00FF00] outline-none" />
               </div>
             </div>
 
-            <button onClick={handleSaveSales} className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-sm py-2.5 rounded-lg mt-2 transition-colors">
+            <button onClick={handleSaveSales} className="w-full bg-[#00FF00] hover:bg-[#00FF00] text-white font-bold text-sm py-2.5 rounded-lg mt-2 transition-colors">
               Salvar Vendas
             </button>
           </div>
@@ -1297,16 +1297,16 @@ export default function Marketing() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
                 <div>
                   <label className="text-[9px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Nome do Parceiro</label>
-                  <input type="text" value={editingCrmPartner.name} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, name: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none" />
+                  <input type="text" value={editingCrmPartner.name} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, name: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-[#00FF00]/50 focus:bg-[#161616] transition-colors outline-none" />
                 </div>
                 <div>
                   <label className="text-[9px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Nicho</label>
-                  <input type="text" value={editingCrmPartner.niche} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, niche: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none" />
+                  <input type="text" value={editingCrmPartner.niche} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, niche: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-[#00FF00]/50 focus:bg-[#161616] transition-colors outline-none" />
                 </div>
                 
                 <div>
                   <label className="text-[9px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Status</label>
-                  <select value={editingCrmPartner.status} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, status: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none appearance-none cursor-pointer">
+                  <select value={editingCrmPartner.status} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, status: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-[#00FF00]/50 focus:bg-[#161616] transition-colors outline-none appearance-none cursor-pointer">
                     <option value="Postado">Postado</option>
                     <option value="Aprovação Interna">Aprovação Interna</option>
                     <option value="Aguardando Roteiro">Aguardando Roteiro</option>
@@ -1315,7 +1315,7 @@ export default function Marketing() {
                 </div>
                 <div>
                   <label className="text-[9px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Tier</label>
-                  <select value={editingCrmPartner.tier} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, tier: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none appearance-none cursor-pointer">
+                  <select value={editingCrmPartner.tier} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, tier: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-[#00FF00]/50 focus:bg-[#161616] transition-colors outline-none appearance-none cursor-pointer">
                     <option value="A">Tier A</option>
                     <option value="B">Tier B</option>
                     <option value="C">Tier C</option>
@@ -1324,34 +1324,34 @@ export default function Marketing() {
 
                 <div>
                   <label className="text-[9px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Base Fixa</label>
-                  <input type="text" value={editingCrmPartner.base} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, base: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none" />
+                  <input type="text" value={editingCrmPartner.base} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, base: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-[#00FF00]/50 focus:bg-[#161616] transition-colors outline-none" />
                 </div>
                 <div>
                   <label className="text-[9px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Upside</label>
-                  <input type="text" value={editingCrmPartner.upside} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, upside: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none" />
+                  <input type="text" value={editingCrmPartner.upside} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, upside: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-[#00FF00]/50 focus:bg-[#161616] transition-colors outline-none" />
                 </div>
 
                 <div>
                   <label className="text-[9px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Custo (Seeding)</label>
-                  <input type="text" value={editingCrmPartner.seeding} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, seeding: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none" />
+                  <input type="text" value={editingCrmPartner.seeding} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, seeding: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-[#00FF00]/50 focus:bg-[#161616] transition-colors outline-none" />
                 </div>
                 <div>
                   <label className="text-[9px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Cupom / UTM</label>
-                  <input type="text" value={editingCrmPartner.tracking} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, tracking: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none" />
+                  <input type="text" value={editingCrmPartner.tracking} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, tracking: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-[#00FF00]/50 focus:bg-[#161616] transition-colors outline-none" />
                 </div>
 
                 <div>
                   <label className="text-[9px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Receita (Cupom)</label>
-                  <input type="text" value={editingCrmPartner.roi} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, roi: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none" />
+                  <input type="text" value={editingCrmPartner.roi} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, roi: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-[#00FF00]/50 focus:bg-[#161616] transition-colors outline-none" />
                 </div>
                 <div>
                   <label className="text-[9px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">eCPA Final</label>
-                  <input type="text" value={editingCrmPartner.cpa} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, cpa: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none" />
+                  <input type="text" value={editingCrmPartner.cpa} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, cpa: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-[#00FF00]/50 focus:bg-[#161616] transition-colors outline-none" />
                 </div>
                 
                 <div>
                   <label className="text-[9px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Cor da Receita (Ex: text-emerald-500)</label>
-                  <select value={editingCrmPartner.roiColor} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, roiColor: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none appearance-none cursor-pointer">
+                  <select value={editingCrmPartner.roiColor} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, roiColor: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-[#00FF00]/50 focus:bg-[#161616] transition-colors outline-none appearance-none cursor-pointer">
                     <option value="text-emerald-500">Verde (Positivo)</option>
                     <option value="text-gray-500">Cinza (Neutro)</option>
                     <option value="text-red-500">Vermelho (Negativo)</option>
@@ -1359,14 +1359,14 @@ export default function Marketing() {
                 </div>
                 <div>
                   <label className="text-[9px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Expiração (Dias)</label>
-                  <input type="text" value={editingCrmPartner.rightsExp} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, rightsExp: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-cyan-500/50 focus:bg-[#161616] transition-colors outline-none" />
+                  <input type="text" value={editingCrmPartner.rightsExp} onChange={(e) => setEditingCrmPartner({...editingCrmPartner, rightsExp: e.target.value})} className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2 focus:border-[#00FF00]/50 focus:bg-[#161616] transition-colors outline-none" />
                 </div>
               </div>
             </div>
             
             <div className="p-5 flex justify-end gap-3 mt-2">
               <button onClick={() => setIsCrmModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Cancelar</button>
-              <button onClick={handleSaveCrmPartner} className="px-5 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-sm font-semibold transition-colors shadow-lg">Salvar Alterações</button>
+              <button onClick={handleSaveCrmPartner} className="px-5 py-2 bg-[#00FF00] hover:bg-[#00FF00] text-white rounded-lg text-sm font-semibold transition-colors shadow-lg">Salvar Alterações</button>
             </div>
           </div>
         </div>
