@@ -613,7 +613,24 @@ export default function MeuDia() {
                       ) : (
                         <div className="text-[10px] text-gray-600 font-medium italic">Ninguém visualizou ainda.</div>
                       )}
-                    </div>}
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => handleAcknowledge(ann.id)}
+                    disabled={hasAck}
+                    className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+                      hasAck 
+                        ? 'bg-[#00FF00]/10 text-[#00FF00] border border-[#00FF00]/20' 
+                        : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/5'
+                    }`}
+                  >
+                    {hasAck ? 'Ciente Registrado' : 'Estou Ciente'}
+                    {hasAck ? <CheckCircle2 className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4 opacity-50" />}
+                  </button>
+                </div>
+                );
+              })}
+            </div>
             </div>
           </>
         )}
