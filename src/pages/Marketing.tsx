@@ -973,13 +973,13 @@ export default function Marketing() {
                               <h4 className="text-white text-xs font-bold">{app.title}</h4>
                               <span className="text-[10px] text-gray-500">{app.campaign}</span>
                             </div>
-                            <span className="text-cyan-400 font-bold text-xs bg-cyan-400/10 px-1.5 py-0.5 rounded">R$ {app.amount.toLocaleString('pt-BR')}</span>
+                            <span className="text-[#00FF00] font-bold text-xs bg-[#00FF00]/10 px-1.5 py-0.5 rounded">R$ {app.amount.toLocaleString('pt-BR')}</span>
                           </div>
                           <div className="flex justify-between items-center mt-1 border-t border-white/5 pt-2">
                             <span className="text-[9px] text-gray-600 uppercase tracking-widest font-bold">Ver Detalhes</span>
                             <div className="flex gap-2">
                               <button onClick={(e) => { e.stopPropagation(); handleReject(app.id); }} className="text-[9px] font-bold px-2 py-1 bg-white/5 hover:bg-red-500/20 hover:text-red-400 rounded uppercase text-gray-400 transition-colors">Rejeitar</button>
-                              <button onClick={(e) => { e.stopPropagation(); handleApprove(app.id, app.amount); }} className="text-[9px] font-bold px-2 py-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded uppercase hover:bg-cyan-500 hover:text-white transition-colors">Aprovar</button>
+                              <button onClick={(e) => { e.stopPropagation(); handleApprove(app.id, app.amount); }} className="text-[9px] font-bold px-2 py-1 bg-[#00FF00]/10 border border-[#00FF00]/30 text-[#00FF00] rounded uppercase hover:bg-[#00FF00] hover:text-black transition-colors shadow-[0_0_10px_rgba(0,255,0,0.1)] hover:shadow-[0_0_15px_rgba(0,255,0,0.4)]">Aprovar</button>
                             </div>
                           </div>
                         </div>
@@ -1053,8 +1053,8 @@ export default function Marketing() {
               <p className="text-gray-300 text-sm leading-relaxed">{approvalDetails.description || 'Nenhum detalhe adicional fornecido.'}</p>
             </div>
 
-            <div className="flex items-center justify-between bg-cyan-500/10 border border-cyan-500/20 p-4 rounded-xl">
-              <span className="text-xs uppercase font-bold text-cyan-500">Valor Solicitado</span>
+            <div className="flex items-center justify-between bg-[#00FF00]/5 border border-[#00FF00]/20 p-4 rounded-xl">
+              <span className="text-xs uppercase font-bold text-[#00FF00]">Valor Solicitado</span>
               <span className="text-xl font-bold text-white">R$ {approvalDetails.amount.toLocaleString('pt-BR')}</span>
             </div>
 
@@ -1062,7 +1062,7 @@ export default function Marketing() {
               <button onClick={() => handleReject(approvalDetails.id)} className="w-full bg-transparent border border-white/10 hover:bg-red-500/20 hover:border-red-500/30 text-white hover:text-red-400 font-bold text-sm py-3 rounded-xl transition-colors">
                 Rejeitar
               </button>
-              <button onClick={() => handleApprove(approvalDetails.id, approvalDetails.amount)} className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-sm py-3 rounded-xl transition-colors">
+              <button onClick={() => handleApprove(approvalDetails.id, approvalDetails.amount)} className="w-full bg-[#00FF00] hover:bg-[#00FF00]/80 text-black font-extrabold text-sm py-3 rounded-xl transition-all shadow-[0_0_15px_rgba(0,255,0,0.2)] hover:shadow-[0_0_20px_rgba(0,255,0,0.4)]">
                 Aprovar & Lançar
               </button>
             </div>
