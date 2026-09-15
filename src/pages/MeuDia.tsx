@@ -524,7 +524,7 @@ export default function MeuDia() {
             {/* 3.1. Card Fixo de Prévia de Mensagens */}
             <div 
               onClick={() => window.dispatchEvent(new CustomEvent('open-global-chat'))}
-              className="col-span-1 bg-[#121214] hover:bg-[#18181B] rounded-3xl p-5 flex items-center gap-5 border border-white/5 hover:border-white/10 shadow-lg cursor-pointer transition-all duration-500 group relative overflow-hidden"
+              className="col-span-1 bg-[#121214] hover:bg-[#18181B] rounded-3xl p-5 flex items-center gap-5 border border-white/5 hover:border-white/10 shadow-lg cursor-pointer transition-all duration-500 group relative overflow-hidden h-fit"
             >
               {/* Subtle inner glow */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -559,7 +559,7 @@ export default function MeuDia() {
             </div>
 
             {/* 3.2. Cards do Mural de Alinhamento */}
-            <div id="mural-alinhamento" className="col-span-1 flex flex-col gap-4">
+            <div id="mural-alinhamento" className="col-span-1 flex flex-col gap-4 h-fit">
               <div className="flex items-center justify-between">
                 <h3 className="text-white text-sm font-bold uppercase tracking-widest flex items-center gap-2">
                   <Megaphone className="h-4 w-4 text-[#00FF00]" />
@@ -600,46 +600,24 @@ export default function MeuDia() {
                       {ann.content}
                     </p>
                     
-                    {ann.acknowledgments && ann.acknowledgments.length > 0 && (
-                      <div className="flex items-center gap-2 mb-4 flex-wrap relative pr-8">
-                      <button 
-                        onClick={() => handleDeleteAnnouncement(ann.id)}
-                        className="absolute right-0 -top-2 text-gray-500 hover:text-red-500 transition-colors bg-white/5 hover:bg-red-500/10 p-1.5 rounded-lg"
-                        title="Excluir Aviso"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                        <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-1">
-                          <CheckCircle2 className="h-3 w-3 text-[#00FF00]" /> Cientes:
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                          {ann.acknowledgments.map(ack => (
-                            <span key={ack.id} className="bg-[#00FF00]/10 text-[#00FF00] border border-[#00FF00]/20 px-2 py-0.5 rounded-md text-[9px] font-bold">
-                              {ack.user?.full_name?.split(' ')[0] || 'Usuário'}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <button 
-                    onClick={() => !hasAck && handleAcknowledge(ann.id)}
-                    disabled={hasAck}
-                    className={`w-full px-4 py-2 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-2 ${
-                      hasAck 
-                        ? "bg-[#00FF00]/10 text-[#00FF00] border border-[#00FF00]/20 cursor-default" 
-                        : "bg-white/5 hover:bg-[#00FF00] hover:text-black text-white group-hover:shadow-[0_0_15px_rgba(0,255,0,0.2)]"
-                    }`}
-                  >
-                    {hasAck ? (
-                      <>Ciente Registrado <CheckCircle2 className="h-3 w-3" /></>
-                    ) : (
-                      <>Estou Ciente <CheckCircle2 className="h-3 w-3" /></>
-                    )}
-                  </button>
-                </div>
-              )})}
+                    <div className="flex items-center gap-2 mb-4 flex-wrap relative pr-8 min-h-[24px]">
+                      {(ann.acknowledgments && ann.acknowledgments.length > 0) ? (
+                        <>
+                          <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-1">
+                            <CheckCircle2 className="h-3 w-3 text-[#00FF00]" /> Cientes:
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {ann.acknowledgments.map(ack => (
+                              <span key={ack.id} className="bg-[#00FF00]/10 text-[#00FF00] border border-[#00FF00]/20 px-2 py-0.5 rounded-md text-[9px] font-bold">
+                                {ack.user?.full_name?.split(' ')[0] || 'Usuário'}
+                              </span>
+                            ))}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-[10px] text-gray-600 font-medium italic">Ninguém visualizou ainda.</div>
+                      )}
+                    </div>}
             </div>
           </>
         )}
