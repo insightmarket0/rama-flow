@@ -18,7 +18,7 @@ import {
   Trees,
   LayoutGrid,
   Heart,
-  MessageSquare, X, Send, MessageCircle, ChevronRight } from "lucide-react";
+  MessageSquare, X, Plus, Send, MessageCircle, ChevronRight } from "lucide-react";
 import { RamaDoDiaWidget } from "@/components/RamaDoDiaWidget";
 import { PainelPagamentosHoje } from "@/components/finance/PainelPagamentosHoje";
 import { parseISO, isBefore, format } from "date-fns";
@@ -308,12 +308,60 @@ export default function MeuDia() {
   const [announcements, setAnnouncements] = useState(MOCK_ANNOUNCEMENTS);
   const [reminders, setReminders] = useState(MOCK_REMINDERS);
   const [adjustments, setAdjustments] = useState(MOCK_ADJUSTMENTS);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newContent, setNewContent] = useState("");
+  const [isPinned, setIsPinned] = useState(false);
 
   const todayDate = format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR });
 
   const handleAcknowledge = (id: string) => {
-    setAnnouncements(announcements.filter(a => a.id !== id));
+    setAnnouncements(announcements.map(a => {
+      if (a.id === id) {
+        // Prevent duplicate acks
+        const hasAck = a.acknowledgments?.some(ack => ack.user_id === (user?.id || 'anon'));
+        if (hasAck) return a;
+        
+        return {
+          ...a,
+          acknowledgments: [
+            ...(a.acknowledgments || []),
+            {
+              id: Math.random().toString(),
+              announcement_id: id,
+              user_id: user?.id || 'anon',
+              acknowledged_at: new Date().toISOString(),
+              user: { full_name: currentUserName }
+            }
+          ]
+        };
+      }
+      return a;
+    }));
   };
+
+  const handleCreateAnnouncement = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTitle || !newContent) return;
+
+    const newAnnouncement = {
+      id: Math.random().toString(),
+      creator_id: user?.id || "anon",
+      title: newTitle,
+      content: newContent,
+      is_pinned: isPinned,
+      created_at: new Date().toISOString(),
+      creator: { full_name: currentUserName + " • Equipe" },
+      acknowledgments: []
+    };
+
+    setAnnouncements([newAnnouncement, ...announcements]);
+    setIsModalOpen(false);
+    setNewTitle("");
+    setNewContent("");
+    setIsPinned(false);
+  };
+
 
   const handleCompleteReminder = (id: string) => {
     setReminders(reminders.filter(r => r.id !== id));
@@ -494,13 +542,28 @@ export default function MeuDia() {
 
             {/* 3.2. Cards do Mural de Alinhamento */}
             <div id="mural-alinhamento" className="col-span-1 flex flex-col gap-4">
-              {announcements.map((ann) => (
+              <div className="flex items-center justify-between">
+                <h3 className="text-white text-sm font-bold uppercase tracking-widest flex items-center gap-2">
+                  <Megaphone className="h-4 w-4 text-[#00FF00]" />
+                  Mural de Alinhamento
+                </h3>
+                <button 
+                  onClick={() => setIsModalOpen(true)}
+                  className="bg-white/5 hover:bg-[#00FF00]/20 hover:text-[#00FF00] text-gray-400 p-2 rounded-lg transition-colors border border-white/5 hover:border-[#00FF00]/30"
+                  title="Novo Aviso"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
+              {announcements.map((ann) => {
+                const hasAck = ann.acknowledgments?.some(ack => ack.user_id === (user?.id || 'anon'));
+                return (
                 <div key={ann.id} className="rounded-2xl p-5 flex flex-col justify-between bg-gradient-to-b from-[#18181A] to-[#111111] border border-white/5 shadow-xl relative group">
                   <div>
                     <div className="flex items-center gap-2 mb-4 flex-wrap">
                       <span className="px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border border-white/10 bg-white/5 flex items-center gap-1.5 text-gray-300">
                         <Megaphone className="h-3 w-3 text-[#00FF00]" />
-                        {ann.creator.full_name}
+                        {ann.creator?.full_name || 'Equipe'}
                       </span>
                       <span className="text-gray-500 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1">
                         <Tag className="h-2.5 w-2.5" /> {ann.title}
@@ -508,19 +571,43 @@ export default function MeuDia() {
                       {ann.is_pinned && <AlertTriangle className="h-3 w-3 text-amber-500 ml-auto" />}
                     </div>
                     
-                    <p className="text-gray-300 font-light text-sm leading-relaxed mb-4 line-clamp-3">
+                    <p className="text-gray-300 font-light text-sm leading-relaxed mb-4">
                       {ann.content}
                     </p>
+                    
+                    {ann.acknowledgments && ann.acknowledgments.length > 0 && (
+                      <div className="flex items-center gap-2 mb-4 flex-wrap">
+                        <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-1">
+                          <CheckCircle2 className="h-3 w-3 text-[#00FF00]" /> Cientes:
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {ann.acknowledgments.map(ack => (
+                            <span key={ack.id} className="bg-[#00FF00]/10 text-[#00FF00] border border-[#00FF00]/20 px-2 py-0.5 rounded-md text-[9px] font-bold">
+                              {ack.user?.full_name?.split(' ')[0] || 'Usuário'}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   
                   <button 
-                    onClick={() => handleAcknowledge(ann.id)}
-                    className="w-full bg-white/5 hover:bg-[#00FF00] hover:text-black text-white px-4 py-2 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-2 group-hover:shadow-[0_0_15px_rgba(0,255,0,0.2)]"
+                    onClick={() => !hasAck && handleAcknowledge(ann.id)}
+                    disabled={hasAck}
+                    className={`w-full px-4 py-2 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-2 ${
+                      hasAck 
+                        ? "bg-[#00FF00]/10 text-[#00FF00] border border-[#00FF00]/20 cursor-default" 
+                        : "bg-white/5 hover:bg-[#00FF00] hover:text-black text-white group-hover:shadow-[0_0_15px_rgba(0,255,0,0.2)]"
+                    }`}
                   >
-                    Estou Ciente <CheckCircle2 className="h-3 w-3" />
+                    {hasAck ? (
+                      <>Ciente Registrado <CheckCircle2 className="h-3 w-3" /></>
+                    ) : (
+                      <>Estou Ciente <CheckCircle2 className="h-3 w-3" /></>
+                    )}
                   </button>
                 </div>
-              ))}
+              )})}
             </div>
           </>
         )}
@@ -550,7 +637,87 @@ export default function MeuDia() {
 
       </div>
 
-    </div>
+    
+
+      {/* Modal de Novo Aviso */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#111111] border border-white/10 rounded-2xl w-full max-w-lg shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-6 border-b border-white/5">
+              <h3 className="text-xl font-semibold text-white flex items-center gap-2">
+                <Megaphone className="h-5 w-5 text-[#00FF00]" />
+                Criar Novo Aviso
+              </h3>
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-400 hover:text-white transition-colors p-1"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleCreateAnnouncement} className="p-6 space-y-5">
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                  Ttulo do Aviso
+                </label>
+                <input 
+                  type="text" 
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  placeholder="Ex: Mudana na etiqueta de envio..."
+                  className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#00FF00]/50 transition-colors"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                  Detalhes do Aviso
+                </label>
+                <textarea 
+                  value={newContent}
+                  onChange={(e) => setNewContent(e.target.value)}
+                  placeholder="Descreva a regra, alinhamento ou erro que precisa ser evitado..."
+                  className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#00FF00]/50 transition-colors h-32 resize-none"
+                  required
+                />
+              </div>
+
+              <div className="flex items-center gap-3 bg-[#0a0a0a] p-4 rounded-xl border border-white/5">
+                <input 
+                  type="checkbox" 
+                  id="pin-notice"
+                  checked={isPinned}
+                  onChange={(e) => setIsPinned(e.target.checked)}
+                  className="w-4 h-4 rounded border-white/20 bg-transparent text-[#00FF00] focus:ring-[#00FF00] focus:ring-offset-0"
+                />
+                <label htmlFor="pin-notice" className="text-sm font-medium text-white cursor-pointer flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-orange-500" />
+                  Marcar como Alta Urgncia / Fixar
+                </label>
+              </div>
+
+              <div className="pt-4 flex items-center gap-3">
+                <button 
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 py-3 px-4 bg-transparent border border-white/10 hover:bg-white/5 text-white text-sm font-bold rounded-xl transition-all"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit"
+                  className="flex-1 py-3 px-4 bg-[#00FF00] hover:bg-[#00FF00]/80 text-black text-sm font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(0,255,0,0.2)]"
+                >
+                  Publicar Aviso
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+</div>
   );
 }
 
