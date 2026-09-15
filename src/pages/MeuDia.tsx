@@ -492,33 +492,36 @@ export default function MeuDia() {
               </div>
             </div>
 
-            {/* 3.2. Cards de Ajustes (O AVISO ORIGINAL) */}
-            {adjustments.length > 0 && adjustments.map((ticket, idx) => (
-              <div key={ticket.id} className="col-span-1 rounded-2xl p-5 flex flex-col justify-between bg-gradient-to-b from-[#18181A] to-[#111111] border border-white/5 shadow-xl relative group">
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border flex items-center gap-1.5 ${getMarketplaceStyle(ticket.marketplace)}`}>
-                      {getMarketplaceLogo(ticket.marketplace)}
-                      {ticket.marketplace}
-                    </span>
-                    <span className="text-gray-500 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1">
-                      <Tag className="h-2.5 w-2.5" /> {ticket.sku}
-                    </span>
+            {/* 3.2. Cards do Mural de Alinhamento */}
+            <div id="mural-alinhamento" className="col-span-1 sm:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+              {announcements.map((ann) => (
+                <div key={ann.id} className="rounded-2xl p-5 flex flex-col justify-between bg-gradient-to-b from-[#18181A] to-[#111111] border border-white/5 shadow-xl relative group">
+                  <div>
+                    <div className="flex items-center gap-2 mb-4 flex-wrap">
+                      <span className="px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border border-white/10 bg-white/5 flex items-center gap-1.5 text-gray-300">
+                        <Megaphone className="h-3 w-3 text-[#00FF00]" />
+                        {ann.creator.full_name}
+                      </span>
+                      <span className="text-gray-500 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1">
+                        <Tag className="h-2.5 w-2.5" /> {ann.title}
+                      </span>
+                      {ann.is_pinned && <AlertTriangle className="h-3 w-3 text-amber-500 ml-auto" />}
+                    </div>
+                    
+                    <p className="text-gray-300 font-light text-sm leading-relaxed mb-4 line-clamp-3">
+                      {ann.content}
+                    </p>
                   </div>
                   
-                  <p className="text-gray-300 font-light text-sm leading-relaxed mb-4 line-clamp-3">
-                    {ticket.description}
-                  </p>
+                  <button 
+                    onClick={() => handleAcknowledge(ann.id)}
+                    className="w-full bg-white/5 hover:bg-[#00FF00] hover:text-black text-white px-4 py-2 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-2 group-hover:shadow-[0_0_15px_rgba(0,255,0,0.2)]"
+                  >
+                    Estou Ciente <CheckCircle2 className="h-3 w-3" />
+                  </button>
                 </div>
-                
-                <button 
-                  onClick={() => handleResolveAdjustment(ticket.id)}
-                  className="w-full bg-white/5 hover:bg-[#00FF00] hover:text-black text-white px-4 py-2 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-2 group-hover:shadow-[0_0_15px_rgba(0,255,0,0.2)]"
-                >
-                  Marcar Resolvido <CheckCircle2 className="h-3 w-3" />
-                </button>
-              </div>
-            ))}
+              ))}
+            </div>
           </>
         )}
 
