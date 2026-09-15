@@ -402,7 +402,7 @@ export default function Marketing() {
         <div className="flex items-center justify-between shrink-0">
           <div>
             <h1 className="text-xl font-semibold text-white tracking-tight flex items-center gap-2">
-              MARKETING & <span className="text-[#00FF00] font-light">GROWTH</span>
+              MARKETING & <span className="text-cyan-400 font-light">GROWTH</span>
             </h1>
             
           </div>
