@@ -34,7 +34,7 @@ import {
   Smartphone,
   Heart,
   MessageCircle,
-  ShoppingBag,
+  ShoppingBag, ShoppingCart,
   PlayCircle,
   FileText,
   PenTool,
