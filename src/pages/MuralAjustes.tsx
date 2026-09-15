@@ -261,98 +261,83 @@ export default function MuralAjustes() {
         {/* Lado Esquerdo: Grid de Tickets */}
         <div className="flex-1 w-full min-w-0">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-        {filteredTickets.map((ticket) => {
+                {filteredTickets.map((ticket) => {
           const isResolved = ticket.status === 'resolvido';
+          const mkStyle = getMarketplaceStyle(ticket.marketplace);
+          const textColor = mkStyle.split(' ').find(c => c.startsWith('text-')) || 'text-gray-400';
           
           return (
             <div 
               key={ticket.id} 
-              className={`bg-[#111111]/80 backdrop-blur-sm rounded-xl p-4 flex flex-col justify-between transition-all duration-300 group ${
+              className={`bg-[#111111]/80 backdrop-blur-sm rounded-xl p-5 flex flex-col justify-between transition-all duration-300 group ${
                 isResolved 
                   ? 'opacity-50 border border-[#00FF00]/20' 
                   : `border-x border-b border-white/5 border-t-2 ${getMarketplaceCardStyle(ticket.marketplace)}`
               }`}
             >
               <div>
-                <div className="flex items-center justify-between mb-5">
-                  <span className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border flex items-center gap-2 ${getMarketplaceStyle(ticket.marketplace)}`}>
-                    {getMarketplaceLogo(ticket.marketplace)}
-                    {ticket.marketplace}
-                  </span>
+                {/* Header (Status, Marketplace, SKU, Creator) */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center gap-2">
+                      <div className={`h-2 w-2 rounded-full shrink-0 ${ticket.priority === 'critico' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse' : 'bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.6)]'}`} title={ticket.priority === 'critico' ? 'Crítico / Risco' : 'Normal / Estético'} />
+                      <span className={`text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 ${textColor}`}>
+                        {getMarketplaceLogo(ticket.marketplace)}
+                        {ticket.marketplace}
+                      </span>
+                    </div>
+                    
+                    {(ticket.sku || ticket.link) && (
+                      <div className="flex items-center gap-1.5 text-white font-bold text-sm tracking-wide mt-1">
+                        <span className="text-gray-500 font-medium text-xs">{ticket.sku ? "SKU" : "LINK"}</span>
+                        <a href={ticket.link || `https://seller.shopee.com.br/portal/product/list?search=${ticket.sku}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#00FF00] transition-colors">
+                          {ticket.sku || "Acessar Anúncio"}
+                        </a>
+                      </div>
+                    )}
+                  </div>
                   
                   <div className="flex flex-col items-end gap-1">
-                    <span className="text-[10px] font-bold text-gray-400 flex items-center gap-1.5 bg-white/5 px-2 py-0.5 rounded-full">
-                      {ticket.creator_name || 'Sistema'}
-                    </span>
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-gray-600 flex items-center gap-1">
+                    <span className="text-[10px] text-gray-500 font-medium">{ticket.creator_name?.split(' ')[0] || 'Sistema'}</span>
+                    <span className="text-[9px] text-gray-600 font-medium flex items-center gap-1">
                       <Clock className="h-3 w-3" />
                       Hoje
                     </span>
                   </div>
                 </div>
                 
-                {(ticket.sku || ticket.link) && (
-                  <div className="flex items-center gap-3 mb-4 bg-[#050505]/80 w-fit px-3 py-1.5 rounded-lg border border-white/5 shadow-inner">
-                    <div className={`h-2 w-2 rounded-full shrink-0 ${ticket.priority === 'critico' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse' : 'bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.6)]'}`} title={ticket.priority === 'critico' ? 'Crítico / Risco' : 'Normal / Estético'} />
-                    
-                    <div className="h-3 w-[1px] bg-white/10" />
-
-                    <div className="flex items-center gap-1.5 text-[#00FF00] font-bold tracking-widest text-xs uppercase">
-                      <Tag className="h-3.5 w-3.5 opacity-80" />
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[#00FF00]/40 font-medium">{ticket.sku ? "SKU" : "LINK"}</span>
-                        <a href={ticket.link || `https://seller.shopee.com.br/portal/product/list?search=${ticket.sku}`} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors drop-shadow-[0_0_8px_rgba(0,255,0,0.2)]">
-                          {ticket.sku || "Acessar Anúncio"}
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                <p className="text-gray-300 text-sm mb-6 leading-relaxed flex items-start gap-3">
-                  <MessageSquare className="h-4 w-4 mt-0.5 text-gray-600 shrink-0" />
+                {/* Description */}
+                <p className="text-gray-300 text-[13px] leading-relaxed mb-6 font-light">
                   <span className={isResolved ? "line-through text-gray-500" : ""}>{ticket.description}</span>
                 </p>
               </div>
               
-              <div className="pt-5 border-t border-white/5 flex items-center justify-between gap-4 mt-auto">
-                {/* Avatar / Assignee */}
-                <div className="flex items-center gap-3 shrink-0">
+              {/* Footer */}
+              <div className="flex items-center justify-between mt-auto">
+                <div className="flex items-center gap-2 shrink-0">
                   {ticket.assignee_name ? (
-                    <div className="flex items-center gap-2">
-                      <div className={`h-8 w-8 rounded-full border flex items-center justify-center text-[10px] font-bold tracking-wider ${getAvatarStyle(ticket.assignee_name)}`}>
+                    <>
+                      <div className={`h-6 w-6 rounded-full border flex items-center justify-center text-[9px] font-bold ${getAvatarStyle(ticket.assignee_name)}`}>
                         {ticket.assignee_name.substring(0, 2).toUpperCase()}
                       </div>
-                      <div className="flex flex-col">
-                        <span className="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Designado para</span>
-                        <span className="text-xs text-gray-300 font-medium">{ticket.assignee_name}</span>
-                      </div>
-                    </div>
+                      <span className="text-xs text-gray-400 font-medium">{ticket.assignee_name.split(' ')[0]}</span>
+                    </>
                   ) : (
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-600 text-[10px] font-bold">
-                        --
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Status</span>
-                        <span className="text-xs text-gray-500 font-medium italic">Livre</span>
-                      </div>
-                    </div>
+                    <span className="text-xs text-gray-600 font-medium italic">Não atribuído</span>
                   )}
                 </div>
 
                 {isResolved ? (
-                  <div className="text-[#00FF00]/70 text-[10px] uppercase tracking-widest font-bold flex items-center gap-1.5">
-                    <CheckCircle2 className="h-4 w-4" />
-                    Resolvido por {ticket.resolved_by}
-                  </div>
+                  <span className="text-[#00FF00]/70 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4" /> Resolvido
+                  </span>
                 ) : (
                   <button 
                     onClick={() => handleResolve(ticket.id)}
-                    className="flex-1 py-2.5 px-4 bg-transparent hover:bg-[#00FF00]/10 border border-white/10 hover:border-[#00FF00]/50 text-gray-400 hover:text-[#00FF00] text-xs font-bold uppercase tracking-widest rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group/btn"
+                    className="text-gray-500 hover:text-[#00FF00] transition-colors flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest group/btn"
                   >
-                    <CheckCircle2 className="h-4 w-4 group-hover/btn:scale-110 group-hover/btn:drop-shadow-[0_0_8px_rgba(0,255,0,0.5)] transition-all" />
-                    Marcar Resolvido
+                    <CheckCircle2 className="h-4 w-4 group-hover/btn:scale-110 transition-transform" />
+                    Resolver
                   </button>
                 )}
               </div>
