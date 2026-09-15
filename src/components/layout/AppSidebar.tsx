@@ -112,6 +112,14 @@ const NAV_GROUPS = [
     subItems: [
       { title: "Gestão de Equipe", url: "/equipe", icon: Users },
     ]
+  },
+  {
+    id: "sistema",
+    icon: Terminal,
+    title: "Desenvolvimento",
+    subItems: [
+      { title: "Rama System Hub", url: "/sistema-dev", icon: Database },
+    ]
   }
 ];
 
