@@ -772,7 +772,7 @@ export default function Marketing() {
                       </div>
                       <div className="flex items-end gap-3 mb-4 mt-2">
                         <div>
-                          <span className="text-[9px] font-medium tracking-widest uppercase text-gray-500 block mb-0.5">Seguidores Totais</span>
+                          <span className="text-[9px] font-medium tracking-widest uppercase text-gray-500 block mb-0.5">Alcance Mensal</span>
                           <div className="flex items-center gap-2">
                             <span className="text-2xl font-bold text-white">{socialMetrics.instagram.followers.toLocaleString('pt-BR')}</span>
                             <span className="text-emerald-400 text-[10px] font-medium flex items-center bg-emerald-400/10 px-1.5 py-0.5 rounded"><ArrowUpRight className="w-2.5 h-2.5 mr-0.5" /> {socialMetrics.instagram.followersGrowth > 0 ? '+' : ''}{socialMetrics.instagram.followersGrowth}%</span>
@@ -782,15 +782,15 @@ export default function Marketing() {
                       <div className="grid grid-cols-2 gap-2 mb-4">
                         <div className="bg-[#111] border border-white/5 rounded-lg p-2.5 flex flex-col justify-between">
                           <div className="flex items-center gap-1.5 mb-1">
-                            <Heart className="w-3 h-3 text-gray-500" />
-                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Likes (Mês)</span>
+                            <MousePointerClick className="w-3 h-3 text-gray-500" />
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Cliques no Link</span>
                           </div>
                           <span className="text-white text-sm font-bold">{formatK(socialMetrics.instagram.likes)}</span>
                         </div>
                         <div className="bg-[#111] border border-white/5 rounded-lg p-2.5 flex flex-col justify-between">
                           <div className="flex items-center gap-1.5 mb-1">
-                            <MessageCircle className="w-3 h-3 text-gray-500" />
-                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Comentários</span>
+                            <ShoppingCart className="w-3 h-3 text-gray-500" />
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Conversões</span>
                           </div>
                           <span className="text-white text-sm font-bold">{formatK(socialMetrics.instagram.comments)}</span>
                         </div>
@@ -828,7 +828,7 @@ export default function Marketing() {
                       </div>
                       <div className="flex items-end gap-3 mb-4 mt-2">
                         <div>
-                          <span className="text-[9px] font-medium tracking-widest uppercase text-gray-500 block mb-0.5">Seguidores Totais</span>
+                          <span className="text-[9px] font-medium tracking-widest uppercase text-gray-500 block mb-0.5">Alcance Mensal</span>
                           <div className="flex items-center gap-2">
                             <span className="text-2xl font-bold text-white">{socialMetrics.tiktok.followers.toLocaleString('pt-BR')}</span>
                             <span className="text-emerald-400 text-[10px] font-medium flex items-center bg-emerald-400/10 px-1.5 py-0.5 rounded"><ArrowUpRight className="w-2.5 h-2.5 mr-0.5" /> {socialMetrics.tiktok.followersGrowth > 0 ? '+' : ''}{socialMetrics.tiktok.followersGrowth}%</span>
@@ -838,15 +838,15 @@ export default function Marketing() {
                       <div className="grid grid-cols-2 gap-2 mb-4">
                         <div className="bg-[#111] border border-white/5 rounded-lg p-2.5 flex flex-col justify-between">
                           <div className="flex items-center gap-1.5 mb-1">
-                            <Heart className="w-3 h-3 text-gray-500" />
-                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Likes (Mês)</span>
+                            <MousePointerClick className="w-3 h-3 text-gray-500" />
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Cliques no Link</span>
                           </div>
                           <span className="text-white text-sm font-bold">{formatK(socialMetrics.tiktok.likes)}</span>
                         </div>
                         <div className="bg-[#111] border border-white/5 rounded-lg p-2.5 flex flex-col justify-between">
                           <div className="flex items-center gap-1.5 mb-1">
-                            <MessageCircle className="w-3 h-3 text-gray-500" />
-                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Comentários</span>
+                            <ShoppingCart className="w-3 h-3 text-gray-500" />
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Conversões</span>
                           </div>
                           <span className="text-white text-sm font-bold">{formatK(socialMetrics.tiktok.comments)}</span>
                         </div>
@@ -1372,6 +1372,60 @@ export default function Marketing() {
         </div>
       )}
 
+
+      {/* SOCIAL MODAL */}
+      {isSocialModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl w-full max-w-md flex flex-col shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-cyan-500"></div>
+            <div className="p-5 flex justify-between items-center border-b border-white/5">
+              <h2 className="text-white font-semibold text-lg tracking-tight capitalize">
+                Lançar Métricas: {editingSocial}
+              </h2>
+              <button onClick={() => setIsSocialModalOpen(false)} className="text-gray-500 hover:text-white transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest block mb-2">Alcance Mensal</label>
+                <input 
+                  type="number" 
+                  value={socialForm.followers} 
+                  onChange={e => setSocialForm({...socialForm, followers: parseFloat(e.target.value) || 0})} 
+                  className="w-full bg-[#111] border border-white/5 rounded-lg px-3 py-2 text-white text-sm focus:border-[#00FF00] outline-none transition-colors" 
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest block mb-2">Cliques no Link</label>
+                  <input 
+                    type="number" 
+                    value={socialForm.likes} 
+                    onChange={e => setSocialForm({...socialForm, likes: parseFloat(e.target.value) || 0})} 
+                    className="w-full bg-[#111] border border-white/5 rounded-lg px-3 py-2 text-white text-sm focus:border-[#00FF00] outline-none transition-colors" 
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest block mb-2">Conversões</label>
+                  <input 
+                    type="number" 
+                    value={socialForm.comments} 
+                    onChange={e => setSocialForm({...socialForm, comments: parseFloat(e.target.value) || 0})} 
+                    className="w-full bg-[#111] border border-white/5 rounded-lg px-3 py-2 text-white text-sm focus:border-[#00FF00] outline-none transition-colors" 
+                  />
+                </div>
+              </div>
+              <button 
+                onClick={handleSaveSocial} 
+                className="w-full bg-[#00FF00] hover:bg-[#00FF00]/80 text-black font-extrabold text-sm py-3 rounded-xl mt-4 transition-all shadow-[0_0_15px_rgba(0,255,0,0.2)] hover:shadow-[0_0_20px_rgba(0,255,0,0.4)]"
+              >
+                Salvar Métricas
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 </div>
   );
 }
