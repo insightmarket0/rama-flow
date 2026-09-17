@@ -10,6 +10,7 @@ import {
   ShoppingCart,
   Store,
   Trash2,
+  ExternalLink,
   Tag,
   Handshake,
   ShoppingBag,
@@ -367,12 +368,10 @@ export default function MuralAjustes() {
                       </span>
                     </div>
                     
-                    {(ticket.sku || ticket.link) && (
+                    {(ticket.sku) && (
                       <div className="flex items-center gap-1.5 text-white font-bold text-xs tracking-wide mt-1">
-                        <span className="text-gray-500 font-medium text-[10px]">{ticket.sku ? "SKU" : "LINK"}</span>
-                        <a href={ticket.link || `https://seller.shopee.com.br/portal/product/list?search=${ticket.sku}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#00FF00] transition-colors">
-                          {ticket.sku || "Acessar Anúncio"}
-                        </a>
+                        <span className="text-gray-500 font-medium text-[10px]">SKU</span>
+                        <span>{ticket.sku}</span>
                       </div>
                     )}
                   </div>
@@ -390,6 +389,18 @@ export default function MuralAjustes() {
                 <p className="text-gray-300 text-xs leading-relaxed mb-3 font-light">
                   <span className={isResolved ? "line-through text-gray-500" : ""}>{ticket.description}</span>
                 </p>
+                
+                {(ticket.link || ticket.sku) && (
+                  <a 
+                    href={ticket.link || (ticket.marketplace.toLowerCase() === 'shopee' ? `https://seller.shopee.com.br/portal/product/list?search=${ticket.sku}` : ticket.marketplace.toLowerCase() === 'mercado livre' ? `https://myaccount.mercadolivre.com.br/listings/#label=active&search=${ticket.sku}` : `#`)}
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="mt-3 w-fit flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#111] hover:bg-[#1a1a1a] text-gray-400 hover:text-white transition-colors text-[10px] font-bold uppercase tracking-wider border border-white/10 shadow-sm"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    Abrir Anúncio
+                  </a>
+                )}
               </div>
               
               {/* Footer */}
