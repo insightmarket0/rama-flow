@@ -150,7 +150,7 @@ export default function Lembretes() {
             </h1>
           </div>
           <p className="text-gray-500 mt-2 text-sm max-w-xl leading-relaxed">
-            Um espaço totalmente seu. Organize sua agenda, checklist do dia a dia e rascunhos mentais longe do barulho da operação.
+            Um espaço totalmente seu. Organize sua agenda, checklist do dia a dia e rascunhos mentais.
           </p>
         </div>
 
