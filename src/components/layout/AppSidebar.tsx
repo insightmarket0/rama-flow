@@ -59,7 +59,7 @@ const NAV_GROUPS = [
     icon: Zap,
     title: "Operação",
     subItems: [
-      { title: "Mural de Ajustes", url: "/mural-ajustes", icon: ClipboardList },{ title: "Workspace Pessoal", url: "/lembretes", icon: CheckSquare },
+      { title: "Mural de Ajustes", url: "/mural-ajustes", icon: ClipboardList },{ title: "Seu Mundo", url: "/lembretes", icon: CheckSquare },
     ]
   },
   {
