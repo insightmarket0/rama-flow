@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { Calendar as CalendarUI } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { 
   Clock, 
   CircleDashed,
@@ -116,7 +121,7 @@ export default function Lembretes() {
   const [showChecklistForm, setShowChecklistForm] = useState(false);
   
   const [newAgendaTitle, setNewAgendaTitle] = useState("");
-  const [newAgendaDate, setNewAgendaDate] = useState("");
+  const [newAgendaDate, setNewAgendaDate] = useState<Date | undefined>(new Date());
   const [newAgendaTime, setNewAgendaTime] = useState("");
   const [newChecklistTitle, setNewChecklistTitle] = useState("");
 
@@ -164,13 +169,13 @@ export default function Lembretes() {
     if (!newAgendaTitle.trim()) return;
 
     const todayStr = new Date().toISOString().split('T')[0];
-    const finalDate = newAgendaDate || todayStr;
+    const finalDate = newAgendaDate ? format(newAgendaDate, 'yyyy-MM-dd') : todayStr;
     const finalTime = newAgendaTime || "O dia todo";
 
     if (!user) {
       const newItem = { id: Date.now().toString(), title: newAgendaTitle, day: finalDate, time: finalTime, is_priority: true };
       setAgenda([newItem, ...agenda]);
-      setNewAgendaTitle(""); setNewAgendaDate(""); setNewAgendaTime(""); setShowAgendaForm(false);
+      setNewAgendaTitle(""); setNewAgendaDate(new Date()); setNewAgendaTime(""); setShowAgendaForm(false);
       return;
     }
 
@@ -182,7 +187,7 @@ export default function Lembretes() {
       user_id: user.id
     });
 
-    setNewAgendaTitle(""); setNewAgendaDate(""); setNewAgendaTime(""); setShowAgendaForm(false);
+    setNewAgendaTitle(""); setNewAgendaDate(new Date()); setNewAgendaTime(""); setShowAgendaForm(false);
     fetchData();
   };
 
@@ -302,18 +307,52 @@ export default function Lembretes() {
                   autoFocus
                 />
                 <div className="flex gap-2">
-                    <input
-                      type="date"
-                      value={newAgendaDate}
-                      onChange={(e) => setNewAgendaDate(e.target.value)}
-                      className="w-1/2 bg-[#0a0a0a] border border-white/5 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00FF00]/50 [color-scheme:dark]"
-                    />
-                    <input
-                      type="time"
-                      value={newAgendaTime}
-                      onChange={(e) => setNewAgendaTime(e.target.value)}
-                      className="w-1/2 bg-[#0a0a0a] border border-white/5 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00FF00]/50 [color-scheme:dark]"
-                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className={`w-1/2 flex items-center justify-center gap-2 bg-[#0a0a0a] border border-white/5 rounded-lg px-3 py-2 text-xs text-white focus:outline-none hover:border-[#00FF00]/50 transition-colors ${!newAgendaDate && "text-gray-500"}`}
+                        >
+                          <Calendar className="h-3 w-3 text-[#00FF00]" />
+                          {newAgendaDate ? format(newAgendaDate, "dd 'de' MMM", { locale: ptBR }) : "Escolher data"}
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 border-[#00FF00]/20 bg-[#0a0a0a] shadow-[0_0_30px_rgba(0,255,0,0.15)] rounded-xl" align="start">
+                        <CalendarUI
+                          mode="single"
+                          selected={newAgendaDate}
+                          onSelect={setNewAgendaDate}
+                          initialFocus
+                          className="bg-transparent text-white"
+                          classNames={{
+                            day_selected: "bg-[#00FF00] text-black hover:bg-[#00FF00]/90 font-bold",
+                            day_today: "bg-white/10 text-white",
+                          }}
+                        />
+                      </PopoverContent>
+                    </Popover>
+
+                    <Select value={newAgendaTime} onValueChange={setNewAgendaTime}>
+                      <SelectTrigger className="w-1/2 bg-[#0a0a0a] border-white/5 text-xs text-white h-auto py-2 focus:ring-0 focus:ring-offset-0 focus:border-[#00FF00]/50 hover:border-[#00FF00]/50">
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-3 w-3 text-[#00FF00]" />
+                          <SelectValue placeholder="Horário" />
+                        </div>
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#0a0a0a] border-[#00FF00]/20 text-white max-h-48 custom-scrollbar">
+                        <SelectItem value="O dia todo" className="text-xs focus:bg-[#00FF00]/20 focus:text-[#00FF00] cursor-pointer">O dia todo</SelectItem>
+                        {Array.from({ length: 15 }).map((_, i) => {
+                          const h = i + 8;
+                          const hour = h.toString().padStart(2, '0');
+                          return (
+                            <React.Fragment key={hour}>
+                              <SelectItem value={`${hour}:00`} className="text-xs focus:bg-[#00FF00]/20 focus:text-[#00FF00] cursor-pointer">{`${hour}:00`}</SelectItem>
+                              <SelectItem value={`${hour}:30`} className="text-xs focus:bg-[#00FF00]/20 focus:text-[#00FF00] cursor-pointer">{`${hour}:30`}</SelectItem>
+                            </React.Fragment>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
                   </div>
                 <button type="submit" className="w-full mt-3 bg-white/5 hover:bg-[#00FF00]/20 text-white hover:text-[#00FF00] border border-white/5 hover:border-[#00FF00]/30 rounded-lg py-2 text-xs font-bold transition-all uppercase tracking-wider">
                   Adicionar
