@@ -438,10 +438,11 @@ export default function MuralAjustes() {
                       href={ticket.link || (ticket.marketplace.toLowerCase() === 'shopee' ? `https://seller.shopee.com.br/portal/product/list?search=${ticket.sku}` : ticket.marketplace.toLowerCase() === 'mercado livre' ? `https://myaccount.mercadolivre.com.br/listings/#label=active&search=${ticket.sku}` : `#`)}
                       target="_blank" 
                       rel="noopener noreferrer" 
-                      className="text-gray-500 hover:text-white transition-colors flex items-center justify-center"
+                      className="text-gray-400 hover:text-white transition-colors flex items-center justify-center gap-1.5 text-[9px] font-bold uppercase tracking-widest mr-1"
                       title="Abrir Anúncio"
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
+                      Abrir Anúncio
                     </a>
                   )}
 
