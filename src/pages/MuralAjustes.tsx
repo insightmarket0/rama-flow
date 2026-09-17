@@ -195,7 +195,7 @@ export default function MuralAjustes() {
   });
 
   return (
-    <div className="flex-1 px-4 md:px-8 pt-0 pb-4 animate-in fade-in duration-500 h-screen max-h-screen overflow-hidden flex flex-col">
+    <div className="flex-1 w-full max-w-full px-4 md:px-8 pt-6 pb-6 animate-in fade-in duration-500 min-h-0 overflow-hidden flex flex-col">
       
       {/* Container Layout com Feed na Lateral */}
       <div className="flex flex-col xl:flex-row gap-4 items-start flex-1 min-h-0 overflow-hidden">
@@ -363,7 +363,7 @@ export default function MuralAjustes() {
       
         </div>
         {/* Lado Direito: Feed de Auditoria */}
-        <div className="w-full xl:w-[320px] shrink-0 bg-[#070707] border border-white/5 rounded-2xl flex flex-col h-[calc(100vh-40px)] sticky top-4 shadow-2xl overflow-hidden">
+        <div className="w-full xl:w-[320px] shrink-0 bg-[#070707] border border-white/5 rounded-2xl flex flex-col h-full shadow-2xl overflow-hidden">
           <div className="flex items-center gap-2 p-4 border-b border-white/5 bg-[#0a0a0a]/50">
             <Activity className="h-4 w-4 text-[#00FF00]" />
             <h3 className="text-white font-bold text-xs tracking-widest uppercase">Feed de Auditoria</h3>
