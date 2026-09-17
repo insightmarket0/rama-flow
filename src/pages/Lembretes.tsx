@@ -73,6 +73,32 @@ export default function Lembretes() {
     return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' s ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   };
 
+  const formatAgendaDay = (dateStr: string) => {
+    if (!dateStr || typeof dateStr !== 'string') return "HOJE";
+    if (dateStr.toUpperCase() === "HOJE" || dateStr.toUpperCase() === "AMANHÃ" || dateStr.toUpperCase() === "AMANH") return dateStr.toUpperCase();
+    if (dateStr.includes('/')) return dateStr;
+
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    if (dateStr === todayStr) return "HOJE";
+    if (dateStr === tomorrowStr) return "AMANHÃ";
+
+    try {
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}`;
+      }
+      return dateStr;
+    } catch {
+      return dateStr;
+    }
+  };
+
   const fetchData = async () => {
     const { data: agendaData } = await supabase.from('seu_mundo_agenda').select('*').order('created_at', { ascending: false });
     if (agendaData) setAgenda(agendaData);
@@ -136,8 +162,12 @@ export default function Lembretes() {
     e.preventDefault();
     if (!newAgendaTitle.trim()) return;
 
+    const todayStr = new Date().toISOString().split('T')[0];
+    const finalDate = newAgendaDate || todayStr;
+    const finalTime = newAgendaTime || "O dia todo";
+
     if (!user) {
-      const newItem = { id: Date.now().toString(), title: newAgendaTitle, day: newAgendaDate || "HOJE", time: newAgendaTime || "O dia todo", is_priority: true };
+      const newItem = { id: Date.now().toString(), title: newAgendaTitle, day: finalDate, time: finalTime, is_priority: true };
       setAgenda([newItem, ...agenda]);
       setNewAgendaTitle(""); setNewAgendaDate(""); setNewAgendaTime(""); setShowAgendaForm(false);
       return;
@@ -145,8 +175,8 @@ export default function Lembretes() {
 
     await supabase.from('seu_mundo_agenda').insert({
       title: newAgendaTitle,
-      day: newAgendaDate || "HOJE",
-      time: newAgendaTime || "O dia todo",
+      day: finalDate,
+      time: finalTime,
       is_priority: true,
       user_id: user.id
     });
@@ -271,21 +301,19 @@ export default function Lembretes() {
                   autoFocus
                 />
                 <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Ex: HOJE"
-                    value={newAgendaDate}
-                    onChange={(e) => setNewAgendaDate(e.target.value)}
-                    className="w-1/2 bg-[#0a0a0a] border border-white/5 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00FF00]/50"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Ex: 14:00"
-                    value={newAgendaTime}
-                    onChange={(e) => setNewAgendaTime(e.target.value)}
-                    className="w-1/2 bg-[#0a0a0a] border border-white/5 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00FF00]/50"
-                  />
-                </div>
+                    <input
+                      type="date"
+                      value={newAgendaDate}
+                      onChange={(e) => setNewAgendaDate(e.target.value)}
+                      className="w-1/2 bg-[#0a0a0a] border border-white/5 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00FF00]/50 [color-scheme:dark]"
+                    />
+                    <input
+                      type="time"
+                      value={newAgendaTime}
+                      onChange={(e) => setNewAgendaTime(e.target.value)}
+                      className="w-1/2 bg-[#0a0a0a] border border-white/5 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00FF00]/50 [color-scheme:dark]"
+                    />
+                  </div>
                 <button type="submit" className="w-full mt-3 bg-white/5 hover:bg-[#00FF00]/20 text-white hover:text-[#00FF00] border border-white/5 hover:border-[#00FF00]/30 rounded-lg py-2 text-xs font-bold transition-all uppercase tracking-wider">
                   Adicionar
                 </button>
@@ -302,7 +330,7 @@ export default function Lembretes() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span className={`text-[9px] font-bold uppercase tracking-widest ${item.day === 'HOJE' ? 'text-[#00FF00]' : 'text-gray-500'}`}>
-                          {item.day}
+                          {formatAgendaDay(item.day)}
                         </span>
                         {(item.is_priority || item.isPriority) && (
                           <span className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse" title="Prioridade" />
