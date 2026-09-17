@@ -241,6 +241,7 @@ export default function MuralAjustes() {
       });
       setIsModalOpen(false);
       setFormData({ marketplace: 'Mercado Livre', sku: '', link: '', description: '', priority: 'normal', assignee_name: 'livre' });
+      fetchTicketsAndAudits();
     }
   };
 
