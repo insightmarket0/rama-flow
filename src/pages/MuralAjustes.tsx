@@ -372,61 +372,45 @@ export default function MuralAjustes() {
           return (
             <div 
               key={ticket.id} 
-              className={`bg-[#111111]/80 backdrop-blur-sm rounded-xl p-3 flex flex-col justify-between transition-all duration-300 group ${
+              className={`bg-[#111111]/80 backdrop-blur-sm rounded-xl p-4 flex flex-col justify-between transition-all duration-300 group ${
                 isResolved 
                   ? 'opacity-50 border border-[#00FF00]/20' 
                   : `border-x border-b border-white/5 border-t-2 ${getMarketplaceCardStyle(ticket.marketplace)}`
               }`}
             >
-              <div>
-                {/* Header (Status, Marketplace, SKU, Creator) */}
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex flex-col gap-1.5">
-                    <div className="flex items-center gap-2">
-                      <div className={`h-2 w-2 rounded-full shrink-0 ${ticket.priority === 'critico' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse' : 'bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.6)]'}`} title={ticket.priority === 'critico' ? 'Crítico / Risco' : 'Normal / Estético'} />
-                      <span className={`text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5 ${textColor}`}>
-                        {getMarketplaceLogo(ticket.marketplace)}
-                        {ticket.marketplace}
-                      </span>
-                    </div>
-                    
-                    {(ticket.sku) && (
-                      <div className="flex items-center gap-1.5 text-white font-bold text-xs tracking-wide mt-1">
-                        <span className="text-gray-500 font-medium text-[10px]">SKU</span>
-                        <span>{ticket.sku}</span>
-                      </div>
-                    )}
+              <div className="flex flex-col gap-3 flex-1">
+                {/* Header: Marketplace & Meta */}
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className={`h-1.5 w-1.5 rounded-full shrink-0 ${ticket.priority === 'critico' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse' : 'bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.6)]'}`} title={ticket.priority === 'critico' ? 'Crítico / Risco' : 'Normal / Estético'} />
+                    <span className={`text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5 ${textColor}`}>
+                      {getMarketplaceLogo(ticket.marketplace)}
+                      {ticket.marketplace}
+                    </span>
                   </div>
                   
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="text-[9px] text-gray-500 font-medium">{ticket.creator_name?.split(' ')[0] || 'Sistema'}</span>
-                    <span className="text-[8px] text-gray-600 font-medium flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      Hoje
-                    </span>
+                  <div className="flex items-center gap-2 text-[9px] text-gray-500 font-medium">
+                    <span>{ticket.creator_name?.split(' ')[0] || 'Sistema'}</span>
+                    <span className="flex items-center gap-1 text-gray-600"><Clock className="h-2.5 w-2.5" /> Hoje</span>
                   </div>
                 </div>
                 
-                {/* Description */}
-                <p className="text-gray-300 text-xs leading-relaxed mb-3 font-light">
-                  <span className={isResolved ? "line-through text-gray-500" : ""}>{ticket.description}</span>
-                </p>
-                
-                {(ticket.link || ticket.sku) && (
-                  <a 
-                    href={ticket.link || (ticket.marketplace.toLowerCase() === 'shopee' ? `https://seller.shopee.com.br/portal/product/list?search=${ticket.sku}` : ticket.marketplace.toLowerCase() === 'mercado livre' ? `https://myaccount.mercadolivre.com.br/listings/#label=active&search=${ticket.sku}` : `#`)}
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="mt-3 w-fit flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#111] hover:bg-[#1a1a1a] text-gray-400 hover:text-white transition-colors text-[10px] font-bold uppercase tracking-wider border border-white/10 shadow-sm"
-                  >
-                    <ExternalLink className="h-3 w-3" />
-                    Abrir Anúncio
-                  </a>
-                )}
+                {/* Body: SKU & Desc */}
+                <div className="flex flex-col gap-1.5 mb-2">
+                  {(ticket.sku) && (
+                    <div className="flex items-center gap-1.5 text-white font-bold text-xs tracking-wide">
+                      <span className="text-gray-500 font-medium text-[9px] uppercase">SKU</span>
+                      <span>{ticket.sku}</span>
+                    </div>
+                  )}
+                  <p className="text-gray-300 text-xs leading-relaxed font-light">
+                    <span className={isResolved ? "line-through text-gray-500" : ""}>{ticket.description}</span>
+                  </p>
+                </div>
               </div>
               
-              {/* Footer */}
-              <div className="flex items-center justify-between mt-auto">
+              {/* Footer: Assignee & Actions */}
+              <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/5">
                 <div className="flex items-center gap-2 shrink-0">
                   {ticket.assignee_name ? (
                     <>
@@ -436,32 +420,48 @@ export default function MuralAjustes() {
                       <span className="text-[10px] text-gray-400 font-medium">{ticket.assignee_name.split(' ')[0]}</span>
                     </>
                   ) : (
-                    <span className="text-xs text-gray-600 font-medium italic">Não atribuído</span>
+                    <span className="text-[10px] text-gray-600 font-medium italic">Sem responsável</span>
                   )}
                 </div>
 
-                {isResolved ? (
-                  <span className="text-[#00FF00]/70 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5" /> Resolvido
-                  </span>
-                ) : (
-                  <div className="flex items-center gap-3">
-                    <button 
-                      onClick={() => handleDelete(ticket.id, ticket.sku, ticket.marketplace)}
-                      className="text-gray-600 hover:text-red-500 transition-colors flex items-center justify-center"
-                      title="Excluir ticket"
+                <div className="flex items-center gap-3">
+                  {/* Action: Link */}
+                  {(ticket.link || ticket.sku) && (
+                    <a 
+                      href={ticket.link || (ticket.marketplace.toLowerCase() === 'shopee' ? `https://seller.shopee.com.br/portal/product/list?search=${ticket.sku}` : ticket.marketplace.toLowerCase() === 'mercado livre' ? `https://myaccount.mercadolivre.com.br/listings/#label=active&search=${ticket.sku}` : `#`)}
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-gray-500 hover:text-white transition-colors flex items-center justify-center"
+                      title="Abrir Anúncio"
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  )}
+
+                  {/* Action: Delete */}
+                  <button 
+                    onClick={() => handleDelete(ticket.id, ticket.sku, ticket.marketplace)}
+                    className="text-gray-600 hover:text-red-500 transition-colors flex items-center justify-center"
+                    title="Excluir ticket"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                  
+                  {/* Action: Resolve */}
+                  {isResolved ? (
+                    <span className="text-[#00FF00]/70 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                      <CheckCircle2 className="h-3.5 w-3.5" /> Resolvido
+                    </span>
+                  ) : (
                     <button 
                       onClick={() => handleResolve(ticket.id, ticket.sku, ticket.marketplace)}
-                      className="text-gray-500 hover:text-[#00FF00] transition-colors flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest group/btn"
+                      className="text-gray-400 hover:text-[#00FF00] transition-colors flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest group/btn ml-1"
                     >
                       <CheckCircle2 className="h-3.5 w-3.5 group-hover/btn:scale-110 transition-transform" />
                       Resolver
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           );
