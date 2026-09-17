@@ -20,6 +20,8 @@ import { FaAmazon } from "react-icons/fa";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 
 const getMarketplaceLogo = (marketplace?: string) => {
   if (!marketplace) return <Store className="h-3.5 w-3.5 opacity-70 shrink-0" />;
@@ -147,7 +149,8 @@ export default function MuralAjustes() {
   const { user } = useAuth();
   const userName = user?.user_metadata?.name || 'Sistema';
   
-  const [tickets, setTickets] = useState<any[]>(MOCK_TICKETS);
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [audits, setAudits] = useState<any[]>([]);
   const [filter, setFilter] = useState("todos");
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -160,15 +163,54 @@ export default function MuralAjustes() {
     assignee_name: 'livre'
   });
 
-  const handleCreateTicket = (e: React.FormEvent) => {
+  const fetchTicketsAndAudits = async () => {
+    try {
+      const { data: ticketsData, error: tError } = await supabase
+        .from('ajustes_tickets')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (!tError && ticketsData) setTickets(ticketsData);
+
+      const { data: auditsData, error: aError } = await supabase
+        .from('ajustes_auditoria')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(15);
+        
+      if (!aError && auditsData) setAudits(auditsData);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    fetchTicketsAndAudits();
+
+    const ticketsSub = supabase.channel('ajustes_tickets_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ajustes_tickets' }, () => {
+        fetchTicketsAndAudits();
+      }).subscribe();
+
+    const auditsSub = supabase.channel('ajustes_auditoria_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ajustes_auditoria' }, () => {
+        fetchTicketsAndAudits();
+      }).subscribe();
+
+    return () => {
+      supabase.removeChannel(ticketsSub);
+      supabase.removeChannel(auditsSub);
+    }
+  }, []);
+
+  const handleCreateTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.description) return;
     
     const newTicket = {
-      id: Math.random().toString(),
-      creator_id: user?.id || "user_manager",
+      creator_id: user?.id,
       creator_name: userName,
-      assignee_id: formData.assignee_name === 'livre' ? null : `user_${formData.assignee_name.toLowerCase()}`,
+      assignee_id: null,
       assignee_name: formData.assignee_name === 'livre' ? null : formData.assignee_name,
       marketplace: formData.marketplace,
       sku: formData.sku,
@@ -176,17 +218,40 @@ export default function MuralAjustes() {
       description: formData.description,
       status: "pendente",
       priority: formData.priority,
-      created_at: new Date().toISOString()
     };
     
-    setTickets([newTicket, ...tickets]);
-    setIsModalOpen(false);
-    setFormData({ marketplace: 'Mercado Livre', sku: '', description: '', priority: 'normal', assignee_name: 'livre' });
+    const { data: insertedTicket, error } = await supabase.from('ajustes_tickets').insert(newTicket).select().single();
+    
+    if (!error && insertedTicket) {
+      await supabase.from('ajustes_auditoria').insert({
+        action_type: 'created',
+        user_id: user?.id,
+        user_name: userName,
+        target_id: insertedTicket.id,
+        target_type: 'ticket',
+        context_text: `SKU: ${insertedTicket.sku || 'N/A'} (${insertedTicket.marketplace})`,
+        message: 'abriu um ticket de ajuste',
+        priority: formData.priority
+      });
+      setIsModalOpen(false);
+      setFormData({ marketplace: 'Mercado Livre', sku: '', link: '', description: '', priority: 'normal', assignee_name: 'livre' });
+    }
   };
 
-  const handleResolve = (id: string) => {
-    // Na vida real: await updateTicketStatus(id, 'resolvido')
-    setTickets(tickets.map(t => t.id === id ? { ...t, status: 'resolvido', resolved_by: 'Você' } : t));
+  const handleResolve = async (id: string, sku: string, marketplace: string) => {
+    const { error } = await supabase.from('ajustes_tickets').update({ status: 'resolvido', resolved_by_id: user?.id, resolved_by_name: userName }).eq('id', id);
+    if (!error) {
+      await supabase.from('ajustes_auditoria').insert({
+        action_type: 'resolved',
+        user_id: user?.id,
+        user_name: userName,
+        target_id: id,
+        target_type: 'ticket',
+        context_text: `SKU: ${sku || 'N/A'} (${marketplace})`,
+        message: 'resolveu um ajuste de anúncio',
+        priority: 'normal'
+      });
+    }
   };
 
   const filteredTickets = tickets.filter(t => {
@@ -340,7 +405,7 @@ export default function MuralAjustes() {
                   </span>
                 ) : (
                   <button 
-                    onClick={() => handleResolve(ticket.id)}
+                    onClick={() => handleResolve(ticket.id, ticket.sku, ticket.marketplace)}
                     className="text-gray-500 hover:text-[#00FF00] transition-colors flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest group/btn"
                   >
                     <CheckCircle2 className="h-3.5 w-3.5 group-hover/btn:scale-110 transition-transform" />
@@ -372,65 +437,29 @@ export default function MuralAjustes() {
           <div className="flex-1 p-5 overflow-y-auto [&::-webkit-scrollbar]:hidden">
             <div className="space-y-6 relative before:absolute before:inset-y-0 before:left-1.5 before:w-[1px] before:bg-white/5">
               
-              {/* Item 1 */}
-              <div className="relative pl-6">
-                <div className="absolute left-[3px] top-1.5 w-2 h-2 rounded-full bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.8)]" />
-                <p className="text-[11px] text-gray-400 leading-snug mb-1">
-                  <span className="text-white font-bold">Lucas</span> resolveu ajuste de anúncio
-                </p>
-                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider block mb-1.5 bg-white/5 w-fit px-2 py-0.5 rounded">
-                  SKU: KITGAS001
-                </span>
-                <div className="flex items-center gap-1 text-gray-600">
-                  <Clock className="h-2.5 w-2.5" />
-                  <span className="text-[8px] font-bold uppercase">Há 5 min</span>
-                </div>
-              </div>
-
-              {/* Item 2 */}
-              <div className="relative pl-6">
-                <div className="absolute left-[3px] top-1.5 w-2 h-2 rounded-full bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.8)]" />
-                <p className="text-[11px] text-gray-400 leading-snug mb-1">
-                  <span className="text-white font-bold">João</span> deu Ciente em aviso crítico
-                </p>
-                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider block mb-1.5 bg-white/5 w-fit px-2 py-0.5 rounded">
-                  Mural Alinhamento
-                </span>
-                <div className="flex items-center gap-1 text-gray-600">
-                  <Clock className="h-2.5 w-2.5" />
-                  <span className="text-[8px] font-bold uppercase">Há 12 min</span>
-                </div>
-              </div>
-
-              {/* Item 3 */}
-              <div className="relative pl-6">
-                <div className="absolute left-[3px] top-1.5 w-2 h-2 rounded-full bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.8)]" />
-                <p className="text-[11px] text-gray-400 leading-snug mb-1">
-                  <span className="text-white font-bold">Lucas</span> concluiu urgência
-                </p>
-                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider block mb-1.5 bg-white/5 w-fit px-2 py-0.5 rounded">
-                  Atualizar foto
-                </span>
-                <div className="flex items-center gap-1 text-gray-600">
-                  <Clock className="h-2.5 w-2.5" />
-                  <span className="text-[8px] font-bold uppercase">Há 45 min</span>
-                </div>
-              </div>
-
-              {/* Item 4 */}
-              <div className="relative pl-6">
-                <div className="absolute left-[3px] top-1.5 w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-                <p className="text-[11px] text-gray-400 leading-snug mb-1">
-                  <span className="text-red-400 font-bold">Sistema</span> emitiu alerta SLA
-                </p>
-                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider block mb-1.5 bg-red-500/10 text-red-400 w-fit px-2 py-0.5 rounded">
-                  Aviso não lido
-                </span>
-                <div className="flex items-center gap-1 text-gray-600">
-                  <Clock className="h-2.5 w-2.5" />
-                  <span className="text-[8px] font-bold uppercase">Há 2 horas</span>
-                </div>
-              </div>
+              {audits.map((audit) => {
+                const dateObj = new Date(audit.created_at);
+                const timeStr = dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                const isCritical = audit.priority === 'critico' || audit.action_type === 'alert';
+                return (
+                  <div key={audit.id} className="relative pl-6">
+                    <div className={`absolute left-[3px] top-1.5 w-2 h-2 rounded-full ${isCritical ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]' : 'bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.8)]'}`} />
+                    <p className="text-[11px] text-gray-400 leading-snug mb-1">
+                      <span className={isCritical ? "text-red-400 font-bold" : "text-white font-bold"}>{audit.user_name || 'Sistema'}</span> {audit.message}
+                    </p>
+                    {audit.context_text && (
+                      <span className={`text-[9px] font-bold uppercase tracking-wider block mb-1.5 w-fit px-2 py-0.5 rounded ${isCritical ? 'bg-red-500/10 text-red-400' : 'bg-white/5 text-gray-500'}`}>
+                        {audit.context_text}
+                      </span>
+                    )}
+                    <div className="flex items-center gap-1 text-gray-600">
+                      <Clock className="h-2.5 w-2.5" />
+                      <span className="text-[8px] font-bold uppercase">{timeStr}</span>
+                    </div>
+                  </div>
+                )
+              })}
+              
             </div>
           </div>
           
