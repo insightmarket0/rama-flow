@@ -52,12 +52,13 @@ const MOCK_AGENDA = [
 ];
 
 export default function Lembretes() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [ideas, setIdeas] = useState<any[]>([]);
   const [checklist, setChecklist] = useState<any[]>([]);
   const [agenda, setAgenda] = useState<any[]>([]);
 
-  useEffect(() => {
+    useEffect(() => {
+    if (loading) return; // Aguarda o auth carregar para não piscar os mocks
     if (user) {
       fetchData();
     } else {
@@ -66,7 +67,7 @@ export default function Lembretes() {
       setChecklist(MOCK_CHECKLIST);
       setAgenda(MOCK_AGENDA);
     }
-  }, [user]);
+  }, [user, loading]);
 
   const formatTime = (dateString: string) => {
     const d = new Date(dateString);
