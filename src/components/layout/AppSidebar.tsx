@@ -239,10 +239,10 @@ export function AppSidebar() {
                     className={`h-12 w-12 rounded-[18px] flex items-center justify-center transition-all duration-300 relative ${
                       active 
                         ? group.special 
-                          ? "bg-[#00FF00] text-black shadow-[0_0_20px_rgba(0,255,0,0.5)]" 
+                          ? "text-[#00FF00] bg-[#00FF00]/10 border border-[#00FF00]/30 shadow-[inset_0_0_15px_rgba(0,255,0,0.15)]" 
                           : isMarketing 
-                            ? "bg-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]"
-                            : "bg-primary text-black shadow-[0_0_15px_rgba(34,197,94,0.4)]" 
+                            ? "text-cyan-400 bg-cyan-400/10 border border-cyan-400/30 shadow-[inset_0_0_15px_rgba(6,182,212,0.15)]"
+                            : "text-[#00FF00] bg-[#00FF00]/10 border border-[#00FF00]/30 shadow-[inset_0_0_15px_rgba(0,255,0,0.15)]" 
                         : group.special 
                           ? isMarketing
                             ? "text-cyan-400 hover:bg-cyan-500/20 bg-cyan-500/10"
@@ -261,8 +261,8 @@ export function AppSidebar() {
                     className={`h-12 w-12 rounded-[18px] flex items-center justify-center transition-all duration-300 relative ${
                       active 
                         ? isMarketing
-                          ? "bg-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]"
-                          : "bg-primary text-black shadow-[0_0_15px_rgba(34,197,94,0.4)]" 
+                          ? "text-cyan-400 bg-cyan-400/10 border border-cyan-400/30 shadow-[inset_0_0_15px_rgba(6,182,212,0.15)]"
+                          : "text-[#00FF00] bg-[#00FF00]/10 border border-[#00FF00]/30 shadow-[inset_0_0_15px_rgba(0,255,0,0.15)]" 
                         : "text-gray-400 hover:text-white hover:bg-white/10"
                     }`}
                   >
@@ -292,8 +292,8 @@ export function AppSidebar() {
                               `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group border relative ${
                                 isActive
                                   ? isMarketing
-                                    ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 shadow-[0_0_10px_rgba(6,182,212,0.05)]"
-                                    : "bg-[#00FF00]/10 text-[#00FF00] border-[#00FF00]/20 shadow-[0_0_10px_rgba(0,255,0,0.05)]"
+                                    ? "text-cyan-400 bg-white/5 border-transparent shadow-none"
+                                    : "text-[#00FF00] bg-white/5 border-transparent shadow-none"
                                   : "border-transparent text-gray-400 hover:bg-white/5 hover:border-white/5 hover:text-white"
                               }`
                             }
