@@ -263,6 +263,28 @@ export default function MuralAjustes() {
     }
   };
 
+  const handleDelete = async (id: string, sku: string, marketplace: string) => {
+    if (!window.confirm('Tem certeza que deseja excluir este ticket?')) return;
+    
+    const { error } = await supabase.from('ajustes_tickets').delete().eq('id', id);
+    if (!error) {
+      await supabase.from('ajustes_auditoria').insert({
+        action_type: 'deleted',
+        user_id: user?.id,
+        user_name: userName,
+        target_id: id,
+        target_type: 'ticket',
+        context_text: `SKU: ${sku || 'N/A'} (${marketplace})`,
+        message: 'excluiu um ticket',
+        priority: 'normal'
+      });
+      fetchTicketsAndAudits();
+    } else {
+      console.error(error);
+      alert('Erro ao excluir: ' + error.message);
+    }
+  };
+
   const filteredTickets = tickets.filter(t => {
     if (filter === "todos") return true;
     return t.marketplace.toLowerCase() === filter.toLowerCase();
