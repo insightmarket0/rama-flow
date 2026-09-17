@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   Clock, 
   CircleDashed,
@@ -50,9 +52,37 @@ const MOCK_AGENDA = [
 ];
 
 export default function Lembretes() {
-  const [ideas, setIdeas] = useState(MOCK_IDEAS);
-  const [checklist, setChecklist] = useState(MOCK_CHECKLIST);
-  const [agenda, setAgenda] = useState(MOCK_AGENDA);
+  const { user } = useAuth();
+  const [ideas, setIdeas] = useState<any[]>([]);
+  const [checklist, setChecklist] = useState<any[]>([]);
+  const [agenda, setAgenda] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      fetchData();
+    } else {
+      // Fallback para os mocks se no estiver logado ou em ambiente local sem bd conectado
+      setIdeas(MOCK_IDEAS);
+      setChecklist(MOCK_CHECKLIST);
+      setAgenda(MOCK_AGENDA);
+    }
+  }, [user]);
+
+  const formatTime = (dateString: string) => {
+    const d = new Date(dateString);
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' s ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const fetchData = async () => {
+    const { data: agendaData } = await supabase.from('seu_mundo_agenda').select('*').order('created_at', { ascending: false });
+    if (agendaData) setAgenda(agendaData);
+
+    const { data: checklistData } = await supabase.from('seu_mundo_checklist').select('*').order('created_at', { ascending: false });
+    if (checklistData) setChecklist(checklistData);
+
+    const { data: ideiasData } = await supabase.from('seu_mundo_ideias').select('*').order('created_at', { ascending: false });
+    if (ideiasData) setIdeas(ideiasData);
+  };
   
   const [quickThought, setQuickThought] = useState("");
   const [showAgendaForm, setShowAgendaForm] = useState(false);
@@ -63,79 +93,109 @@ export default function Lembretes() {
   const [newAgendaTime, setNewAgendaTime] = useState("");
   const [newChecklistTitle, setNewChecklistTitle] = useState("");
 
-  const handleAddThought = (e: React.FormEvent) => {
+  const handleAddThought = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!quickThought.trim()) return;
 
-    const colors = [
-      "bg-blue-500",
-      "bg-[#00FF00]",
-      "bg-purple-500",
-      "bg-orange-500",
-      "bg-pink-500",
-    ];
+    const colors = ["bg-blue-500", "bg-[#00FF00]", "bg-purple-500", "bg-orange-500", "bg-pink-500"];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
-    const newIdea = {
-      id: Date.now().toString(),
+    if (!user) {
+      const newIdea = { id: Date.now().toString(), content: quickThought, date: "Agora mesmo", color: randomColor };
+      setIdeas([newIdea, ...ideas]);
+      setQuickThought("");
+      return;
+    }
+
+    const { error } = await supabase.from('seu_mundo_ideias').insert({
       content: quickThought,
-      date: "Agora mesmo",
       color: randomColor,
-    };
-
-    setIdeas([newIdea, ...ideas]);
-    setQuickThought("");
+      user_id: user.id
+    });
+    
+    if (!error) {
+      setQuickThought("");
+      fetchData();
+    }
   };
 
-  const toggleTask = (id: string) => {
-    setChecklist(checklist.map(t => t.id === id ? { ...t, done: !t.done } : t));
+  const toggleTask = async (id: string) => {
+    const task = checklist.find(t => t.id === id);
+    if (!task) return;
+    
+    if (!user) {
+      setChecklist(checklist.map(t => t.id === id ? { ...t, done: !t.done } : t));
+      return;
+    }
+
+    await supabase.from('seu_mundo_checklist').update({ done: !task.done }).eq('id', id);
+    fetchData();
   };
 
-  const handleAddAgenda = (e: React.FormEvent) => {
+  const handleAddAgenda = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAgendaTitle.trim()) return;
 
-    const newItem = {
-      id: Date.now().toString(),
+    if (!user) {
+      const newItem = { id: Date.now().toString(), title: newAgendaTitle, day: newAgendaDate || "HOJE", time: newAgendaTime || "O dia todo", is_priority: true };
+      setAgenda([newItem, ...agenda]);
+      setNewAgendaTitle(""); setNewAgendaDate(""); setNewAgendaTime(""); setShowAgendaForm(false);
+      return;
+    }
+
+    await supabase.from('seu_mundo_agenda').insert({
       title: newAgendaTitle,
       day: newAgendaDate || "HOJE",
       time: newAgendaTime || "O dia todo",
-      isPriority: true
-    };
+      is_priority: true,
+      user_id: user.id
+    });
 
-    setAgenda([newItem, ...agenda]);
-    setNewAgendaTitle("");
-    setNewAgendaDate("");
-    setNewAgendaTime("");
-    setShowAgendaForm(false);
+    setNewAgendaTitle(""); setNewAgendaDate(""); setNewAgendaTime(""); setShowAgendaForm(false);
+    fetchData();
   };
 
-  const handleAddChecklist = (e: React.FormEvent) => {
+  const handleAddChecklist = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newChecklistTitle.trim()) return;
 
-    const newTask = {
-      id: Date.now().toString(),
+    if (!user) {
+      const newTask = { id: Date.now().toString(), title: newChecklistTitle, done: false };
+      setChecklist([newTask, ...checklist]);
+      setNewChecklistTitle(""); setShowChecklistForm(false);
+      return;
+    }
+
+    await supabase.from('seu_mundo_checklist').insert({
       title: newChecklistTitle,
-      done: false
-    };
+      done: false,
+      user_id: user.id
+    });
 
-    setChecklist([newTask, ...checklist]);
-    setNewChecklistTitle("");
-    setShowChecklistForm(false);
+    setNewChecklistTitle(""); setShowChecklistForm(false);
+    fetchData();
   };
 
-  const removeChecklist = (id: string, e: React.MouseEvent) => {
+  const removeChecklist = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setChecklist(checklist.filter(item => item.id !== id));
+    if (!user) { setChecklist(checklist.filter(item => item.id !== id)); return; }
+    
+    await supabase.from('seu_mundo_checklist').delete().eq('id', id);
+    fetchData();
   };
 
-  const removeAgenda = (id: string) => {
-    setAgenda(agenda.filter(item => item.id !== id));
+  const removeAgenda = async (id: string) => {
+    if (!user) { setAgenda(agenda.filter(item => item.id !== id)); return; }
+    
+    await supabase.from('seu_mundo_agenda').delete().eq('id', id);
+    fetchData();
   };
 
-  const removeIdea = (id: string) => {
-    setIdeas(ideas.filter(item => item.id !== id));
+  const removeIdea = async (id: string) => {
+    if (!user) { setIdeas(ideas.filter(item => item.id !== id)); return; }
+    
+    await supabase.from('seu_mundo_ideias').delete().eq('id', id);
+    fetchData();
   };
 
   return (
@@ -244,7 +304,7 @@ export default function Lembretes() {
                         <span className={`text-[9px] font-bold uppercase tracking-widest ${item.day === 'HOJE' ? 'text-[#00FF00]' : 'text-gray-500'}`}>
                           {item.day}
                         </span>
-                        {item.isPriority && (
+                        {(item.is_priority || item.isPriority) && (
                           <span className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse" title="Prioridade" />
                         )}
                       </div>
@@ -387,7 +447,7 @@ export default function Lembretes() {
                   <div className="flex items-center justify-between mt-auto">
                     <span className="text-[9px] uppercase font-bold tracking-widest text-gray-600 flex items-center gap-1.5">
                       <Clock className="h-2.5 w-2.5" />
-                      {idea.date}
+                      {user && idea.created_at ? formatTime(idea.created_at) : idea.date}
                     </span>
                     <button 
                       onClick={() => removeIdea(idea.id)}
