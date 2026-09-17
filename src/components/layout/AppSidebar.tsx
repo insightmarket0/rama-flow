@@ -105,16 +105,10 @@ const NAV_GROUPS = [
         { title: "Metas e Visão", url: "/metas", icon: Target },
       { title: "Playbooks (SOPs)", url: "/playbooks", icon: BookOpen },
       { title: "Instaladores Externos", url: "/instaladores", icon: Truck },
+        { title: "Gestão de Equipe", url: "/equipe", icon: Users },
     ]
   },
-  {
-    id: "equipe",
-    icon: Users,
-    title: "Equipe",
-    subItems: [
-      { title: "Gestão de Equipe", url: "/equipe", icon: Users },
-    ]
-  },
+  
   {
     id: "sistema",
     icon: Terminal,
