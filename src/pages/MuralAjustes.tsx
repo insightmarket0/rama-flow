@@ -222,6 +222,12 @@ export default function MuralAjustes() {
     
     const { data: insertedTicket, error } = await supabase.from('ajustes_tickets').insert(newTicket).select().single();
     
+    if (error) {
+      console.error("Erro Supabase:", error);
+      alert("Erro ao criar ticket: " + error.message);
+      return;
+    }
+    
     if (!error && insertedTicket) {
       await supabase.from('ajustes_auditoria').insert({
         action_type: 'created',
