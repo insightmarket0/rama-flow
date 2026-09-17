@@ -285,6 +285,13 @@ export default function MuralAjustes() {
     }
   };
 
+  const handleDeleteAudit = async (id: string) => {
+    const { error } = await supabase.from('ajustes_auditoria').delete().eq('id', id);
+    if (!error) {
+      fetchTicketsAndAudits();
+    }
+  };
+
   const filteredTickets = tickets.filter(t => {
     if (filter === "todos") return true;
     return t.marketplace.toLowerCase() === filter.toLowerCase();
@@ -492,7 +499,7 @@ export default function MuralAjustes() {
                 const timeStr = dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                 const isCritical = audit.priority === 'critico' || audit.action_type === 'alert';
                 return (
-                  <div key={audit.id} className="relative pl-6">
+                  <div key={audit.id} className="relative pl-6 group/audit">
                     <div className={`absolute left-[3px] top-1.5 w-2 h-2 rounded-full ${isCritical ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]' : 'bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.8)]'}`} />
                     <p className="text-[11px] text-gray-400 leading-snug mb-1">
                       <span className={isCritical ? "text-red-400 font-bold" : "text-white font-bold"}>{audit.user_name || 'Sistema'}</span> {audit.message}
@@ -505,6 +512,13 @@ export default function MuralAjustes() {
                     <div className="flex items-center gap-1 text-gray-600">
                       <Clock className="h-2.5 w-2.5" />
                       <span className="text-[8px] font-bold uppercase">{timeStr}</span>
+                      <button 
+                        onClick={() => handleDeleteAudit(audit.id)} 
+                        className="ml-auto opacity-0 group-hover/audit:opacity-100 transition-opacity text-gray-600 hover:text-red-500"
+                        title="Excluir histórico"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
                     </div>
                   </div>
                 )
