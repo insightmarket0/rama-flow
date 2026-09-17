@@ -319,7 +319,7 @@ export default function MuralAjustes() {
         </div>
 
       {/* Action Bar: Tabs + Search/Add */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-4">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-start gap-4 mb-4">
         {/* Tabs / Filters */}
         <div className="flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden">
         {['Todos', 'Shopee', 'Mercado Livre', 'Amazon', 'Geral'].map((m) => {
@@ -349,22 +349,23 @@ export default function MuralAjustes() {
       </div>
 
         {/* Search & Actions */}
-        <div className="flex gap-4 items-center shrink-0 ml-auto">
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 bg-[#00FF00] hover:bg-[#00FF00]/80 text-black px-4 py-1.5 rounded-lg text-xs font-bold transition-all shadow-[0_0_15px_rgba(0,255,0,0.3)] hover:shadow-[0_0_20px_rgba(0,255,0,0.4)] uppercase tracking-wider"
-          >
-            <Plus className="h-4 w-4" />
-            Novo Ticket
-          </button>
+        <div className="flex gap-4 items-center shrink-0">
+
           <div className="relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-500 group-focus-within:text-[#00FF00] transition-colors" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-500 group-focus-within:text-[#00FF00] transition-colors" />
             <input 
               type="text" 
               placeholder="Buscar SKU ou tarefa..." 
-              className="pl-9 pr-4 py-1.5 bg-[#0a0a0a] border border-white/5 rounded-lg text-xs text-white focus:outline-none focus:border-[#00FF00]/50 focus:shadow-[0_0_10px_rgba(0,255,0,0.1)] transition-all w-48 xl:w-64"
+              className="pl-9 pr-3 py-1 bg-[#0a0a0a] border border-white/5 rounded-lg text-xs text-white focus:outline-none focus:border-[#00FF00]/50 focus:shadow-[0_0_10px_rgba(0,255,0,0.1)] transition-all w-64"
             />
           </div>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 bg-[#00FF00] hover:bg-[#00FF00]/80 text-black px-3 py-1 rounded-md text-xs font-bold transition-all shadow-[0_0_15px_rgba(0,255,0,0.3)] hover:shadow-[0_0_20px_rgba(0,255,0,0.4)]"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Novo Ticket
+          </button>
         </div>
       </div>
 
