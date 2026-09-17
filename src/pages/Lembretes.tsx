@@ -137,7 +137,7 @@ export default function Lembretes() {
   };
 
   return (
-    <div className="flex-1 p-4 md:p-8 pt-6 animate-in fade-in duration-500 max-w-[1400px] mx-auto w-full font-sans">
+    <div className="flex-1 p-4 md:p-8 pt-6 animate-in fade-in duration-500 max-w-[1400px] mx-auto w-full font-sans flex flex-col min-h-0 overflow-hidden">
       
       {/* Header Intimista */}
       <div className="mb-8 border-b border-white/5 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -179,7 +179,7 @@ export default function Lembretes() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1 min-h-0 overflow-y-auto pr-2 pb-20 custom-scrollbar">
         
         {/* COLUNA 1: Agenda / Lembretes */}
         <div className="space-y-6">
