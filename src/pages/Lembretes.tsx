@@ -20,19 +20,19 @@ const MOCK_IDEAS = [
     id: "1",
     content: "Talvez criar um playbook específico sobre como tratar devoluções de eletrônicos no Mercado Livre. Temos tido muitas dúvidas nisso.",
     date: "Hoje às 10:45",
-    color: "bg-blue-500/10 border-blue-500/20 text-blue-100",
+    color: "bg-blue-500",
   },
   {
     id: "2",
     content: "Revisar as descrições da linha de Cozinha. O CTR caiu um pouco, podemos colocar os bullet points no topo.",
     date: "Ontem às 16:30",
-    color: "bg-[#00FF00]/10 border-[#00FF00]/20 text-[#00FF00]",
+    color: "bg-[#00FF00]",
   },
   {
     id: "3",
     content: "Lembrar de pedir para o marketing as fotos de life-style dos produtos novos.",
     date: "19/07 às 09:12",
-    color: "bg-purple-500/10 border-purple-500/20 text-purple-100",
+    color: "bg-purple-500",
   }
 ];
 
@@ -50,19 +50,17 @@ const MOCK_AGENDA = [
 ];
 
 export default function Lembretes() {
-  const [quickThought, setQuickThought] = useState("");
   const [ideas, setIdeas] = useState(MOCK_IDEAS);
   const [checklist, setChecklist] = useState(MOCK_CHECKLIST);
-  
-  // Agenda State
   const [agenda, setAgenda] = useState(MOCK_AGENDA);
+  
+  const [quickThought, setQuickThought] = useState("");
   const [showAgendaForm, setShowAgendaForm] = useState(false);
+  const [showChecklistForm, setShowChecklistForm] = useState(false);
+  
   const [newAgendaTitle, setNewAgendaTitle] = useState("");
   const [newAgendaDate, setNewAgendaDate] = useState("");
   const [newAgendaTime, setNewAgendaTime] = useState("");
-
-  // Checklist State
-  const [showChecklistForm, setShowChecklistForm] = useState(false);
   const [newChecklistTitle, setNewChecklistTitle] = useState("");
 
   const handleAddThought = (e: React.FormEvent) => {
@@ -70,11 +68,11 @@ export default function Lembretes() {
     if (!quickThought.trim()) return;
 
     const colors = [
-      "bg-blue-500/10 border-blue-500/20 text-blue-100",
-      "bg-[#00FF00]/10 border-[#00FF00]/20 text-[#00FF00]",
-      "bg-purple-500/10 border-purple-500/20 text-purple-100",
-      "bg-orange-500/10 border-orange-500/20 text-orange-100",
-      "bg-pink-500/10 border-pink-500/20 text-pink-100",
+      "bg-blue-500",
+      "bg-[#00FF00]",
+      "bg-purple-500",
+      "bg-orange-500",
+      "bg-pink-500",
     ];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
@@ -136,11 +134,15 @@ export default function Lembretes() {
     setAgenda(agenda.filter(item => item.id !== id));
   };
 
+  const removeIdea = (id: string) => {
+    setIdeas(ideas.filter(item => item.id !== id));
+  };
+
   return (
     <div className="flex-1 p-4 md:p-8 pt-6 animate-in fade-in duration-500 max-w-[1400px] mx-auto w-full font-sans flex flex-col min-h-0 overflow-hidden">
       
       {/* Header Intimista */}
-      <div className="mb-8 border-b border-white/5 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div className="mb-8 border-b border-white/5 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 shrink-0">
         <div>
           <div className="mb-2">
             <h1 className="text-3xl md:text-4xl font-light text-white tracking-tight flex items-center gap-2">
@@ -152,27 +154,26 @@ export default function Lembretes() {
           </p>
         </div>
 
-        {/* Módulo de Captura Rápida no Topo */}
+        {/* Módulo de Captura Rápida no Topo (Stealth Input) */}
         <div className="w-full md:w-[450px]">
           <form onSubmit={handleAddThought} className="relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-[#00FF00]/30 to-blue-500/30 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
-            <div className="relative flex items-center bg-[#111315]/90 border border-white/10 rounded-2xl shadow-xl overflow-hidden backdrop-blur-sm">
+            <div className="relative flex items-center bg-[#0A0A0A] border border-white/5 group-focus-within:border-[#00FF00]/40 rounded-xl overflow-hidden transition-all shadow-lg group-focus-within:shadow-[0_0_20px_rgba(0,255,0,0.05)]">
               <div className="pl-4">
-                <BrainCircuit className="h-5 w-5 text-gray-400 group-focus-within:text-[#00FF00] transition-colors" />
+                <BrainCircuit className="h-4 w-4 text-gray-500 group-focus-within:text-[#00FF00] transition-colors" />
               </div>
               <input 
                 type="text" 
                 value={quickThought}
                 onChange={(e) => setQuickThought(e.target.value)}
                 placeholder="O que está na sua mente agora?"
-                className="w-full bg-transparent border-none text-white text-sm px-4 py-4 focus:outline-none placeholder:text-gray-600"
+                className="w-full bg-transparent border-none text-white text-xs px-3 py-3 focus:outline-none placeholder:text-gray-600"
               />
               <button 
                 type="submit"
                 disabled={!quickThought.trim()}
-                className="pr-4 pl-2 text-gray-500 hover:text-[#00FF00] disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                className="pr-4 pl-2 text-gray-600 hover:text-[#00FF00] disabled:opacity-30 disabled:hover:text-gray-600 transition-colors"
               >
-                <Send className="h-5 w-5" />
+                <Send className="h-4 w-4" />
               </button>
             </div>
           </form>
@@ -185,80 +186,80 @@ export default function Lembretes() {
         <div className="space-y-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-xl font-bold text-white flex items-center gap-2">
-              <Calendar className="h-6 w-6 text-orange-400" />
+              <Calendar className="h-5 w-5 text-[#00FF00]" />
               Minha Agenda
             </h3>
             <button 
               onClick={() => setShowAgendaForm(!showAgendaForm)}
-              className="text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 p-1.5 rounded-lg transition-colors"
+              className="text-gray-500 hover:text-[#00FF00] hover:bg-white/5 p-1.5 rounded-lg transition-colors"
             >
               {showAgendaForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
             </button>
           </div>
 
           {showAgendaForm && (
-            <form onSubmit={handleAddAgenda} className="bg-[#111315]/80 backdrop-blur-md border border-white/10 rounded-2xl p-4 shadow-xl animate-in slide-in-from-top-2">
+            <form onSubmit={handleAddAgenda} className="bg-[#111111] border border-[#00FF00]/20 rounded-2xl p-4 shadow-xl animate-in slide-in-from-top-2">
               <input
                 type="text"
-                placeholder="Ex: Almoço com cliente"
+                placeholder="Título do compromisso"
                 value={newAgendaTitle}
                 onChange={(e) => setNewAgendaTitle(e.target.value)}
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-orange-500/50 mb-3"
+                className="w-full bg-[#0a0a0a] border border-white/5 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00FF00]/50 mb-2"
                 autoFocus
               />
               <div className="flex gap-2">
                 <input
                   type="text"
-                  placeholder="Data (ex: HOJE, 25/07)"
+                  placeholder="Ex: HOJE"
                   value={newAgendaDate}
-                  onChange={(e) => setNewAgendaDate(e.target.value.toUpperCase())}
-                  className="w-1/2 bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-orange-500/50"
+                  onChange={(e) => setNewAgendaDate(e.target.value)}
+                  className="w-1/2 bg-[#0a0a0a] border border-white/5 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00FF00]/50"
                 />
                 <input
                   type="text"
-                  placeholder="Horário (ex: 12:30)"
+                  placeholder="Ex: 14:00"
                   value={newAgendaTime}
                   onChange={(e) => setNewAgendaTime(e.target.value)}
-                  className="w-1/2 bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-orange-500/50"
+                  className="w-1/2 bg-[#0a0a0a] border border-white/5 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00FF00]/50"
                 />
               </div>
-              <button type="submit" className="w-full mt-3 bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/20 rounded-xl px-4 py-2 text-sm font-bold transition-colors">
-                Salvar Compromisso
+              <button type="submit" className="w-full mt-3 bg-white/5 hover:bg-[#00FF00]/20 text-white hover:text-[#00FF00] border border-white/5 hover:border-[#00FF00]/30 rounded-lg py-2 text-xs font-bold transition-all uppercase tracking-wider">
+                Adicionar
               </button>
             </form>
           )}
 
-          <div className="bg-[#111315]/50 backdrop-blur-sm border border-white/5 rounded-[2rem] p-6 shadow-lg relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-yellow-500"></div>
-            
-            <div className="space-y-6 mt-2">
+          <div className="bg-[#111111] border border-[#00FF00]/20 rounded-3xl p-6 shadow-[0_0_30px_rgba(0,255,0,0.02)] relative overflow-hidden">
+            <div className="space-y-1">
               {agenda.length === 0 && (
-                <p className="text-gray-500 text-sm text-center py-4">Sua agenda está livre!</p>
+                <p className="text-gray-600 text-xs font-bold uppercase tracking-widest text-center py-4">Sua agenda está livre!</p>
               )}
               {agenda.map((item, index) => (
-                <React.Fragment key={item.id}>
-                  <div className="flex gap-4 items-start group cursor-pointer relative">
-                    <button 
-                      onClick={() => removeAgenda(item.id)}
-                      className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 p-1 hover:bg-white/10 rounded text-gray-500 hover:text-red-400 transition-all"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                    <div className={`w-12 h-12 rounded-2xl flex flex-col items-center justify-center shrink-0 transition-colors ${item.day === 'HOJE' ? 'bg-orange-500/10 border border-orange-500/30 group-hover:bg-orange-500/20' : 'bg-white/5 border border-white/10 group-hover:bg-white/10'}`}>
-                      <span className={`text-[9px] font-black uppercase tracking-wider ${item.day === 'HOJE' ? 'text-orange-500' : 'text-gray-400'}`}>{item.day}</span>
-                    </div>
-                    <div className={`pt-1 ${item.day !== 'HOJE' ? 'opacity-70 group-hover:opacity-100 transition-opacity' : ''}`}>
-                      <p className="text-sm font-bold text-white mb-0.5">{item.title}</p>
-                      <p className="text-xs text-gray-400 flex items-center gap-1 mb-1">
-                        <Clock className="h-3 w-3" /> {item.time}
-                      </p>
+                <div key={item.id} className="group relative py-2.5 border-b border-white/5 last:border-0 flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`text-[9px] font-bold uppercase tracking-widest ${item.day === 'HOJE' ? 'text-[#00FF00]' : 'text-gray-500'}`}>
+                        {item.day}
+                      </span>
                       {item.isPriority && (
-                        <span className="text-[10px] bg-orange-500/10 text-orange-400 border border-orange-500/20 px-2 py-0.5 rounded uppercase font-bold tracking-wider inline-block">Prioridade</span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse" title="Prioridade" />
                       )}
                     </div>
+                    <p className={`text-xs font-medium truncate ${item.day === 'HOJE' ? 'text-white' : 'text-gray-400'}`}>
+                      {item.title}
+                    </p>
+                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-1 mt-1">
+                      <Clock className="h-2.5 w-2.5" /> {item.time}
+                    </p>
                   </div>
-                  {index < agenda.length - 1 && <div className="w-full h-px bg-white/5"></div>}
-                </React.Fragment>
+                  <button 
+                    onClick={() => removeAgenda(item.id)}
+                    className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-white/5 rounded-md text-gray-600 hover:text-red-500 transition-all shrink-0 mt-1"
+                    title="Excluir"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               ))}
             </div>
           </div>
@@ -268,76 +269,71 @@ export default function Lembretes() {
         <div className="space-y-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-xl font-bold text-white flex items-center gap-2">
-              <ListTodo className="h-6 w-6 text-[#00FF00]" />
+              <ListTodo className="h-5 w-5 text-[#00FF00]" />
               Checklist do Dia
             </h3>
             <button 
               onClick={() => setShowChecklistForm(!showChecklistForm)}
-              className="text-gray-400 hover:text-[#00FF00] bg-white/5 hover:bg-white/10 p-1.5 rounded-lg transition-colors"
+              className="text-gray-500 hover:text-[#00FF00] hover:bg-white/5 p-1.5 rounded-lg transition-colors"
             >
               {showChecklistForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
             </button>
           </div>
           
           {showChecklistForm && (
-            <form onSubmit={handleAddChecklist} className="bg-[#111315]/80 backdrop-blur-md border border-white/10 rounded-2xl p-4 shadow-xl animate-in slide-in-from-top-2">
+            <form onSubmit={handleAddChecklist} className="bg-[#111111] border border-[#00FF00]/20 rounded-2xl p-4 shadow-xl animate-in slide-in-from-top-2">
               <div className="flex gap-2">
                 <input
                   type="text"
                   placeholder="Ex: Enviar relatório"
                   value={newChecklistTitle}
                   onChange={(e) => setNewChecklistTitle(e.target.value)}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00FF00]/50"
+                  className="w-full bg-[#0a0a0a] border border-white/5 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00FF00]/50"
                   autoFocus
                 />
-                <button type="submit" className="bg-[#00FF00]/20 hover:bg-[#00FF00]/30 text-[#00FF00] border border-[#00FF00]/20 rounded-xl px-4 text-sm font-bold transition-colors">
+                <button type="submit" className="bg-[#00FF00]/10 hover:bg-[#00FF00]/20 text-[#00FF00] border border-[#00FF00]/20 rounded-lg px-4 text-xs font-bold uppercase tracking-wider transition-colors">
                   Add
                 </button>
               </div>
             </form>
           )}
 
-          <div className="bg-[#111315]/80 backdrop-blur-md border border-white/5 rounded-[2rem] p-6 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-[#00FF00]"></div>
-
-            <div className="space-y-3 mt-2">
+          <div className="bg-[#111111] border border-[#00FF00]/20 rounded-3xl p-6 shadow-[0_0_30px_rgba(0,255,0,0.02)] relative overflow-hidden">
+            <div className="space-y-1">
               {checklist.length === 0 && (
-                <p className="text-gray-500 text-sm text-center py-4">Sua lista está limpa!</p>
+                <p className="text-gray-600 text-xs font-bold uppercase tracking-widest text-center py-4">Sua lista está limpa!</p>
               )}
               {checklist.map(task => (
                 <div 
                   key={task.id}
                   onClick={() => toggleTask(task.id)}
-                  className={`group flex items-start justify-between gap-3 p-3.5 rounded-2xl cursor-pointer transition-all border relative ${
-                    task.done 
-                      ? "bg-white/5 border-transparent opacity-50" 
-                      : "bg-[#0a0a0a]/50 border-white/5 hover:border-white/10 hover:bg-white/10"
-                  }`}
+                  className="group flex items-center justify-between gap-3 py-2.5 cursor-pointer transition-all border-b border-white/5 last:border-0 relative"
                 >
                   <div className="flex items-start gap-3 w-full pr-6">
-                    <button className="mt-0.5 shrink-0 transition-colors">
+                    <button className="shrink-0 transition-colors mt-0.5">
                       {task.done 
-                        ? <CheckCircle2 className="h-5 w-5 text-[#00FF00]" /> 
-                        : <CircleDashed className="h-5 w-5 text-gray-500 group-hover:text-[#00FF00]" />
+                        ? <CheckCircle2 className="h-4 w-4 text-[#00FF00]/50" /> 
+                        : <CircleDashed className="h-4 w-4 text-gray-600 group-hover:text-[#00FF00]" />
                       }
                     </button>
-                    <span className={`text-sm font-medium leading-relaxed ${task.done ? "text-gray-500 line-through" : "text-gray-200"}`}>
+                    <span className={`text-xs font-medium leading-relaxed ${task.done ? "text-gray-600 line-through" : "text-gray-300"}`}>
                       {task.title}
                     </span>
                   </div>
                   <button 
                     onClick={(e) => removeChecklist(task.id, e)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-1.5 hover:bg-white/10 rounded-lg text-gray-500 hover:text-red-400 transition-all"
+                    className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-1.5 hover:bg-white/5 rounded-md text-gray-600 hover:text-red-500 transition-all"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 </div>
               ))}
             </div>
             
-            {checklist.every(t => t.done) && (
-              <div className="mt-6 text-center border border-dashed border-[#00FF00]/30 bg-[#00FF00]/10 rounded-2xl p-4">
-                <p className="text-[10px] font-bold text-[#00FF00] uppercase tracking-widest">Você concluiu tudo!</p>
+            {checklist.length > 0 && checklist.every(t => t.done) && (
+              <div className="mt-4 flex items-center justify-center gap-2">
+                <span className="text-[9px] font-bold text-[#00FF00]/50 uppercase tracking-widest">Você concluiu tudo</span>
+                <CheckCircle2 className="h-3 w-3 text-[#00FF00]/50" />
               </div>
             )}
           </div>
@@ -347,30 +343,42 @@ export default function Lembretes() {
         <div className="space-y-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-xl font-bold text-white flex items-center gap-2">
-              <Lightbulb className="h-6 w-6 text-[#00FF00] drop-shadow-[0_0_8px_rgba(0,255,0,0.4)]" />
+              <Lightbulb className="h-5 w-5 text-[#00FF00]" />
               Ideias Avulsas
             </h3>
-            <span className="text-[10px] font-bold uppercase tracking-widest bg-white/5 border border-white/10 text-gray-400 px-3 py-1.5 rounded-lg">
+            <span className="text-[9px] font-bold uppercase tracking-widest bg-white/5 border border-white/10 text-gray-500 px-2 py-1 rounded">
               {ideas.length} Notas
             </span>
           </div>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
+            {ideas.length === 0 && (
+              <div className="bg-[#111111] border border-[#00FF00]/20 rounded-3xl p-6 shadow-[0_0_30px_rgba(0,255,0,0.02)] flex items-center justify-center">
+                <p className="text-gray-600 text-xs font-bold uppercase tracking-widest text-center py-4">Nenhuma ideia anotada</p>
+              </div>
+            )}
             {ideas.map(idea => (
               <div 
                 key={idea.id} 
-                className={`relative group p-6 rounded-3xl border backdrop-blur-sm shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between ${idea.color}`}
+                className="relative group p-5 rounded-3xl bg-[#111111] border border-[#00FF00]/20 shadow-[0_0_30px_rgba(0,255,0,0.05)] hover:border-[#00FF00]/40 transition-all duration-300 flex flex-col justify-between"
               >
-                <p className="text-sm leading-relaxed mb-6 font-medium text-white/90">
+                <div className="absolute top-4 right-4">
+                  <div className={`w-1.5 h-1.5 rounded-full ${idea.color}`} />
+                </div>
+                <p className="text-xs leading-relaxed mb-5 font-light text-gray-300 pr-4">
                   {idea.content}
                 </p>
                 <div className="flex items-center justify-between mt-auto">
-                  <span className="text-[10px] uppercase font-bold tracking-wider opacity-60 flex items-center gap-1.5">
-                    <Clock className="h-3 w-3" />
+                  <span className="text-[9px] uppercase font-bold tracking-widest text-gray-600 flex items-center gap-1.5">
+                    <Clock className="h-2.5 w-2.5" />
                     {idea.date}
                   </span>
-                  <button className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-black/20 rounded-lg">
-                    <MoreVertical className="h-4 w-4" />
+                  <button 
+                    onClick={() => removeIdea(idea.id)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 text-gray-600 hover:text-red-500 hover:bg-white/5 rounded-md"
+                    title="Excluir ideia"
+                  >
+                    <X className="h-3 w-3" />
                   </button>
                 </div>
               </div>
