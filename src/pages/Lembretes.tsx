@@ -361,37 +361,68 @@ export default function Lembretes() {
             )}
 
             <div className="bg-[#111111] border border-[#00FF00]/20 rounded-3xl p-6 shadow-[0_0_30px_rgba(0,255,0,0.02)] relative overflow-hidden shrink-0">
-              <div className="space-y-1">
+              <div className="space-y-3">
                 {agenda.length === 0 && (
                   <p className="text-gray-600 text-xs font-bold uppercase tracking-widest text-center py-4">Sua agenda está livre!</p>
                 )}
-                {agenda.map((item, index) => (
-                  <div key={item.id} className="group relative py-2.5 border-b border-white/5 last:border-0 flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`text-[9px] font-bold uppercase tracking-widest ${item.day === 'HOJE' ? 'text-[#00FF00]' : 'text-gray-500'}`}>
-                          {formatAgendaDay(item.day)}
-                        </span>
-                        {(item.is_priority || item.isPriority) && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse" title="Prioridade" />
-                        )}
+                {agenda.map((item) => {
+                    const displayDay = formatAgendaDay(item.day);
+                    let topText = "";
+                    let bottomText = "";
+                    
+                    if (displayDay === "HOJE") {
+                      topText = "DIA";
+                      bottomText = "HOJE";
+                    } else if (displayDay === "AMANHÃ") {
+                      topText = "DIA";
+                      bottomText = "AMANHÃ";
+                    } else {
+                      const parts = displayDay.split('/');
+                      if (parts.length === 2) {
+                        topText = "MÊS " + parts[1];
+                        bottomText = parts[0];
+                      } else {
+                        topText = "DIA";
+                        bottomText = displayDay;
+                      }
+                    }
+
+                    return (
+                      <div key={item.id} className="bg-[#0a0a0a]/50 backdrop-blur-sm rounded-2xl p-2.5 border border-white/5 relative group hover:border-[#00FF00]/30 hover:bg-[#111111] transition-all flex items-center gap-3 overflow-hidden">
+                        <div className={`absolute left-0 top-0 bottom-0 w-1 ${displayDay === 'HOJE' ? 'bg-gradient-to-b from-[#00FF00] to-[#00FF00]/20' : 'bg-white/5'} transition-colors`} />
+
+                        <div className={`flex flex-col items-center justify-center rounded-xl w-12 h-12 shrink-0 border ml-1 ${displayDay === 'HOJE' ? 'bg-[#00FF00]/10 border-[#00FF00]/20' : 'bg-white/5 border-white/5'}`}>
+                          <span className={`text-[7px] uppercase tracking-widest font-bold mb-0.5 ${displayDay === 'HOJE' ? 'text-[#00FF00]/70' : 'text-gray-500'}`}>
+                            {topText}
+                          </span>
+                          <span className={`font-black leading-none ${displayDay === 'HOJE' || displayDay === 'AMANHÃ' ? 'text-[9px]' : 'text-lg'} ${displayDay === 'HOJE' ? 'text-[#00FF00]' : 'text-gray-200'}`}>
+                            {bottomText}
+                          </span>
+                        </div>
+
+                        <div className="flex-1 min-w-0 py-0.5">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className={`text-sm font-semibold truncate ${displayDay === 'HOJE' ? 'text-white' : 'text-gray-300'}`}>{item.title}</h4>
+                            {(item.is_priority || item.isPriority) && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse shrink-0" title="Prioridade" />
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1.5 text-gray-500">
+                            <Clock className="h-3 w-3 text-[#00FF00]/50" />
+                            <span className="text-[9px] font-bold tracking-widest uppercase">{item.time}</span>
+                          </div>
+                        </div>
+
+                        <button 
+                          onClick={() => removeAgenda(item.id)}
+                          className="opacity-0 group-hover:opacity-100 p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all shrink-0"
+                          title="Excluir"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
                       </div>
-                      <p className={`text-xs font-medium truncate ${item.day === 'HOJE' ? 'text-white' : 'text-gray-400'}`}>
-                        {item.title}
-                      </p>
-                      <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-1 mt-1">
-                        <Clock className="h-2.5 w-2.5" /> {item.time}
-                      </p>
-                    </div>
-                    <button 
-                      onClick={() => removeAgenda(item.id)}
-                      className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-white/5 rounded-md text-gray-600 hover:text-red-500 transition-all shrink-0 mt-1"
-                      title="Excluir"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                ))}
+                    );
+                  })}
               </div>
             </div>
           </div>
