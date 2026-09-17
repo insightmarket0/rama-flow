@@ -100,7 +100,7 @@ export default function Lembretes() {
       title: newAgendaTitle,
       day: newAgendaDate || "HOJE",
       time: newAgendaTime || "O dia todo",
-      isPriority: true // Colocando como prioridade apenas para destaque
+      isPriority: true
     };
 
     setAgenda([newItem, ...agenda]);
@@ -142,7 +142,7 @@ export default function Lembretes() {
     <div className="flex-1 p-4 md:p-8 pt-6 animate-in fade-in duration-500 max-w-[1400px] mx-auto w-full font-sans flex flex-col min-h-0 overflow-hidden">
       
       {/* Header Intimista */}
-      <div className="mb-8 border-b border-white/5 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 shrink-0">
+      <div className="mb-6 border-b border-white/5 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-6 shrink-0">
         <div>
           <div className="mb-2">
             <h1 className="text-3xl md:text-4xl font-light text-white tracking-tight flex items-center gap-2">
@@ -180,11 +180,12 @@ export default function Lembretes() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1 min-h-0 overflow-y-auto pr-2 pb-20 custom-scrollbar">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1 min-h-0 overflow-hidden pb-4">
         
         {/* COLUNA 1: Agenda / Lembretes */}
-        <div className="space-y-6">
-          <div className="flex items-center justify-between mb-2">
+        <div className="flex flex-col min-h-0">
+          {/* Header Fixo */}
+          <div className="flex items-center justify-between mb-4 shrink-0 px-1">
             <h3 className="text-xl font-bold text-white flex items-center gap-2">
               <Calendar className="h-5 w-5 text-[#00FF00]" />
               Minha Agenda
@@ -197,77 +198,81 @@ export default function Lembretes() {
             </button>
           </div>
 
-          {showAgendaForm && (
-            <form onSubmit={handleAddAgenda} className="bg-[#111111] border border-[#00FF00]/20 rounded-2xl p-4 shadow-xl animate-in slide-in-from-top-2">
-              <input
-                type="text"
-                placeholder="Título do compromisso"
-                value={newAgendaTitle}
-                onChange={(e) => setNewAgendaTitle(e.target.value)}
-                className="w-full bg-[#0a0a0a] border border-white/5 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00FF00]/50 mb-2"
-                autoFocus
-              />
-              <div className="flex gap-2">
+          {/* Área Rolável */}
+          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-2 space-y-4">
+            {showAgendaForm && (
+              <form onSubmit={handleAddAgenda} className="bg-[#111111] border border-white/5 border-t border-t-[#00FF00]/30 rounded-2xl p-4 shadow-xl animate-in slide-in-from-top-2 shrink-0">
                 <input
                   type="text"
-                  placeholder="Ex: HOJE"
-                  value={newAgendaDate}
-                  onChange={(e) => setNewAgendaDate(e.target.value)}
-                  className="w-1/2 bg-[#0a0a0a] border border-white/5 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00FF00]/50"
+                  placeholder="Título do compromisso"
+                  value={newAgendaTitle}
+                  onChange={(e) => setNewAgendaTitle(e.target.value)}
+                  className="w-full bg-[#0a0a0a] border border-white/5 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00FF00]/50 mb-2"
+                  autoFocus
                 />
-                <input
-                  type="text"
-                  placeholder="Ex: 14:00"
-                  value={newAgendaTime}
-                  onChange={(e) => setNewAgendaTime(e.target.value)}
-                  className="w-1/2 bg-[#0a0a0a] border border-white/5 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00FF00]/50"
-                />
-              </div>
-              <button type="submit" className="w-full mt-3 bg-white/5 hover:bg-[#00FF00]/20 text-white hover:text-[#00FF00] border border-white/5 hover:border-[#00FF00]/30 rounded-lg py-2 text-xs font-bold transition-all uppercase tracking-wider">
-                Adicionar
-              </button>
-            </form>
-          )}
-
-          <div className="bg-[#111111] border border-[#00FF00]/20 rounded-3xl p-6 shadow-[0_0_30px_rgba(0,255,0,0.02)] relative overflow-hidden">
-            <div className="space-y-1">
-              {agenda.length === 0 && (
-                <p className="text-gray-600 text-xs font-bold uppercase tracking-widest text-center py-4">Sua agenda está livre!</p>
-              )}
-              {agenda.map((item, index) => (
-                <div key={item.id} className="group relative py-2.5 border-b border-white/5 last:border-0 flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`text-[9px] font-bold uppercase tracking-widest ${item.day === 'HOJE' ? 'text-[#00FF00]' : 'text-gray-500'}`}>
-                        {item.day}
-                      </span>
-                      {item.isPriority && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse" title="Prioridade" />
-                      )}
-                    </div>
-                    <p className={`text-xs font-medium truncate ${item.day === 'HOJE' ? 'text-white' : 'text-gray-400'}`}>
-                      {item.title}
-                    </p>
-                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-1 mt-1">
-                      <Clock className="h-2.5 w-2.5" /> {item.time}
-                    </p>
-                  </div>
-                  <button 
-                    onClick={() => removeAgenda(item.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-white/5 rounded-md text-gray-600 hover:text-red-500 transition-all shrink-0 mt-1"
-                    title="Excluir"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Ex: HOJE"
+                    value={newAgendaDate}
+                    onChange={(e) => setNewAgendaDate(e.target.value)}
+                    className="w-1/2 bg-[#0a0a0a] border border-white/5 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00FF00]/50"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Ex: 14:00"
+                    value={newAgendaTime}
+                    onChange={(e) => setNewAgendaTime(e.target.value)}
+                    className="w-1/2 bg-[#0a0a0a] border border-white/5 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00FF00]/50"
+                  />
                 </div>
-              ))}
+                <button type="submit" className="w-full mt-3 bg-white/5 hover:bg-[#00FF00]/20 text-white hover:text-[#00FF00] border border-white/5 hover:border-[#00FF00]/30 rounded-lg py-2 text-xs font-bold transition-all uppercase tracking-wider">
+                  Adicionar
+                </button>
+              </form>
+            )}
+
+            <div className="bg-[#111111] border border-[#00FF00]/20 rounded-3xl p-6 shadow-[0_0_30px_rgba(0,255,0,0.02)] relative overflow-hidden shrink-0">
+              <div className="space-y-1">
+                {agenda.length === 0 && (
+                  <p className="text-gray-600 text-xs font-bold uppercase tracking-widest text-center py-4">Sua agenda está livre!</p>
+                )}
+                {agenda.map((item, index) => (
+                  <div key={item.id} className="group relative py-2.5 border-b border-white/5 last:border-0 flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`text-[9px] font-bold uppercase tracking-widest ${item.day === 'HOJE' ? 'text-[#00FF00]' : 'text-gray-500'}`}>
+                          {item.day}
+                        </span>
+                        {item.isPriority && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse" title="Prioridade" />
+                        )}
+                      </div>
+                      <p className={`text-xs font-medium truncate ${item.day === 'HOJE' ? 'text-white' : 'text-gray-400'}`}>
+                        {item.title}
+                      </p>
+                      <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-1 mt-1">
+                        <Clock className="h-2.5 w-2.5" /> {item.time}
+                      </p>
+                    </div>
+                    <button 
+                      onClick={() => removeAgenda(item.id)}
+                      className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-white/5 rounded-md text-gray-600 hover:text-red-500 transition-all shrink-0 mt-1"
+                      title="Excluir"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
         {/* COLUNA 2: Checklist Pessoal */}
-        <div className="space-y-6">
-          <div className="flex items-center justify-between mb-2">
+        <div className="flex flex-col min-h-0">
+          {/* Header Fixo */}
+          <div className="flex items-center justify-between mb-4 shrink-0 px-1">
             <h3 className="text-xl font-bold text-white flex items-center gap-2">
               <ListTodo className="h-5 w-5 text-[#00FF00]" />
               Checklist do Dia
@@ -280,68 +285,72 @@ export default function Lembretes() {
             </button>
           </div>
           
-          {showChecklistForm && (
-            <form onSubmit={handleAddChecklist} className="bg-[#111111] border border-[#00FF00]/20 rounded-2xl p-4 shadow-xl animate-in slide-in-from-top-2">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Ex: Enviar relatório"
-                  value={newChecklistTitle}
-                  onChange={(e) => setNewChecklistTitle(e.target.value)}
-                  className="w-full bg-[#0a0a0a] border border-white/5 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00FF00]/50"
-                  autoFocus
-                />
-                <button type="submit" className="bg-[#00FF00]/10 hover:bg-[#00FF00]/20 text-[#00FF00] border border-[#00FF00]/20 rounded-lg px-4 text-xs font-bold uppercase tracking-wider transition-colors">
-                  Add
-                </button>
-              </div>
-            </form>
-          )}
-
-          <div className="bg-[#111111] border border-[#00FF00]/20 rounded-3xl p-6 shadow-[0_0_30px_rgba(0,255,0,0.02)] relative overflow-hidden">
-            <div className="space-y-1">
-              {checklist.length === 0 && (
-                <p className="text-gray-600 text-xs font-bold uppercase tracking-widest text-center py-4">Sua lista está limpa!</p>
-              )}
-              {checklist.map(task => (
-                <div 
-                  key={task.id}
-                  onClick={() => toggleTask(task.id)}
-                  className="group flex items-center justify-between gap-3 py-2.5 cursor-pointer transition-all border-b border-white/5 last:border-0 relative"
-                >
-                  <div className="flex items-start gap-3 w-full pr-6">
-                    <button className="shrink-0 transition-colors mt-0.5">
-                      {task.done 
-                        ? <CheckCircle2 className="h-4 w-4 text-[#00FF00]/50" /> 
-                        : <CircleDashed className="h-4 w-4 text-gray-600 group-hover:text-[#00FF00]" />
-                      }
-                    </button>
-                    <span className={`text-xs font-medium leading-relaxed ${task.done ? "text-gray-600 line-through" : "text-gray-300"}`}>
-                      {task.title}
-                    </span>
-                  </div>
-                  <button 
-                    onClick={(e) => removeChecklist(task.id, e)}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-1.5 hover:bg-white/5 rounded-md text-gray-600 hover:text-red-500 transition-all"
-                  >
-                    <X className="h-3.5 w-3.5" />
+          {/* Área Rolável */}
+          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-2 space-y-4">
+            {showChecklistForm && (
+              <form onSubmit={handleAddChecklist} className="bg-[#111111] border border-white/5 border-t border-t-[#00FF00]/30 rounded-2xl p-4 shadow-xl animate-in slide-in-from-top-2 shrink-0">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Ex: Enviar relatório"
+                    value={newChecklistTitle}
+                    onChange={(e) => setNewChecklistTitle(e.target.value)}
+                    className="w-full bg-[#0a0a0a] border border-white/5 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00FF00]/50"
+                    autoFocus
+                  />
+                  <button type="submit" className="bg-[#00FF00]/10 hover:bg-[#00FF00]/20 text-[#00FF00] border border-[#00FF00]/20 rounded-lg px-4 text-xs font-bold uppercase tracking-wider transition-colors">
+                    Add
                   </button>
                 </div>
-              ))}
-            </div>
-            
-            {checklist.length > 0 && checklist.every(t => t.done) && (
-              <div className="mt-4 flex items-center justify-center gap-2">
-                <span className="text-[9px] font-bold text-[#00FF00]/50 uppercase tracking-widest">Você concluiu tudo</span>
-                <CheckCircle2 className="h-3 w-3 text-[#00FF00]/50" />
-              </div>
+              </form>
             )}
+
+            <div className="bg-[#111111] border border-[#00FF00]/20 rounded-3xl p-6 shadow-[0_0_30px_rgba(0,255,0,0.02)] relative overflow-hidden shrink-0">
+              <div className="space-y-1">
+                {checklist.length === 0 && (
+                  <p className="text-gray-600 text-xs font-bold uppercase tracking-widest text-center py-4">Sua lista está limpa!</p>
+                )}
+                {checklist.map(task => (
+                  <div 
+                    key={task.id}
+                    onClick={() => toggleTask(task.id)}
+                    className="group flex items-center justify-between gap-3 py-2.5 cursor-pointer transition-all border-b border-white/5 last:border-0 relative"
+                  >
+                    <div className="flex items-start gap-3 w-full pr-6">
+                      <button className="shrink-0 transition-colors mt-0.5">
+                        {task.done 
+                          ? <CheckCircle2 className="h-4 w-4 text-[#00FF00]/50" /> 
+                          : <CircleDashed className="h-4 w-4 text-gray-600 group-hover:text-[#00FF00]" />
+                        }
+                      </button>
+                      <span className={`text-xs font-medium leading-relaxed ${task.done ? "text-gray-600 line-through" : "text-gray-300"}`}>
+                        {task.title}
+                      </span>
+                    </div>
+                    <button 
+                      onClick={(e) => removeChecklist(task.id, e)}
+                      className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-1.5 hover:bg-white/5 rounded-md text-gray-600 hover:text-red-500 transition-all"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              
+              {checklist.length > 0 && checklist.every(t => t.done) && (
+                <div className="mt-4 flex items-center justify-center gap-2">
+                  <span className="text-[9px] font-bold text-[#00FF00]/50 uppercase tracking-widest">Você concluiu tudo</span>
+                  <CheckCircle2 className="h-3 w-3 text-[#00FF00]/50" />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {/* COLUNA 3: Ideias e Rascunhos */}
-        <div className="space-y-6">
-          <div className="flex items-center justify-between mb-2">
+        <div className="flex flex-col min-h-0">
+          {/* Header Fixo */}
+          <div className="flex items-center justify-between mb-4 shrink-0 px-1">
             <h3 className="text-xl font-bold text-white flex items-center gap-2">
               <Lightbulb className="h-5 w-5 text-[#00FF00]" />
               Ideias Avulsas
@@ -351,38 +360,41 @@ export default function Lembretes() {
             </span>
           </div>
 
-          <div className="flex flex-col gap-3">
-            {ideas.length === 0 && (
-              <div className="bg-[#111111] border border-[#00FF00]/20 rounded-3xl p-6 shadow-[0_0_30px_rgba(0,255,0,0.02)] flex items-center justify-center">
-                <p className="text-gray-600 text-xs font-bold uppercase tracking-widest text-center py-4">Nenhuma ideia anotada</p>
-              </div>
-            )}
-            {ideas.map(idea => (
-              <div 
-                key={idea.id} 
-                className="relative group p-5 rounded-3xl bg-[#111111] border border-[#00FF00]/20 shadow-[0_0_30px_rgba(0,255,0,0.05)] hover:border-[#00FF00]/40 transition-all duration-300 flex flex-col justify-between"
-              >
-                <div className="absolute top-4 right-4">
-                  <div className={`w-1.5 h-1.5 rounded-full ${idea.color}`} />
+          {/* Área Rolável */}
+          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-2">
+            <div className="flex flex-col gap-3">
+              {ideas.length === 0 && (
+                <div className="bg-[#111111] border border-[#00FF00]/20 rounded-3xl p-6 shadow-[0_0_30px_rgba(0,255,0,0.02)] flex items-center justify-center">
+                  <p className="text-gray-600 text-xs font-bold uppercase tracking-widest text-center py-4">Nenhuma ideia anotada</p>
                 </div>
-                <p className="text-xs leading-relaxed mb-5 font-light text-gray-300 pr-4">
-                  {idea.content}
-                </p>
-                <div className="flex items-center justify-between mt-auto">
-                  <span className="text-[9px] uppercase font-bold tracking-widest text-gray-600 flex items-center gap-1.5">
-                    <Clock className="h-2.5 w-2.5" />
-                    {idea.date}
-                  </span>
-                  <button 
-                    onClick={() => removeIdea(idea.id)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 text-gray-600 hover:text-red-500 hover:bg-white/5 rounded-md"
-                    title="Excluir ideia"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
+              )}
+              {ideas.map(idea => (
+                <div 
+                  key={idea.id} 
+                  className="relative group p-5 rounded-3xl bg-[#111111] border border-[#00FF00]/20 shadow-[0_0_30px_rgba(0,255,0,0.05)] hover:border-[#00FF00]/40 transition-all duration-300 flex flex-col justify-between"
+                >
+                  <div className="absolute top-4 right-4">
+                    <div className={`w-1.5 h-1.5 rounded-full ${idea.color}`} />
+                  </div>
+                  <p className="text-xs leading-relaxed mb-5 font-light text-gray-300 pr-4">
+                    {idea.content}
+                  </p>
+                  <div className="flex items-center justify-between mt-auto">
+                    <span className="text-[9px] uppercase font-bold tracking-widest text-gray-600 flex items-center gap-1.5">
+                      <Clock className="h-2.5 w-2.5" />
+                      {idea.date}
+                    </span>
+                    <button 
+                      onClick={() => removeIdea(idea.id)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 text-gray-600 hover:text-red-500 hover:bg-white/5 rounded-md"
+                      title="Excluir ideia"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
