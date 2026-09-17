@@ -317,16 +317,20 @@ export default function Lembretes() {
                           {newAgendaDate ? format(newAgendaDate, "dd 'de' MMM", { locale: ptBR }) : "Escolher data"}
                         </button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 border-[#00FF00]/20 bg-[#0a0a0a] shadow-[0_0_30px_rgba(0,255,0,0.15)] rounded-xl" align="start">
+                      <PopoverContent className="w-auto p-2 border-[#00FF00]/20 bg-[#0a0a0a] shadow-[0_0_30px_rgba(0,255,0,0.15)] rounded-xl" align="start">
                         <CalendarUI
                           mode="single"
                           selected={newAgendaDate}
                           onSelect={setNewAgendaDate}
                           initialFocus
-                          className="bg-transparent text-white"
+                          locale={ptBR}
+                          className="bg-transparent text-white p-0"
                           classNames={{
-                            day_selected: "bg-[#00FF00] text-black hover:bg-[#00FF00]/90 font-bold",
-                            day_today: "bg-white/10 text-white",
+                            head_cell: "text-gray-400 rounded-md w-7 font-normal text-[0.65rem] uppercase",
+                            cell: "h-7 w-7 text-center text-xs p-0 relative focus-within:relative focus-within:z-20",
+                            day: "h-7 w-7 p-0 font-normal aria-selected:opacity-100 hover:bg-white/10 rounded-md transition-colors flex items-center justify-center",
+                            day_selected: "!bg-[#00FF00] !text-black hover:!bg-[#00FF00]/90 font-bold rounded-md",
+                            day_today: "bg-white/10 text-white font-bold rounded-md",
                           }}
                         />
                       </PopoverContent>
