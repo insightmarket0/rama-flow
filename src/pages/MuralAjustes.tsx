@@ -9,6 +9,7 @@ import {
   Search,
   ShoppingCart,
   Store,
+  Trash2,
   Tag,
   Handshake,
   ShoppingBag,
@@ -411,13 +412,22 @@ export default function MuralAjustes() {
                     <CheckCircle2 className="h-3.5 w-3.5" /> Resolvido
                   </span>
                 ) : (
-                  <button 
-                    onClick={() => handleResolve(ticket.id, ticket.sku, ticket.marketplace)}
-                    className="text-gray-500 hover:text-[#00FF00] transition-colors flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest group/btn"
-                  >
-                    <CheckCircle2 className="h-3.5 w-3.5 group-hover/btn:scale-110 transition-transform" />
-                    Resolver
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button 
+                      onClick={() => handleDelete(ticket.id, ticket.sku, ticket.marketplace)}
+                      className="text-gray-600 hover:text-red-500 transition-colors flex items-center justify-center"
+                      title="Excluir ticket"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                    <button 
+                      onClick={() => handleResolve(ticket.id, ticket.sku, ticket.marketplace)}
+                      className="text-gray-500 hover:text-[#00FF00] transition-colors flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest group/btn"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5 group-hover/btn:scale-110 transition-transform" />
+                      Resolver
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
