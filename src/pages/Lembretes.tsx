@@ -305,42 +305,47 @@ export default function Lembretes() {
               </form>
             )}
 
-            <div className="bg-[#111111] border border-[#00FF00]/20 rounded-3xl p-6 shadow-[0_0_30px_rgba(0,255,0,0.02)] relative overflow-hidden shrink-0">
-              <div className="space-y-1">
+                        <div className="bg-[#111315]/80 backdrop-blur-md border border-white/5 rounded-[2rem] p-6 shadow-2xl relative overflow-hidden shrink-0">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-[#00FF00]"></div>
+
+              <div className="space-y-3 mt-2">
                 {checklist.length === 0 && (
-                  <p className="text-gray-600 text-xs font-bold uppercase tracking-widest text-center py-4">Sua lista está limpa!</p>
+                  <p className="text-gray-500 text-sm text-center py-4">Sua lista está limpa!</p>
                 )}
                 {checklist.map(task => (
                   <div 
                     key={task.id}
                     onClick={() => toggleTask(task.id)}
-                    className="group flex items-center justify-between gap-3 py-2.5 cursor-pointer transition-all border-b border-white/5 last:border-0 relative"
+                    className={`group flex items-start justify-between gap-3 p-3.5 rounded-2xl cursor-pointer transition-all border relative ${
+                      task.done 
+                        ? "bg-white/5 border-transparent opacity-50" 
+                        : "bg-[#0a0a0a]/50 border-white/5 hover:border-white/10 hover:bg-white/10"
+                    }`}
                   >
                     <div className="flex items-start gap-3 w-full pr-6">
-                      <button className="shrink-0 transition-colors mt-0.5">
+                      <button className="mt-0.5 shrink-0 transition-colors">
                         {task.done 
-                          ? <CheckCircle2 className="h-4 w-4 text-[#00FF00]/50" /> 
-                          : <CircleDashed className="h-4 w-4 text-gray-600 group-hover:text-[#00FF00]" />
+                          ? <CheckCircle2 className="h-5 w-5 text-[#00FF00]" /> 
+                          : <CircleDashed className="h-5 w-5 text-gray-500 group-hover:text-[#00FF00]" />
                         }
                       </button>
-                      <span className={`text-xs font-medium leading-relaxed ${task.done ? "text-gray-600 line-through" : "text-gray-300"}`}>
+                      <span className={`text-sm font-medium leading-relaxed ${task.done ? "text-gray-500 line-through" : "text-gray-200"}`}>
                         {task.title}
                       </span>
                     </div>
                     <button 
                       onClick={(e) => removeChecklist(task.id, e)}
-                      className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-1.5 hover:bg-white/5 rounded-md text-gray-600 hover:text-red-500 transition-all"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-1.5 hover:bg-white/10 rounded-lg text-gray-500 hover:text-red-400 transition-all"
                     >
-                      <X className="h-3.5 w-3.5" />
+                      <X className="h-3 w-3" />
                     </button>
                   </div>
                 ))}
               </div>
               
               {checklist.length > 0 && checklist.every(t => t.done) && (
-                <div className="mt-4 flex items-center justify-center gap-2">
-                  <span className="text-[9px] font-bold text-[#00FF00]/50 uppercase tracking-widest">Você concluiu tudo</span>
-                  <CheckCircle2 className="h-3 w-3 text-[#00FF00]/50" />
+                <div className="mt-6 text-center border border-dashed border-[#00FF00]/30 bg-[#00FF00]/10 rounded-2xl p-4">
+                  <p className="text-[10px] font-bold text-[#00FF00] uppercase tracking-widest">Você concluiu tudo!</p>
                 </div>
               )}
             </div>
