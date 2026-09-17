@@ -498,145 +498,126 @@ export default function MuralAjustes() {
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleCreateTicket} className="space-y-4 mt-4">
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-gray-500">Plataforma</label>
-              <Select 
-                value={formData.marketplace}
-                onValueChange={v => setFormData({...formData, marketplace: v})}
-              >
-                <SelectTrigger className="w-full bg-[#0a0a0a] border-white/10 text-white focus:ring-0 focus:border-[#00FF00]/50 h-10">
-                  <SelectValue placeholder="Selecione..." />
-                </SelectTrigger>
-                <SelectContent className="bg-[#111111] border-white/10 text-white">
-                  <SelectItem value="Mercado Livre" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">
-                    <div className="flex items-center gap-2">{getMarketplaceLogo("Mercado Livre")} Mercado Livre</div>
-                  </SelectItem>
-                  <SelectItem value="Shopee" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">
-                    <div className="flex items-center gap-2">{getMarketplaceLogo("Shopee")} Shopee</div>
-                  </SelectItem>
-                  <SelectItem value="Magalu" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">
-                    <div className="flex items-center gap-2">{getMarketplaceLogo("Magalu")} Magalu</div>
-                  </SelectItem>
-                  <SelectItem value="Amazon" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">
-                    <div className="flex items-center gap-2">{getMarketplaceLogo("Amazon")} Amazon</div>
-                  </SelectItem>
-                  <SelectItem value="Geral" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">
-                    <div className="flex items-center gap-2">{getMarketplaceLogo("Geral")} Geral</div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+          <form onSubmit={handleCreateTicket} className="space-y-4 mt-6">
+            
+            <div className="flex gap-4">
+              <div className="flex-1 space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Plataforma</label>
+                <Select 
+                  value={formData.marketplace}
+                  onValueChange={v => setFormData({...formData, marketplace: v})}
+                >
+                  <SelectTrigger className="w-full bg-white/5 border-transparent hover:bg-white/10 text-white focus:ring-1 focus:ring-white/20 h-11 rounded-xl transition-all">
+                    <SelectValue placeholder="Selecione..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#111111] border-white/10 text-white rounded-xl shadow-2xl">
+                    <SelectItem value="Mercado Livre" className="hover:bg-white/10 cursor-pointer py-2">
+                      <div className="flex items-center gap-2">{getMarketplaceLogo("Mercado Livre")} Mercado Livre</div>
+                    </SelectItem>
+                    <SelectItem value="Shopee" className="hover:bg-white/10 cursor-pointer py-2">
+                      <div className="flex items-center gap-2">{getMarketplaceLogo("Shopee")} Shopee</div>
+                    </SelectItem>
+                    <SelectItem value="Magalu" className="hover:bg-white/10 cursor-pointer py-2">
+                      <div className="flex items-center gap-2">{getMarketplaceLogo("Magalu")} Magalu</div>
+                    </SelectItem>
+                    <SelectItem value="Amazon" className="hover:bg-white/10 cursor-pointer py-2">
+                      <div className="flex items-center gap-2">{getMarketplaceLogo("Amazon")} Amazon</div>
+                    </SelectItem>
+                    <SelectItem value="Geral" className="hover:bg-white/10 cursor-pointer py-2">
+                      <div className="flex items-center gap-2">{getMarketplaceLogo("Geral")} Geral</div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex-1 space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Responsável</label>
+                <Select 
+                  value={formData.assignee_name}
+                  onValueChange={v => setFormData({...formData, assignee_name: v})}
+                >
+                  <SelectTrigger className="w-full bg-white/5 border-transparent hover:bg-white/10 text-white focus:ring-1 focus:ring-white/20 h-11 rounded-xl transition-all">
+                    <SelectValue placeholder="Livre" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#111111] border-white/10 text-white rounded-xl shadow-2xl">
+                    <SelectItem value="livre" className="hover:bg-white/10 cursor-pointer py-2">Nenhum (Livre)</SelectItem>
+                    <SelectItem value="Rogério" className="hover:bg-white/10 cursor-pointer py-2">Rogério</SelectItem>
+                    <SelectItem value="Anderson" className="hover:bg-white/10 cursor-pointer py-2">Anderson</SelectItem>
+                    <SelectItem value="William" className="hover:bg-white/10 cursor-pointer py-2">William</SelectItem>
+                    <SelectItem value="Alyson" className="hover:bg-white/10 cursor-pointer py-2">Alyson</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="flex gap-4">
-              <div className="space-y-2 flex-1">
-                <label className="text-xs font-bold uppercase tracking-widest text-gray-500">SKU (Opcional)</label>
+              <div className="flex-1 space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-500">SKU</label>
                 <input 
                   type="text" 
-                  placeholder="Ex: KITGAS001"
+                  placeholder="EX: KITGAS001"
                   value={formData.sku}
                   onChange={e => setFormData({...formData, sku: e.target.value})}
-                  className="w-full bg-[#0a0a0a] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-[#00FF00]/50 uppercase"
+                  className="w-full bg-white/5 border-transparent hover:bg-white/10 rounded-xl px-4 h-11 text-sm text-white focus:outline-none focus:bg-white/10 focus:ring-1 focus:ring-white/20 uppercase transition-all placeholder:text-gray-600 placeholder:normal-case"
                 />
               </div>
-              <div className="space-y-2 flex-1">
-                <label className="text-xs font-bold uppercase tracking-widest text-gray-500">Link (Opcional)</label>
+              <div className="flex-1 space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Link</label>
                 <input 
                   type="text" 
-                  placeholder="https://..."
+                  placeholder="Opcional..."
                   value={formData.link}
                   onChange={e => setFormData({...formData, link: e.target.value})}
-                  className="w-full bg-[#0a0a0a] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-[#00FF00]/50"
+                  className="w-full bg-white/5 border-transparent hover:bg-white/10 rounded-xl px-4 h-11 text-sm text-white focus:outline-none focus:bg-white/10 focus:ring-1 focus:ring-white/20 transition-all placeholder:text-gray-600"
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-gray-500">Responsável</label>
-              <Select 
-                value={formData.assignee_name}
-                onValueChange={v => setFormData({...formData, assignee_name: v})}
-              >
-                <SelectTrigger className="w-full bg-[#0a0a0a] border-white/10 text-white focus:ring-0 focus:border-[#00FF00]/50 h-10">
-                  <SelectValue placeholder="Selecione..." />
-                </SelectTrigger>
-                <SelectContent className="bg-[#111111] border-white/10 text-white">
-                  <SelectItem value="livre" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">
-                    <div className="flex items-center gap-3">
-                      <div className="h-5 w-5 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[8px] text-gray-500 font-bold">--</div>
-                      <span>Nenhum (Livre)</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="Rogério" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">
-                    <div className="flex items-center gap-3">
-                      <div className="h-5 w-5 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 text-[8px] font-bold">RO</div>
-                      <span>Rogério</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="Anderson" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">
-                    <div className="flex items-center gap-3">
-                      <div className="h-5 w-5 rounded-full bg-[#00FF00]/10 border border-[#00FF00]/30 flex items-center justify-center text-[#00FF00] text-[8px] font-bold">AN</div>
-                      <span>Anderson</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="William" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">
-                    <div className="flex items-center gap-3">
-                      <div className="h-5 w-5 rounded-full bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400 text-[8px] font-bold">WI</div>
-                      <span>William</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="Alyson" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">
-                    <div className="flex items-center gap-3">
-                      <div className="h-5 w-5 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 text-[8px] font-bold">AL</div>
-                      <span>Alyson</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-gray-500">Prioridade</label>
-              <Select 
-                value={formData.priority}
-                onValueChange={v => setFormData({...formData, priority: v})}
-              >
-                <SelectTrigger className="w-full bg-[#0a0a0a] border-white/10 text-white focus:ring-0 focus:border-[#00FF00]/50 h-10">
-                  <SelectValue placeholder="Selecione..." />
-                </SelectTrigger>
-                <SelectContent className="bg-[#111111] border-white/10 text-white">
-                  <SelectItem value="normal" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">Normal / Estético</SelectItem>
-                  <SelectItem value="critico" className="hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer">Crítico / Risco de Bloqueio</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-gray-500">O que precisa ser feito?</label>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Ajuste Necessário</label>
               <textarea 
-                placeholder="Descreva o ajuste necessário de forma clara..."
+                placeholder="O que precisa ser feito?"
                 value={formData.description}
                 onChange={e => setFormData({...formData, description: e.target.value})}
-                className="w-full bg-[#0a0a0a] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-[#00FF00]/50 min-h-[100px] resize-none"
+                className="w-full bg-white/5 border-transparent hover:bg-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:bg-white/10 focus:ring-1 focus:ring-white/20 min-h-[90px] resize-none transition-all placeholder:text-gray-600"
                 required
               />
             </div>
 
-            <DialogFooter className="mt-6 pt-4 border-t border-white/5">
-              <button 
-                type="button" 
-                onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors"
-              >
-                Cancelar
-              </button>
-              <button 
-                type="submit"
-                className="bg-[#00FF00] hover:bg-[#00FF00]/80 text-black px-6 py-2 rounded-lg text-sm font-bold transition-all shadow-[0_0_15px_rgba(0,255,0,0.2)] hover:shadow-[0_0_20px_rgba(0,255,0,0.4)]"
-              >
-                Criar Ticket
-              </button>
-            </DialogFooter>
+            <div className="pt-2 flex items-center justify-between">
+              <div className="flex items-center gap-2 bg-[#0A0A0A] p-1 rounded-xl border border-white/5">
+                <button
+                  type="button"
+                  onClick={() => setFormData({...formData, priority: 'normal'})}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${formData.priority === 'normal' ? 'bg-white/10 text-white' : 'text-gray-600 hover:text-gray-400'}`}
+                >
+                  Normal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({...formData, priority: 'critico'})}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${formData.priority === 'critico' ? 'bg-red-500/20 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]' : 'text-gray-600 hover:text-gray-400'}`}
+                >
+                  Crítico
+                </button>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button 
+                  type="button" 
+                  onClick={() => setIsModalOpen(false)}
+                  className="text-xs font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-wider"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit"
+                  className="bg-[#00FF00] hover:bg-[#00FF00]/80 text-black px-6 py-2.5 rounded-xl text-xs font-bold transition-all shadow-[0_0_15px_rgba(0,255,0,0.2)] hover:shadow-[0_0_20px_rgba(0,255,0,0.4)] uppercase tracking-wider"
+                >
+                  Criar Ticket
+                </button>
+              </div>
+            </div>
           </form>
         </DialogContent>
       </Dialog>
