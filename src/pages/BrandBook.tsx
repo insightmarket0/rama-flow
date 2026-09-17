@@ -90,12 +90,10 @@ export default function BrandBook() {
 
           {/* COLUNA 2 - LINHA 4: Essência */}
           <div className="col-start-2 col-span-1 row-start-4 row-span-1 bg-gradient-to-r from-blue-500 to-[#00FF00] rounded-[2rem] p-6 shadow-xl flex flex-col justify-center relative overflow-hidden group">
-            <h4 className="text-black text-[9px] lg:text-[10px] font-bold uppercase tracking-widest mb-2 flex items-center gap-2 relative z-10">
+            <h4 className="text-black text-[9px] lg:text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 relative z-10">
                <HeartHandshake className="w-3 h-3 lg:w-4 lg:h-4" /> Essência
             </h4>
-            <p className="text-black text-sm lg:text-lg leading-snug relative z-10 font-medium" style={{ fontFamily: "'Playfair Display', serif" }}>
-              "Nós não vendemos apenas produtos; entregamos confiança."
-            </p>
+            
           </div>
 
           {/* COLUNA 3 - LINHA 4: Público-Alvo */}
