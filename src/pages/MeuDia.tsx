@@ -152,7 +152,7 @@ const ExpediçãoTracker = () => {
   const circumference = 2 * Math.PI * radius;
 
   return (
-    <div className="col-span-1 md:col-span-2 flex flex-col md:flex-row items-center justify-between py-3 px-6 bg-[#050505] rounded-3xl border border-white/5 relative overflow-hidden shadow-2xl gap-6 min-h-[160px]">
+    <div className="col-span-1 md:col-span-2 flex flex-col md:flex-row items-center justify-between py-3 px-6 bg-[#050505] rounded-3xl border border-[#00FF00]/20 relative overflow-hidden shadow-[0_0_30px_rgba(0,255,0,0.05)] gap-6 min-h-[160px]">
       {/* Glow background */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[200px] bg-[#00FF00]/5 rounded-full blur-[80px] pointer-events-none" />
       
@@ -241,7 +241,7 @@ const MuralExpedição = ({ user }: { user: any }) => {
   };
 
   return (
-    <div className="col-span-1 md:col-span-2 bg-[#111111] border-l-4 border-[#00FF00] rounded-2xl p-5 group relative shadow-lg h-fit mt-4">
+    <div className="col-span-1 md:col-span-2 bg-[#111111] border border-[#00FF00]/20 rounded-3xl p-5 group relative shadow-[0_0_30px_rgba(0,255,0,0.05)] h-fit mt-4">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-[#00FF00] font-bold tracking-tighter text-xl uppercase flex items-center gap-2">
           <Megaphone className="h-5 w-5" strokeWidth={3} />
@@ -463,7 +463,7 @@ export default function MeuDia() {
           <PainelPagamentosHoje />
         ) : (
           user?.email !== "mara@hotmail.com" && (
-            <div className="col-span-1 md:col-span-2 bg-[#111111] border-l-4 border-[#00FF00] rounded-2xl p-5 group relative shadow-lg h-fit">
+            <div className="col-span-1 md:col-span-2 bg-[#111111] border border-[#00FF00]/20 rounded-3xl p-5 group relative shadow-[0_0_30px_rgba(0,255,0,0.05)] h-fit">
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-[#00FF00] font-bold tracking-tighter text-xl uppercase flex items-center gap-2">
@@ -636,7 +636,7 @@ export default function MeuDia() {
 
         {/* 4. Card de Desempenho Rápido */}
         {!isNothingPending && (
-          <div className="col-span-1 md:col-span-2 bg-[#1A1A1A] rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between border border-white/5 relative overflow-hidden shrink-0 min-h-[90px]">
+          <div className="col-span-1 md:col-span-2 bg-[#1A1A1A] rounded-3xl p-5 flex flex-col sm:flex-row items-center justify-between border border-[#00FF00]/20 relative overflow-hidden shadow-[0_0_30px_rgba(0,255,0,0.05)] shrink-0 min-h-[90px]">
              <div className="relative z-10 flex items-center gap-4">
                 <div className="h-12 w-12 rounded-full bg-[#00FF00]/10 flex items-center justify-center border border-[#00FF00]/20">
                   <Zap className="h-6 w-6 text-[#00FF00]" />
