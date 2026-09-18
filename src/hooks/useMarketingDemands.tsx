@@ -52,7 +52,9 @@ export const useMarketingDemands = () => {
         if (name.toLowerCase().includes("mara")) avatar = "/mara.png";
         else if (name.toLowerCase().includes("rogério") || name.toLowerCase().includes("rogerio")) avatar = "/rogerio.png";
         else if (name.toLowerCase().includes("lívia") || name.toLowerCase().includes("livia")) avatar = "/livia.png";
-        else avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`;
+        else if (name.toLowerCase().includes("anderson") || name.toLowerCase().includes("ander")) avatar = `https://ui-avatars.com/api/?name=Anderson&background=00FF00&color=000&font-size=0.33&bold=true`;
+        else if (name.toLowerCase().includes("will")) avatar = `https://ui-avatars.com/api/?name=Will&background=06B6D4&color=000&font-size=0.33&bold=true`;
+        else avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=333&color=FFF`;
 
         return {
           ...demand,

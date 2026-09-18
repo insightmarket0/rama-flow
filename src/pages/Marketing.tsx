@@ -41,6 +41,7 @@ import {
   Trash2
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { supabase } from "@/integrations/supabase/client";
 
 const BrandPalette = [
   { name: "Primary White", hex: "#FFFFFF", class: "bg-white" },
@@ -137,15 +138,67 @@ const INITIAL_SCRIPTS = [
 ];
 
 export default function Marketing() {
-
+  const [activeTab, setActiveTab] = useState("orcamento");
   const [isSalesModalOpen, setIsSalesModalOpen] = useState(false);
   const [salesForm, setSalesForm] = useState({ vendas: 0, vendasGrowth: 0 });
 
-  const [crmPartners, setCrmPartners] = useState(CRM_PARTNERS);
+  // Database Sync Function
+  const saveToDatabase = async (column: string, value: any) => {
+    try {
+      await supabase
+        .from('marketing_settings')
+        .update({ [column]: value, updated_at: new Date().toISOString() })
+        .eq('id', '00000000-0000-0000-0000-000000000000');
+    } catch (e) {
+      console.error("Error saving to supabase:", e);
+    }
+  };
+
+  React.useEffect(() => {
+    async function fetchDb() {
+      try {
+        const { data } = await supabase.from('marketing_settings').select('*').eq('id', '00000000-0000-0000-0000-000000000000').single();
+        if (data) {
+          if (data.scripts) setScripts(data.scripts);
+          if (data.crm_partners) setCrmPartners(data.crm_partners);
+          if (data.marketing_budget && data.marketing_budget.total !== undefined) setMarketingBudget(data.marketing_budget);
+          if (data.approvals) setApprovals(data.approvals);
+          if (data.social_metrics && data.social_metrics.instagram) setSocialMetrics(data.social_metrics);
+        }
+      } catch (e) {
+        console.error("Supabase not initialized for marketing yet. Run migrations.", e);
+      }
+    }
+    fetchDb();
+  }, []);
+
+  const [crmPartners, setCrmPartners] = useState(() => {
+    const saved = localStorage.getItem("rama_crm_partners");
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return CRM_PARTNERS;
+  });
+
+  React.useEffect(() => {
+    localStorage.setItem("rama_crm_partners", JSON.stringify(crmPartners));
+    saveToDatabase('crm_partners', crmPartners);
+  }, [crmPartners]);
   const [isCrmModalOpen, setIsCrmModalOpen] = useState(false);
   const [editingCrmPartner, setEditingCrmPartner] = useState<any>(null);
 
-  const [scripts, setScripts] = useState(INITIAL_SCRIPTS);
+  const [scripts, setScripts] = useState(() => {
+    const saved = localStorage.getItem("rama_marketing_scripts");
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return INITIAL_SCRIPTS;
+  });
+
+  React.useEffect(() => {
+    localStorage.setItem("rama_marketing_scripts", JSON.stringify(scripts));
+    saveToDatabase('scripts', scripts);
+  }, [scripts]);
   const [activeScriptId, setActiveScriptId] = useState(1);
   const [isNewScriptModalOpen, setIsNewScriptModalOpen] = useState(false);
   const [newScriptForm, setNewScriptForm] = useState({ title: '', category: 'TikTok & UGC', description: '' });
@@ -175,20 +228,23 @@ export default function Marketing() {
 
   const [isScalingActive, setIsScalingActive] = useState(false);
   const [isNewMonthPromptOpen, setIsNewMonthPromptOpen] = useState(false);
-  const [approvals, setApprovals] = useState([
-    { id: 1, title: 'Cachê Extra: Virgínia', campaign: 'Campanha Black Friday', amount: 15000, description: 'Cachê adicional aprovado em reunião com diretoria para fechar 3 stories e 1 reel.' },
-    { id: 2, title: 'Boost Meta Ads', campaign: 'Escala de Criativo #04', amount: 5000, description: 'Injeção de verba para escalar criativo validado com ROAS > 4.' }
-  ]);
+  const [approvals, setApprovals] = useState(() => {
+    const saved = localStorage.getItem("rama_approvals");
+    if (saved) {
+      try { return JSON.parse(saved); } catch(e){}
+    }
+    return [
+      { id: 1, title: 'Cachê Extra: Virgínia', campaign: 'Campanha Black Friday', amount: 15000, description: 'Cachê adicional aprovado em reunião com diretoria para fechar 3 stories e 1 reel.' },
+      { id: 2, title: 'Boost Meta Ads', campaign: 'Escala de Criativo #04', amount: 5000, description: 'Injeção de verba para escalar criativo validado com ROAS > 4.' }
+    ];
+  });
   const [isCreateApprovalModalOpen, setIsCreateApprovalModalOpen] = useState(false);
   const [approvalForm, setApprovalForm] = useState({ title: '', campaign: '', amount: 0, description: '' });
   const [approvalDetails, setApprovalDetails] = useState(null);
 
   React.useEffect(() => {
-    const savedApprovals = localStorage.getItem("rama_approvals");
-    if (savedApprovals) {
-      try { setApprovals(JSON.parse(savedApprovals)); } catch(e){}
-    }
-  }, []);
+    saveToDatabase('approvals', approvals);
+  }, [approvals]);
 
   const handleCreateApproval = () => {
     const newApproval = { ...approvalForm, id: Date.now() };
@@ -249,20 +305,24 @@ export default function Marketing() {
   };
 
 
-  const [socialMetrics, setSocialMetrics] = useState({
-    instagram: { followers: 135145, likes: 42500, comments: 8200, followersGrowth: 1.2, history: [{name:"M-4", value: 120000}, {name:"M-3", value: 125000}, {name:"M-2", value: 130000}, {name:"M-1", value: 135145}] },
-    tiktok: { followers: 241800, likes: 89200, comments: 14500, followersGrowth: 5.4, history: [{name:"M-4", value: 190000}, {name:"M-3", value: 210000}, {name:"M-2", value: 230000}, {name:"M-1", value: 241800}] }
+  const [socialMetrics, setSocialMetrics] = useState(() => {
+    const saved = localStorage.getItem("rama_social_metrics");
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return {
+      instagram: { followers: 135145, likes: 42500, comments: 8200, followersGrowth: 1.2, history: [{name:"M-4", value: 120000}, {name:"M-3", value: 125000}, {name:"M-2", value: 130000}, {name:"M-1", value: 135145}] },
+      tiktok: { followers: 241800, likes: 89200, comments: 14500, followersGrowth: 5.4, history: [{name:"M-4", value: 190000}, {name:"M-3", value: 210000}, {name:"M-2", value: 230000}, {name:"M-1", value: 241800}] }
+    };
   });
   const [isSocialModalOpen, setIsSocialModalOpen] = useState(false);
   const [editingSocial, setEditingSocial] = useState("instagram");
   const [socialForm, setSocialForm] = useState({ followers: 0, likes: 0, comments: 0 });
 
   React.useEffect(() => {
-    const saved = localStorage.getItem("rama_social_metrics");
-    if (saved) {
-      try { setSocialMetrics(JSON.parse(saved)); } catch (e) {}
-    }
-  }, []);
+    localStorage.setItem("rama_social_metrics", JSON.stringify(socialMetrics));
+    saveToDatabase('social_metrics', socialMetrics);
+  }, [socialMetrics]);
 
   const handleEditSocial = (platform) => {
     setEditingSocial(platform);
@@ -320,6 +380,10 @@ export default function Marketing() {
       if (parsed.currentMonth !== getCurrentMonthStr()) {
         parsed.needsMonthUpdate = true;
       }
+      if (parsed.budgetSplit?.cache !== undefined && parsed.budgetSplit?.influenciadores === undefined) {
+        parsed.budgetSplit.influenciadores = parsed.budgetSplit.cache;
+        delete parsed.budgetSplit.cache;
+      }
       return parsed;
     }
     return {
@@ -329,9 +393,13 @@ export default function Marketing() {
       vendas: 450000,
       vendasGrowth: 15,
       history: [],
-      budgetSplit: { trafego: 52, cache: 48, seeding: 0 }
+      budgetSplit: { trafego: 52, influenciadores: 48, seeding: 0 }
     };
   });
+
+  React.useEffect(() => {
+    saveToDatabase('marketing_budget', marketingBudget);
+  }, [marketingBudget]);
 
   const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
   const [budgetForm, setBudgetForm] = useState({ total: 0, gasto: 0 });
@@ -352,6 +420,12 @@ export default function Marketing() {
     localStorage.setItem("rama_marketing_budget", JSON.stringify(updated));
     setIsBudgetModalOpen(false);
   };
+
+  React.useEffect(() => {
+    if (marketingBudget.needsMonthUpdate) {
+      setIsNewMonthPromptOpen(true);
+    }
+  }, [marketingBudget.needsMonthUpdate]);
 
   const handleConfirmNewMonth = (keepSameBudget) => {
     const newHistory = [...(marketingBudget.history || [])];
@@ -380,7 +454,7 @@ export default function Marketing() {
     }
   };
 
-  const [activeTab, setActiveTab] = useState<"orcamento" | "cockpit" | "roadmap" | "crm" | "performance">("orcamento");
+
   const [viewScope, setViewScope] = useState<"global" | "marca_propria">("global");
   const [isBrandVaultOpen, setIsBrandVaultOpen] = useState(false);
   const [zoom, setZoom] = useState<"semana" | "mes" | "trimestre">("mes");
@@ -399,36 +473,33 @@ export default function Marketing() {
       <div className="p-2 md:p-3 max-w-[1400px] w-full mx-auto h-full flex flex-col gap-2 relative z-10">
         
         {/* Header Compacto Premium */}
-        <div className="flex items-center justify-between shrink-0">
-          <div>
-            <h1 className="text-xl font-semibold text-white tracking-tight flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between shrink-0 gap-4 mb-2">
+          <div className="flex items-center gap-8">
+            <h1 className="text-xl font-semibold text-white tracking-tight flex items-center gap-2 whitespace-nowrap">
               MARKETING & <span className="text-cyan-400 font-light">GROWTH</span>
             </h1>
             
+            {/* Tabs de Navegação Estilo Pill */}
+            <div className="flex items-center gap-1 shrink-0 overflow-x-auto no-scrollbar">
+              {[
+                { id: "orcamento", label: "Orçamento e Investimentos" },
+                { id: "crm", label: "CRM Influenciadores" },
+                { id: "roadmap", label: "Creative Studio (Roteiros)" },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`px-4 py-1.5 text-xs font-medium rounded-full transition-all ${
+                    activeTab === tab.id 
+                      ? "bg-white/10 text-white shadow-sm" 
+                      : "bg-transparent text-gray-500 hover:text-gray-300 hover:bg-white/5"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
-          
-        </div>
-
-        {/* Tabs de Navegação Estilo Pill */}
-        <div className="flex items-center gap-2 mt-2 shrink-0 overflow-x-auto no-scrollbar">
-          {[
-            
-            { id: "orcamento", label: "Orçamento e Investimentos" },
-            { id: "roadmap", label: "Creative Studio (Roteiros)" },
-            { id: "crm", label: "CRM Influenciadores" },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`px-4 py-1.5 text-xs font-medium rounded-full transition-all ${
-                activeTab === tab.id 
-                  ? "bg-white/10 text-white shadow-sm" 
-                  : "bg-transparent text-gray-500 hover:text-gray-300 hover:bg-white/5"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
         </div>
 
 
@@ -440,10 +511,14 @@ export default function Marketing() {
             <div className="flex-1 overflow-hidden flex gap-4 mt-4 h-full">
               
               {/* MASTER PANEL (Left Sidebar) */}
-              <div className="w-[320px] flex-shrink-0 bg-[#0a0a0a] border border-white/5 rounded-2xl flex flex-col overflow-hidden h-full">
-                <div className="p-4 border-b border-white/5 bg-[#111]/50 flex items-center justify-between sticky top-0 z-10 backdrop-blur-md">
-                  <h3 className="text-white text-sm font-semibold tracking-tight">Suas Estratégias</h3>
-                  <button className="text-[#00FF00] hover:text-cyan-300 transition-colors p-1" onClick={() => {
+              <div className="w-[320px] flex-shrink-0 bg-[#0a0a0a] border border-white/[0.03] shadow-lg rounded-2xl flex flex-col overflow-hidden h-full relative">
+                <div className="absolute top-0 right-0 w-40 h-40 bg-[#00FF00]/5 rounded-full blur-[60px] pointer-events-none"></div>
+                <div className="p-5 border-b border-white/[0.02] flex items-center justify-between sticky top-0 z-10 backdrop-blur-md">
+                  <div>
+                    <h3 className="text-white text-base font-semibold tracking-tight">Suas Estratégias</h3>
+                    <p className="text-[9px] text-gray-500 uppercase tracking-widest mt-0.5">Roteiros e Briefings</p>
+                  </div>
+                  <button className="bg-[#00FF00]/10 text-[#00FF00] hover:bg-[#00FF00]/20 hover:text-[#00FF00] transition-colors p-1.5 rounded-lg flex items-center justify-center" onClick={() => {
                     setNewScriptForm({ title: 'Novo Roteiro', category: 'TikTok & UGC', description: '' });
                     setIsNewScriptModalOpen(true);
                   }}>
@@ -451,25 +526,27 @@ export default function Marketing() {
                   </button>
                 </div>
                 
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-6">
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-6 relative z-10">
                   {Array.from(new Set(scripts.map(s => s.category))).map(category => (
                     <div key={category}>
-                      <div className="flex items-center gap-2 mb-2 px-2">
-                        {category.includes('TikTok') ? <PlayCircle className="w-3.5 h-3.5 text-pink-400" /> : category.includes('Instagram') ? <Instagram className="w-3.5 h-3.5 text-purple-400" /> : <ShoppingBag className="w-3.5 h-3.5 text-orange-400" />}
-                        <span className="text-xs font-bold uppercase tracking-widest text-gray-500">{category}</span>
+                      <div className="flex items-center gap-2 mb-3 px-3">
+                        <div className="w-5 h-5 rounded-md bg-white/5 flex items-center justify-center border border-white/5">
+                          {category.includes('TikTok') ? <PlayCircle className="w-3 h-3 text-pink-400" /> : category.includes('Instagram') ? <Instagram className="w-3 h-3 text-purple-400" /> : <ShoppingBag className="w-3 h-3 text-orange-400" />}
+                        </div>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{category}</span>
                       </div>
-                      <div className="space-y-1">
+                      <div className="space-y-1.5">
                         {scripts.filter(s => s.category === category).map(script => (
                           <div 
                             key={script.id}
                             onClick={() => setActiveScriptId(script.id)}
-                            className={`border rounded-lg p-2.5 cursor-pointer flex flex-col gap-1.5 relative overflow-hidden transition-all ${activeScriptId === script.id ? 'bg-white/[0.08] border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.5)]' : 'hover:bg-white/5 border-transparent'}`}
+                            className={`group relative rounded-xl p-3 cursor-pointer flex flex-col gap-1.5 overflow-hidden transition-all ${activeScriptId === script.id ? 'bg-white/[0.05] shadow-sm' : 'hover:bg-white/[0.02]'}`}
                           >
-                            {activeScriptId === script.id && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#00FF00] rounded-l-lg"></div>}
-                            <span className="text-gray-200 text-xs font-medium ml-1">{script.title}</span>
-                            <div className="flex justify-between items-center ml-1">
-                              <span className={`text-[9px] px-1.5 py-0.5 rounded ${script.statusColor}`}>{script.status}</span>
-                              <span className="text-[9px] text-gray-500">{script.date}</span>
+                            <div className={`absolute left-0 top-3 bottom-3 w-1 rounded-r-md transition-opacity ${activeScriptId === script.id ? 'bg-[#00FF00] opacity-100' : 'bg-gray-600 opacity-0 group-hover:opacity-100'}`}></div>
+                            <span className={`text-sm font-semibold ml-2 transition-colors ${activeScriptId === script.id ? 'text-white' : 'text-gray-300 group-hover:text-white'}`}>{script.title}</span>
+                            <div className="flex justify-between items-center ml-2 mt-1">
+                              <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${script.statusColor.replace('/10', '/20')}`}>{script.status}</span>
+                              <span className="text-[9px] font-medium text-gray-500">{script.date}</span>
                             </div>
                           </div>
                         ))}
@@ -484,16 +561,16 @@ export default function Marketing() {
                 const activeScript = scripts.find(s => s.id === activeScriptId);
                 if (!activeScript) return <div className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-2xl flex items-center justify-center text-gray-500">Selecione um roteiro</div>;
                 return (
-                <div className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-2xl flex flex-col overflow-hidden h-full relative">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-[#00FF00]/5 rounded-full blur-[80px] pointer-events-none"></div>
+                <div className="flex-1 bg-[#0a0a0a] border border-white/[0.03] shadow-lg rounded-2xl flex flex-col overflow-hidden h-full relative">
+                  <div className="absolute top-0 right-0 w-96 h-96 bg-[#00FF00]/5 rounded-full blur-[100px] pointer-events-none"></div>
                   
                   {/* Editor Header */}
-                  <div className="p-8 border-b border-white/5 flex flex-col gap-4 relative z-10">
+                  <div className="p-8 border-b border-white/[0.02] flex flex-col gap-4 relative z-10">
                     <div className="flex justify-between items-start">
                       <div className="flex gap-2">
-                        <span className={`text-[10px] font-bold tracking-widest uppercase px-2 py-1 rounded-md ${activeScript.statusColor}`}>{activeScript.status}</span>
-                        <span className="text-[10px] font-bold tracking-widest uppercase text-gray-400 bg-white/5 px-2 py-1 rounded-md flex items-center gap-1">
-                          {activeScript.category.includes('TikTok') ? <PlayCircle className="w-3 h-3" /> : activeScript.category.includes('Instagram') ? <Instagram className="w-3 h-3" /> : <ShoppingBag className="w-3 h-3" />}
+                        <span className={`text-[9px] font-bold tracking-widest uppercase px-3 py-1.5 rounded-full border border-white/5 shadow-sm ${activeScript.statusColor.replace('/10', '/20')}`}>{activeScript.status}</span>
+                        <span className="text-[9px] font-bold tracking-widest uppercase text-gray-400 bg-[#111] px-3 py-1.5 rounded-full border border-white/5 shadow-sm flex items-center gap-1.5">
+                          {activeScript.category.includes('TikTok') ? <PlayCircle className="w-3.5 h-3.5" /> : activeScript.category.includes('Instagram') ? <Instagram className="w-3.5 h-3.5" /> : <ShoppingBag className="w-3.5 h-3.5" />}
                           {activeScript.category}
                         </span>
                       </div>
@@ -505,13 +582,22 @@ export default function Marketing() {
                             if (newScripts.length > 0) setActiveScriptId(newScripts[0].id);
                             else setActiveScriptId(0);
                           }}
-                          className="text-gray-500 hover:text-red-500 bg-white/5 hover:bg-red-500/10 p-2 rounded-lg transition-colors"
+                          className="text-gray-500 hover:text-red-500 hover:bg-red-500/10 p-2.5 rounded-lg transition-colors flex items-center justify-center"
                           title="Excluir Roteiro">
                           <Trash2 className="w-4 h-4" />
                         </button>
                         <button 
-                          onClick={() => {}}
-                          className="bg-[#00FF00] hover:bg-[#00FF00] text-black text-xs font-bold px-4 py-2 rounded-lg transition-colors shadow-[0_0_15px_rgba(0,255,0,0.3)]">
+                          onClick={(e) => {
+                            const btn = e.currentTarget;
+                            const old = btn.innerText;
+                            btn.innerText = 'Salvo!';
+                            btn.classList.add('bg-[#00E500]');
+                            setTimeout(() => {
+                              btn.innerText = old;
+                              btn.classList.remove('bg-[#00E500]');
+                            }, 1500);
+                          }}
+                          className="bg-[#00FF00] hover:bg-[#00E500] text-black text-xs font-bold px-5 py-2.5 rounded-lg transition-all shadow-[0_0_15px_rgba(0,255,0,0.2)]">
                           Salvar Roteiro
                         </button>
                       </div>
@@ -519,7 +605,7 @@ export default function Marketing() {
                     <input 
                       value={activeScript.title}
                       onChange={(e) => setScripts(scripts.map(s => s.id === activeScriptId ? {...s, title: e.target.value} : s))}
-                      className="text-4xl font-extrabold text-white tracking-tight mt-3 mb-1 bg-transparent border-none outline-none w-full"
+                      className="text-4xl font-extrabold text-white tracking-tight mt-4 mb-2 bg-transparent border-none outline-none w-full"
                     />
                     <textarea 
                       value={activeScript.description}
@@ -530,7 +616,7 @@ export default function Marketing() {
 
                   {/* Editor Body */}
                   <div className="flex-1 overflow-y-auto custom-scrollbar p-8 relative z-10">
-                    <div className="max-w-2xl space-y-8">
+                    <div className="max-w-2xl space-y-10">
                       {activeScript.blocks.map(block => (
                         <div key={block.id} className="group relative">
                           <button 
@@ -540,7 +626,7 @@ export default function Marketing() {
                                 return {...s, blocks: s.blocks.filter(b => b.id !== block.id)};
                               }));
                             }}
-                            className="absolute -left-8 top-1 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-500 transition-all p-1"
+                            className="absolute -left-10 top-0.5 opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-md transition-all p-1.5"
                             title="Remover Bloco"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -553,10 +639,10 @@ export default function Marketing() {
                                 return {...s, blocks: s.blocks.map(b => b.id === block.id ? {...b, title: e.target.value} : b)};
                               }));
                             }}
-                            className={`flex items-center gap-2 text-${block.color}-400 font-semibold mb-3 bg-transparent border-none outline-none w-full`}
+                            className={`flex items-center gap-2 text-${block.color}-400 font-bold tracking-tight text-lg mb-4 bg-transparent border-none outline-none w-full`}
                           />
                           <div 
-                            className={`pl-4 border-l-2 border-${block.color}-500/30 hover:border-${block.color}-500 text-gray-300 text-[15px] leading-relaxed outline-none transition-colors min-h-[20px]`}
+                            className={`pl-5 border-l-[3px] border-${block.color}-500/30 hover:border-${block.color}-500 text-gray-300 text-[15px] leading-relaxed outline-none transition-colors min-h-[20px]`}
                             contentEditable 
                             suppressContentEditableWarning
                             onBlur={(e) => {
@@ -578,7 +664,7 @@ export default function Marketing() {
                             return {...s, blocks: [...s.blocks, newBlock]};
                           }));
                         }}
-                        className="flex items-center gap-2 text-gray-500 text-xs mt-10 hover:text-white cursor-pointer transition-colors w-max"
+                        className="flex items-center gap-2 text-gray-500 font-medium text-sm mt-12 hover:text-[#00FF00] cursor-pointer transition-colors w-max py-2 px-4 rounded-lg hover:bg-[#00FF00]/10 border border-transparent hover:border-[#00FF00]/20"
                       >
                         <Plus className="w-4 h-4" /> Adicionar novo bloco de texto
                       </div>
@@ -593,103 +679,128 @@ export default function Marketing() {
           {/* TAB 2: CRM */}
           {activeTab === "crm" && (
             <div className="flex-1 flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-2">
-              <div className="bg-[#0d0d0d] border border-white/5 rounded-xl overflow-hidden flex flex-col shrink-0 shadow-lg">
-              <div className="overflow-auto flex-1 custom-scrollbar">
-                <table className="w-full text-left">
-                  <thead className="bg-[#0d0d0d] sticky top-0 z-10">
-                    <tr className="border-b border-white/5">
-                      <th className="px-4 py-3 text-[9px] uppercase tracking-wider font-semibold text-gray-500">Parceiro</th>
-                      <th className="px-4 py-3 text-[9px] uppercase tracking-wider font-semibold text-gray-500">Nicho</th>
-                      <th className="px-4 py-3 text-[9px] uppercase tracking-wider font-semibold text-gray-500">Status</th>
-                      <th className="px-4 py-3 text-[9px] uppercase tracking-wider font-semibold text-gray-500">Base Fixa</th>
-                      <th className="px-4 py-3 text-[9px] uppercase tracking-wider font-semibold text-gray-500">Upside</th>
-                      <th className="px-4 py-3 text-[9px] uppercase tracking-wider font-semibold text-gray-500">Custo (Seeding)</th>
-                      <th className="px-4 py-3 text-[9px] uppercase tracking-wider font-semibold text-gray-500">Cupom / UTM</th>
-                      <th className="px-4 py-3 text-[9px] uppercase tracking-wider font-semibold text-gray-500 text-right">Receita (Cupom) / eCPA</th>
-                      <th className="pr-4 py-3 w-10"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/[0.03]">
-                    {crmPartners.map(partner => (
-                      <tr key={partner.id} onClick={() => handleEditCrmPartner(partner)} className="hover:bg-white/[0.02] cursor-pointer transition-colors">
-                        <td className="px-4 py-2 flex items-center gap-2">
-                          <div className="relative">
-                            <Avatar className="w-8 h-8 rounded border border-[#333]">
-                              <AvatarImage src={partner.avatar} />
-                              <AvatarFallback className="bg-[#222] text-[9px] text-white rounded">
-                                {partner.name.substring(0,2).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            {/* Tier Badge */}
-                            <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#111] flex items-center justify-center border border-[#222]">
-                              <span className={`text-[8px] font-bold ${partner.tier === 'A' ? 'text-amber-400' : partner.tier === 'B' ? 'text-gray-300' : 'text-orange-600'}`}>{partner.tier}</span>
-                            </div>
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-medium text-xs text-gray-200">{partner.name}</span>
-                              {partner.whitelisted && <ShieldCheck className="w-3.5 h-3.5 text-blue-500" title="Whitelisting Ativo" />}
-                            </div>
-                            {/* Image Rights */}
-                            <div className="flex items-center gap-1 mt-0.5">
-                              <Clock className={`w-3 h-3 ${parseInt(partner.rightsExp) <= 15 ? 'text-red-500' : 'text-gray-500'}`} />
-                              <span className={`text-[8px] ${parseInt(partner.rightsExp) <= 15 ? 'text-red-400' : 'text-gray-500'}`}>{partner.rightsExp} dias</span>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-2 text-xs text-gray-400">{partner.niche}</td>
-                        <td className="px-4 py-2">
-                          <select
-                            value={partner.status}
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={(e) => {
-                              const newStatus = e.target.value;
-                              setCrmPartners(crmPartners.map(p => p.id === partner.id ? { ...p, status: newStatus } : p));
-                            }}
-                            className={`appearance-none cursor-pointer outline-none inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded border transition-colors ${
-                              partner.status === 'Postado' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20' :
-                              partner.status === 'Aprovação Interna' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500/20' :
-                              partner.status === 'Aguardando Roteiro' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20 hover:bg-purple-500/20' :
-                              partner.status === 'Refação' ? 'bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20' :
-                              'bg-gray-500/10 text-gray-400 border-gray-500/20 hover:bg-gray-500/20'
-                            }`}
-                          >
-                            <option value="Postado" className="bg-[#111] text-emerald-400">Postado</option>
-                            <option value="Aprovação Interna" className="bg-[#111] text-blue-400">Aprovação Interna</option>
-                            <option value="Aguardando Roteiro" className="bg-[#111] text-purple-400">Aguardando Roteiro</option>
-                            <option value="Refação" className="bg-[#111] text-red-400">Refação</option>
-                          </select>
-                        </td>
-                        <td className="px-4 py-2 text-xs text-gray-300">{partner.base}</td>
-                        <td className="px-4 py-2 text-xs text-emerald-400/80 font-medium">{partner.upside}</td>
-                        <td className="px-4 py-2 text-xs text-gray-400">{partner.seeding}</td>
-                        <td className="px-4 py-2">
-                          <span className="text-[10px] font-mono text-blue-400/80 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">{partner.tracking}</span>
-                        </td>
-                        <td className="px-4 py-2 text-right">
-                          <div className={`text-xs font-semibold ${partner.roiColor}`}>{partner.roi}</div>
-                          <div className="text-[9px] text-gray-500 mt-0.5">CPA: {partner.cpa}</div>
-                        </td>
-                        <td className="pr-4 py-2 text-right">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setCrmPartners(crmPartners.filter(p => p.id !== partner.id));
-                            }}
-                            className="text-gray-500 hover:text-red-500 hover:bg-red-500/10 p-1.5 rounded transition-colors inline-flex"
-                            title="Excluir parceiro"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </td>
+              <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-6 flex flex-col shrink-0 shadow-lg relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-[80px] pointer-events-none"></div>
+                
+                {/* Header do CRM */}
+                <div className="flex justify-between items-center mb-6 relative z-10">
+                  <div>
+                    <h3 className="text-white text-lg font-semibold tracking-tight">Painel de Influenciadores</h3>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-1">Gestão de Parcerias e Seeding</p>
+                  </div>
+                  <button onClick={() => {
+                    setEditingCrmPartner({ id: Date.now(), avatar: '', name: 'Novo Parceiro', niche: 'Lifestyle', status: 'Aguardando Roteiro', base: 'Permuta', upside: '10%', tracking: 'NOVO10', roi: 'R$ 0', roiColor: 'text-gray-500', whitelisted: false, cpa: '-', tier: 'C', rightsExp: '30', seeding: 'R$ 0' });
+                    setIsCrmModalOpen(true);
+                  }} className="bg-[#00FF00] hover:bg-[#00E500] text-black text-xs font-bold px-4 py-2 rounded-lg transition-colors shadow-[0_0_15px_rgba(0,255,0,0.2)] flex items-center gap-2">
+                    <Plus className="w-4 h-4" /> Novo Parceiro
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto relative z-10">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-white/[0.05]">
+                        <th className="px-4 py-3 text-[10px] uppercase tracking-widest font-medium text-gray-500 w-64">Parceiro</th>
+                        <th className="px-4 py-3 text-[10px] uppercase tracking-widest font-medium text-gray-500">Nicho</th>
+                        <th className="px-4 py-3 text-[10px] uppercase tracking-widest font-medium text-gray-500">Status</th>
+                        <th className="px-4 py-3 text-[10px] uppercase tracking-widest font-medium text-gray-500">Base Fixa</th>
+                        <th className="px-4 py-3 text-[10px] uppercase tracking-widest font-medium text-gray-500">Upside</th>
+                        <th className="px-4 py-3 text-[10px] uppercase tracking-widest font-medium text-gray-500">Custo (Seeding)</th>
+                        <th className="px-4 py-3 text-[10px] uppercase tracking-widest font-medium text-gray-500">Cupom / UTM</th>
+                        <th className="px-4 py-3 text-[10px] uppercase tracking-widest font-medium text-gray-500 text-right">Receita (Cupom) / eCPA</th>
+                        <th className="px-4 py-3 w-10"></th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-white/[0.02]">
+                      {crmPartners.map(partner => (
+                        <tr key={partner.id} onClick={() => handleEditCrmPartner(partner)} className="group hover:bg-white/[0.03] cursor-pointer transition-colors">
+                          <td className="px-4 py-4 flex items-center gap-3 relative rounded-l-xl">
+                            {/* Accent indicator on hover */}
+                            <div className="absolute left-0 top-2 bottom-2 w-1 bg-[#00FF00] rounded-r opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            
+                            <div className="relative">
+                              <Avatar className="w-10 h-10 rounded-full border border-white/10 group-hover:border-[#00FF00]/30 transition-colors">
+                                <AvatarImage src={partner.avatar} />
+                                <AvatarFallback className="bg-[#222] text-xs font-bold text-gray-300">
+                                  {partner.name.substring(0,2).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              {/* Tier Badge */}
+                              <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-[#111] flex items-center justify-center border border-white/10 shadow-sm">
+                                <span className={`text-[9px] font-extrabold ${partner.tier === 'A' ? 'text-amber-400' : partner.tier === 'B' ? 'text-gray-300' : 'text-orange-600'}`}>{partner.tier}</span>
+                              </div>
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-semibold text-sm text-gray-200 group-hover:text-white transition-colors">{partner.name}</span>
+                                {partner.whitelisted && <ShieldCheck className="w-3.5 h-3.5 text-blue-400" title="Whitelisting Ativo" />}
+                              </div>
+                              {/* Image Rights */}
+                              <div className="flex items-center gap-1 mt-0.5">
+                                <Clock className={`w-3 h-3 ${parseInt(partner.rightsExp) <= 15 ? 'text-red-500' : 'text-gray-500'}`} />
+                                <span className={`text-[9px] font-medium tracking-wide ${parseInt(partner.rightsExp) <= 15 ? 'text-red-400' : 'text-gray-500'}`}>Uso: {partner.rightsExp} dias</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 text-xs font-medium text-gray-400">{partner.niche}</td>
+                          <td className="px-4 py-4">
+                            <select
+                              value={partner.status}
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) => {
+                                const newStatus = e.target.value;
+                                setCrmPartners(crmPartners.map(p => p.id === partner.id ? { ...p, status: newStatus } : p));
+                              }}
+                              className={`appearance-none cursor-pointer outline-none inline-flex items-center text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border transition-all shadow-sm ${
+                                partner.status === 'Postado' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20' :
+                                partner.status === 'Aprovação Interna' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500/20' :
+                                partner.status === 'Aguardando Roteiro' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20 hover:bg-purple-500/20' :
+                                partner.status === 'Refação' ? 'bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20' :
+                                'bg-gray-500/10 text-gray-400 border-gray-500/20 hover:bg-gray-500/20'
+                              }`}
+                            >
+                              <option value="Postado" className="bg-[#111] text-emerald-400">Postado</option>
+                              <option value="Aprovação Interna" className="bg-[#111] text-blue-400">Aprovação Interna</option>
+                              <option value="Aguardando Roteiro" className="bg-[#111] text-purple-400">Aguardando Roteiro</option>
+                              <option value="Refação" className="bg-[#111] text-red-400">Refação</option>
+                            </select>
+                          </td>
+                          <td className="px-4 py-4 text-xs font-medium text-gray-300">{partner.base}</td>
+                          <td className="px-4 py-4 text-xs text-emerald-400/90 font-semibold">{partner.upside}</td>
+                          <td className="px-4 py-4 text-xs font-medium text-gray-400">{partner.seeding}</td>
+                          <td className="px-4 py-4">
+                            <span className="text-[10px] font-mono font-medium text-cyan-400/90 bg-cyan-500/10 px-2.5 py-1 rounded-md border border-cyan-500/20 shadow-sm">{partner.tracking}</span>
+                          </td>
+                          <td className="px-4 py-4 text-right">
+                            <div className={`text-sm font-bold tracking-tight ${partner.roiColor}`}>{partner.roi}</div>
+                            <div className="text-[9px] font-medium uppercase tracking-widest text-gray-500 mt-1">CPA: {partner.cpa}</div>
+                          </td>
+                          <td className="px-4 py-4 text-right rounded-r-xl">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setCrmPartners(crmPartners.filter(p => p.id !== partner.id));
+                              }}
+                              className="text-gray-500 hover:text-red-500 opacity-0 group-hover:opacity-100 p-2 rounded-lg hover:bg-red-500/10 transition-all inline-flex"
+                              title="Excluir parceiro"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      
+                      {crmPartners.length === 0 && (
+                        <tr>
+                          <td colSpan={9} className="px-4 py-12 text-center text-gray-500 text-sm">Nenhum parceiro cadastrado.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
           {/* TAB 4: OR�!AMENTO */}
           {activeTab === "orcamento" && (
@@ -702,7 +813,10 @@ export default function Marketing() {
                   <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   <div className="flex justify-between mb-2 items-center">
                     <span className="text-gray-500 text-[10px] font-medium tracking-widest uppercase">Orçamento ({getMonthName(marketingBudget.currentMonth)})</span>
-                    <button onClick={handleEditBudget} className="bg-white/5 hover:bg-white/10 text-gray-400 px-2 py-0.5 rounded text-[9px] font-medium transition-colors border border-white/5 uppercase">Edit</button>
+                    <div className="flex gap-2">
+                      <button onClick={() => setIsNewMonthPromptOpen(true)} className="bg-white/5 hover:bg-[#00FF00]/20 hover:text-[#00FF00] text-gray-400 px-2 py-0.5 rounded text-[9px] font-bold tracking-widest transition-colors border border-white/5 uppercase">Fechar Mês</button>
+                      <button onClick={handleEditBudget} className="bg-white/5 hover:bg-white/10 text-gray-400 px-2 py-0.5 rounded text-[9px] font-medium transition-colors border border-white/5 uppercase">Edit</button>
+                    </div>
                   </div>
                   
                   <div className="mt-auto">
@@ -1097,16 +1211,30 @@ export default function Marketing() {
               </div>
               
               <div>
-                <label className="text-[9px] uppercase font-bold tracking-widest text-gray-500 mb-1 block">Plataforma (Categoria)</label>
-                <select 
-                  value={newScriptForm.category} 
-                  onChange={(e) => setNewScriptForm({...newScriptForm, category: e.target.value})} 
-                  className="w-full bg-[#111] border border-white/5 rounded-lg text-white text-sm px-3 py-2.5 focus:border-[#00FF00]/50 focus:bg-[#161616] transition-colors outline-none appearance-none cursor-pointer"
-                >
-                  <option value="TikTok & UGC">TikTok & UGC</option>
-                  <option value="Instagram">Instagram (Reels / Stories)</option>
-                  <option value="Shopee">Shopee (Live / Ads)</option>
-                </select>
+                <label className="text-[9px] uppercase font-bold tracking-widest text-gray-500 mb-2 block">Plataforma (Categoria)</label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {[
+                    { id: 'TikTok & UGC', label: 'TikTok', icon: <PlayCircle className="w-3.5 h-3.5" />, colorClass: 'text-pink-400' },
+                    { id: 'Instagram', label: 'Instagram', icon: <Instagram className="w-3.5 h-3.5" />, colorClass: 'text-purple-400' },
+                    { id: 'Shopee', label: 'Shopee', icon: <ShoppingBag className="w-3.5 h-3.5" />, colorClass: 'text-orange-400' }
+                  ].map(opt => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setNewScriptForm({...newScriptForm, category: opt.id})}
+                      className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg border text-xs font-semibold transition-all ${
+                        newScriptForm.category === opt.id 
+                          ? 'bg-white/10 border-white/20 text-white shadow-sm' 
+                          : 'bg-[#111] border-white/5 text-gray-500 hover:text-gray-300 hover:bg-white/5'
+                      }`}
+                    >
+                      <span className={newScriptForm.category === opt.id ? opt.colorClass : 'opacity-70'}>
+                        {opt.icon}
+                      </span>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div>
@@ -1216,6 +1344,66 @@ export default function Marketing() {
         </div>
       )}
     
+      {isBudgetModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#111] border border-[#222] rounded-2xl p-6 relative z-10 w-full max-w-sm shadow-2xl flex flex-col gap-4">
+            <div className="flex justify-between items-center border-b border-white/10 pb-3">
+              <h3 className="text-white font-semibold flex items-center gap-2">
+                <DollarSign className="w-4 h-4 text-[#00FF00]" />
+                Editar Orçamento
+              </h3>
+              <button onClick={() => setIsBudgetModalOpen(false)} className="text-gray-500 hover:text-white transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <div className="space-y-4 mt-2">
+              <div>
+                <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Total do Orçamento (R$)</label>
+                <input 
+                  type="number" 
+                  value={budgetForm.total} 
+                  onChange={e => setBudgetForm({...budgetForm, total: parseFloat(e.target.value) || 0})} 
+                  className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-[#00FF00] outline-none" 
+                />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Já Gasto (R$)</label>
+                <input 
+                  type="number" 
+                  value={budgetForm.gasto} 
+                  onChange={e => setBudgetForm({...budgetForm, gasto: parseFloat(e.target.value) || 0})} 
+                  className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-[#00FF00] outline-none" 
+                />
+              </div>
+            </div>
+
+            <button onClick={handleSaveBudget} className="w-full bg-[#00FF00] hover:bg-[#00E500] text-black font-bold text-sm py-2.5 rounded-lg mt-2 transition-colors">
+              Salvar Orçamento
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isNewMonthPromptOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#111] border border-[#222] rounded-2xl p-6 relative z-10 w-full max-w-sm shadow-2xl flex flex-col gap-4 text-center">
+            <h3 className="text-white font-semibold text-lg">Fechar o Mês?</h3>
+            <p className="text-gray-400 text-sm">Isso salvará o orçamento e os gastos atuais no histórico e iniciará um novo mês. Você deseja manter o orçamento total do mês atual para o próximo?</p>
+            <div className="flex flex-col gap-2 mt-4">
+              <button onClick={() => handleConfirmNewMonth(true)} className="w-full bg-[#00FF00] hover:bg-[#00E500] text-black font-bold text-sm py-2.5 rounded-lg transition-colors">
+                Sim, manter Orçamento
+              </button>
+              <button onClick={() => handleConfirmNewMonth(false)} className="w-full bg-white/10 hover:bg-white/20 text-white font-bold text-sm py-2.5 rounded-lg transition-colors">
+                Não, definir novo
+              </button>
+              <button onClick={() => setIsNewMonthPromptOpen(false)} className="w-full bg-transparent text-gray-500 hover:text-white text-sm py-2 transition-colors mt-2">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isSalesModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center">

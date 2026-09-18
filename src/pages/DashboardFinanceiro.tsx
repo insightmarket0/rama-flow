@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { HistoricalDataDialog } from "@/components/finance/HistoricalDataDialog";
-import { NewFeatureModal } from "@/components/NewFeatureModal";
 
 import { useAuth } from "@/hooks/useAuth";
 
@@ -219,8 +218,6 @@ const DashboardFinanceiro = () => {
         initialData={editingClosing}
         onSave={handleSaveClosing}
       />
-
-      <NewFeatureModal />
     </div>
   );
 };

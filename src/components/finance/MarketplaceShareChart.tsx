@@ -82,8 +82,8 @@ export const MarketplaceShareChart = ({ data }: MarketplaceShareChartProps) => {
                             data={chartData.data}
                             cx="50%"
                             cy="50%"
-                            innerRadius={90}
-                            outerRadius={110}
+                            innerRadius={75}
+                            outerRadius={95}
                             paddingAngle={3}
                             dataKey="value"
                             stroke="none"
@@ -91,7 +91,7 @@ export const MarketplaceShareChart = ({ data }: MarketplaceShareChartProps) => {
                             labelLine={false}
                             label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
                                 const RADIAN = Math.PI / 180;
-                                const radius = 30 + innerRadius + (outerRadius - innerRadius);
+                                const radius = 15 + outerRadius;
                                 const x = cx + radius * Math.cos(-midAngle * RADIAN);
                                 const y = cy + radius * Math.sin(-midAngle * RADIAN);
                                 const market = marketplaces.find(m => m.label === chartData.data[index].name);
@@ -101,12 +101,14 @@ export const MarketplaceShareChart = ({ data }: MarketplaceShareChartProps) => {
 
                                 return (
                                     <g>
-                                        <foreignObject x={x - 32} y={y - 14} width={64} height={28} className="overflow-visible">
-                                            <div className="flex items-center justify-center gap-1.5 bg-[#0A0A0A]/90 backdrop-blur-xl rounded-md border border-white/10 px-2 py-1 shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-all">
-                                                {Icon && <Icon className="h-3 w-3" style={{ color: chartData.data[index].color }} />}
-                                                <span className="text-[10px] font-bold text-white tracking-widest">
-                                                    {`${(percent * 100).toFixed(0)}%`}
-                                                </span>
+                                        <foreignObject x={x - 40} y={y - 20} width={80} height={40}>
+                                            <div className="flex h-full w-full items-center justify-center">
+                                                <div className="flex items-center justify-center gap-1.5 bg-[#0A0A0A]/90 backdrop-blur-xl rounded-md border border-white/10 px-2.5 py-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-all">
+                                                    {Icon && <Icon className="h-3 w-3" style={{ color: chartData.data[index].color }} />}
+                                                    <span className="text-[10px] font-bold text-white tracking-widest">
+                                                        {`${(percent * 100).toFixed(0)}%`}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </foreignObject>
                                     </g>
