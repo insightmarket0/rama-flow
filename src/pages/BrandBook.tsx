@@ -7,7 +7,7 @@ export default function BrandBook() {
       <div className="max-w-[1400px] w-full min-h-[1600px] lg:min-h-[1800px] mx-auto flex flex-col p-4">
         
         {/* BENTO GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-3 grid-rows-[repeat(8,minmax(0,1fr))] gap-3 flex-1 min-h-0">
+        <div className="grid grid-cols-1 md:grid-cols-3 auto-rows-[minmax(220px,auto)] gap-3 flex-1 min-h-0">
 
           {/* COLUNA 1 - LINHAS 1 E 2: Símbolo Verde Limão */}
           <div className="col-start-1 col-span-1 row-start-1 row-span-2 bg-[#D6F599] rounded-[2rem] flex flex-col p-6 lg:p-8 relative overflow-hidden group">
@@ -119,8 +119,8 @@ export default function BrandBook() {
              </div>
           </div>
 
-          {/* NOVA LINHA 5: DETALHAMENTO DE PÚBLICO E GEOLOCALIZAÇÃO (Ocupa 3 colunas) */}
-          <div className="col-start-1 col-span-3 row-start-5 row-span-1 bg-[#1A2421] border border-white/5 rounded-[2rem] p-6 flex flex-col lg:flex-row gap-8 lg:items-center justify-between overflow-y-auto custom-scrollbar">
+          {/* NOVA LINHA 5: DETALHAMENTO DE PÚBLICO E GEOLOCALIZAÇÃO */}
+          <div className="md:col-span-3 bg-[#1A2421] border border-white/5 rounded-[2rem] p-6 flex flex-col lg:flex-row gap-8 lg:items-center justify-between overflow-y-auto custom-scrollbar">
              
              {/* Esquerda: Geração e Classe */}
              <div className="flex flex-col gap-3 min-w-[250px]">
@@ -179,7 +179,7 @@ export default function BrandBook() {
           </div>
 
           {/* LINHA 6 - COLUNAS 1 E 2: Manifesto & Estratégia B2B */}
-          <div className="col-start-1 col-span-1 md:col-span-2 row-start-6 row-span-1 bg-gradient-to-tr from-[#161B19] to-[#1A2421] border border-white/5 rounded-[2rem] p-6 lg:p-8 flex flex-col justify-center relative overflow-hidden group">
+          <div className="md:col-span-2 bg-gradient-to-tr from-[#161B19] to-[#1A2421] border border-white/5 rounded-[2rem] p-6 lg:p-8 flex flex-col justify-center relative overflow-hidden group">
              <div className="absolute top-0 right-0 p-8 opacity-10">
                <Asterisk className="w-48 h-48 text-[#D6F599] -rotate-12" strokeWidth={1} />
              </div>
@@ -201,7 +201,7 @@ export default function BrandBook() {
           </div>
 
           {/* LINHA 6 - COLUNA 3: Futuro & Experiência */}
-          <div className="col-start-1 md:col-start-3 col-span-1 row-start-7 md:row-start-6 row-span-1 bg-[#D6F599] rounded-[2rem] p-6 flex flex-col justify-center relative overflow-hidden group">
+          <div className="md:col-span-1 bg-[#D6F599] rounded-[2rem] p-6 flex flex-col justify-center relative overflow-hidden group">
              <h4 className="text-[#1A2421] text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 mb-4">
                <HeartHandshake className="w-4 h-4" /> Futuro & Experiência
              </h4>
@@ -221,50 +221,109 @@ export default function BrandBook() {
              </ul>
           </div>
 
-          {/* LINHA 7 - COLUNAS 1 E 2: Estratégia de Conteúdo e Marketing */}
-          <div className="col-start-1 col-span-1 md:col-span-2 row-start-8 md:row-start-7 row-span-1 bg-[#24302A] border border-[#D6F599]/20 rounded-[2rem] p-6 lg:p-8 flex flex-col justify-center relative overflow-hidden">
-             <h4 className="text-[#D6F599] text-[10px] lg:text-xs font-bold uppercase tracking-widest flex items-center gap-2 mb-4">
-               <Sparkles className="w-4 h-4" /> Conteúdo & Publicidade
+          {/* LINHA 7 - FULL WIDTH: O Motor de Marketing, Influência e Lives */}
+          <div className="md:col-span-3 row-span-2 bg-[#24302A] border border-[#D6F599]/30 rounded-[2rem] p-6 lg:p-8 flex flex-col relative overflow-hidden group">
+             <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-[#D6F599]/5 blur-3xl pointer-events-none" />
+             <h4 className="text-[#D6F599] text-[10px] lg:text-xs font-bold uppercase tracking-widest flex items-center gap-2 mb-6 relative z-10">
+               <Sparkles className="w-4 h-4" /> Playbook de Marca & Influência (Padrão Shopee/ML)
              </h4>
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-               <div className="space-y-3">
-                 <h5 className="text-white text-sm font-bold">Storytelling & Influência</h5>
+             
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+               
+               {/* Coluna A: O Programa de Influenciadores */}
+               <div className="space-y-4">
+                 <h5 className="text-white text-sm font-bold flex items-center gap-2">
+                   <span className="w-2 h-2 rounded-full bg-[#D6F599]" /> 1. O Exército do ABC
+                 </h5>
                  <p className="text-white/70 text-xs leading-relaxed">
-                   <strong>Mini-filmes e Estilo de Vida:</strong> Conversação natural, sem venda agressiva. Foco no desejo. <i>"Gostou? O link de todos os produtos do vídeo está na bio."</i>
+                   <strong>Perfil:</strong> 4 blogueiras com alto engajamento + 1 profissional técnico para produtos sérios. Precisam ser da região do ABC e ter fit com nossos produtos.
                  </p>
                  <p className="text-white/70 text-xs leading-relaxed">
-                   <strong>Rede de Influenciadores:</strong> Recebem produtos, geram Reels, e vendem via cupom (comissionado). O Instagram e TikTok serão abastecidos por esse ecossistema.
+                   <strong>Acordo e Entregáveis:</strong> Cache de R$ 100 + comissão por venda (cupom/link). Recebem 5 produtos em uma <i>Caixa Personalizada RAMA</i>. Em troca, entregam 3 vídeos diferentes por produto.
+                 </p>
+                 <p className="text-white/70 text-xs leading-relaxed">
+                   <strong>Gestão (O Funil):</strong> Todos recebem um Script Guia. Controle estrito de prazos: quando foi pago, quando chega o produto, dias das postagens e Collabs.
                  </p>
                </div>
+
+               {/* Coluna B: Conteúdo e Live Commerce */}
+               <div className="space-y-4">
+                 <h5 className="text-white text-sm font-bold flex items-center gap-2">
+                   <span className="w-2 h-2 rounded-full bg-[#D6F599]" /> 2. Formatos e Lives
+                 </h5>
+                 <p className="text-white/70 text-xs leading-relaxed">
+                   <strong>A Máquina de Vídeos:</strong> O conteúdo dos influencers retroalimentará nosso TikTok e Instagram. 
+                 </p>
+                 <p className="text-white/70 text-xs leading-relaxed">
+                   <strong>Mini-filmes e Estilo de Vida:</strong> Vídeos de conversação (ex: estilo David Ludolf) sem venda forçada. Termina com: <i>"Gostou? Link na bio."</i>
+                 </p>
+                 <p className="text-white/70 text-xs leading-relaxed">
+                   <strong>Live Commerce:</strong> Apresentador fixo guiado por roteiro (Sábados/Domingos). O cenário é real: fundo com o estoque físico ou área de embalagem rolando ao vivo para gerar autoridade.
+                 </p>
+               </div>
+
+               {/* Coluna C: Personas e a Grande Promessa */}
+               <div className="space-y-4">
+                 <h5 className="text-white text-sm font-bold flex items-center gap-2">
+                   <span className="w-2 h-2 rounded-full bg-[#D6F599]" /> 3. Personas & Promessa
+                 </h5>
+                 <p className="text-white/70 text-xs leading-relaxed">
+                   <strong>As Faces da Marca:</strong> Para o público mais velho e tradicional (Facebook), o rosto do <strong>Rogério</strong> (passa credibilidade e confiança). Para o público jovem, um novo comunicador ágil.
+                 </p>
+                 <p className="text-[#D6F599] text-xs font-bold leading-relaxed mt-4 p-3 bg-white/5 rounded-xl border border-[#D6F599]/20">
+                   A Promessa Inquebrável:<br/>
+                   <span className="text-white font-medium">O influencer divulga, o cliente compra. A RAMA entrega os produtos Curva A no mesmo dia (Prazo de 1 dia) em todo o ABC.</span>
+                 </p>
+               </div>
+
+             </div>
+          </div>
+
+          {/* LINHA 8 - FULL WIDTH: Operação, Nuvemshop & Whats Marketplace */}
+          <div className="md:col-span-3 bg-[#F4F4F0] border border-[#1A2421]/10 rounded-[2rem] p-6 lg:p-8 flex flex-col relative group">
+             <h4 className="text-[#1A2421] text-[10px] lg:text-xs font-bold uppercase tracking-widest flex items-center gap-2 mb-6">
+               <HeartHandshake className="w-4 h-4" /> Operação: Nuvemshop & Whats Marketplace
+             </h4>
+             
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+               {/* Coluna 1: O Whats Marketplace */}
                <div className="space-y-3">
-                 <h5 className="text-white text-sm font-bold">Inclusão Geracional</h5>
-                 <p className="text-white/70 text-xs leading-relaxed">
-                   <strong>Geração X e Z:</strong> Foco em simplicidade absoluta. Mostrar um senhor comprando do seu jeito, fazendo pedidos até por áudio de WhatsApp.
+                 <h5 className="text-[#1A2421] text-sm font-bold">O Whats Marketplace</h5>
+                 <p className="text-[#1A2421]/80 text-xs leading-relaxed">
+                   <strong>Onde o brasileiro está:</strong> Teremos a base na Nuvemshop, mas a operação vai fluir 100% pelo WhatsApp. Tudo altamente personalizável para cada cliente.
                  </p>
-                 <p className="text-white/70 text-xs leading-relaxed">
-                   <strong>Facebook Ads:</strong> Canal chave para atingir o público mais velho com ticket médio alto.
+                 <p className="text-[#1A2421]/80 text-xs leading-relaxed">
+                   Início regional focado na grande São Paulo e ABC, usando a proximidade como nossa maior arma.
                  </p>
+               </div>
+
+               {/* Coluna 2: Tecnologia + Humanização */}
+               <div className="space-y-3">
+                 <h5 className="text-[#1A2421] text-sm font-bold">Tecnologia Humanizada</h5>
+                 <p className="text-[#1A2421]/80 text-xs leading-relaxed">
+                   <strong>Copiloto de IA + Toque Humano:</strong> A Inteligência Artificial lê o cliente e já gera a resposta perfeita (adaptando o linguajar para criar conexão e respeito). O atendente humano apenas revisa, dá o 'OK' e envia.
+                 </p>
+                 <p className="text-[#1A2421]/80 text-xs leading-relaxed">
+                   <strong>Escala Absoluta:</strong> Com esse sistema, um único atendente gerencia múltiplas conversas simultâneas com agilidade extrema, sem nunca perder o calor humano. Faremos marketing forte em cima disso.
+                 </p>
+               </div>
+
+               {/* Coluna 3: A Oferta & Instalação */}
+               <div className="space-y-3">
+                 <h5 className="text-[#1A2421] text-sm font-bold">Oferta & Logística</h5>
+                 <p className="text-[#1A2421]/80 text-xs leading-relaxed">
+                   <strong>Produtos Curva A:</strong> Começamos forte com a Curva A da RAMA (comissão em cima). 
+                 </p>
+                 <div className="bg-white p-3 rounded-xl border border-[#1A2421]/5 text-[#1A2421]/90 text-xs leading-relaxed">
+                   <strong>Frete Grátis</strong> (já incluído no valor).<br/>
+                   <strong>Instalação SP e ABC:</strong> Venda de serviço cruzado (Cross-sell), como oferecer a mangueira instalada junto com o produto.
+                 </div>
                </div>
              </div>
           </div>
 
-          {/* LINHA 7 - COLUNA 3: Operação Nuvemshop */}
-          <div className="col-start-1 md:col-start-3 col-span-1 row-start-9 md:row-start-7 row-span-1 bg-[#F4F4F0] border border-[#1A2421]/10 rounded-[2rem] p-6 flex flex-col justify-center relative">
-             <h4 className="text-[#1A2421] text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 mb-3">
-               <HeartHandshake className="w-4 h-4" /> Operação & Serviço
-             </h4>
-             <p className="text-[#1A2421]/90 text-sm font-bold mb-2">Base: Nuvemshop</p>
-             <p className="text-[#1A2421]/80 text-xs leading-relaxed mb-3">
-               Nosso diferencial é a solução completa para o público final (venda + explicação + instalação).
-             </p>
-             <div className="bg-white p-3 rounded-xl border border-[#1A2421]/5 text-xs text-[#1A2421]/80 leading-relaxed font-medium">
-               <strong>Foco SP e ABC:</strong> Garantir excelente entrega e forte divulgação da instalação. <br/><br/>
-               <i>Cross-sell estratégico:</i> Oferecer serviços conjuntos, como a instalação de mangueiras com o utensílio.
-             </div>
-          </div>
-
-          {/* LINHA 8 - FULL WIDTH: O Sistema Interno */}
-          <div className="col-start-1 col-span-1 md:col-span-3 row-start-10 md:row-start-8 row-span-1 bg-gradient-to-r from-blue-600 to-indigo-800 rounded-[2rem] p-6 lg:p-8 flex flex-col md:flex-row items-center justify-between shadow-2xl relative overflow-hidden">
+          {/* LINHA 9 - FULL WIDTH: O Sistema Interno */}
+          <div className="md:col-span-3 row-span-2 bg-gradient-to-r from-blue-600 to-indigo-800 rounded-[2rem] p-6 lg:p-8 flex flex-col md:flex-row items-center justify-between shadow-2xl relative overflow-hidden">
              <div className="absolute inset-0 bg-black/10" />
              <div className="md:w-1/3 relative z-10 mb-6 md:mb-0">
                <h4 className="text-white/80 text-[10px] lg:text-xs font-bold uppercase tracking-widest flex items-center gap-2 mb-2">

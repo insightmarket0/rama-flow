@@ -227,6 +227,8 @@ const ExpediçãoTracker = () => {
 };
 
 
+import { supabase } from "@/integrations/supabase/client";
+
 export default function MeuDia() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -244,7 +246,17 @@ export default function MeuDia() {
     greeting = "Boa noite";
   }
 
-  const [announcements, setAnnouncements] = useState(MOCK_ANNOUNCEMENTS);
+  type Announcement = {
+    id: string;
+    title: string;
+    content: string;
+    is_pinned: boolean;
+    creator_name: string;
+    created_at: string;
+    acknowledgments?: { id: string; user_id: string; user_name: string; acknowledged_at: string }[];
+  };
+
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [reminders, setReminders] = useState(MOCK_REMINDERS);
   const [adjustments, setAdjustments] = useState(MOCK_ADJUSTMENTS);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -252,67 +264,96 @@ export default function MeuDia() {
   const [newContent, setNewContent] = useState("");
   const [isPinned, setIsPinned] = useState(false);
 
+  const fetchAnnouncements = async () => {
+    try {
+      // 1. Fetch announcements
+      const { data: annData, error: annError } = await supabase
+        .from('announcements')
+        .select('*')
+        .order('is_pinned', { ascending: false })
+        .order('created_at', { ascending: false });
+
+      if (annError) throw annError;
+
+      // 2. Fetch acknowledgments
+      const { data: ackData, error: ackError } = await supabase
+        .from('announcement_acknowledgments')
+        .select('*');
+
+      if (ackError) throw ackError;
+
+      // 3. Map together
+      const merged = (annData || []).map(ann => ({
+        ...ann,
+        acknowledgments: (ackData || []).filter(ack => ack.announcement_id === ann.id)
+      }));
+
+      setAnnouncements(merged);
+    } catch (error) {
+      console.warn("Table announcements not found or error fetching.", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAnnouncements();
+
+    const channel = supabase
+      .channel('announcements_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, () => {
+        fetchAnnouncements();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'announcement_acknowledgments' }, () => {
+        fetchAnnouncements();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   const todayDate = format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR });
+  const [exitingAnnouncement, setExitingAnnouncement] = useState<string | null>(null);
 
-  const handleDeleteAnnouncement = (id: string) => {
-    setAnnouncements(prev => prev.filter(a => a.id !== id));
+  const handleDeleteAnnouncement = async (id: string) => {
+    setExitingAnnouncement(id);
+    setTimeout(async () => {
+      await supabase.from('announcements').delete().eq('id', id);
+      setExitingAnnouncement(null);
+    }, 300);
   };
 
-  const handleAcknowledge = (id: string) => {
-    const TOTAL_TEAM_MEMBERS = 4; // Auto-excluir após 4 visualizações
+  const handleAcknowledge = async (id: string) => {
+    const hasAck = announcements.find(a => a.id === id)?.acknowledgments?.some(ack => ack.user_id === (user?.id || 'anon'));
+    if (hasAck) return;
     
-    setAnnouncements(prev => {
-      const updated = prev.map(a => {
-        if (a.id === id) {
-          const hasAck = a.acknowledgments?.some(ack => ack.user_id === (user?.id || 'anon'));
-          if (hasAck) return a;
-          
-          return {
-            ...a,
-            acknowledgments: [
-              ...(a.acknowledgments || []),
-              {
-                id: Math.random().toString(),
-                announcement_id: id,
-                user_id: user?.id || 'anon',
-                acknowledged_at: new Date().toISOString(),
-                user: { full_name: currentUserName }
-              }
-            ]
-          };
-        }
-        return a;
+    setExitingAnnouncement(id);
+    setTimeout(async () => {
+      await supabase.from('announcement_acknowledgments').insert({
+        announcement_id: id,
+        user_id: user?.id || 'anon',
+        user_name: currentUserName
       });
-      
-      return updated.filter(a => {
-        if (a.id === id && a.acknowledgments && a.acknowledgments.length >= TOTAL_TEAM_MEMBERS) {
-          return false; // Remove automatically
-        }
-        return true;
-      });
-    });
+      setExitingAnnouncement(null);
+    }, 300);
   };
 
-  const handleCreateAnnouncement = (e: React.FormEvent) => {
+  const handleCreateAnnouncement = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle || !newContent) return;
 
-    const newAnnouncement = {
-      id: Math.random().toString(),
-      creator_id: user?.id || "anon",
+    await supabase.from('announcements').insert({
       title: newTitle,
       content: newContent,
       is_pinned: isPinned,
-      created_at: new Date().toISOString(),
-      creator: { full_name: currentUserName + " • Equipe" },
-      acknowledgments: []
-    };
+      creator_id: user?.id || null,
+      creator_name: currentUserName
+    });
 
-    setAnnouncements([newAnnouncement, ...announcements]);
-    setIsModalOpen(false);
     setNewTitle("");
     setNewContent("");
     setIsPinned(false);
+    setIsModalOpen(false);
   };
 
 
@@ -324,7 +365,23 @@ export default function MeuDia() {
     setAdjustments(adjustments.filter(a => a.id !== id));
   };
 
-  const isNothingPending = announcements.length === 0 && reminders.length === 0 && adjustments.length === 0;
+  const TOTAL_TEAM_MEMBERS = 4;
+
+  const visibleAnnouncements = announcements.filter(ann => {
+    const isCreator = ann.creator_id === user?.id;
+    const hasAck = ann.acknowledgments?.some(ack => ack.user_id === (user?.id || 'anon'));
+    const ackCount = ann.acknowledgments?.length || 0;
+
+    if (isCreator) {
+      // Se for o criador, só some quando todos os outros marcarem ciente
+      return ackCount < (TOTAL_TEAM_MEMBERS - 1);
+    } else {
+      // Se não for o criador, some assim que ele próprio marcar ciente
+      return !hasAck;
+    }
+  });
+
+  const isNothingPending = visibleAnnouncements.length === 0 && reminders.length === 0 && adjustments.length === 0;
 
   const quoteOfDay = getQuoteOfTheDay(user?.email);
 
@@ -400,50 +457,65 @@ export default function MeuDia() {
 
         <PainelPagamentosHoje />
 
-            {/* 3.1. Card Fixo de Prévia de Mensagens */}
+            {/* 3.1. Card Fixo de Prévia de Mensagens -> Escritório Virtual */}
             <div 
               onClick={() => window.dispatchEvent(new CustomEvent('open-global-chat'))}
-              className="col-span-1 bg-[#121214] hover:bg-[#18181B] rounded-3xl p-5 flex flex-col justify-center items-center gap-5 border border-white/5 hover:border-white/10 shadow-lg cursor-pointer transition-all duration-500 group relative overflow-hidden h-[250px]"
+              className="col-span-1 bg-gradient-to-br from-slate-300/10 via-slate-400/5 to-slate-500/10 hover:from-slate-300/15 hover:to-slate-500/15 backdrop-blur-md rounded-[2rem] p-6 flex flex-col justify-between border border-white/10 cursor-pointer transition-all duration-500 h-[250px] relative overflow-hidden group shadow-[0_8px_30px_rgba(0,0,0,0.12)]"
             >
-              {/* Subtle inner glow */}
-              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+              {/* Brilho interno sutil */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-slate-200/5 rounded-full blur-[60px] group-hover:bg-slate-200/10 transition-colors pointer-events-none"></div>
               
-              <div className="relative shrink-0">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#1E1E20] to-[#111] flex items-center justify-center border border-white/10 group-hover:scale-105 transition-transform duration-500 shadow-inner relative overflow-hidden">
-                   <div className="absolute inset-0 bg-emerald-500/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                   <MessageCircle className="w-6 h-6 text-gray-400 group-hover:text-white transition-colors relative z-10" />
+              <div className="flex justify-between items-start z-10 relative">
+                <div className="w-12 h-12 rounded-[14px] bg-white/5 flex items-center justify-center border border-white/10 shadow-sm group-hover:bg-white/10 transition-all">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-300"><rect width="16" height="12" x="4" y="4" rx="2"/><path d="M4 12v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/><path d="M12 16v-4"/><path d="M8 16v-4"/><path d="M16 16v-4"/></svg>
                 </div>
                 {/* Notification Badge */}
-                <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#FF3B30] border-2 border-[#121214] rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-lg animate-in zoom-in">
-                  3
+                <div className="bg-white/5 border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm group-hover:bg-white/10 transition-colors">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.5)]"></div>
+                  <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">6 Online</span>
                 </div>
               </div>
               
-              <div className="flex-1 min-w-0 flex flex-col justify-center items-center text-center mt-2">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
-                    Chat da Equipe
+              <div className="flex-1 mt-6 z-10 relative">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-[10px] font-bold text-slate-400 tracking-[0.15em] uppercase">
+                    Ambiente Virtual
                   </span>
-                  <div className="w-1 h-1 rounded-full bg-white/20" />
-                  <span className="text-[10px] text-gray-500 font-medium">Agora</span>
                 </div>
-                <h3 className="text-white font-medium text-[13px] leading-tight truncate mb-1">
-                  Fahema: <span className="text-gray-400 font-normal">Os novos criativos já estão na pasta...</span>
+                <h3 className="text-slate-100 text-xl font-bold tracking-tight leading-tight mb-2 group-hover:text-white transition-colors">
+                  Escritório da Equipe
                 </h3>
+                <p className="text-sm text-slate-400 font-medium leading-relaxed">
+                  Toda a equipe está trabalhando no escritório virtual.
+                </p>
               </div>
-              
-              <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 duration-300">
-                <ChevronRight className="w-4 h-4 text-white/50 group-hover:text-white" />
+
+              {/* Avatar Pile */}
+              <div className="flex items-center mt-3 z-10 relative">
+                <div className="w-8 h-8 rounded-full border-2 border-[#1e2330] bg-gray-200 z-50 overflow-hidden shadow-sm"><img src="/rogerio.png" className="w-full h-full object-cover" onError={(e) => e.currentTarget.src = 'https://ui-avatars.com/api/?name=RO&background=random'}/></div>
+                <div className="w-8 h-8 rounded-full border-2 border-[#1e2330] bg-purple-600 flex items-center justify-center text-[10px] font-bold text-white z-40 -ml-2 shadow-sm">MA</div>
+                <div className="w-8 h-8 rounded-full border-2 border-[#1e2330] bg-amber-600 flex items-center justify-center text-[10px] font-bold text-white z-30 -ml-2 shadow-sm">AN</div>
+                <div className="w-8 h-8 rounded-full border-2 border-[#1e2330] bg-blue-600 flex items-center justify-center text-[10px] font-bold text-white z-20 -ml-2 shadow-sm">AL</div>
+                <div className="w-8 h-8 rounded-full border-2 border-[#1e2330] bg-gray-200 z-10 -ml-2 overflow-hidden shadow-sm"><img src="/assets/will.jpg" className="w-full h-full object-cover" onError={(e) => e.currentTarget.src = 'https://ui-avatars.com/api/?name=WM&background=random'}/></div>
+                <div className="w-8 h-8 rounded-full border-2 border-[#1e2330] bg-green-500/20 flex items-center justify-center text-[10px] font-bold text-emerald-400 z-0 -ml-2 shadow-sm border-green-500/30">IA</div>
               </div>
             </div>
 
             {/* 3.2. Cards do Mural de Alinhamento */}
-            <div id="mural-alinhamento" className="col-span-1 flex flex-col gap-4 h-[250px]">
-              <div className="flex items-center gap-3 mb-1">
-                <h3 className="text-gray-300 text-xs font-semibold uppercase tracking-widest flex items-center gap-2">
-                  <Megaphone className="h-3.5 w-3.5 text-[#00FF00]" />
-                  Alinhamento
-                </h3>
+            <div id="mural-alinhamento" className="col-span-1 flex flex-col gap-2 h-[250px]">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-gray-300 text-xs font-semibold uppercase tracking-widest flex items-center gap-2">
+                    <Megaphone className="h-3.5 w-3.5 text-[#00FF00]" />
+                    Alinhamento
+                  </h3>
+                  {visibleAnnouncements.length > 1 && (
+                    <span className="text-[9px] font-bold text-gray-400 bg-white/5 px-2 py-0.5 rounded-full border border-white/10 flex items-center gap-1.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-slate-300 shadow-[0_0_5px_rgba(203,213,225,0.8)] animate-pulse"></div>
+                      +{visibleAnnouncements.length - 1} na fila
+                    </span>
+                  )}
+                </div>
                 <button 
                   onClick={() => setIsModalOpen(true)}
                   className="bg-white/5 hover:bg-[#00FF00]/20 hover:text-[#00FF00] text-gray-400 p-1 rounded-md transition-colors border border-white/5 hover:border-[#00FF00]/30"
@@ -452,10 +524,18 @@ export default function MeuDia() {
                   <Plus className="h-3.5 w-3.5" />
                 </button>
               </div>
-              {announcements.slice(0, 1).map((ann) => {
+
+              {visibleAnnouncements.length === 0 && (
+                <div className="flex-1 rounded-2xl p-5 flex flex-col items-center justify-center bg-[#111111] border border-white/5 border-dashed text-gray-500 shadow-inner">
+                  <CheckCircle2 className="h-6 w-6 mb-2 opacity-20" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest opacity-50">Nenhum alinhamento pendente</span>
+                </div>
+              )}
+
+              {visibleAnnouncements.slice(0, 1).map((ann) => {
                 const hasAck = ann.acknowledgments?.some(ack => ack.user_id === (user?.id || 'anon'));
                 return (
-                <div key={ann.id} className="rounded-2xl p-5 flex flex-col justify-between bg-gradient-to-b from-[#18181A] to-[#111111] border border-white/5 shadow-xl relative group flex-1 overflow-hidden">
+                <div key={ann.id} className={`rounded-2xl p-5 flex flex-col justify-between bg-gradient-to-b from-[#18181A] to-[#111111] border border-white/5 shadow-xl relative group flex-1 overflow-hidden transition-all duration-300 transform ${exitingAnnouncement === ann.id ? 'opacity-0 scale-95 -translate-x-8' : 'opacity-100 scale-100 translate-x-0'}`}>
                   <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 mb-2 min-h-0">
                     <div className="flex items-center gap-2 mb-4 flex-wrap relative pr-8">
                       <button 
@@ -467,7 +547,7 @@ export default function MeuDia() {
                       </button>
                       <span className="px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border border-white/10 bg-white/5 flex items-center gap-1.5 text-gray-300">
                         <Megaphone className="h-3 w-3 text-[#00FF00]" />
-                        {ann.creator?.full_name || 'Equipe'}
+                        {ann.creator_name || 'Equipe'}
                       </span>
                       <span className="text-gray-500 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1">
                         <Tag className="h-2.5 w-2.5" /> {ann.title}
@@ -488,7 +568,7 @@ export default function MeuDia() {
                           <div className="flex flex-wrap gap-1">
                             {ann.acknowledgments.map(ack => (
                               <span key={ack.id} className="bg-[#00FF00]/10 text-[#00FF00] border border-[#00FF00]/20 px-2 py-0.5 rounded-md text-[9px] font-bold">
-                                {ack.user?.full_name?.split(' ')[0] || 'Usuário'}
+                                {ack.user_name?.split(' ')[0] || 'Usuário'}
                               </span>
                             ))}
                           </div>

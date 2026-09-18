@@ -14,6 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcements: {
+        Row: {
+          id: string
+          created_at: string
+          title: string
+          content: string
+          is_pinned: boolean
+          creator_id: string | null
+          creator_name: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          title: string
+          content: string
+          is_pinned?: boolean
+          creator_id?: string | null
+          creator_name: string
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          title?: string
+          content?: string
+          is_pinned?: boolean
+          creator_id?: string | null
+          creator_name?: string
+        }
+        Relationships: []
+      }
+      announcement_acknowledgments: {
+        Row: {
+          id: string
+          announcement_id: string
+          user_id: string
+          user_name: string
+          acknowledged_at: string
+        }
+        Insert: {
+          id?: string
+          announcement_id: string
+          user_id: string
+          user_name: string
+          acknowledged_at?: string
+        }
+        Update: {
+          id?: string
+          announcement_id?: string
+          user_id?: string
+          user_name?: string
+          acknowledged_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_acknowledgments_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       marketplaces: {
         Row: {
           color: string

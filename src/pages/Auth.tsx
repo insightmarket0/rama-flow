@@ -186,205 +186,166 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
-      {/* Left Side - Form */}
-      <div className="flex items-center justify-center p-8 bg-background">
-        <div className="w-full max-w-md space-y-8 animate-fade-in">
-          {/* Logo & Title */}
-          <div className="text-center space-y-2">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <img
-                src="/assets/logo.png"
-                alt="RAMA"
-                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
-                className="h-12 w-auto object-contain"
-              />
-              <h1 className="text-3xl font-bold tracking-tight">RAMA</h1>
-            </div>
-            <h2 className="text-2xl font-semibold text-foreground">
-              {isLogin ? "Bem-vindo de volta" : "Crie sua conta"}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {isLogin 
-                ? "Entre para acessar seu painel de gestão" 
-                : "Comece a gerenciar seus pedidos hoje"}
-            </p>
-          </div>
-
-          {/* Toggle Login/Signup */}
-          <div className="flex items-center justify-center gap-2 p-1 bg-muted rounded-lg">
-            <button
-              type="button"
-              onClick={() => setIsLogin(true)}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
-                isLogin 
-                  ? "bg-background text-foreground shadow-sm" 
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Entrar
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsLogin(false)}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
-                !isLogin 
-                  ? "bg-background text-foreground shadow-sm" 
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Criar Conta
-            </button>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={isLogin ? handleSignIn : handleSignUp} className="space-y-4">
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="fullName" className="text-sm font-medium">
-                  Nome Completo
-                </Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="fullName"
-                    type="text"
-                    placeholder="Seu nome completo"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="pl-10"
-                    required={!isLogin}
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">
-                E-mail
-              </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">
-                Senha
-              </Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
-                  required
-                  minLength={6}
-                />
-              </div>
-              {!isLogin && (
-                <p className="text-xs text-muted-foreground">
-                  Mínimo de 6 caracteres
-                </p>
-              )}
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full bg-accent hover:bg-accent/90 text-accent-foreground group"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {isLogin ? "Entrando..." : "Criando conta..."}
-                </>
-              ) : (
-                <>
-                  {isLogin ? "Entrar" : "Criar Conta"}
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </>
-              )}
-            </Button>
-          </form>
-        </div>
+    <div className="h-screen w-screen bg-[#050505] text-white overflow-hidden font-sans flex p-4 md:p-6 gap-6 selection:bg-[#00FF00] selection:text-black">
+      
+      {/* Decorative left barcode/lines */}
+      <div className="hidden md:flex flex-col gap-1 w-4 h-full border-r-2 border-white/20 pr-4">
+        <div className="w-1 h-32 bg-white"></div>
+        <div className="w-2 h-16 bg-[#00FF00]"></div>
+        <div className="w-0.5 h-64 bg-white/50"></div>
+        <div className="w-1.5 h-full bg-white"></div>
       </div>
 
-      {/* Right Side - Hero Visual */}
-      <div className="hidden lg:flex items-center justify-center p-12 bg-gradient-to-br from-accent/20 via-primary/10 to-background relative overflow-hidden">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0 bg-grid-white/5 [mask-image:radial-gradient(white,transparent_85%)]" />
-        <div className="absolute top-20 right-20 w-72 h-72 bg-accent/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 left-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse [animation-delay:2s]" />
+      <div className="flex-1 flex flex-col h-full min-w-0">
+        
+        {/* Massive Header Row */}
+        <div className="flex justify-between items-end pb-4 border-b-[6px] border-white shrink-0">
+          <h1 className="text-6xl md:text-[8rem] font-bold tracking-tighter leading-[0.8] uppercase">
+            Sistema
+          </h1>
+          <h1 className="text-6xl md:text-[8rem] font-bold tracking-tighter leading-[0.8] uppercase text-[#00FF00]">
+            RM01
+          </h1>
+        </div>
 
-        <div className="relative z-10 max-w-lg space-y-12 animate-fade-in [animation-delay:200ms]">
-          {/* Main Headline */}
-          <div className="space-y-4">
-            <h2 className="text-4xl font-bold text-foreground leading-tight">
-              Gestão Financeira
-              <span className="block text-accent mt-2">Inteligente para B2B</span>
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              Controle completo dos seus pedidos de compra, fornecedores e parcelas em um único lugar.
+        {/* Tiny text info row below header */}
+        <div className="flex justify-between items-start pt-2 pb-6 shrink-0">
+          <div className="flex gap-12">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#00FF00]">01</span>
+            <p className="text-[10px] uppercase font-bold text-gray-400 max-w-xs leading-relaxed tracking-widest">
+              Plataforma Centralizada pt.1<br/>
+              Gestão Operacional, Expedição e Controle.
             </p>
           </div>
+          <div className="flex gap-12 text-right">
+            <p className="text-[10px] uppercase font-bold text-gray-400 max-w-xs leading-relaxed tracking-widest text-left">
+              Acesso Restrito<br/>
+              Colaboradores Autorizados.
+            </p>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-white">V 2.0</span>
+          </div>
+        </div>
 
-          {/* Feature Cards */}
-          <div className="space-y-4">
-            <div className="flex items-start gap-4 p-4 rounded-lg bg-background/50 backdrop-blur-sm border border-border/50 hover:border-accent/50 transition-all hover:shadow-lg group">
-              <div className="p-2 rounded-lg bg-accent/10 group-hover:bg-accent/20 transition-colors">
-                <Package className="h-5 w-5 text-accent" />
+        {/* Main Grid Area */}
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 min-h-0">
+          
+          {/* Left Column: Form */}
+          <div className="flex flex-col justify-between bg-[#0A0A0A] p-8 md:p-10 border-2 border-white/10 h-full relative group overflow-hidden">
+            {/* Corner accent */}
+            <div className="absolute top-0 right-0 w-8 h-8 border-l-2 border-b-2 border-[#00FF00] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            
+            <div className="flex-1 flex flex-col justify-center">
+              <div className="flex gap-4 mb-10 border-b-2 border-white/10 pb-4">
+                <button
+                  type="button"
+                  onClick={() => setIsLogin(true)}
+                  className={`text-xl font-bold tracking-widest uppercase transition-colors ${
+                    isLogin ? "text-white" : "text-gray-600 hover:text-white"
+                  }`}
+                >
+                  Autenticar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsLogin(false)}
+                  className={`text-xl font-bold tracking-widest uppercase transition-colors ${
+                    !isLogin ? "text-white" : "text-gray-600 hover:text-white"
+                  }`}
+                >
+                  Registrar
+                </button>
               </div>
-              <div>
-                <h3 className="font-semibold text-foreground mb-1">Pedidos Organizados</h3>
-                <p className="text-sm text-muted-foreground">
-                  Gerencie todos os seus pedidos de compra com status em tempo real
-                </p>
-              </div>
+
+              <form onSubmit={isLogin ? handleSignIn : handleSignUp} className="space-y-6">
+                {!isLogin && (
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-bold text-[#00FF00] uppercase tracking-widest">01. Nome</Label>
+                    <Input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="NOME COMPLETO"
+                      className="bg-transparent border-0 border-b-2 border-white/20 rounded-none px-0 h-12 text-2xl font-light text-white placeholder:text-gray-700 focus-visible:ring-0 focus-visible:border-white transition-colors uppercase"
+                      required={!isLogin}
+                    />
+                  </div>
+                )}
+
+                <div className="space-y-1">
+                  <Label className="text-[10px] font-bold text-[#00FF00] uppercase tracking-widest">{isLogin ? "01." : "02."} E-mail</Label>
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="CORPORATIVO@RAMA.COM"
+                    className="bg-transparent border-0 border-b-2 border-white/20 rounded-none px-0 h-12 text-2xl font-light text-white placeholder:text-gray-700 focus-visible:ring-0 focus-visible:border-white transition-colors uppercase"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-[10px] font-bold text-[#00FF00] uppercase tracking-widest">{isLogin ? "02." : "03."} Senha</Label>
+                  <Input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="bg-transparent border-0 border-b-2 border-white/20 rounded-none px-0 h-12 text-2xl font-light text-white placeholder:text-gray-700 focus-visible:ring-0 focus-visible:border-white transition-colors uppercase"
+                    required
+                    minLength={6}
+                  />
+                </div>
+
+                <div className="pt-6">
+                  <Button
+                    type="submit"
+                    className="w-full h-14 bg-white hover:bg-[#00FF00] text-black font-extrabold text-xl uppercase tracking-[0.2em] rounded-none transition-colors"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    ) : (
+                      <>{isLogin ? "Acessar Sistema" : "Solicitar Acesso"}</>
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          {/* Right Column: Grid Information */}
+          <div className="flex flex-col gap-6 h-full min-h-0">
+            {/* Top Block */}
+            <div className="flex-1 bg-[#00FF00] p-6 flex flex-col justify-between border-2 border-[#00FF00] text-black hover:bg-[#050505] hover:text-[#00FF00] transition-colors group">
+               <div className="flex justify-between items-start">
+                 <span className="text-sm font-bold uppercase tracking-widest">Módulo 01</span>
+                 <Package className="h-8 w-8" />
+               </div>
+               <div>
+                 <h2 className="text-4xl lg:text-5xl font-extrabold uppercase tracking-tighter leading-none mb-2">Expedição &<br/>Despachos</h2>
+                 <p className="text-xs font-bold uppercase tracking-widest opacity-80">Controle de PLPs, Logística e SLAs Diários.</p>
+               </div>
             </div>
 
-            <div className="flex items-start gap-4 p-4 rounded-lg bg-background/50 backdrop-blur-sm border border-border/50 hover:border-accent/50 transition-all hover:shadow-lg group">
-              <div className="p-2 rounded-lg bg-accent/10 group-hover:bg-accent/20 transition-colors">
-                <CreditCard className="h-5 w-5 text-accent" />
+            {/* Bottom Row */}
+            <div className="flex-1 flex gap-6 min-h-0">
+              <div className="w-1/2 bg-[#0A0A0A] p-6 flex flex-col justify-between border-2 border-white/20 hover:border-white transition-colors">
+                <span className="text-xs font-bold text-[#00FF00] uppercase tracking-widest">Módulo 02</span>
+                <div>
+                  <h3 className="text-2xl font-bold uppercase tracking-tighter leading-none mb-2">Marketing</h3>
+                  <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Ads & Campanhas</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-semibold text-foreground mb-1">Parcelas Automáticas</h3>
-                <p className="text-sm text-muted-foreground">
-                  Cálculo automático de parcelas baseado nas condições de pagamento
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4 p-4 rounded-lg bg-background/50 backdrop-blur-sm border border-border/50 hover:border-accent/50 transition-all hover:shadow-lg group">
-              <div className="p-2 rounded-lg bg-accent/10 group-hover:bg-accent/20 transition-colors">
-                <TrendingUp className="h-5 w-5 text-accent" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-foreground mb-1">Insights Financeiros</h3>
-                <p className="text-sm text-muted-foreground">
-                  Dashboard completo com métricas e indicadores de performance
-                </p>
+              <div className="w-1/2 bg-white text-black p-6 flex flex-col justify-between border-2 border-white hover:bg-transparent hover:text-white transition-colors">
+                <span className="text-xs font-bold uppercase tracking-widest opacity-50">Módulo 03</span>
+                <div>
+                  <h3 className="text-2xl font-bold uppercase tracking-tighter leading-none mb-2">Financeiro</h3>
+                  <p className="text-[9px] font-bold uppercase tracking-widest opacity-80">DRE & Conciliação</p>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Trust Badge */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <CheckCircle2 className="h-4 w-4 text-accent" />
-            <span>Plataforma segura e profissional para gestão B2B</span>
-          </div>
         </div>
       </div>
     </div>

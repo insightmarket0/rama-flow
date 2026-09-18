@@ -154,6 +154,8 @@ export default function Marketing() {
     }
   };
 
+  const [isInitialized, setIsInitialized] = useState(false);
+
   React.useEffect(() => {
     async function fetchDb() {
       try {
@@ -167,6 +169,8 @@ export default function Marketing() {
         }
       } catch (e) {
         console.error("Supabase not initialized for marketing yet. Run migrations.", e);
+      } finally {
+        setIsInitialized(true);
       }
     }
     fetchDb();
@@ -181,9 +185,11 @@ export default function Marketing() {
   });
 
   React.useEffect(() => {
+    if (!isInitialized) return;
     localStorage.setItem("rama_crm_partners", JSON.stringify(crmPartners));
     saveToDatabase('crm_partners', crmPartners);
-  }, [crmPartners]);
+  }, [crmPartners, isInitialized]);
+
   const [isCrmModalOpen, setIsCrmModalOpen] = useState(false);
   const [editingCrmPartner, setEditingCrmPartner] = useState<any>(null);
 
@@ -196,9 +202,10 @@ export default function Marketing() {
   });
 
   React.useEffect(() => {
+    if (!isInitialized) return;
     localStorage.setItem("rama_marketing_scripts", JSON.stringify(scripts));
     saveToDatabase('scripts', scripts);
-  }, [scripts]);
+  }, [scripts, isInitialized]);
   const [activeScriptId, setActiveScriptId] = useState(1);
   const [isNewScriptModalOpen, setIsNewScriptModalOpen] = useState(false);
   const [newScriptForm, setNewScriptForm] = useState({ title: '', category: 'TikTok & UGC', description: '' });
@@ -243,8 +250,9 @@ export default function Marketing() {
   const [approvalDetails, setApprovalDetails] = useState(null);
 
   React.useEffect(() => {
+    if (!isInitialized) return;
     saveToDatabase('approvals', approvals);
-  }, [approvals]);
+  }, [approvals, isInitialized]);
 
   const handleCreateApproval = () => {
     const newApproval = { ...approvalForm, id: Date.now() };
@@ -320,9 +328,10 @@ export default function Marketing() {
   const [socialForm, setSocialForm] = useState({ followers: 0, likes: 0, comments: 0 });
 
   React.useEffect(() => {
+    if (!isInitialized) return;
     localStorage.setItem("rama_social_metrics", JSON.stringify(socialMetrics));
     saveToDatabase('social_metrics', socialMetrics);
-  }, [socialMetrics]);
+  }, [socialMetrics, isInitialized]);
 
   const handleEditSocial = (platform) => {
     setEditingSocial(platform);
@@ -398,8 +407,9 @@ export default function Marketing() {
   });
 
   React.useEffect(() => {
+    if (!isInitialized) return;
     saveToDatabase('marketing_budget', marketingBudget);
-  }, [marketingBudget]);
+  }, [marketingBudget, isInitialized]);
 
   const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
   const [budgetForm, setBudgetForm] = useState({ total: 0, gasto: 0 });
@@ -504,7 +514,13 @@ export default function Marketing() {
 
 
         {/* Tab Content Flex-Grow para preencher e rolar apenas dentro */}
-        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+        {!isInitialized ? (
+          <div className="flex-1 flex flex-col items-center justify-center animate-in fade-in duration-500">
+            <div className="w-12 h-12 border-4 border-[#00FF00]/20 border-t-[#00FF00] rounded-full animate-spin mb-4 shadow-[0_0_15px_rgba(0,255,0,0.5)]"></div>
+            <p className="text-gray-400 text-[10px] font-bold tracking-widest uppercase animate-pulse">Sincronizando Dados...</p>
+          </div>
+        ) : (
+        <div className="flex-1 overflow-hidden flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-4 duration-700">
           
           {/* TAB 1: CREATIVE STUDIO (Master-Detail / Notion Style) */}
           {activeTab === "roadmap" && (
@@ -1107,6 +1123,7 @@ export default function Marketing() {
           </div>
         )}
       </div>
+      )}
 
       </div>
 
