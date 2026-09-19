@@ -188,7 +188,7 @@ export function MainLayout({ children }: MainLayoutProps) {
     <>
       <GlobalDialogs />
       <GlobalShortcuts />
-      <div className={`flex min-h-screen w-full ${location.pathname.startsWith('/marketing') ? '' : 'bg-background pl-24'}`}>
+      <div className={`flex min-h-screen w-full ${location.pathname.startsWith('/marketing') ? '' : (location.pathname === '/playbooks' || location.pathname === '/business-plan') ? 'bg-[#050505] pl-24' : 'bg-background pl-24'}`}>
         <AppSidebar />
         <div className="flex flex-1 flex-col">
           <main className={`flex flex-col flex-1 ${(location.pathname.startsWith('/marketing') || location.pathname === '/brand-book' || location.pathname === '/equipe' || location.pathname === '/expedicao' || location.pathname === '/instaladores' || location.pathname === '/mural-ajustes' || location.pathname === '/lembretes') ? 'h-screen max-h-screen overflow-hidden' : 'p-6'}`}>

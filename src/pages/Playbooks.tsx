@@ -1,38 +1,38 @@
 import React, { useState } from "react";
 import { 
-  BookOpen, 
-  Search, 
-  Folder, 
-  FileText, 
-  X,
-  ChevronRight,
-  Package,
-  MessageSquare,
-  Store,
-  Wrench,
+  Package, 
+  MessageSquare, 
+  Store, 
+  Wrench, 
+  ChevronRight, 
+  BookOpen,
+  Search,
+  FileText,
   Clock,
   Printer,
-  Share2
+  Share2,
+  X,
+  Folder
 } from "lucide-react";
 
-// ---- MOCK DATA ----
 const CATEGORIES = [
-  { id: "logistica", name: "Logística & Embalagem", icon: Package, color: "text-blue-400", bg: "bg-blue-400/10" },
-  { id: "atendimento", name: "Atendimento ao Cliente", icon: MessageSquare, color: "text-emerald-400", bg: "bg-emerald-400/10" },
-  { id: "marketplaces", name: "Marketplaces (Cadastros)", icon: Store, color: "text-orange-400", bg: "bg-orange-400/10" },
-  { id: "resolucao", name: "Resolução de Problemas", icon: Wrench, color: "text-rose-400", bg: "bg-rose-400/10" },
+  { id: "logistica", name: "Logística & Embalagem", icon: Package, color: "text-[#CCFF00]", bg: "bg-[#CCFF00]/10" },
+  { id: "atendimento", name: "Atendimento ao Cliente", icon: MessageSquare, color: "text-[#CCFF00]", bg: "bg-[#CCFF00]/10" },
+  { id: "marketplaces", name: "Marketplaces (Cadastros)", icon: Store, color: "text-black", bg: "bg-black/10" },
+  { id: "resolucao", name: "Resolução de Problemas", icon: Wrench, color: "text-[#CCFF00]", bg: "bg-[#CCFF00]/10" },
 ];
 
 const ARTICLES = [
   {
     id: "art_1",
     categoryId: "marketplaces",
-    title: "Padrão de Títulos e Fotos - Shopee",
+    title: "Padrão de Títulos e Fotos",
     author: "Anderson",
     lastUpdated: "Há 2 dias",
+    featured: false,
     content: `
-## Diretrizes para Títulos na Shopee
-Os títulos dos nossos produtos na Shopee precisam seguir uma estrutura exata para otimizar as buscas e evitar punições do algoritmo.
+## Diretrizes para Títulos
+Os títulos dos nossos produtos precisam seguir uma estrutura exata para otimizar as buscas e evitar punições dos algoritmos.
 
 ### Estrutura Obrigatória:
 **[Produto] + [Marca] + [Característica Principal] + [Quantidade/Voltagem]**
@@ -41,11 +41,38 @@ Os títulos dos nossos produtos na Shopee precisam seguir uma estrutura exata pa
 *Incorreto:* Lindo kit de gás barato promoção
 
 ### Imagens do Produto:
-1. **Fundo 100% Branco** na primeira foto (obrigatório, gera banimento se tiver fundo poluído).
-2. Não adicione textos promocionais ou marcas d'água gigantes na primeira imagem.
-3. As fotos 2, 3 e 4 devem ser o produto em uso (contexto) e os detalhes técnicos.
+1. **1ª Foto (Capa):** Padrão da plataforma, fundo branco, máxima qualidade do produto possível.
+2. **2ª Foto (Explicativo 1):** Imagem chamativa. Preferência para mostrar o produto em alta qualidade, mas, em uso, ou de alguma forma que mostre a sua aplicação de uma forma nítida e bonita.
+3. **3ª Foto (Explicativo 2):** Imagem do produto com especificações técnicas, ou, com algum descritivo sobre a aplicação, ou, que faça um resumo de descrição.
+4. **4ª Foto em diante:** Podemos já imaginar mais em mostrar outros ângulos, ou, outras informações.
+
+*Regra de Ouro:* Obrigatório o mínimo de 3 imagens (Capa / Explicativo / Explicativo 2) com essas informações no cadastro de anúncio.
 
 Se tiver dúvidas com a imagem, suba no sistema de *Mural de Ajustes* e peça avaliação da coordenação antes de publicar o anúncio.
+    `
+  },
+  {
+    id: "art_prompts",
+    categoryId: "marketplaces",
+    title: "Prompts Oficiais de IA (Anúncios & Imagens)",
+    author: "Estratégia",
+    lastUpdated: "Hoje",
+    featured: true,
+    content: `
+## Central de Prompts Oficiais
+Utilize estes prompts copiando e colando na nossa IA para manter a padronização e a alta conversão dos anúncios em Marketplaces.
+
+### 1. PROMPT FOTO DE CAPA
+> Melhore essa imagem do meu produto para deixá-la o mais vendível possível, nas dimensões de 1200x1200 pixels, com fundo branco puro (RGB #FFFFFF), seguindo as exigências do Mercado Livre. A imagem deve parecer realista, profissional, limpa e atrativa visualmente. Mantenha foco no produto, centralizado, sem distorções, com o máximo de resolução e parecendo o mais real possível.
+
+### 2. PROMPT SEGUNDA IMAGEM (Produto em Uso/Contexto)
+> a imagem em anexo mostra a capa de um produto anunciado em ecommerce. criar nova imagem de 1200x1200 px do produto em anexo, criar o produto grande centralizado, com o máximo de resolução possível com fundo branco puro (RGB #FFFFFF), seguindo as exigências do Mercado Livre. alterar a posição do produto em relação a imagem em anexo
+
+### 3. PROMPT DESCRIÇÃO
+> Estou criando anúncios do Mercado Livre. Fornecer mais duas opções de DESCRIÇÃO DE PRODUTO limitado a 1200 caracteres, sem ícones, baseado no texto da descrição abaixo. O texto deve conter as palavras-chave mais corretas para esse tipo de produto, sempre visando vender o máximo possível por ter um título com as palavras certas para gerar mais clique e acessos a paginas. O texto atual é o que segue:
+
+### 4. PROMPT TÍTULO
+> Criar mais duas opções de título com no máximo 60 caracteres para anúncio nas plataformas de ecommerce para o seguinte produto:
     `
   },
   {
@@ -54,6 +81,7 @@ Se tiver dúvidas com a imagem, suba no sistema de *Mural de Ajustes* e peça av
     title: "Como contestar devolução injusta (Mercado Livre)",
     author: "Estratégia",
     lastUpdated: "Há 1 semana",
+    featured: false,
     content: `
 ## Passo a Passo para Contestar Devoluções no ML
 
@@ -71,241 +99,199 @@ Quando o cliente devolver um produto avariado ou com peça faltando, siga este s
 
 **Atenção:** Você tem no máximo 3 dias corridos para abrir essa reclamação. Passou disso, a empresa perde o dinheiro. Fique atento ao Mural de Ajustes!
     `
-  },
-  {
-    id: "art_3",
-    categoryId: "logistica",
-    title: "Procedimento: Embalagem de Kits Frágeis",
-    author: "Lucas",
-    lastUpdated: "Há 1 mês",
-    content: "Instruções de embalagem pendentes de revisão..."
-  },
-  {
-    id: "art_4",
-    categoryId: "atendimento",
-    title: "Script para clientes atrasados",
-    author: "Anderson",
-    lastUpdated: "Há 2 semanas",
-    content: "Scripts de atendimento ao cliente..."
   }
 ];
 // -------------------
 
 export default function Playbooks() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [activeArticle, setActiveArticle] = useState<typeof ARTICLES[0] | null>(null);
 
-  // Filtros
   const filteredArticles = ARTICLES.filter(art => {
-    const matchesSearch = art.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory ? art.categoryId === selectedCategory : true;
-    return matchesSearch && matchesCategory;
+    return art.title.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
   return (
-    <div className="flex-1 p-4 md:p-8 pt-6 animate-in fade-in duration-500 max-w-6xl mx-auto w-full relative">
+    <div className="flex-1 min-h-[100dvh] bg-[#050505] text-white p-4 md:p-8 animate-in fade-in duration-500 font-sans selection:bg-[#CCFF00] selection:text-black pb-24">
       
-      {/* Header Centralizado - Estilo Central de Ajuda */}
-      <div className="flex flex-col items-center justify-center mb-12 mt-4 text-center">
-        <div className="h-16 w-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mb-6 border border-primary/20">
-          <BookOpen className="h-8 w-8" />
+      {/* HEADER / HERO - BRUTALIST */}
+      <div className="max-w-7xl mx-auto mb-16 pt-8 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8">
+        <div className="flex flex-col">
+          <span className="text-[#CCFF00] font-black uppercase tracking-widest text-sm mb-2">Base de Conhecimento</span>
+          <h1 className="text-5xl md:text-8xl font-black uppercase tracking-tighter leading-none">
+            SISTEMA DE<br />
+            <span className="text-[#CCFF00]">PLAYBOOKS</span>
+          </h1>
         </div>
-        <h2 className="text-4xl font-bold tracking-tight text-white mb-4">
-          Como podemos te ajudar hoje?
-        </h2>
-        <p className="text-gray-400 text-lg mb-8 max-w-2xl">
-          Nossa base de conhecimento oficial. Guias, processos e manuais para garantir a qualidade de ponta a ponta na nossa operação.
-        </p>
-        
-        {/* Barra de Busca Gigante */}
-        <div className="relative w-full max-w-2xl">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input 
-            type="text" 
-            placeholder="Ex: Como contestar devolução no ML..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-4 bg-[#111315]/80 backdrop-blur-md border border-white/10 hover:border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-lg shadow-xl transition-all"
-          />
+
+        <div className="w-full max-w-lg shrink-0 lg:mb-2 border-l-4 border-[#CCFF00] pl-6">
+          <p className="text-gray-400 text-lg md:text-xl font-medium leading-relaxed">
+            Processos, scripts e manuais oficiais. Consulte nossa base para garantir a execução com excelência em todas as pontas da operação.
+          </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      {/* BENTO GRID LAYOUT */}
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-2xl font-black uppercase tracking-tight mb-8">Todos os Manuais</h2>
         
-        {/* Sidebar Esquerda (Categorias) */}
-        <div className="lg:col-span-1 space-y-2">
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 px-2">Categorias</h3>
-          
-          <button 
-            onClick={() => setSelectedCategory(null)}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium ${
-              selectedCategory === null 
-                ? 'bg-white/10 text-white' 
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            <Folder className="h-4 w-4" />
-            Todos os Manuais
-          </button>
+        {filteredArticles.length === 0 ? (
+          <div className="py-20 border-2 border-dashed border-white/10 flex items-center justify-center">
+            <p className="text-xl font-bold text-gray-500 uppercase tracking-widest">Nenhum resultado</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredArticles.map((art, idx) => {
+              const cat = CATEGORIES.find(c => c.id === art.categoryId);
+              
+              // Estilização condicional baseada na flag "featured"
+              if (art.featured) {
+                return (
+                  <button 
+                    key={art.id}
+                    onClick={() => setActiveArticle(art)}
+                    className="col-span-1 md:col-span-2 lg:col-span-2 group relative overflow-hidden bg-[#CCFF00] p-8 md:p-10 text-left transition-transform hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(204,255,0,0.2)]"
+                  >
+                    {/* Número de Fundo Gigante */}
+                    <div className="absolute -right-8 -bottom-16 text-[15rem] font-black text-black opacity-10 pointer-events-none select-none tracking-tighter leading-none">
+                      {idx + 1}
+                    </div>
 
-          {CATEGORIES.map(cat => {
-            const isActive = selectedCategory === cat.id;
-            return (
-              <button 
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium ${
-                  isActive 
-                    ? 'bg-white/10 text-white' 
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <div className={`p-1.5 rounded-md ${cat.bg} ${cat.color}`}>
-                  <cat.icon className="h-3.5 w-3.5" />
-                </div>
-                {cat.name}
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Lista de Artigos */}
-        <div className="lg:col-span-3">
-          <div className="bg-[#111315]/80 backdrop-blur-md border border-white/5 rounded-2xl p-6 shadow-lg min-h-[400px]">
-            <h3 className="text-lg font-bold text-white mb-6">
-              {selectedCategory 
-                ? CATEGORIES.find(c => c.id === selectedCategory)?.name 
-                : "Todos os Manuais Disponíveis"}
-            </h3>
-
-            {filteredArticles.length === 0 ? (
-              <div className="text-center py-12">
-                <FileText className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-400">Nenhum manual encontrado para esta busca.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {filteredArticles.map(art => {
-                  const cat = CATEGORIES.find(c => c.id === art.categoryId);
-                  const colorClass = cat?.color.replace('text-', 'border-') || 'border-white/5';
-                  
-                  return (
-                    <button 
-                      key={art.id}
-                      onClick={() => setActiveArticle(art)}
-                      className={`w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-xl border hover:border-white/20 bg-[#1A1D21]/50 hover:bg-[#1A1D21] transition-all duration-300 group text-left shadow-sm hover:shadow-xl hover:-translate-y-1 border-l-4 ${colorClass}`}
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className={`p-3 rounded-xl shrink-0 mt-1 sm:mt-0 ${cat?.bg} ${cat?.color} shadow-inner`}>
-                          <FileText className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2 mb-1.5">
-                            <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${cat?.bg} ${cat?.color}`}>
-                              {cat?.name}
-                            </span>
-                          </div>
-                          <h4 className="text-white font-bold text-lg mb-1.5 group-hover:text-primary transition-colors">
-                            {art.title}
-                          </h4>
-                          <div className="flex items-center gap-3 text-xs text-gray-500 font-medium">
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-3.5 w-3.5" />
-                              Atualizado {art.lastUpdated}
-                            </span>
-                            <span>•</span>
-                            <span>Por {art.author}</span>
-                          </div>
-                        </div>
+                    <div className="relative z-10 h-full flex flex-col justify-between">
+                      <div className="mb-12">
+                        <span className="inline-block px-3 py-1 bg-black text-[#CCFF00] text-xs font-black uppercase tracking-widest mb-6">
+                          {cat?.name}
+                        </span>
+                        <h3 className="text-3xl md:text-5xl font-black text-black uppercase tracking-tighter leading-tight mb-4 group-hover:underline decoration-4 underline-offset-4">
+                          {art.title}
+                        </h3>
                       </div>
                       
-                      <div className="shrink-0 hidden sm:flex items-center text-gray-500 group-hover:text-primary transition-colors bg-white/5 p-2 rounded-full group-hover:bg-primary/10">
-                        <ChevronRight className="h-5 w-5" />
+                      <div className="flex items-center justify-between mt-auto border-t-4 border-black pt-6">
+                        <div className="flex items-center gap-4 text-black font-bold text-sm uppercase">
+                          <span>Atualizado {art.lastUpdated}</span>
+                          <span>•</span>
+                          <span>{art.author}</span>
+                        </div>
+                        <div className="h-12 w-12 rounded-full bg-black flex items-center justify-center text-[#CCFF00] group-hover:scale-110 transition-transform">
+                          <ChevronRight className="h-6 w-6" />
+                        </div>
                       </div>
-                    </button>
-                  )
-                })}
-              </div>
-            )}
+                    </div>
+                  </button>
+                )
+              }
+
+              // Estilo Padrão Escuro
+              return (
+                <button 
+                  key={art.id}
+                  onClick={() => setActiveArticle(art)}
+                  className="col-span-1 group relative overflow-hidden bg-[#111111] p-8 md:p-10 text-left transition-transform hover:-translate-y-2 hover:shadow-2xl border-t-4 border-[#CCFF00]"
+                >
+                  <div className="absolute -right-4 -bottom-10 text-[10rem] font-black text-white/5 pointer-events-none select-none tracking-tighter leading-none">
+                    {idx + 1}
+                  </div>
+
+                  <div className="relative z-10 h-full flex flex-col justify-between">
+                    <div className="mb-12">
+                      <span className="inline-block px-3 py-1 bg-white/10 text-white text-xs font-black uppercase tracking-widest mb-6">
+                        {cat?.name}
+                      </span>
+                      <h3 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter leading-tight mb-4 group-hover:text-[#CCFF00] transition-colors">
+                        {art.title}
+                      </h3>
+                    </div>
+                    
+                    <div className="flex items-center justify-between mt-auto border-t border-white/10 pt-6">
+                      <div className="flex items-center gap-2 text-gray-500 font-bold text-xs uppercase flex-wrap">
+                        <span>{art.lastUpdated}</span>
+                        <span>•</span>
+                        <span>{art.author}</span>
+                      </div>
+                      <ChevronRight className="h-6 w-6 text-[#CCFF00] opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                    </div>
+                  </div>
+                </button>
+              )
+            })}
           </div>
-        </div>
+        )}
       </div>
 
       {/* MODAL DE LEITURA (Painel Lateral / Drawer) */}
       {activeArticle && (
         <div className="fixed inset-0 z-50 flex justify-end">
-          {/* Overlay escuro */}
+          {/* Overlay */}
           <div 
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
             onClick={() => setActiveArticle(null)}
           />
           
-          {/* Painel que desliza da direita */}
-          <div className="relative w-full max-w-3xl bg-[#111315] border-l border-white/10 h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+          {/* Drawer Minimalista */}
+          <div className="relative w-full max-w-3xl bg-[#0A0A0A] border-l-4 border-[#CCFF00] h-full flex flex-col animate-in slide-in-from-right duration-500 shadow-2xl">
             
-            {/* Cabecalho do Leitor */}
-            <div className="flex items-center justify-between p-6 border-b border-white/10 bg-[#1A1D21]">
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 bg-primary/20 text-primary rounded-2xl flex items-center justify-center border border-primary/30 shadow-inner">
-                  <BookOpen className="h-6 w-6" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-white line-clamp-1">{activeArticle.title}</h2>
-                  <p className="text-sm text-gray-400 mt-1">Escrito por <span className="text-gray-300">{activeArticle.author}</span> • {activeArticle.lastUpdated}</p>
-                </div>
+            {/* Header */}
+            <div className="flex items-center justify-between p-8 border-b border-white/10">
+              <div className="flex-1 pr-8">
+                <span className="text-[#CCFF00] text-xs font-black uppercase tracking-widest mb-2 block">Playbook</span>
+                <h2 className="text-2xl font-black text-white uppercase tracking-tighter leading-tight">
+                  {activeArticle.title}
+                </h2>
               </div>
-              <div className="flex items-center gap-2">
-                <button className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors" title="Imprimir (Em breve)">
-                  <Printer className="h-4 w-4" />
-                </button>
-                <button className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors" title="Copiar Link">
-                  <Share2 className="h-4 w-4" />
-                </button>
-                <div className="w-px h-6 bg-white/10 mx-1" />
+              <div className="flex items-center gap-2 shrink-0">
                 <button 
                   onClick={() => setActiveArticle(null)}
-                  className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-colors"
+                  className="h-12 w-12 flex items-center justify-center bg-white/5 hover:bg-[#CCFF00] hover:text-black text-white transition-colors"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-6 w-6" />
                 </button>
               </div>
             </div>
             
-            {/* Conteudo (Renderização simulada de Markdown) */}
-            <div className="flex-1 overflow-y-auto p-8 md:p-12 custom-scrollbar bg-[#111315]">
-              <div className="prose prose-invert prose-p:text-gray-300 prose-p:text-lg prose-p:leading-relaxed prose-headings:text-white prose-a:text-primary max-w-none font-sans">
-                {/* 
-                  Neste mock, renderizamos o texto manualmente com tratamento básico 
-                  para simular um parser Markdown
-                */}
+            {/* Conteudo (Brutalist Markdown Mock) */}
+            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+              <div className="max-w-none font-sans">
                 {activeArticle.content.split('\n').map((paragraph, index) => {
                   if (paragraph.startsWith('## ')) {
-                    return <h2 key={index} className="text-3xl font-bold mt-10 mb-6 pb-2 border-b border-white/5 tracking-tight">{paragraph.replace('## ', '')}</h2>
+                    return <h2 key={index} className="text-3xl font-black text-[#CCFF00] uppercase tracking-tighter mt-12 mb-6">{paragraph.replace('## ', '')}</h2>
                   }
                   if (paragraph.startsWith('### ')) {
-                    return <h3 key={index} className="text-xl font-bold mt-8 mb-4 text-gray-200">{paragraph.replace('### ', '')}</h3>
+                    return <h3 key={index} className="text-xl font-bold mt-10 mb-4 text-white uppercase tracking-tight">{paragraph.replace('### ', '')}</h3>
                   }
-                  if (paragraph.startsWith('1. ') || paragraph.startsWith('2. ') || paragraph.startsWith('3. ') || paragraph.startsWith('- ')) {
-                    return <li key={index} className="ml-6 mb-3 text-gray-300 text-lg list-disc pl-2 marker:text-primary">{paragraph.substring(3)}</li>
+                  if (paragraph.startsWith('> ')) {
+                    return (
+                      <div key={index} className="bg-[#111111] border-l-4 border-[#CCFF00] p-6 my-6">
+                        <p className="text-lg text-gray-300 font-mono leading-relaxed">
+                          {paragraph.replace('> ', '')}
+                        </p>
+                      </div>
+                    )
                   }
-                  if (paragraph.trim() === '') return <div key={index} className="h-4" />
+                  if (paragraph.startsWith('1. ') || paragraph.startsWith('2. ') || paragraph.startsWith('3. ') || paragraph.startsWith('4. ') || paragraph.startsWith('- ')) {
+                    return <div key={index} className="flex gap-4 mb-4">
+                      <span className="text-[#CCFF00] font-black">{paragraph.substring(0, 2)}</span>
+                      <p className="text-gray-300 text-lg leading-relaxed">{paragraph.substring(3)}</p>
+                    </div>
+                  }
+                  if (paragraph.trim() === '') return <div key={index} className="h-2" />
                   
-                  // Simple bold parsing
                   const parts = paragraph.split('**');
                   return (
-                    <p key={index} className="mb-6 leading-relaxed text-gray-300">
-                      {parts.map((part, i) => i % 2 === 1 ? <strong key={i} className="text-white font-semibold">{part}</strong> : part)}
+                    <p key={index} className="mb-6 text-lg leading-relaxed text-gray-400">
+                      {parts.map((part, i) => i % 2 === 1 ? <strong key={i} className="text-white font-bold">{part}</strong> : part)}
                     </p>
                   );
                 })}
               </div>
 
-              <div className="mt-12 p-4 bg-primary/10 border border-primary/20 rounded-xl flex items-start gap-4">
-                <BookOpen className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+              <div className="mt-16 p-8 bg-[#111111] border-2 border-[#CCFF00] flex flex-col sm:flex-row items-center gap-6">
+                <div className="h-16 w-16 bg-[#CCFF00] rounded-none flex items-center justify-center text-black shrink-0">
+                  <BookOpen className="h-8 w-8" />
+                </div>
                 <div>
-                  <h4 className="text-primary font-bold text-sm mb-1">Este manual resolveu sua dúvida?</h4>
-                  <p className="text-xs text-gray-400">A operação atualiza estes guias regularmente. Siga sempre o procedimento mais recente.</p>
+                  <h4 className="text-white font-black text-xl mb-2 uppercase tracking-tight">Siga o processo</h4>
+                  <p className="text-gray-400">A operação atualiza estes guias regularmente. Execute sempre o procedimento mais recente descrito acima.</p>
                 </div>
               </div>
             </div>

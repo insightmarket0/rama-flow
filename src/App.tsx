@@ -14,7 +14,7 @@ const MeuDia = lazy(() => import("./pages/MeuDia"));
 const RankingEquipe = lazy(() => import("./pages/RankingEquipe"));
 const Equipe = lazy(() => import("./pages/Equipe"));
 const PortalExpedicao = lazy(() => import("./pages/PortalExpedicao"));
-const Metas = lazy(() => import("./pages/Metas"));
+
 const Lembretes = lazy(() => import("./pages/Lembretes"));
 const MuralAjustes = lazy(() => import("./pages/MuralAjustes"));
 const SistemaDev = lazy(() => import("./pages/SistemaDev"));
@@ -105,16 +105,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/metas"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <Metas />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
+
             <Route
               path="/lembretes"
               element={

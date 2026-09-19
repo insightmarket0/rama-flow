@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Terminal, Database, Code2, Rocket, Server, GitBranch, Github, Layout, CheckCircle2, Circle, Clock, Bug, Sparkles } from "lucide-react";
+import { Asterisk, Terminal, Database, Code2, Rocket, Server, GitBranch, Github, Layout, CheckCircle2, Circle, Clock, Bug, Sparkles } from "lucide-react";
 
 export default function SistemaDev() {
   const [activeTab, setActiveTab] = useState("visao-geral");
@@ -46,7 +46,39 @@ export default function SistemaDev() {
       </div>
 
       {activeTab === "visao-geral" && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="space-y-6">
+          {/* LINHA 9 - FULL WIDTH: O Sistema Interno */}
+          <div className="md:col-span-3 row-span-2 bg-gradient-to-r from-blue-600 to-indigo-800 rounded-[2rem] p-6 lg:p-8 flex flex-col md:flex-row items-center justify-between shadow-2xl relative overflow-hidden">
+             <div className="absolute inset-0 bg-black/10" />
+             <div className="md:w-1/3 relative z-10 mb-6 md:mb-0">
+               <h4 className="text-white/80 text-[10px] lg:text-xs font-bold uppercase tracking-widest flex items-center gap-2 mb-2">
+                 <Asterisk className="w-4 h-4" /> O Cérebro da Operação
+               </h4>
+               <h3 className="text-white text-2xl lg:text-3xl font-bold" style={{ fontFamily: "'Playfair Display', serif" }}>
+                 Sistema Interno
+               </h3>
+               <p className="text-white/80 text-xs mt-2 font-medium">
+                 Tudo que um dono de marketplace precisa em um único lugar.
+               </p>
+             </div>
+             
+             <div className="md:w-2/3 flex flex-wrap gap-3 relative z-10">
+               <div className="flex-1 min-w-[200px] bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl">
+                 <strong className="text-white block text-sm mb-1">Previsibilidade</strong>
+                 <p className="text-white/70 text-xs">Visão clara de quais pedidos fazer ao fornecedor.</p>
+               </div>
+               <div className="flex-1 min-w-[200px] bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl">
+                 <strong className="text-white block text-sm mb-1">Automação Financeira</strong>
+                 <p className="text-white/70 text-xs">Pagar contas sozinho e conciliação exata de recebíveis dos marketplaces.</p>
+               </div>
+               <div className="flex-1 min-w-[200px] bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl">
+                 <strong className="text-white block text-sm mb-1">Análise de Gargalos</strong>
+                 <p className="text-white/70 text-xs">Dashboard inteligente para identificar e resolver gargalos logísticos e operacionais.</p>
+               </div>
+             </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2 space-y-6">
             <div className="bg-[#0A0A0A] border border-white/5 rounded-2xl p-8 shadow-2xl relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-64 h-64 bg-[#00FF00]/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/4 pointer-events-none group-hover:bg-[#00FF00]/10 transition-colors duration-700" />
@@ -130,6 +162,7 @@ export default function SistemaDev() {
               </div>
             </div>
           </div>
+        </div>
         </div>
       )}
 
