@@ -15,7 +15,8 @@ export const useSmartContractInstallments = () => {
     queryKey: ["smart-contract-installments", "upcoming"],
     queryFn: async () => {
 
-      const today = new Date();
+      const pastDate = new Date();
+      pastDate.setDate(pastDate.getDate() - 365); // Considera dívidas em aberto até 1 ano atrás
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 60);
 
@@ -25,7 +26,7 @@ export const useSmartContractInstallments = () => {
           *,
           smart_contract:smart_contracts(name, category, value_type)
         `)
-        .gte("due_date", today.toISOString().split("T")[0])
+        .gte("due_date", pastDate.toISOString().split("T")[0])
         .lte("due_date", futureDate.toISOString().split("T")[0])
         .neq("status", "pago")
         .order("due_date", { ascending: true });

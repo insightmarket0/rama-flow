@@ -1,14 +1,1 @@
-const fs = require('fs');
-let bp = fs.readFileSync('src/pages/BusinessPlan.tsx', 'utf8');
-
-const sIdx = bp.indexOf('Estrutura & Expansão');
-const cardStart = bp.lastIndexOf('<div className="lg:col-span-12 bg-[#0a0a0a]', sIdx);
-
-// The card ends right at the last `</div>` before `<section className="mt-8`.
-const endBlock = bp.indexOf('<section className="mt-8 flex flex-col gap-6">', cardStart);
-// Backtrack to the end of `</div>` that closes the grid
-const cardEnd = bp.lastIndexOf('</div>', endBlock) + 6;
-
-bp = bp.substring(0, cardStart) + bp.substring(cardEnd);
-fs.writeFileSync('src/pages/BusinessPlan.tsx', bp);
-console.log('Deleted');
+﻿const fs = require('fs'); let lines = fs.readFileSync('src/pages/BusinessPlan.tsx', 'utf-8').split(/\r?\n/); const startIdx = lines.findIndex(l => l.includes('<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">')); const endIdx = lines.findIndex((l, i) => i > startIdx && l.includes('Agendar Primeira Live')); const divEndIdx = lines.findIndex((l, i) => i > endIdx && l.trim() === '</div>'); const finalDivEndIdx = lines.findIndex((l, i) => i > divEndIdx && l.trim() === '</div>'); if (startIdx > -1 && finalDivEndIdx > -1) { lines.splice(startIdx, finalDivEndIdx - startIdx + 1); fs.writeFileSync('src/pages/BusinessPlan.tsx', lines.join('\n'), 'utf-8'); console.log('Removed successfully from ' + startIdx + ' to ' + finalDivEndIdx); } else { console.log('Error'); }
