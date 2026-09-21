@@ -115,7 +115,7 @@ export default function Playbooks() {
     <div className="flex-1 min-h-[100dvh] bg-[#050505] text-white p-4 md:p-8 animate-in fade-in duration-500 font-sans selection:bg-[#CCFF00] selection:text-black pb-24">
       
       {/* HEADER / HERO - BRUTALIST */}
-      <div className="max-w-7xl mx-auto mb-16 pt-8 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8">
+      <div className="max-w-7xl mx-auto mb-16 -mt-10 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8">
         <div className="flex flex-col">
           <span className="text-[#CCFF00] font-black uppercase tracking-widest text-sm mb-2">Base de Conhecimento</span>
           <h1 className="text-5xl md:text-8xl font-black uppercase tracking-tighter leading-none">

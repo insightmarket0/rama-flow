@@ -72,7 +72,7 @@ export const FinancialStats = ({ stats }: FinancialStatsProps) => {
                 
                 {(() => {
                     // Meta pode ser puxada de outro lugar, por enquanto estático para apresentação
-                    const metaAno = 5000000; 
+                    const metaAno = 3000000; 
                     const faturamentoAtual = stats.totalYear;
                     
                     const isPassed = faturamentoAtual >= metaAno;

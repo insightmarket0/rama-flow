@@ -58,7 +58,7 @@ export const MarketplaceShareChart = ({ data }: MarketplaceShareChartProps) => {
     return (
         <div className="w-full flex flex-col items-center justify-center relative">
             <h4 className="text-gray-500 uppercase tracking-widest text-[10px] font-bold mb-8 opacity-70">
-                Faturamento por Canal
+                Faturamento e Lucros
             </h4>
             <div className="h-[320px] w-full relative opacity-95">
                 <ResponsiveContainer width="100%" height="100%">

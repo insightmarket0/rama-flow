@@ -91,14 +91,14 @@ export default function ComparativoContas() {
   }, [allBills, date]);
 
   return (
-    <div className="flex-1 flex flex-col xl:flex-row gap-6 p-6 h-[calc(100vh-64px)] overflow-y-auto">
+    <div className="flex-1 flex flex-col xl:flex-row gap-4 p-4 pt-2 h-[calc(100vh-64px)] overflow-y-auto overflow-x-hidden">
       {/* Lado Esquerdo - Gráfico e Cards */}
-      <div className="flex-1 flex flex-col gap-6 max-w-7xl mx-auto w-full">
-        <div className="flex flex-col gap-2">
-          <p className="text-cyan-400 font-bold text-[10px] tracking-[0.2em] uppercase flex items-center gap-2">
+      <div className="flex-1 flex flex-col gap-4 max-w-7xl mx-auto w-full">
+        <div className="flex flex-col gap-1 -mt-2">
+          <p className="text-[#00FF00] font-bold text-[10px] tracking-[0.2em] uppercase flex items-center gap-2">
             <Activity className="w-3 h-3" /> Análise Financeira
           </p>
-          <h1 className="text-2xl font-light text-white mt-1">Comparativo de Contas</h1>
+          <h1 className="text-xl font-light text-white mt-1">Comparativo de Contas</h1>
         </div>
 
         {/* Top KPI Cards */}
@@ -170,17 +170,17 @@ export default function ComparativoContas() {
         </div>
 
         {/* Main Chart Area */}
-        <Card className="bg-[#111111]/80 backdrop-blur-sm border-white/5 rounded-3xl overflow-hidden flex-1 min-h-[400px] flex flex-col">
-          <CardHeader className="border-b border-white/5 bg-white/[0.02] py-4">
+        <Card className="bg-[#111111]/80 backdrop-blur-sm border-white/5 rounded-3xl overflow-hidden flex-1 min-h-[250px] flex flex-col">
+          <CardHeader className="border-b border-white/5 bg-white/[0.02] py-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-light text-white">Projeção de Saídas</CardTitle>
-              <div className="bg-white/5 px-3 py-1 rounded-full text-xs text-gray-400 font-medium tracking-wide">
+              <CardTitle className="text-sm font-light text-white">Projeção de Saídas</CardTitle>
+              <div className="bg-white/5 px-2 py-1 rounded-full text-[10px] text-gray-400 font-medium tracking-wide">
                 Próximas 6 semanas
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-6 flex-1 flex flex-col">
-            <div className="flex-1 min-h-[300px]">
+          <CardContent className="p-4 flex-1 flex flex-col">
+            <div className="flex-1 min-h-[200px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
                   <defs>
@@ -253,8 +253,8 @@ export default function ComparativoContas() {
       </div>
       
       {/* Lado Direito - Agenda Interativa colada ao lado */}
-      <div className="w-full xl:w-[350px] flex-shrink-0 flex flex-col gap-6 pt-[68px]">
-        <Card className="bg-transparent border-0 shadow-none overflow-hidden flex-1 flex flex-col min-h-[450px]">
+      <div className="w-full xl:w-[320px] flex-shrink-0 flex flex-col gap-4 xl:pt-[52px]">
+        <Card className="bg-transparent border-0 shadow-none overflow-hidden flex-1 flex flex-col min-h-[350px]">
           <CardHeader className="pb-4 px-0">
             <CardTitle className="text-lg font-light text-white flex items-center gap-2">
               <CalendarIcon className="h-5 w-5 text-[#00FF00]" /> Agenda de Pagamentos
@@ -313,7 +313,7 @@ export default function ComparativoContas() {
               />
             </div>
             
-            <div className="flex-1 p-5 overflow-y-auto max-h-[350px] scrollbar-thin scrollbar-thumb-white/10">
+            <div className="flex-1 p-4 overflow-y-auto max-h-[250px] scrollbar-thin scrollbar-thumb-white/10">
               <h4 className="text-sm font-light text-gray-400 mb-4 flex items-center justify-between">
                 {date ? format(date, "dd 'de' MMMM", { locale: ptBR }) : 'Selecione uma data'}
                 {selectedDayBills.length > 0 && (

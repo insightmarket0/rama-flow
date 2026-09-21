@@ -55,7 +55,7 @@ export const RevenueChart = ({ data }: RevenueChartProps) => {
     return (
         <div className="w-full flex flex-col items-center justify-end relative">
             <h4 className="text-gray-500 uppercase tracking-widest text-[10px] font-bold mb-8 opacity-70">
-                Evolução Mensal
+                Faturamento e Lucros
             </h4>
             <div className="h-[250px] w-full max-w-4xl opacity-90">
                 <ResponsiveContainer width="100%" height="100%">

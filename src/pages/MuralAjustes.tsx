@@ -1,150 +1,20 @@
-import React, { useState } from "react";
-import { 
-  AlertCircle,
-  Activity, 
-  CheckCircle2, 
-  Clock, 
-  MessageSquare, 
-  Plus, 
-  Search,
-  ShoppingCart,
-  Store,
-  Trash2,
-  ExternalLink,
-  Tag,
-  Handshake,
-  ShoppingBag,
-  Smile,
-  Smartphone
-} from "lucide-react";
+﻿import React, { useState, useEffect } from "react";
+import { AlertCircle, Plus, Search, Store, Trash2, ExternalLink, CheckCircle2, Clock, Activity, LayoutGrid } from "lucide-react";
 import { SiMercadopago, SiShopee } from "react-icons/si";
 import { FaAmazon } from "react-icons/fa";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
 
-const getMarketplaceLogo = (marketplace?: string) => {
-  if (!marketplace) return <Store className="h-3.5 w-3.5 opacity-70 shrink-0" />;
+const getMarketplaceLogo = (marketplace?: string, className = "h-4 w-4") => {
+  if (!marketplace) return <Store className={className} />;
   const m = marketplace.toLowerCase();
-  
-  if (m === 'mercado livre') {
-    return <SiMercadopago className="h-4 w-4 text-[#FFE600] shrink-0 drop-shadow-[0_0_2px_rgba(255,230,0,0.5)]" />;
-  }
-  if (m === 'shopee') {
-    return <SiShopee className="h-4 w-4 text-[#EE4D2D] shrink-0 drop-shadow-[0_0_2px_rgba(238,77,45,0.5)]" />;
-  }
-  if (m === 'amazon') {
-    return <FaAmazon className="h-4 w-4 text-white shrink-0 drop-shadow-[0_0_2px_rgba(255,255,255,0.5)]" />;
-  }
-  if (m === 'magalu') {
-    return (
-      <div className="h-4 w-4 rounded-sm bg-[#0086FF] flex items-center justify-center shrink-0">
-        <span className="text-white text-[10px] font-bold leading-none -mt-[1px]">m</span>
-      </div>
-    );
-  }
-  
-  return <Store className="h-3.5 w-3.5 opacity-70 shrink-0" />;
-};
-
-// Dados mockados baseados nos exemplos reais solicitados pelo usuário
-const MOCK_TICKETS: any[] = [
-  {
-    id: "1",
-    creator_id: "user_manager",
-    creator_name: "Anderson",
-    assignee_id: "user_rogerio",
-    assignee_name: "Rogério",
-    marketplace: "Mercado Livre",
-    sku: "KITGAS001",
-    description: "Aviso no kit de gás: corrigir a imagem e a descrição. Tem duas abraçadeiras na foto, mas é só uma.",
-    status: "pendente",
-    priority: "normal",
-    created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 mins atrás
-  },
-  {
-    id: "2",
-    creator_id: "user_manager",
-    creator_name: "Anderson",
-    assignee_id: null,
-    assignee_name: null,
-    marketplace: "Shopee",
-    sku: "CAP002",
-    description: "Retirar a marca do título e descrição do anúncio do cap na Shopee para evitar bloqueio.",
-    status: "pendente",
-    priority: "critico",
-    created_at: new Date(Date.now() - 1000 * 60 * 120).toISOString(), // 2 hours ago
-  },
-  {
-    id: "3",
-    creator_id: "user_manager",
-    creator_name: "Anderson",
-    assignee_id: "user_rogerio",
-    assignee_name: "Rogério",
-    marketplace: "Amazon",
-    sku: "MANG003",
-    description: "Alterar as especificações do produto: retira a mangueira comum da descrição porque é uma pigtail.",
-    status: "pendente",
-    priority: "normal",
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // 5 hours ago
-  },
-  {
-    id: "4",
-    creator_id: "user_manager",
-    creator_name: "Anderson",
-    assignee_id: "user_rogerio",
-    assignee_name: "Rogério",
-    marketplace: "Geral",
-    sku: "RGUARDANAPO",
-    description: "Tirar a letra R que foi digitada por erro antes da palavra Guardanapo no SKU.",
-    status: "pendente",
-    priority: "normal",
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
-  }
-];
-
-const getMarketplaceStyle = (marketplace: string) => {
-  switch (marketplace.toLowerCase()) {
-    case 'mercado livre':
-      return "bg-yellow-500/10 text-yellow-400 border-yellow-500/20";
-    case 'shopee':
-      return "bg-[#EE4D2D]/10 text-[#EE4D2D] border-[#EE4D2D]/20";
-    case 'magalu':
-    case 'magazine luiza':
-      return "bg-blue-500/10 text-blue-400 border-blue-500/20";
-    case 'amazon':
-      return "bg-white/10 text-white border-white/20";
-    default:
-      return "bg-white/5 text-gray-400 border-white/10";
-  }
-};
-
-const getMarketplaceCardStyle = (marketplace: string) => {
-  switch (marketplace.toLowerCase()) {
-    case 'mercado livre':
-      return "border-t-[#FFE600]/50 hover:border-[#FFE600]/30 hover:shadow-[0_0_30px_rgba(255,230,0,0.07)] bg-gradient-to-b from-[#FFE600]/[0.03] to-transparent";
-    case 'shopee':
-      return "border-t-[#EE4D2D]/50 hover:border-[#EE4D2D]/30 hover:shadow-[0_0_30px_rgba(238,77,45,0.07)] bg-gradient-to-b from-[#EE4D2D]/[0.03] to-transparent";
-    case 'amazon':
-      return "border-t-white/50 hover:border-white/30 hover:shadow-[0_0_30px_rgba(255,255,255,0.07)] bg-gradient-to-b from-white/[0.03] to-transparent";
-    case 'magalu':
-    case 'magazine luiza':
-      return "border-t-[#0086FF]/50 hover:border-[#0086FF]/30 hover:shadow-[0_0_30px_rgba(0,134,255,0.07)] bg-gradient-to-b from-[#0086FF]/[0.03] to-transparent";
-    default:
-      return "border-t-white/10 hover:border-white/20 hover:shadow-2xl bg-gradient-to-b from-white/[0.01] to-transparent";
-  }
-};
-
-const getAvatarStyle = (name: string) => {
-  switch (name.toLowerCase()) {
-    case 'rogério': return "bg-blue-500/10 border-blue-500/30 text-blue-400";
-    case 'anderson': return "bg-[#00FF00]/10 border-[#00FF00]/30 text-[#00FF00]";
-    case 'william': return "bg-orange-500/10 border-orange-500/30 text-orange-400";
-    case 'alyson': return "bg-purple-500/10 border-purple-500/30 text-purple-400";
-    default: return "bg-white/5 border-white/10 text-gray-400";
-  }
+  if (m === 'mercado livre') return <SiMercadopago className={`text-[#FFE600] ${className}`} />;
+  if (m === 'shopee') return <SiShopee className={`text-[#EE4D2D] ${className}`} />;
+  if (m === 'amazon') return <FaAmazon className={`text-white ${className}`} />;
+  if (m === 'magalu' || m === 'magazine luiza') return <div className={`flex items-center justify-center font-black bg-[#0086FF] text-white rounded-sm text-[10px] ${className}`}>m</div>;
+  return <Store className={`text-gray-400 ${className}`} />;
 };
 
 export default function MuralAjustes() {
@@ -154,516 +24,319 @@ export default function MuralAjustes() {
   const [tickets, setTickets] = useState<any[]>([]);
   const [audits, setAudits] = useState<any[]>([]);
   const [filter, setFilter] = useState("todos");
+  const [search, setSearch] = useState("");
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     marketplace: 'Mercado Livre',
-    sku: '',
-    link: '',
-    description: '',
-    priority: 'normal',
-    assignee_name: 'livre'
+    sku: '', link: '', description: '', priority: 'normal', assignee_name: 'livre'
   });
 
   const fetchTicketsAndAudits = async () => {
-    try {
-      const { data: ticketsData, error: tError } = await supabase
-        .from('ajustes_tickets')
-        .select('*')
-        .order('created_at', { ascending: false });
-        
-      if (!tError && ticketsData) setTickets(ticketsData);
+    const { data: ticketsData } = await supabase.from('ajustes_tickets').select('*').order('created_at', { ascending: false });
+    if (ticketsData) setTickets(ticketsData);
 
-      const { data: auditsData, error: aError } = await supabase
-        .from('ajustes_auditoria')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(15);
-        
-      if (!aError && auditsData) setAudits(auditsData);
-    } catch (e) {
-      console.error(e);
-    }
+    const { data: auditsData } = await supabase.from('ajustes_auditoria').select('*').order('created_at', { ascending: false }).limit(20);
+    if (auditsData) setAudits(auditsData);
   };
 
   useEffect(() => {
     fetchTicketsAndAudits();
-
-    const ticketsSub = supabase.channel('ajustes_tickets_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'ajustes_tickets' }, () => {
-        fetchTicketsAndAudits();
-      }).subscribe();
-
-    const auditsSub = supabase.channel('ajustes_auditoria_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'ajustes_auditoria' }, () => {
-        fetchTicketsAndAudits();
-      }).subscribe();
-
-    return () => {
-      supabase.removeChannel(ticketsSub);
-      supabase.removeChannel(auditsSub);
-    }
+    const ticketsSub = supabase.channel('ajustes_tickets_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'ajustes_tickets' }, fetchTicketsAndAudits).subscribe();
+    const auditsSub = supabase.channel('ajustes_auditoria_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'ajustes_auditoria' }, fetchTicketsAndAudits).subscribe();
+    return () => { supabase.removeChannel(ticketsSub); supabase.removeChannel(auditsSub); }
   }, []);
 
   const handleCreateTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.description) return;
-    
-    const newTicket = {
-      creator_id: user?.id,
-      creator_name: userName,
-      assignee_id: null,
+    const { data: insertedTicket, error } = await supabase.from('ajustes_tickets').insert({
+      creator_id: user?.id, creator_name: userName,
       assignee_name: formData.assignee_name === 'livre' ? null : formData.assignee_name,
-      marketplace: formData.marketplace,
-      sku: formData.sku,
-      link: formData.link,
-      description: formData.description,
-      status: "pendente",
-      priority: formData.priority,
-    };
-    
-    const { data: insertedTicket, error } = await supabase.from('ajustes_tickets').insert(newTicket).select().single();
-    
-    if (error) {
-      console.error("Erro Supabase:", error);
-      alert("Erro ao criar ticket: " + error.message);
-      return;
-    }
-    
+      marketplace: formData.marketplace, sku: formData.sku, link: formData.link, description: formData.description,
+      status: "pendente", priority: formData.priority,
+    }).select().single();
     if (!error && insertedTicket) {
       await supabase.from('ajustes_auditoria').insert({
-        action_type: 'created',
-        user_id: user?.id,
-        user_name: userName,
-        target_id: insertedTicket.id,
-        target_type: 'ticket',
-        context_text: `SKU: ${insertedTicket.sku || 'N/A'} (${insertedTicket.marketplace})`,
-        message: 'abriu um ticket de ajuste',
-        priority: formData.priority
+        action_type: 'created', user_id: user?.id, user_name: userName, target_id: insertedTicket.id, target_type: 'ticket',
+        context_text: `SKU: ${insertedTicket.sku || 'N/A'}`, message: 'abriu um ticket', priority: formData.priority
       });
       setIsModalOpen(false);
       setFormData({ marketplace: 'Mercado Livre', sku: '', link: '', description: '', priority: 'normal', assignee_name: 'livre' });
-      fetchTicketsAndAudits();
     }
   };
 
-  const handleResolve = async (id: string, sku: string, marketplace: string) => {
-    const { error } = await supabase.from('ajustes_tickets').update({ status: 'resolvido', resolved_by_id: user?.id, resolved_by_name: userName }).eq('id', id);
-    if (!error) {
-      await supabase.from('ajustes_auditoria').insert({
-        action_type: 'resolved',
-        user_id: user?.id,
-        user_name: userName,
-        target_id: id,
-        target_type: 'ticket',
-        context_text: `SKU: ${sku || 'N/A'} (${marketplace})`,
-        message: 'resolveu um ajuste de anúncio',
-        priority: 'normal'
-      });
-    }
+  const handleResolve = async (id: string, sku: string) => {
+    await supabase.from('ajustes_tickets').update({ status: 'resolvido', resolved_by_id: user?.id, resolved_by_name: userName }).eq('id', id);
+    await supabase.from('ajustes_auditoria').insert({
+      action_type: 'resolved', user_id: user?.id, user_name: userName, target_id: id, target_type: 'ticket',
+      context_text: `SKU: ${sku || 'N/A'}`, message: 'resolveu um ticket', priority: 'normal'
+    });
   };
 
-  const handleDelete = async (id: string, sku: string, marketplace: string) => {
-    if (!window.confirm('Tem certeza que deseja excluir este ticket?')) return;
-    
-    const { error } = await supabase.from('ajustes_tickets').delete().eq('id', id);
-    if (!error) {
-      await supabase.from('ajustes_auditoria').insert({
-        action_type: 'deleted',
-        user_id: user?.id,
-        user_name: userName,
-        target_id: id,
-        target_type: 'ticket',
-        context_text: `SKU: ${sku || 'N/A'} (${marketplace})`,
-        message: 'excluiu um ticket',
-        priority: 'normal'
-      });
-      fetchTicketsAndAudits();
-    } else {
-      console.error(error);
-      alert('Erro ao excluir: ' + error.message);
-    }
-  };
-
-  const handleDeleteAudit = async (id: string) => {
-    const { error } = await supabase.from('ajustes_auditoria').delete().eq('id', id);
-    if (!error) {
-      fetchTicketsAndAudits();
-    }
+  const handleDelete = async (id: string, sku: string) => {
+    if (!window.confirm('Excluir ticket permanentemente?')) return;
+    await supabase.from('ajustes_tickets').delete().eq('id', id);
+    await supabase.from('ajustes_auditoria').insert({
+      action_type: 'deleted', user_id: user?.id, user_name: userName, target_id: id, target_type: 'ticket',
+      context_text: `SKU: ${sku || 'N/A'}`, message: 'excluiu um ticket', priority: 'normal'
+    });
   };
 
   const filteredTickets = tickets.filter(t => {
-    if (filter === "todos") return true;
-    return t.marketplace.toLowerCase() === filter.toLowerCase();
+    const matchesFilter = filter === "todos" || t.marketplace.toLowerCase() === filter.toLowerCase();
+    const matchesSearch = search === "" || t.sku?.toLowerCase().includes(search.toLowerCase()) || t.description?.toLowerCase().includes(search.toLowerCase());
+    return matchesFilter && matchesSearch;
   });
 
   return (
-    <div className="flex-1 w-full max-w-full px-4 md:px-8 pt-6 pb-6 animate-in fade-in duration-500 min-h-0 overflow-hidden flex flex-col">
+    <div className="flex-1 w-full bg-transparent min-h-[calc(100vh-64px)] text-white overflow-hidden font-sans flex flex-col xl:flex-row p-4 gap-4">
       
-      {/* Container Layout com Feed na Lateral */}
-      <div className="flex flex-col xl:flex-row gap-4 items-start flex-1 min-h-0 overflow-hidden">
-        {/* Lado Esquerdo: Header + Actions + Grid */}
-        <div className="flex-1 w-full min-w-0 flex flex-col h-full overflow-y-auto [&::-webkit-scrollbar]:hidden pr-2">
-          {/* Header */}
-          <div className="mb-3">
-        <div>
-          <h2 className="text-2xl font-light tracking-tight text-white flex items-center gap-2 mb-1">
-            <AlertCircle className="h-5 w-5 text-[#00FF00] drop-shadow-[0_0_10px_rgba(0,255,0,0.3)]" />
-            Mural de Ajustes Rápidos
-          </h2>
-          <p className="text-gray-500 font-medium text-[9px] tracking-widest uppercase">
-            CORREÇÃO DE ERROS E OTIMIZAÇÃO DE ANÚNCIOS
-          </p>
-        </div>
+      {/* MAIN CONTENT (LEFT) */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto pr-2 custom-scrollbar">
         
-        </div>
-
-      {/* Action Bar: Tabs + Search/Add */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-start gap-4 mb-4">
-        {/* Tabs / Filters */}
-        <div className="flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden">
-        {['Todos', 'Shopee', 'Mercado Livre', 'Amazon', 'Geral'].map((m) => {
-          const count = m === 'Todos' 
-            ? tickets.length 
-            : tickets.filter(t => (t.marketplace || '').toLowerCase() === m.toLowerCase()).length;
-          const isActive = filter === m.toLowerCase();
-
-          return (
-            <button 
-              key={m}
-              onClick={() => setFilter(m.toLowerCase())}
-              className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all flex items-center gap-2 ${
-                isActive 
-                  ? 'bg-white/10 text-white border-b-2 border-[#00FF00]' 
-                  : 'text-gray-500 hover:text-gray-300 hover:bg-white/5 border-b-2 border-transparent'
-              }`}
-            >
-              {m !== 'Todos' && getMarketplaceLogo(m)}
-              {m}
-              <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold ${isActive ? 'bg-[#00FF00]/20 text-[#00FF00]' : 'bg-white/5 text-gray-500'}`}>
-                {count}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-        {/* Search & Actions */}
-        <div className="flex gap-4 items-center shrink-0">
-
-          <div className="relative group">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-500 group-focus-within:text-[#00FF00] transition-colors" />
-            <input 
-              type="text" 
-              placeholder="Buscar SKU ou tarefa..." 
-              className="pl-9 pr-3 py-1 bg-[#0a0a0a] border border-white/5 rounded-lg text-xs text-white focus:outline-none focus:border-[#00FF00]/50 focus:shadow-[0_0_10px_rgba(0,255,0,0.1)] transition-all w-64"
-            />
+        {/* MINIMALIST HEADER */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 pt-4">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-3xl font-light text-white flex items-center gap-3">
+              <LayoutGrid className="h-8 w-8 text-[#00FF00]" />
+              Mural de Ajustes
+            </h1>
+            <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#00FF00]">
+              Correção de Erros e Otimização
+            </p>
           </div>
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 bg-[#00FF00] hover:bg-[#00FF00]/80 text-black px-3 py-1 rounded-md text-xs font-bold transition-all shadow-[0_0_15px_rgba(0,255,0,0.3)] hover:shadow-[0_0_20px_rgba(0,255,0,0.4)]"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Novo Ticket
-          </button>
-        </div>
-      </div>
-
-            {/* Grid de Tickets */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3">
-                {filteredTickets.map((ticket) => {
-          const isResolved = ticket.status === 'resolvido';
-          const mkStyle = getMarketplaceStyle(ticket.marketplace);
-          const textColor = mkStyle.split(' ').find(c => c.startsWith('text-')) || 'text-gray-400';
           
-          return (
-            <div 
-              key={ticket.id} 
-              className={`bg-[#111111]/80 backdrop-blur-sm rounded-xl p-4 flex flex-col justify-between transition-all duration-300 group ${
-                isResolved 
-                  ? 'opacity-50 border border-[#00FF00]/20' 
-                  : `border-x border-b border-white/5 border-t-2 ${getMarketplaceCardStyle(ticket.marketplace)}`
-              }`}
+          <div className="flex items-center gap-4">
+            <div className="relative group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 group-focus-within:text-[#00FF00] transition-colors" />
+              <input 
+                type="text" 
+                placeholder="Buscar SKU ou tarefa..." 
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="pl-10 pr-4 py-2.5 bg-white/[0.02] border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-[#00FF00]/50 focus:bg-white/[0.05] transition-all w-64 md:w-80"
+              />
+            </div>
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="bg-[#00FF00] hover:bg-[#00FF00]/80 text-black px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-[0_0_15px_rgba(204,255,0,0.2)] hover:shadow-[0_0_20px_rgba(204,255,0,0.4)] flex items-center gap-2"
             >
-              <div className="flex flex-col gap-3 flex-1">
-                {/* Header: Marketplace & Meta */}
-                <div className="flex items-start justify-between">
+              <Plus className="h-4 w-4" /> Novo Ticket
+            </button>
+          </div>
+        </div>
+
+        {/* MINIMALIST TABS */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {['Todos', 'Shopee', 'Mercado Livre', 'Amazon', 'Geral'].map((m) => {
+            const count = m === 'Todos' ? tickets.length : tickets.filter(t => (t.marketplace || '').toLowerCase() === m.toLowerCase()).length;
+            const isActive = filter === m.toLowerCase();
+            return (
+              <button 
+                key={m}
+                onClick={() => setFilter(m.toLowerCase())}
+                className={`px-4 py-2 flex items-center gap-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border ${
+                  isActive 
+                    ? 'bg-white/10 text-white border-white/20' 
+                    : 'bg-transparent border-transparent text-gray-500 hover:text-gray-300 hover:bg-white/5'
+                }`}
+              >
+                {m !== 'Todos' && getMarketplaceLogo(m, "h-3.5 w-3.5 opacity-70")}
+                {m}
+                <span className={`px-2 py-0.5 rounded-full text-[10px] ${isActive ? 'bg-[#00FF00] text-black' : 'bg-white/10 text-gray-400'}`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* GLASSMORPHISM TICKETS GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
+          {filteredTickets.map((ticket) => {
+            const isResolved = ticket.status === 'resolvido';
+            const isCritical = ticket.priority === 'critico';
+            
+            return (
+              <div key={ticket.id} className={`flex flex-col bg-[#111111]/80 backdrop-blur-sm border rounded-2xl overflow-hidden transition-all duration-300 hover:border-white/20 hover:shadow-2xl hover:-translate-y-1 ${isResolved ? 'border-white/5 opacity-60' : isCritical ? 'border-red-500/30' : 'border-white/10'}`}>
+                
+                {/* HEADER */}
+                <div className={`p-4 border-b flex justify-between items-center bg-gradient-to-r ${isResolved ? 'from-white/[0.02] border-white/5' : isCritical ? 'from-red-500/10 border-red-500/20' : 'from-white/[0.02] border-white/5'}`}>
                   <div className="flex items-center gap-2">
-                    <div className={`h-1.5 w-1.5 rounded-full shrink-0 ${ticket.priority === 'critico' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse' : 'bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.6)]'}`} title={ticket.priority === 'critico' ? 'Crítico / Risco' : 'Normal / Estético'} />
-                    <span className={`text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5 ${textColor}`}>
+                    <div className={`h-2 w-2 rounded-full ${isCritical && !isResolved ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse' : 'bg-[#00FF00] shadow-[0_0_8px_rgba(204,255,0,0.6)]'}`} />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-300 flex items-center gap-1.5">
                       {getMarketplaceLogo(ticket.marketplace)}
                       {ticket.marketplace}
                     </span>
                   </div>
-                  
-                  <div className="flex items-center gap-2 text-[9px] text-gray-500 font-medium">
-                    <span>{ticket.creator_name?.split(' ')[0] || 'Sistema'}</span>
-                    <span className="flex items-center gap-1 text-gray-600"><Clock className="h-2.5 w-2.5" /> Hoje</span>
+                  <div className="text-[10px] text-gray-500 font-medium flex items-center gap-1">
+                    <Clock className="h-3 w-3" /> Hoje
                   </div>
                 </div>
-                
-                {/* Body: SKU & Desc */}
-                <div className="flex flex-col gap-1.5 mb-2">
-                  {(ticket.sku) && (
-                    <div className="flex items-center gap-1.5 text-white font-bold text-xs tracking-wide">
-                      <span className="text-gray-500 font-medium text-[9px] uppercase">SKU</span>
-                      <span>{ticket.sku}</span>
+
+                {/* BODY */}
+                <div className="p-5 flex flex-col gap-3 flex-1">
+                  {ticket.sku && (
+                    <div className="flex items-center gap-2 text-sm text-white font-bold tracking-wide">
+                      <span className="text-xs text-gray-500 uppercase font-medium">SKU</span>
+                      {ticket.sku}
                     </div>
                   )}
-                  <p className="text-gray-300 text-xs leading-relaxed font-light">
-                    <span className={isResolved ? "line-through text-gray-500" : ""}>{ticket.description}</span>
+                  <p className={`text-sm leading-relaxed font-light ${isResolved ? 'line-through text-gray-500' : 'text-gray-300'}`}>
+                    {ticket.description}
                   </p>
                 </div>
-              </div>
-              
-              {/* Footer: Assignee & Actions */}
-              <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/5">
-                <div className="flex items-center gap-2 shrink-0">
-                  {ticket.assignee_name ? (
-                    <>
-                      <div className={`h-5 w-5 rounded-full border flex items-center justify-center text-[8px] font-bold ${getAvatarStyle(ticket.assignee_name)}`}>
-                        {ticket.assignee_name.substring(0, 2).toUpperCase()}
+
+                {/* FOOTER ACTIONS */}
+                <div className="p-4 border-t border-white/5 flex justify-between items-center bg-white/[0.01]">
+                  <div className="flex items-center gap-2">
+                    {ticket.assignee_name ? (
+                      <div className="flex items-center gap-2">
+                        <div className="h-6 w-6 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-[10px] font-bold text-white">
+                          {ticket.assignee_name.substring(0, 2).toUpperCase()}
+                        </div>
+                        <span className="text-xs text-gray-400 font-medium">{ticket.assignee_name.split(' ')[0]}</span>
                       </div>
-                      <span className="text-[10px] text-gray-400 font-medium">{ticket.assignee_name.split(' ')[0]}</span>
-                    </>
-                  ) : (
-                    <span className="text-[10px] text-gray-600 font-medium italic">Sem responsável</span>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-3">
-                  {/* Action: Link */}
-                  {(ticket.link || ticket.sku) && (
-                    <a 
-                      href={ticket.link || (ticket.marketplace.toLowerCase() === 'shopee' ? `https://seller.shopee.com.br/portal/product/list?search=${ticket.sku}` : ticket.marketplace.toLowerCase() === 'mercado livre' ? `https://myaccount.mercadolivre.com.br/listings/#label=active&search=${ticket.sku}` : `#`)}
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="text-gray-400 hover:text-white transition-colors flex items-center justify-center gap-1.5 text-[9px] font-bold uppercase tracking-widest mr-1"
-                      title="Abrir Anúncio"
-                    >
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      Abrir Anúncio
-                    </a>
-                  )}
-
-                  {/* Action: Delete */}
-                  <button 
-                    onClick={() => handleDelete(ticket.id, ticket.sku, ticket.marketplace)}
-                    className="text-gray-600 hover:text-red-500 transition-colors flex items-center justify-center"
-                    title="Excluir ticket"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+                    ) : (
+                      <span className="text-xs text-gray-600 font-medium italic">Sem responsável</span>
+                    )}
+                  </div>
                   
-                  {/* Action: Resolve */}
-                  {isResolved ? (
-                    <span className="text-[#00FF00]/70 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                      <CheckCircle2 className="h-3.5 w-3.5" /> Resolvido
-                    </span>
-                  ) : (
-                    <button 
-                      onClick={() => handleResolve(ticket.id, ticket.sku, ticket.marketplace)}
-                      className="text-gray-400 hover:text-[#00FF00] transition-colors flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest group/btn ml-1"
-                    >
-                      <CheckCircle2 className="h-3.5 w-3.5 group-hover/btn:scale-110 transition-transform" />
-                      Resolver
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => handleDelete(ticket.id, ticket.sku)} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors rounded-lg hover:bg-white/5" title="Excluir">
+                      <Trash2 className="h-4 w-4" />
                     </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-        
-        {filteredTickets.length === 0 && (
-          <div className="col-span-full py-12 flex flex-col items-center justify-center text-gray-500">
-            <CheckCircle2 className="h-12 w-12 mb-3 text-white/10" />
-            <p>Nenhum ajuste pendente para este canal.</p>
-          </div>
-        )}
-      </div>
-
-      
-        </div>
-        {/* Lado Direito: Feed de Auditoria */}
-        <div className="w-full xl:w-[320px] shrink-0 bg-[#070707] border border-white/5 rounded-2xl flex flex-col h-full shadow-2xl overflow-hidden">
-          <div className="flex items-center gap-2 p-4 border-b border-white/5 bg-[#0a0a0a]/50">
-            <Activity className="h-4 w-4 text-[#00FF00]" />
-            <h3 className="text-white font-bold text-xs tracking-widest uppercase">Feed de Auditoria</h3>
-          </div>
-          
-          <div className="flex-1 p-5 overflow-y-auto [&::-webkit-scrollbar]:hidden">
-            <div className="space-y-6 relative before:absolute before:inset-y-0 before:left-1.5 before:w-[1px] before:bg-white/5">
-              
-              {audits.map((audit) => {
-                const dateObj = new Date(audit.created_at);
-                const timeStr = dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                const isCritical = audit.priority === 'critico' || audit.action_type === 'alert';
-                return (
-                  <div key={audit.id} className="relative pl-6 group/audit">
-                    <div className={`absolute left-[3px] top-1.5 w-2 h-2 rounded-full ${isCritical ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]' : 'bg-[#00FF00] shadow-[0_0_8px_rgba(0,255,0,0.8)]'}`} />
-                    <p className="text-[11px] text-gray-400 leading-snug mb-1">
-                      <span className={isCritical ? "text-red-400 font-bold" : "text-white font-bold"}>{audit.user_name || 'Sistema'}</span> {audit.message}
-                    </p>
-                    {audit.context_text && (
-                      <span className={`text-[9px] font-bold uppercase tracking-wider block mb-1.5 w-fit px-2 py-0.5 rounded ${isCritical ? 'bg-red-500/10 text-red-400' : 'bg-white/5 text-gray-500'}`}>
-                        {audit.context_text}
+                    {(ticket.link || ticket.sku) && (
+                      <a href={ticket.link || '#'} target="_blank" rel="noopener noreferrer" className="p-1.5 text-gray-500 hover:text-white transition-colors rounded-lg hover:bg-white/5" title="Abrir Anúncio">
+                        <ExternalLink className="h-4 w-4" />
+                      </a>
+                    )}
+                    {!isResolved ? (
+                      <button onClick={() => handleResolve(ticket.id, ticket.sku)} className="ml-2 px-3 py-1.5 bg-transparent border border-[#00FF00]/50 text-[#00FF00] hover:bg-[#00FF00] hover:text-black hover:border-[#00FF00] transition-all rounded-lg font-bold flex items-center gap-1.5 text-[10px] uppercase tracking-widest shadow-[0_0_10px_rgba(204,255,0,0.1)]">
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Resolver
+                      </button>
+                    ) : (
+                      <span className="ml-2 px-3 py-1.5 bg-white/5 text-[#00FF00]/60 rounded-lg font-bold flex items-center gap-1.5 text-[10px] uppercase tracking-widest">
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Resolvido
                       </span>
                     )}
-                    <div className="flex items-center gap-1 text-gray-600">
-                      <Clock className="h-2.5 w-2.5" />
-                      <span className="text-[8px] font-bold uppercase">{timeStr}</span>
-                      <button 
-                        onClick={() => handleDeleteAudit(audit.id)} 
-                        className="ml-auto opacity-0 group-hover/audit:opacity-100 transition-opacity text-gray-600 hover:text-red-500"
-                        title="Excluir histórico"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    </div>
                   </div>
-                )
-              })}
-              
+                </div>
+              </div>
+            );
+          })}
+          {filteredTickets.length === 0 && (
+            <div className="col-span-full py-16 flex flex-col items-center justify-center text-gray-500">
+              <CheckCircle2 className="h-12 w-12 mb-4 text-white/10" />
+              <p>Nenhum ajuste pendente encontrado.</p>
             </div>
-          </div>
-          
-          <button className="p-3 border-t border-white/5 text-[9px] font-bold uppercase tracking-widest text-gray-500 hover:text-white bg-[#0a0a0a]/50 hover:bg-[#111] transition-colors">
-            Ver Histórico Completo
-          </button>
+          )}
         </div>
       </div>
 
+      {/* MINIMALIST AUDIT SIDEBAR */}
+      <div className="w-full xl:w-[320px] shrink-0 bg-[#0A0A0A] border border-white/10 rounded-3xl flex flex-col h-[calc(100vh-32px)] shadow-2xl">
+        <div className="p-5 border-b border-white/5 flex items-center gap-3">
+          <Activity className="h-4 w-4 text-[#00FF00]" />
+          <h3 className="text-white font-bold text-xs tracking-widest uppercase">Feed de Auditoria</h3>
+        </div>
+        
+        <div className="flex-1 p-5 overflow-y-auto custom-scrollbar">
+          <div className="space-y-6 relative before:absolute before:inset-y-0 before:left-[3px] before:w-[1px] before:bg-gradient-to-b before:from-white/10 before:to-transparent">
+            {audits.map((audit) => {
+              const timeStr = new Date(audit.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+              const isCritical = audit.priority === 'critico';
+              
+              return (
+                <div key={audit.id} className="relative pl-5 group">
+                  <div className={`absolute left-0 top-1.5 w-2 h-2 rounded-full ${isCritical ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]' : 'bg-[#00FF00] shadow-[0_0_8px_rgba(204,255,0,0.8)]'}`} />
+                  <p className="text-[11px] text-gray-300 leading-relaxed mb-1">
+                    <span className={`font-bold ${isCritical ? 'text-red-400' : 'text-white'}`}>{audit.user_name || 'Sistema'}</span> {audit.message}
+                  </p>
+                  {audit.context_text && (
+                    <span className="inline-block mb-1.5 bg-white/5 border border-white/10 text-gray-400 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                      {audit.context_text}
+                    </span>
+                  )}
+                  <div className="flex items-center gap-1.5 text-gray-600">
+                    <Clock className="h-2.5 w-2.5" />
+                    <span className="text-[9px] font-medium">{timeStr}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* GLASSMORPHISM MODAL */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="bg-[#111111] border-white/10 text-white max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-light text-white flex items-center gap-2">
-              <Plus className="h-5 w-5 text-[#00FF00]" />
-              Novo Ticket de Ajuste
+        <DialogContent className="bg-[#111111]/95 backdrop-blur-md border-white/10 text-white max-w-md rounded-3xl p-6 shadow-2xl">
+          <DialogHeader className="mb-6">
+            <DialogTitle className="text-xl font-light flex items-center gap-2">
+              <Plus className="h-5 w-5 text-[#00FF00]" /> Novo Ticket
             </DialogTitle>
-            <DialogDescription className="text-gray-400">
-              Preencha os dados da correção necessária no anúncio.
+            <DialogDescription className="text-gray-400 text-xs">
+              Preencha os detalhes para solicitar uma correção.
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleCreateTicket} className="space-y-4 mt-6">
-            
-            <div className="flex gap-4">
-              <div className="flex-1 space-y-1.5">
+          <form onSubmit={handleCreateTicket} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Plataforma</label>
-                <Select 
-                  value={formData.marketplace}
-                  onValueChange={v => setFormData({...formData, marketplace: v})}
-                >
-                  <SelectTrigger className="w-full bg-white/5 border-transparent hover:bg-white/10 text-white focus:ring-1 focus:ring-white/20 h-11 rounded-xl transition-all">
-                    <SelectValue placeholder="Selecione..." />
+                <Select value={formData.marketplace} onValueChange={v => setFormData({...formData, marketplace: v})}>
+                  <SelectTrigger className="bg-white/5 border-transparent text-white rounded-xl focus:ring-1 focus:ring-[#00FF00]/50 h-11">
+                    <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#111111] border-white/10 text-white rounded-xl shadow-2xl">
-                    <SelectItem value="Mercado Livre" className="hover:bg-white/10 cursor-pointer py-2">
-                      <div className="flex items-center gap-2">{getMarketplaceLogo("Mercado Livre")} Mercado Livre</div>
-                    </SelectItem>
-                    <SelectItem value="Shopee" className="hover:bg-white/10 cursor-pointer py-2">
-                      <div className="flex items-center gap-2">{getMarketplaceLogo("Shopee")} Shopee</div>
-                    </SelectItem>
-                    <SelectItem value="Magalu" className="hover:bg-white/10 cursor-pointer py-2">
-                      <div className="flex items-center gap-2">{getMarketplaceLogo("Magalu")} Magalu</div>
-                    </SelectItem>
-                    <SelectItem value="Amazon" className="hover:bg-white/10 cursor-pointer py-2">
-                      <div className="flex items-center gap-2">{getMarketplaceLogo("Amazon")} Amazon</div>
-                    </SelectItem>
-                    <SelectItem value="Geral" className="hover:bg-white/10 cursor-pointer py-2">
-                      <div className="flex items-center gap-2">{getMarketplaceLogo("Geral")} Geral</div>
-                    </SelectItem>
+                  <SelectContent className="bg-[#111] border-white/10 text-white rounded-xl">
+                    {['Mercado Livre', 'Shopee', 'Magalu', 'Amazon', 'Geral'].map(m => (
+                      <SelectItem key={m} value={m} className="hover:bg-white/10">{m}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
-
-              <div className="flex-1 space-y-1.5">
+              <div className="space-y-1.5">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Responsável</label>
-                <Select 
-                  value={formData.assignee_name}
-                  onValueChange={v => setFormData({...formData, assignee_name: v})}
-                >
-                  <SelectTrigger className="w-full bg-white/5 border-transparent hover:bg-white/10 text-white focus:ring-1 focus:ring-white/20 h-11 rounded-xl transition-all">
-                    <SelectValue placeholder="Livre" />
+                <Select value={formData.assignee_name} onValueChange={v => setFormData({...formData, assignee_name: v})}>
+                  <SelectTrigger className="bg-white/5 border-transparent text-white rounded-xl focus:ring-1 focus:ring-[#00FF00]/50 h-11">
+                    <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#111111] border-white/10 text-white rounded-xl shadow-2xl">
-                    <SelectItem value="livre" className="hover:bg-white/10 cursor-pointer py-2">Nenhum (Livre)</SelectItem>
-                    <SelectItem value="Rogério" className="hover:bg-white/10 cursor-pointer py-2">Rogério</SelectItem>
-                    <SelectItem value="Anderson" className="hover:bg-white/10 cursor-pointer py-2">Anderson</SelectItem>
-                    <SelectItem value="William" className="hover:bg-white/10 cursor-pointer py-2">William</SelectItem>
-                    <SelectItem value="Alyson" className="hover:bg-white/10 cursor-pointer py-2">Alyson</SelectItem>
+                  <SelectContent className="bg-[#111] border-white/10 text-white rounded-xl">
+                    <SelectItem value="livre" className="hover:bg-white/10">Livre</SelectItem>
+                    <SelectItem value="Rogério" className="hover:bg-white/10">Rogério</SelectItem>
+                    <SelectItem value="Anderson" className="hover:bg-white/10">Anderson</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            <div className="flex gap-4">
-              <div className="flex-1 space-y-1.5">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-gray-500">SKU</label>
-                <input 
-                  type="text" 
-                  placeholder="EX: KITGAS001"
-                  value={formData.sku}
-                  onChange={e => setFormData({...formData, sku: e.target.value})}
-                  className="w-full bg-white/5 border-transparent hover:bg-white/10 rounded-xl px-4 h-11 text-sm text-white focus:outline-none focus:bg-white/10 focus:ring-1 focus:ring-white/20 uppercase transition-all placeholder:text-gray-600 placeholder:normal-case"
-                />
+                <input type="text" value={formData.sku} onChange={e => setFormData({...formData, sku: e.target.value})} placeholder="Ex: KIT001" className="w-full bg-white/5 border-transparent rounded-xl px-4 h-11 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#00FF00]/50 uppercase" />
               </div>
-              <div className="flex-1 space-y-1.5">
+              <div className="space-y-1.5">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Link</label>
-                <input 
-                  type="text" 
-                  placeholder="Opcional..."
-                  value={formData.link}
-                  onChange={e => setFormData({...formData, link: e.target.value})}
-                  className="w-full bg-white/5 border-transparent hover:bg-white/10 rounded-xl px-4 h-11 text-sm text-white focus:outline-none focus:bg-white/10 focus:ring-1 focus:ring-white/20 transition-all placeholder:text-gray-600"
-                />
+                <input type="text" value={formData.link} onChange={e => setFormData({...formData, link: e.target.value})} placeholder="Opcional..." className="w-full bg-white/5 border-transparent rounded-xl px-4 h-11 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#00FF00]/50" />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Ajuste Necessário</label>
-              <textarea 
-                placeholder="O que precisa ser feito?"
-                value={formData.description}
-                onChange={e => setFormData({...formData, description: e.target.value})}
-                className="w-full bg-white/5 border-transparent hover:bg-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:bg-white/10 focus:ring-1 focus:ring-white/20 min-h-[90px] resize-none transition-all placeholder:text-gray-600"
-                required
-              />
+              <label className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Descrição</label>
+              <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} required placeholder="O que precisa ser ajustado?" className="w-full bg-white/5 border-transparent rounded-xl p-4 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#00FF00]/50 min-h-[100px] resize-none" />
             </div>
 
-            <div className="pt-2 flex items-center justify-between">
+            <div className="flex items-center justify-between pt-4 mt-4">
               <div className="flex items-center gap-2 bg-[#0A0A0A] p-1 rounded-xl border border-white/5">
-                <button
-                  type="button"
-                  onClick={() => setFormData({...formData, priority: 'normal'})}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${formData.priority === 'normal' ? 'bg-white/10 text-white' : 'text-gray-600 hover:text-gray-400'}`}
-                >
-                  Normal
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormData({...formData, priority: 'critico'})}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${formData.priority === 'critico' ? 'bg-red-500/20 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]' : 'text-gray-600 hover:text-gray-400'}`}
-                >
-                  Crítico
-                </button>
+                <button type="button" onClick={() => setFormData({...formData, priority: 'normal'})} className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${formData.priority === 'normal' ? 'bg-white/10 text-white' : 'text-gray-600'}`}>Normal</button>
+                <button type="button" onClick={() => setFormData({...formData, priority: 'critico'})} className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${formData.priority === 'critico' ? 'bg-red-500/20 text-red-400' : 'text-gray-600'}`}>Crítico</button>
               </div>
 
-              <div className="flex items-center gap-3">
-                <button 
-                  type="button" 
-                  onClick={() => setIsModalOpen(false)}
-                  className="text-xs font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-wider"
-                >
-                  Cancelar
-                </button>
-                <button 
-                  type="submit"
-                  className="bg-[#00FF00] hover:bg-[#00FF00]/80 text-black px-6 py-2.5 rounded-xl text-xs font-bold transition-all shadow-[0_0_15px_rgba(0,255,0,0.2)] hover:shadow-[0_0_20px_rgba(0,255,0,0.4)] uppercase tracking-wider"
-                >
-                  Criar Ticket
-                </button>
+              <div className="flex gap-3">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-wider">Cancelar</button>
+                <button type="submit" className="bg-[#00FF00] hover:bg-[#00FF00]/80 text-black px-6 py-2 rounded-xl text-xs font-bold transition-all shadow-[0_0_15px_rgba(204,255,0,0.2)] uppercase tracking-wider">Criar Ticket</button>
               </div>
             </div>
           </form>

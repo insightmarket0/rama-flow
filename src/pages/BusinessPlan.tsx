@@ -20,9 +20,10 @@ export default function BusinessPlan() {
   const [activeTab, setActiveTab] = useState<"estrategia" | "metas" | "ecossistema" | "app">("estrategia");
   const [activeGeneration, setActiveGeneration] = useState<string | null>(null);
   const [activeMarketVision, setActiveMarketVision] = useState<"farma" | "atendimento">("farma");
+  const [activeD2CTab, setActiveD2CTab] = useState<"video" | "store">("video");
 
   return (
-    <div className="flex-1 w-full min-h-screen relative flex flex-col font-sans overflow-y-auto overflow-x-hidden custom-scrollbar bg-[#050505] selection:bg-[#CCFF00] selection:text-black pb-10">
+    <div className="flex-1 w-full min-h-screen relative flex flex-col font-sans overflow-y-auto overflow-x-hidden custom-scrollbar bg-[#050505] selection:bg-[#CCFF00] selection:text-black pb-0">
       
       {/* Glow de Fundo Estático */}
       <div className="absolute top-0 right-0 w-[800px] h-[600px] bg-gradient-to-br  to-transparent rounded-none blur-[120px] pointer-events-none -translate-y-1/2  transition-all duration-1000" />
@@ -174,7 +175,7 @@ export default function BusinessPlan() {
             </section>
 
             {/* Marketplaces Progress Brutalista */}
-      <section className="bg-black border-4 border-white/20 rounded-none flex flex-col justify-between shadow-2xl relative overflow-hidden mb-8">
+      <section className="bg-black border-4 border-white/20 rounded-none flex flex-col justify-between shadow-2xl relative overflow-hidden mb-0">
         
         {/* TOP: Cabeçalho */}
         <div className="p-8 lg:p-10 border-b-4 border-white/20 relative">
@@ -197,14 +198,14 @@ export default function BusinessPlan() {
 
         {/* MIDDLE: Metas Próximos Passos */}
         <div className="flex flex-col sm:flex-row border-b-4 border-white/20">
-          <div className="flex-1 bg-[#111111] border-r-0 sm:border-r-4 border-b-4 sm:border-b-0 border-white/20 p-6 flex flex-col justify-center">
+          <div className="flex-1 bg-[#111111] border-r-0 sm:border-r-4 border-b-4 sm:border-b-0 border-white/20 p-4 md:p-5 flex flex-col justify-center">
             <p className="text-[#CCFF00] text-[10px] uppercase tracking-[0.3em] font-bold mb-2 flex items-center gap-2">
               <span className="w-2 h-2 bg-[#CCFF00] animate-pulse" />
               Meta: Outubro
             </p>
             <p className="text-white font-black uppercase text-2xl tracking-tighter">Site Próprio (D2C)</p>
           </div>
-          <div className="flex-1 bg-[#050505] p-6 flex flex-col justify-center relative overflow-hidden group">
+          <div className="flex-1 bg-[#050505] p-4 md:p-5 flex flex-col justify-center relative overflow-hidden group">
             <p className="text-[#CCFF00] text-[10px] uppercase tracking-[0.3em] font-bold mb-2 flex items-center gap-2 relative z-10">
               <span className="w-2 h-2 bg-[#CCFF00] animate-pulse" />
               Meta: Novembro
@@ -220,23 +221,77 @@ export default function BusinessPlan() {
         
         {/* BOTTOM: Grid de Marketplaces */}
         <div className="grid grid-cols-2 md:grid-cols-3">
-          {marketplaces.map((mk, index) => (
-            <div key={mk.name} className={`p-6 flex flex-col gap-4 group ${index < marketplaces.length - 3 ? 'border-b-4 border-white/20' : ''} ${(index + 1) % 3 !== 0 ? 'border-r-4 border-white/20' : ''}`}>
-              <div className="flex justify-between items-start">
-                <mk.icon className={`h-8 w-8 ${mk.color === 'text-primary' ? 'text-[#CCFF00]' : mk.color === 'text-black dark:text-white' ? 'text-white' : mk.color}`} />
-                <span className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold">
+            {marketplaces.map((mk, index) => (
+              <div key={mk.name} className={`p-4 md:p-5 flex items-center justify-between group ${index < marketplaces.length - 3 ? 'border-b-4 border-white/20' : ''} ${(index + 1) % 3 !== 0 ? 'border-r-4 border-white/20' : ''}`}>
+                <div className="flex items-center">
+                  {mk.name === 'Mercado Livre' && <span className="bg-[#FFE600] text-black border-2 border-[#FFE600] text-[10px] md:text-xs uppercase font-black px-3 py-1.5">Mercado Livre</span>}
+                  {mk.name === 'Shopee' && <span className="bg-[#EE4D2D] text-white border-2 border-[#EE4D2D] text-[10px] md:text-xs uppercase font-black px-3 py-1.5">Shopee</span>}
+                  {mk.name === 'Amazon' && <span className="bg-[#FF9900] text-white border-2 border-[#FF9900] text-[10px] md:text-xs uppercase font-black px-3 py-1.5">Amazon</span>}
+                  {mk.name === 'Magalu' && <span className="bg-[#0086FF] text-white border-2 border-[#0086FF] text-[10px] md:text-xs uppercase font-black px-3 py-1.5">Magalu</span>}
+                  {mk.name === 'TikTok' && <span className="bg-white text-black border-2 border-white text-[10px] md:text-xs uppercase font-black px-3 py-1.5">TikTok Shop</span>}
+                  {mk.name.includes('Site Pr') && <span className="bg-[#CCFF00] text-black border-2 border-[#CCFF00] text-[10px] md:text-xs uppercase font-black px-3 py-1.5">Site Próprio</span>}
+                </div>
+                <span className="text-[10px] uppercase tracking-[0.2em] font-bold">
                   {mk.status === "completed" ? (
-                    <span className="text-[#CCFF00] flex items-center gap-1">ATIVO</span>
+                    <span className="text-[#CCFF00]">ATIVO</span>
                   ) : (
-                    <span className="text-orange-500 flex items-center gap-1">A FAZER</span>
+                    <span className="text-orange-500">A FAZER</span>
                   )}
                 </span>
               </div>
-              <span className="font-black text-white text-lg uppercase tracking-tighter">{mk.name}</span>
+            ))}
+          </div>
+        </section>
+          
+        {/* EXPANSÃO GEOGRÁFICA E MICRO-DISTRIBUIÇÃO */}
+        <section className="bg-[#111111] border-4 border-white/20 p-6 lg:p-10 shadow-2xl relative overflow-hidden group mt-8">
+          <div className="absolute -right-4 -bottom-10 text-[14rem] font-black text-white/5 leading-none pointer-events-none transition-transform duration-700 group-hover:scale-110">
+            SUL
+          </div>
+          <div className="flex flex-col gap-6 relative z-10">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-4 border-white/20 pb-4">
+              <h3 className="text-white font-black uppercase tracking-tighter text-3xl md:text-5xl flex items-center gap-4">
+                <span className="text-[#CCFF00]">//</span>
+                Expansão Territorial
+              </h3>
             </div>
-          ))}
-        </div>
-      </section>
+            <p className="text-gray-400 text-sm font-bold uppercase tracking-[0.2em] mb-4">
+              Projeto de Escala Nacional via Micro-Distribuição e Contas Regionais
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-4 border-white/20">
+              {/* Fase 1: SP/ABC */}
+              <div className="bg-[#050505] p-6 border-b-4 md:border-b-0 md:border-r-4 border-white/20 hover:bg-white/5 transition-colors">
+                <span className="text-white/50 text-[10px] font-black uppercase tracking-widest mb-2 block">Fase 01 - Operação Atual</span>
+                <h4 className="text-white font-black text-2xl uppercase tracking-tighter mb-2">Matriz SP / ABC</h4>
+                <p className="text-gray-400 text-xs leading-relaxed font-bold">
+                  Consolidação do ecossistema completo. Centro logístico principal, atendimento próprio e foco em entregas hiper-rápidas na região metropolitana.
+                </p>
+                <div className="mt-4 bg-[#CCFF00]/10 border border-[#CCFF00]/30 text-[#CCFF00] text-[10px] uppercase font-black px-3 py-1.5 inline-block">Dominância Estabelecida</div>
+              </div>
+
+              {/* Fase 2: Curitiba / Sul */}
+              <div className="bg-[#111111] p-6 border-b-4 md:border-b-0 md:border-r-4 border-white/20 hover:bg-white/5 transition-colors">
+                <span className="text-[#CCFF00] text-[10px] font-black uppercase tracking-widest mb-2 block animate-pulse">Fase 02 - Próximo Alvo</span>
+                <h4 className="text-white font-black text-2xl uppercase tracking-tighter mb-2">Região Sul (Curitiba)</h4>
+                <p className="text-white text-xs leading-relaxed font-bold">
+                  Segunda conta estadual com <strong>parceiro operador local</strong> que cuida de toda a logística. A RAMA atua como distribuidora matriz, <span className="text-[#CCFF00]">lucrando direto na fonte (fornecimento)</span> e garantindo escalabilidade para o Sul sem inchar a operação interna.
+                </p>
+                <div className="mt-4 bg-orange-500/10 border border-orange-500/30 text-orange-500 text-[10px] uppercase font-black px-3 py-1.5 inline-block">Em Planejamento</div>
+              </div>
+
+              {/* Fase 3: Nordeste */}
+              <div className="bg-[#050505] p-6 hover:bg-white/5 transition-colors">
+                <span className="text-white/30 text-[10px] font-black uppercase tracking-widest mb-2 block">Fase 03 - Visão de Longo Prazo</span>
+                <h4 className="text-white/80 font-black text-2xl uppercase tracking-tighter mb-2">Região Nordeste</h4>
+                <p className="text-gray-500 text-xs leading-relaxed font-bold">
+                  Após estabelecer com sucesso o modelo de distribuição e logística descentralizada no Sul, replicaremos a estrutura abrindo o próximo polo operacional para atingir e dominar a região Nordeste.
+                </p>
+                <div className="mt-4 bg-white/5 border border-white/10 text-white/40 text-[10px] uppercase font-black px-3 py-1.5 inline-block">Futuro</div>
+              </div>
+            </div>
+          </div>
+        </section>
     </div>
   )}
 
@@ -383,6 +438,9 @@ export default function BusinessPlan() {
                  <p className="text-white/80 text-xs md:text-sm leading-relaxed font-medium">
                    <strong className="text-[#CCFF00]">Marketplace Nacional:</strong> O setor de marketplaces no Brasil é a infraestrutura central do varejo digital, registrando um faturamento de <strong className="text-white">R$ 204,3 bilhões no último ano</strong>. Nossa operação foi estruturada matematicamente para processar e escalar vendas dentro desse ecossistema, garantindo eficiência logística e alta taxa de conversão.
                  </p>
+                 <p className="text-white/80 text-xs md:text-sm leading-relaxed font-medium mb-4">
+                   <strong className="text-[#FF00FF]">Eletrodomésticos & Fogões:</strong> O mercado brasileiro de eletrodomésticos de cozinha movimenta aproximadamente <strong className="text-white">R$ 145 bilhões anuais</strong>. O segmento de fogões e cooktops é o segundo maior pilar da linha branca, respondendo por <strong className="text-white">17% de todas as vendas e buscas</strong> no país.
+                 </p>
 
                  <div className="flex flex-col gap-3">
                    {/* Toggles */}
@@ -422,18 +480,25 @@ export default function BusinessPlan() {
              </div>
 
              {/* Indicadores Visuais */}
-             <div className="flex flex-col sm:flex-row gap-6 lg:gap-12 shrink-0">
+             <div className="flex flex-col xl:flex-row gap-6 lg:gap-8 shrink-0 flex-wrap">
                {/* Bloco 1: Marketplace */}
-               <div className="border-l-4 border-[#CCFF00] pl-5 flex flex-col justify-center">
+               <div className="border-l-4 border-[#CCFF00] pl-4 flex flex-col justify-center">
                  <span className="text-white/50 text-[10px] font-black uppercase tracking-widest mb-1">Marketplace Brasil</span>
-                 <span className="text-[#CCFF00] text-4xl lg:text-5xl font-black tracking-tighter leading-none mb-1">R$ 204 BI</span>
+                 <span className="text-[#CCFF00] text-3xl lg:text-4xl font-black tracking-tighter leading-none mb-1">R$ 204 BI</span>
                  <span className="text-white/80 text-[10px] uppercase font-bold tracking-widest">Faturamento Anual</span>
                </div>
                
-               {/* Bloco 2: Farmácia */}
-               <div className="border-l-4 border-[#00FFFF] pl-5 flex flex-col justify-center">
+               {/* Bloco 2: Linha Branca */}
+               <div className="border-l-4 border-[#FF00FF] pl-4 flex flex-col justify-center">
+                 <span className="text-white/50 text-[10px] font-black uppercase tracking-widest mb-1">Eletrodomésticos</span>
+                 <span className="text-[#FF00FF] text-3xl lg:text-4xl font-black tracking-tighter leading-none mb-1">R$ 145 BI</span>
+                 <span className="text-white/80 text-[10px] uppercase font-bold tracking-widest">Volume Cozinha</span>
+               </div>
+
+               {/* Bloco 3: Farmácia */}
+               <div className="border-l-4 border-[#00FFFF] pl-4 flex flex-col justify-center">
                  <span className="text-white/50 text-[10px] font-black uppercase tracking-widest mb-1">Setor Farmacêutico</span>
-                 <span className="text-[#00FFFF] text-4xl lg:text-5xl font-black tracking-tighter leading-none mb-1">R$ 160 BI</span>
+                 <span className="text-[#00FFFF] text-3xl lg:text-4xl font-black tracking-tighter leading-none mb-1">R$ 160 BI</span>
                  <span className="text-white/80 text-[10px] uppercase font-bold tracking-widest">Volume de Mercado</span>
                </div>
              </div>
@@ -612,6 +677,74 @@ export default function BusinessPlan() {
 
           </section>
 
+            {/* LINHA 8: REFERÊNCIAS */}
+            <section className="bg-[#050505] border-4 border-white/20 p-6 lg:p-8 relative overflow-hidden group mt-6">
+              <div className="flex flex-col gap-8 relative z-10">
+                <div className="flex items-center gap-4 border-b-2 border-white/10 pb-4">
+                  <div className="w-4 h-4 bg-[#CCFF00]" />
+                  <h3 className="text-white text-2xl md:text-3xl font-black uppercase tracking-tighter">
+                    Nossas <span className="text-[#CCFF00]">Referências</span>
+                  </h3>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+                  {/* Modelo de Negócios */}
+                  <div className="flex flex-col gap-4">
+                    <h4 className="text-white/50 text-[10px] font-black uppercase tracking-widest border-b border-white/10 pb-2 flex items-center gap-2">
+                      <Target className="w-4 h-4 text-white/50" />
+                      Formato de Negócios
+                    </h4>
+                    <div className="flex flex-col gap-3">
+                      <div className="bg-white/5 p-4 border-l-4 border-[#CCFF00] hover:bg-white/10 transition-colors">
+                        <span className="text-white font-bold text-lg block uppercase tracking-tight">Mercado Livre</span>
+                        <span className="text-white/60 text-[11px] uppercase font-bold tracking-wider mt-1 block">Agilidade & Malha Logística</span>
+                      </div>
+                      <div className="bg-white/5 p-4 border-l-4 border-[#CCFF00] hover:bg-white/10 transition-colors">
+                        <span className="text-white font-bold text-lg block uppercase tracking-tight">TikTok</span>
+                        <span className="text-white/60 text-[11px] uppercase font-bold tracking-wider mt-1 block">Venda por Conteúdo Rápido</span>
+                      </div>
+                      <div className="bg-white/5 p-4 border-l-4 border-[#CCFF00] hover:bg-white/10 transition-colors">
+                        <span className="text-white font-bold text-lg block uppercase tracking-tight">Marketplaces</span>
+                        <span className="text-white/60 text-[11px] uppercase font-bold tracking-wider mt-1 block">Ecossistemas de Alto Crescimento</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Marca e Influência */}
+                  <div className="flex flex-col gap-4">
+                    <h4 className="text-white/50 text-[10px] font-black uppercase tracking-widest border-b border-white/10 pb-2 flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-white/50" />
+                      Marca & Redes Sociais
+                    </h4>
+                    <div className="flex flex-col gap-3">
+                      <div className="bg-[#CCFF00]/10 p-4 border-l-4 border-[#CCFF00] hover:bg-[#CCFF00]/20 transition-colors">
+                        <span className="text-[#CCFF00] font-bold text-lg block uppercase tracking-tight">Tay Dantas</span>
+                        <span className="text-white/80 text-[11px] uppercase font-bold tracking-wider mt-1 block">Vinci (Construção de Autoridade)</span>
+                      </div>
+                      <div className="bg-[#CCFF00]/10 p-4 border-l-4 border-[#CCFF00] hover:bg-[#CCFF00]/20 transition-colors">
+                        <span className="text-[#CCFF00] font-bold text-lg block uppercase tracking-tight">Erich Shibata</span>
+                        <span className="text-white/80 text-[11px] uppercase font-bold tracking-wider mt-1 block">Cimed (Identidade & Posicionamento)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tráfego e Estratégia */}
+                  <div className="flex flex-col gap-4">
+                    <h4 className="text-white/50 text-[10px] font-black uppercase tracking-widest border-b border-white/10 pb-2 flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-white/50" />
+                      Estratégia & Tráfego
+                    </h4>
+                    <div className="flex flex-col gap-3 h-full">
+                      <div className="bg-[#00FFFF]/10 p-4 border-l-4 border-[#00FFFF] hover:bg-[#00FFFF]/20 transition-colors h-full flex flex-col justify-center">
+                        <span className="text-[#00FFFF] font-bold text-lg block uppercase tracking-tight">Rafael Kiso</span>
+                        <span className="text-white/80 text-[11px] uppercase font-bold tracking-wider mt-2 block leading-relaxed">Especialista Absoluto em Tráfego Pago, Algoritmos e Distribuição Digital Estratégica.</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
           </div>
         )}
 
@@ -642,26 +775,10 @@ export default function BusinessPlan() {
                     <span className="text-black text-[10px] font-black uppercase tracking-[0.3em]">Client-Facing</span>
                   </div>
 
-                  {/* ITEM 1 */}
+                  
+                    {/* ITEM 1 */}
                   <div className="p-6 lg:p-10 border-b-4 border-white/20 relative overflow-hidden group bg-[#111111]">
                     <div className="absolute -right-10 -bottom-10 text-[12rem] font-black text-white/5 pointer-events-none transition-transform duration-700 group-hover:scale-110">1</div>
-                    <h4 className="text-white font-black text-3xl lg:text-4xl uppercase tracking-tighter mb-4 relative z-10 flex flex-col">
-                      <span className="text-[#CCFF00] text-[11px] tracking-[0.4em] font-bold mb-2">MÁQUINA REGIONAL</span>
-                      Marketing & Influenciadores
-                    </h4>
-                    <p className="text-gray-400 text-sm font-bold leading-relaxed mb-8 relative z-10 max-w-[90%]">
-                      Nossa máquina de influência regional. Conteúdo em vídeo retroalimentando o TikTok/IG, Lives Commerce semanais focadas em alta conversão e pessoas reais ancorando a confiança da marca.
-                    </p>
-                    <div className="flex flex-wrap gap-2 relative z-10">
-                      <span className="bg-white/5 text-white border-2 border-white/20 text-[10px] uppercase font-bold px-3 py-1.5">Influenciadores do ABC</span>
-                      <span className="bg-white/5 text-white border-2 border-white/20 text-[10px] uppercase font-bold px-3 py-1.5">Live Commerce</span>
-                      <span className="bg-white/5 text-white border-2 border-white/20 text-[10px] uppercase font-bold px-3 py-1.5">Conteúdo Viral</span>
-                    </div>
-                  </div>
-
-                  {/* ITEM 2 */}
-                  <div className="p-6 lg:p-10 border-b-4 border-white/20 relative overflow-hidden group bg-black">
-                    <div className="absolute -right-10 -bottom-10 text-[12rem] font-black text-white/5 pointer-events-none transition-transform duration-700 group-hover:scale-110">2</div>
                     <h4 className="text-white font-black text-3xl lg:text-4xl uppercase tracking-tighter mb-4 relative z-10 flex flex-col">
                       <span className="text-yellow-400 text-[11px] tracking-[0.4em] font-bold mb-2">MOTOR DE VOLUME</span>
                       Ecossistema de Marketplaces
@@ -678,9 +795,9 @@ export default function BusinessPlan() {
                     </div>
                   </div>
 
-                  {/* ITEM 3 */}
-                  <div className="p-6 lg:p-8 relative overflow-hidden group bg-[#111111]">
-                    <div className="absolute -right-10 -bottom-10 text-[12rem] font-black text-white/5 pointer-events-none transition-transform duration-700 group-hover:scale-110">3</div>
+                  {/* ITEM 2 */}
+                  <div className="p-6 lg:p-8 border-b-4 border-white/20 relative overflow-hidden group bg-black">
+                    <div className="absolute -right-10 -bottom-10 text-[12rem] font-black text-white/5 pointer-events-none transition-transform duration-700 group-hover:scale-110">2</div>
                     <h4 className="text-white font-black text-3xl lg:text-4xl uppercase tracking-tighter mb-4 relative z-10 flex flex-col">
                       <span className="text-blue-400 text-[11px] tracking-[0.4em] font-bold mb-2">CANAIS DIRETOS</span>
                       Nuvemshop & Whats
@@ -694,9 +811,27 @@ export default function BusinessPlan() {
                       <span className="bg-white/5 text-white border-2 border-white/20 text-[10px] uppercase font-bold px-3 py-1.5">Cross-Sell</span>
                     </div>
                   </div>
-                </div>
+                {/* ITEM 3 */}
+                  <div className="p-6 lg:p-10 relative overflow-hidden group bg-[#111111]">
+                    <div className="absolute -right-10 -bottom-10 text-[12rem] font-black text-white/5 pointer-events-none transition-transform duration-700 group-hover:scale-110">3</div>
+                    <h4 className="text-white font-black text-3xl lg:text-4xl uppercase tracking-tighter mb-4 relative z-10 flex flex-col">
+                      <span className="text-[#CCFF00] text-[11px] tracking-[0.4em] font-bold mb-2">MÁQUINA REGIONAL</span>
+                      Marketing & Influenciadores
+                    </h4>
+                    <p className="text-gray-400 text-sm font-bold leading-relaxed mb-8 relative z-10 max-w-[90%]">
+                      Nossa máquina de influência regional. Conteúdo em vídeo retroalimentando o TikTok/IG, Lives Commerce semanais focadas em alta conversão e pessoas reais ancorando a confiança da marca.
+                    </p>
+                    <div className="flex flex-wrap gap-2 relative z-10">
+                      <span className="bg-white/5 text-white border-2 border-white/20 text-[10px] uppercase font-bold px-3 py-1.5">Influenciadores do ABC</span>
+                      <span className="bg-white/5 text-white border-2 border-white/20 text-[10px] uppercase font-bold px-3 py-1.5">Live Commerce</span>
+                      <span className="bg-white/5 text-white border-2 border-white/20 text-[10px] uppercase font-bold px-3 py-1.5">Conteúdo Viral</span>
+                    </div>
+                  </div>
 
-                {/* --- COLUNA DIREITA --- */}
+                  
+
+                </div>
+                  {/* --- COLUNA DIREITA --- */}
                 <div className="flex flex-col bg-black">
                   {/* CABEÇALHO DIREITA */}
                   <div className="bg-white p-6 lg:p-10 border-b-4 border-white/20 flex items-center justify-between">
@@ -744,147 +879,374 @@ export default function BusinessPlan() {
         )}
 
         {activeTab === "app" && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 flex flex-col items-center">
-            <div className="text-center mb-8">
-              <h2 className="text-white text-3xl font-black tracking-tight">O Futuro do E-commerce</h2>
-              <p className="text-gray-400 font-black max-w-lg mt-2 mx-auto">
-                Simulação da nossa futura plataforma proprietária: uma experiência nativa de compra guiada por 
-                vídeos curtos e avaliações reais.
-              </p>
-            </div>
-
-            {/* Simulação do Celular */}
-            <div className="relative w-[340px] h-[720px] bg-black rounded-[3rem] border-[8px] border-[#1A1A1A] shadow-2xl overflow-hidden flex flex-col ring-1 ring-white/10">
-              
-              {/* Notch */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-[#1A1A1A] rounded-b-3xl z-50" />
-
-              {/* Status Bar */}
-              <div className="absolute top-0 w-full h-12 flex justify-between items-center px-6 z-40 text-white text-[10px] font-bold pt-2">
-                <span>9:41</span>
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-none border-4 border-white/100" />
-                  <div className="w-3 h-3 rounded-none border-4 border-white/100" />
-                  <div className="w-4 h-3 bg-white/80 rounded-[2px]" />
-                </div>
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 flex flex-col items-center">
+              <div className="text-center mb-12">
+                <h2 className="text-white text-3xl font-black tracking-tight">O Futuro do E-commerce</h2>
+                <p className="text-gray-400 font-black max-w-lg mt-2 mx-auto">
+                  Simulação da nossa futura plataforma proprietária: uma experiência nativa de compra guiada somada ao poder do atendimento consultivo via WhatsApp.
+                </p>
               </div>
-
-              {/* Feed de Vídeo (TikTok Style) */}
-              <div className="relative flex-1 bg-[#111111] overflow-hidden group cursor-pointer">
+  
+              {/* Simulação dos Celulares */}
+              <div className="flex flex-col xl:flex-row gap-12 xl:gap-20 items-center justify-center w-full max-w-[1200px] mx-auto pb-10">
                 
-                {/* Vídeo / Imagem de Fundo Simulando o Feed */}
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1540569014015-19a7be504e3a?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center opacity-60 mix-blend-luminosity" />
-                
-                {/* Gradientes para Leitura */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/90" />
-
-                {/* Overlays do Feed */}
-                <div className="absolute bottom-0 left-0 w-full p-4 pb-20 flex justify-between items-end">
+                {/* CELULAR 1: App */}
+                <div className="flex flex-col gap-4 items-center">
+                  <div className="flex flex-col items-center gap-1 text-center">
+                    <span className="text-[#CCFF00] font-black tracking-widest uppercase text-sm flex items-center gap-2"><div className="w-2 h-2 bg-[#CCFF00] rounded-full animate-pulse"/> D2C: Compra Rápida</span>
+                    <span className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">Escala & Autoatendimento</span>
+                  </div>
                   
-                  {/* Info do Produto (Esquerda) */}
-                  <div className="flex-1 pr-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-none bg-indigo-500 flex items-center justify-center text-white font-bold text-xs shadow-lg">
-                        RF
+                  <div className="relative w-[340px] h-[720px] bg-black rounded-[3rem] border-[8px] border-[#1A1A1A] shadow-2xl overflow-hidden flex flex-col ring-1 ring-white/10 shrink-0 font-sans">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-[#1A1A1A] rounded-b-3xl z-50" />
+                    <div className="absolute top-0 w-full h-12 flex justify-between items-center px-6 z-40 text-white text-[10px] font-bold pt-2">
+                      <span>9:41</span>
+                      <div className="flex gap-1.5">
+                        <div className="w-3 h-3 rounded-full bg-white/100" />
+                        <div className="w-3 h-3 rounded-full bg-white/100" />
+                        <div className="w-4 h-3 bg-white/80 rounded-[2px]" />
                       </div>
-                      <span className="text-white font-bold text-sm drop-shadow-md">@ramaflow</span>
-                      <span className="bg-white/20 text-white text-[9px] px-1.5 py-0.5 rounded-sm backdrop-blur-sm">Patrocinado</span>
-                    </div>
-                    <p className="text-white text-sm font-black mb-3 drop-shadow-md line-clamp-2">
-                      Testei o Kit de Instalação de Gás com Válvula de Segurança da Rama Flow. Olha a facilidade e a economia! 🔥🛠️
-                    </p>
-                    
-                    {/* Card do Produto Linkado */}
-                    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-none p-3 flex gap-3 items-center cursor-pointer hover:bg-white/20 transition-colors shadow-lg">
-                      <div className="w-12 h-12 bg-[#111111] rounded-none flex items-center justify-center border-4 border-white/10">
-                        <Box className="text-[#CCFF00] w-6 h-6" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="text-white text-xs font-bold leading-tight">Kit Mangueira + Registro</h4>
-                        <div className="flex items-center gap-1 mt-1">
-                          <span className="text-[#CCFF00] font-bold text-sm">R$ 89,90</span>
-                          <span className="text-gray-400 text-[10px] line-through">R$ 120</span>
-                        </div>
-                      </div>
-                      <div className="bg-[#CCFF00] text-black w-8 h-8 rounded-none flex items-center justify-center shadow-[0_0_10px_rgba(0,255,0,0.4)]">
-                        <ShoppingCart className="w-4 h-4" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Interações (Direita) */}
-                  <div className="flex flex-col items-center gap-4 pb-4">
-                    <div className="flex flex-col items-center gap-1 group/btn">
-                      <div className="w-10 h-10 rounded-none bg-[#111111] backdrop-blur-md flex items-center justify-center border-4 border-white/10 group-hover/btn:bg-white/20 transition-colors shadow-lg">
-                        <Heart className="w-5 h-5 text-white" fill="white" />
-                      </div>
-                      <span className="text-white text-[10px] font-bold drop-shadow-md">12.4k</span>
                     </div>
                     
-                    <div className="flex flex-col items-center gap-1 group/btn">
-                      <div className="w-10 h-10 rounded-none bg-[#111111] backdrop-blur-md flex items-center justify-center border-4 border-white/10 group-hover/btn:bg-white/20 transition-colors shadow-lg">
-                        <MessageCircle className="w-5 h-5 text-white" />
-                      </div>
-                      <span className="text-white text-[10px] font-bold drop-shadow-md">842</span>
-                    </div>
-
-                    <div className="flex flex-col items-center gap-1 group/btn">
-                      <div className="w-10 h-10 rounded-none bg-[#111111] backdrop-blur-md flex items-center justify-center border-4 border-white/10 group-hover/btn:bg-white/20 transition-colors shadow-lg">
-                        <Share2 className="w-5 h-5 text-white" />
-                      </div>
-                      <span className="text-white text-[10px] font-bold drop-shadow-md">2k</span>
-                    </div>
-                  </div>
-
-                </div>
-
-                {/* Reviews Overlay Flutuante (Simulando comentários pulando na tela) */}
-                <div className="absolute top-1/4 left-4 right-16 space-y-3 pointer-events-none opacity-90">
-                   <div className="bg-black/60 backdrop-blur-md p-2.5 rounded-none border-4 border-white/10 w-fit animate-pulse shadow-lg">
-                     <span className="text-white text-[10px] font-bold block mb-0.5">João M.</span>
-                     <p className="text-gray-200 text-xs font-black">Produto top! Chegou no mesmo dia. 🙌</p>
-                   </div>
-                   <div className="bg-black/60 backdrop-blur-md p-2.5 rounded-none border-4 border-white/10 w-fit ml-8 animate-pulse delay-150 shadow-lg">
-                     <span className="text-white text-[10px] font-bold block mb-0.5">Marcia T.</span>
-                     <p className="text-gray-200 text-xs font-black">Excelente, técnico super educado!</p>
-                   </div>
-                </div>
-
-              </div>
-
-              {/* Barra de Navegação Inferior (App) */}
-              <div className="h-16 bg-[#111111] border-t border-white/10 flex justify-around items-center px-2 z-40 relative">
-                <div className="flex flex-col items-center gap-1 text-gray-500 cursor-pointer hover:text-white transition-colors">
-                  <Home className="w-5 h-5" />
-                  <span className="text-[8px] font-bold uppercase tracking-wider">Início</span>
-                </div>
-                <div className="flex flex-col items-center gap-1 text-gray-500 cursor-pointer hover:text-white transition-colors">
-                  <Search className="w-5 h-5" />
-                  <span className="text-[8px] font-bold uppercase tracking-wider">Buscar</span>
-                </div>
-                <div className="flex flex-col items-center gap-1 text-[#CCFF00] cursor-pointer -mt-4">
-                  <div className="w-12 h-10 rounded-none bg-white flex items-center justify-center relative shadow-[0_0_20px_rgba(255,255,255,0.4)]">
-                    <div className="absolute -left-1 w-1 h-4 bg-[#CCFF00] rounded-l-sm" />
-                    <div className="absolute -right-1 w-1 h-4 bg-red-500 rounded-r-sm" />
-                    <Play className="w-5 h-5 text-black ml-0.5" fill="black" />
-                  </div>
-                </div>
-                <div className="flex flex-col items-center gap-1 text-gray-500 cursor-pointer hover:text-white transition-colors relative">
-                  <ShoppingCart className="w-5 h-5" />
-                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#CCFF00] rounded-none border-2 border-[#111]" />
-                  <span className="text-[8px] font-bold uppercase tracking-wider">Carrinho</span>
-                </div>
-                <div className="flex flex-col items-center gap-1 text-gray-500 cursor-pointer hover:text-white transition-colors">
-                  <User className="w-5 h-5" />
-                  <span className="text-[8px] font-bold uppercase tracking-wider">Perfil</span>
-                </div>
-              </div>
-
+{activeD2CTab === "video" ? (
+  <div className="relative flex-1 bg-[#111111] overflow-hidden group cursor-pointer">
+    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1540569014015-19a7be504e3a?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center opacity-80" />
+    <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/90" />
+    
+    <div className="absolute bottom-0 left-0 w-full p-4 pb-20 flex justify-between items-end">
+      <div className="flex-1 pr-4">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#CCFF00] to-indigo-500 p-0.5">
+            <div className="w-full h-full bg-black rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg">RF</div>
+          </div>
+          <div className="flex flex-col">
+              <span className="text-white font-bold text-sm drop-shadow-md">@ramaflow</span>
+              <span className="text-[#CCFF00] text-[9px] font-bold uppercase tracking-wider">Patrocinado</span>
+          </div>
+        </div>
+        <p className="text-white text-sm font-medium mb-4 drop-shadow-md leading-snug">
+          Testei o <span className="font-bold">Kit de Instalação de Gás com Válvula de Segurança</span> da Rama Flow. Olha a facilidade e a economia! 🚀🔥
+        </p>
+        <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl p-2.5 flex gap-3 items-center cursor-pointer hover:bg-white/10 transition-colors shadow-2xl">
+          <div className="w-12 h-12 bg-white/5 rounded-lg flex items-center justify-center border border-white/5">
+            <svg viewBox="0 0 24 24" className="text-[#CCFF00] w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+          </div>
+          <div className="flex-1">
+            <h4 className="text-white text-xs font-bold leading-tight">Kit Mangueira + Registro</h4>
+            <div className="flex items-center gap-1.5 mt-1">
+              <span className="text-[#CCFF00] font-black text-sm">R$ 89,90</span>
+              <span className="text-white/40 text-[10px] line-through">R$ 120</span>
             </div>
           </div>
-        )}
-
+          <button className="bg-[#CCFF00] text-black w-8 h-8 rounded-full flex items-center justify-center hover:bg-yellow-400 transition-colors shrink-0 shadow-md">
+            <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+          </button>
+        </div>
+      </div>
+      <div className="flex flex-col gap-5 items-center mb-4">
+        <div className="flex flex-col items-center gap-1">
+          <div className="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors">
+            <svg viewBox="0 0 24 24" className="w-7 h-7 text-white drop-shadow-md" fill="white" stroke="currentColor" strokeWidth="1"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          </div>
+          <span className="text-white text-[11px] font-bold drop-shadow-md">12.4k</span>
+        </div>
+        <div className="flex flex-col items-center gap-1">
+          <div className="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors">
+            <svg viewBox="0 0 24 24" className="w-7 h-7 text-white drop-shadow-md" fill="white" stroke="none" strokeWidth="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+          </div>
+          <span className="text-white text-[11px] font-bold drop-shadow-md">842</span>
+        </div>
+        <div className="flex flex-col items-center gap-1">
+          <div className="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors">
+            <svg viewBox="0 0 24 24" className="w-7 h-7 text-white drop-shadow-md" fill="white" stroke="none"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke="white" strokeWidth="2"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke="white" strokeWidth="2"></line></svg>
+          </div>
+          <span className="text-white text-[11px] font-bold drop-shadow-md">2k</span>
+        </div>
       </div>
     </div>
-  );
+
+    <div className="absolute top-1/3 left-4 right-16 space-y-3 pointer-events-none opacity-95">
+       <div className="bg-black/50 backdrop-blur-lg p-2.5 rounded-2xl rounded-tl-sm border border-white/10 w-fit animate-pulse shadow-xl flex items-center gap-2">
+         <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-[10px] text-white font-bold">J</div>
+         <div>
+           <span className="text-white/60 text-[10px] font-bold block mb-0.5">João M.</span>
+           <p className="text-white text-xs font-medium">Produto top! Chegou no mesmo dia.</p>
+         </div>
+       </div>
+       <div className="bg-black/50 backdrop-blur-lg p-2.5 rounded-2xl rounded-tl-sm border border-white/10 w-fit ml-8 animate-pulse delay-150 shadow-xl flex items-center gap-2">
+         <div className="w-6 h-6 rounded-full bg-pink-500 flex items-center justify-center text-[10px] text-white font-bold">M</div>
+         <div>
+           <span className="text-white/60 text-[10px] font-bold block mb-0.5">Marcia T.</span>
+           <p className="text-white text-xs font-medium">Excelente, técnico super educado!</p>
+         </div>
+       </div>
+    </div>
+  </div>
+) : (
+  <div className="relative flex-1 bg-[#050505] overflow-y-auto custom-scrollbar flex flex-col pb-6">
+    <div className="sticky top-0 w-full bg-black/80 backdrop-blur-xl border-b border-white/5 z-20 px-4 py-3 flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#CCFF00] to-indigo-500 p-[1.5px]">
+          <div className="w-full h-full bg-black rounded-full flex items-center justify-center text-white font-bold text-[9px]">RF</div>
+        </div>
+        <span className="text-white font-bold text-xs uppercase tracking-widest">Loja Oficial</span>
+      </div>
+      <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center">
+        <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+      </div>
+    </div>
+    
+    <div className="p-4 flex gap-2 overflow-x-auto custom-scrollbar pb-2">
+      <div className="px-3 py-1.5 bg-[#CCFF00] text-black rounded-full text-[10px] font-bold whitespace-nowrap">Kits de Gás</div>
+      <div className="px-3 py-1.5 bg-white/10 text-white rounded-full text-[10px] font-medium whitespace-nowrap">Fogões</div>
+      <div className="px-3 py-1.5 bg-white/10 text-white rounded-full text-[10px] font-medium whitespace-nowrap">Peças</div>
+    </div>
+
+    <div className="px-4 grid grid-cols-2 gap-3 mt-2 pb-6">
+      {/* Product 1 */}
+      <div className="bg-[#0a0a0a] rounded-2xl p-1.5 border border-white/10 flex flex-col group hover:border-[#CCFF00]/50 transition-colors shadow-lg">
+        <div className="w-full h-28 bg-[#1a1a1a] rounded-xl mb-2 overflow-hidden relative group-hover:opacity-90 transition-opacity">
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?q=80&w=300&auto=format&fit=crop')] bg-cover bg-center opacity-80" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+          <div className="absolute top-1.5 left-1.5 bg-[#CCFF00] text-black text-[8px] font-black px-1.5 py-0.5 rounded-sm uppercase tracking-wider">PREMIUM</div>
+        </div>
+        <div className="px-1 flex flex-col flex-1">
+          <span className="text-white text-[10px] font-bold leading-snug line-clamp-2">Kit Premium de Gás Encanado + Registro de Segurança</span>
+          <div className="mt-auto pt-2 flex items-center justify-between pb-1">
+            <span className="text-[#CCFF00] font-black text-xs">R$ 149,90</span>
+          </div>
+        </div>
+      </div>
+      
+      {/* Product 2 */}
+      <div className="bg-[#0a0a0a] rounded-2xl p-1.5 border border-white/10 flex flex-col group hover:border-[#CCFF00]/50 transition-colors shadow-lg">
+        <div className="w-full h-28 bg-[#1a1a1a] rounded-xl mb-2 overflow-hidden relative group-hover:opacity-90 transition-opacity">
+           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=300&auto=format&fit=crop')] bg-cover bg-center opacity-90" />
+           <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+           <div className="absolute top-1.5 left-1.5 bg-black/50 backdrop-blur-sm text-white border border-white/10 text-[8px] font-black px-1.5 py-0.5 rounded-sm uppercase tracking-wider">CURVA A</div>
+        </div>
+        <div className="px-1 flex flex-col flex-1">
+          <span className="text-white text-[10px] font-bold leading-snug line-clamp-2">Fogão Brastemp 4 Bocas Inox c/ Timer</span>
+          <div className="mt-auto pt-2 flex items-center justify-between pb-1">
+            <span className="text-[#CCFF00] font-black text-xs">R$ 1.299,00</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Product 3 */}
+      <div className="bg-[#0a0a0a] rounded-2xl p-1.5 border border-white/10 flex flex-col group hover:border-[#CCFF00]/50 transition-colors shadow-lg">
+        <div className="w-full h-28 bg-[#1a1a1a] rounded-xl mb-2 overflow-hidden relative group-hover:opacity-90 transition-opacity">
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1584286595398-a59f2afddaca?q=80&w=300&auto=format&fit=crop')] bg-cover bg-center opacity-80" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+          <div className="absolute top-1.5 left-1.5 bg-[#FF00FF] text-white text-[8px] font-black px-1.5 py-0.5 rounded-sm uppercase tracking-wider">15% OFF</div>
+        </div>
+        <div className="px-1 flex flex-col flex-1">
+          <span className="text-white text-[10px] font-bold leading-snug line-clamp-2">Kit Básico Mangueira Cobre 1.2m</span>
+          <div className="mt-auto pt-2 flex items-center justify-between pb-1">
+            <span className="text-[#CCFF00] font-black text-xs">R$ 89,90</span>
+            <span className="text-white/40 text-[9px] line-through">R$ 105</span>
+          </div>
+        </div>
+      </div>
+      
+      {/* Product 4 */}
+      <div className="bg-[#0a0a0a] rounded-2xl p-1.5 border border-white/10 flex flex-col group hover:border-[#CCFF00]/50 transition-colors shadow-lg">
+        <div className="w-full h-28 bg-[#1a1a1a] rounded-xl mb-2 overflow-hidden relative group-hover:opacity-90 transition-opacity">
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=300&auto=format&fit=crop')] bg-cover bg-center opacity-80" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+          <div className="absolute top-1.5 left-1.5 bg-[#00FFFF] text-black text-[8px] font-black px-1.5 py-0.5 rounded-sm uppercase tracking-wider">SERVIÇO</div>
+        </div>
+        <div className="px-1 flex flex-col flex-1">
+          <span className="text-white text-[10px] font-bold leading-snug line-clamp-2">Instalação Técnica Especializada e Segura</span>
+          <div className="mt-auto pt-2 flex items-center justify-between pb-1">
+            <span className="text-[#CCFF00] font-black text-xs">R$ 90,00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+<div className="h-16 bg-[#000000] flex justify-around items-center px-2 z-40 relative">
+                      <div onClick={() => setActiveD2CTab("video")} className={`flex flex-col items-center gap-1 cursor-pointer transition-colors ${activeD2CTab === "video" ? "text-white" : "text-white/50 hover:text-white"}`}>
+                        <svg viewBox="0 0 24 24" className="w-6 h-6" fill={activeD2CTab === "video" ? "currentColor" : "none"} stroke="currentColor" strokeWidth={activeD2CTab === "video" ? "1" : "2"}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                        <span className={`text-[9px] ${activeD2CTab === "video" ? "font-bold" : "font-medium"}`}>Início</span>
+                      </div>
+                      <div onClick={() => setActiveD2CTab("store")} className={`flex flex-col items-center gap-1 cursor-pointer transition-colors ${activeD2CTab === "store" ? "text-white" : "text-white/50 hover:text-white"}`}>
+                        <svg viewBox="0 0 24 24" className="w-6 h-6" fill={activeD2CTab === "store" ? "currentColor" : "none"} stroke="currentColor" strokeWidth={activeD2CTab === "store" ? "1" : "2"}><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                        <span className={`text-[9px] ${activeD2CTab === "store" ? "font-bold" : "font-medium"}`}>Loja</span>
+                      </div>
+                      <div className="flex flex-col items-center gap-1 text-[#CCFF00] cursor-pointer">
+                        <div className="w-12 h-8 rounded-xl bg-white flex items-center justify-center relative shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                          <div className="absolute -left-1 w-1 h-3 bg-[#CCFF00] rounded-l-sm" />
+                          <div className="absolute -right-1 w-1 h-3 bg-red-500 rounded-r-sm" />
+                          <svg viewBox="0 0 24 24" className="w-4 h-4 text-black ml-0.5" fill="black"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-center gap-1 text-white/50 cursor-pointer hover:text-white transition-colors">
+                        <div className="relative">
+                           <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                           <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#CCFF00] rounded-full animate-ping" />
+                        </div>
+                        <span className="text-[9px] font-medium">Carrinho</span>
+                      </div>
+                      <div className="flex flex-col items-center gap-1 text-white/50 cursor-pointer hover:text-white transition-colors">
+                        <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <span className="text-[9px] font-medium">Perfil</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* VS Badge */}
+                <div className="hidden xl:flex flex-col gap-3 items-center">
+                   <div className="w-[2px] h-32 bg-gradient-to-b from-transparent via-white/20 to-transparent" />
+                   <div className="w-12 h-12 rounded-full bg-[#111] border-2 border-white/20 flex items-center justify-center z-10 shrink-0">
+                     <span className="text-white/40 font-black text-xs">+</span>
+                   </div>
+                   <div className="w-[2px] h-32 bg-gradient-to-b from-transparent via-white/20 to-transparent" />
+                </div>
+
+                {/* CELULAR 2: WhatsApp */}
+                <div className="flex flex-col gap-4 items-center">
+                  <div className="flex flex-col items-center gap-1 text-center">
+                    <span className="text-[#00a884] font-black tracking-widest uppercase text-sm flex items-center gap-2"><div className="w-2 h-2 bg-[#00a884] rounded-full animate-pulse"/> WhatsApp Copilot</span>
+                    <span className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">Cross-Sell & Consultivo</span>
+                  </div>
+                  <div className="relative w-[340px] h-[720px] bg-[#0b141a] rounded-[3rem] border-[8px] border-[#1A1A1A] shadow-2xl overflow-hidden flex flex-col ring-1 ring-white/10 shrink-0 font-sans">
+                    
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-[#1A1A1A] rounded-b-3xl z-50" />
+      
+                    <div className="absolute top-0 w-full h-12 flex justify-between items-center px-6 z-40 text-white/70 text-[10px] font-bold pt-2">
+                      <span>9:42</span>
+                      <div className="flex gap-1.5">
+                        <div className="w-3 h-3 rounded-none border-4 border-white/70" />
+                        <div className="w-3 h-3 rounded-none border-4 border-white/70" />
+                        <div className="w-4 h-3 bg-white/70 rounded-[2px]" />
+                      </div>
+                    </div>
+
+                    <div className="bg-[#202c33] w-full pt-12 pb-3 px-4 flex items-center gap-3 z-30 shadow-sm relative">
+                      <svg viewBox="0 0 24 24" className="text-[#8696a0] w-6 h-6 shrink-0" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                      <div className="w-10 h-10 rounded-full bg-black border border-white/10 flex items-center justify-center shrink-0">
+                        <span className="text-[#CCFF00] font-black text-sm">L</span>
+                      </div>
+                      <div className="flex flex-col flex-1 leading-tight">
+                        <div className="flex items-center gap-1">
+                          <span className="text-[#e9edef] font-bold text-base whitespace-nowrap">Luna - Club RM</span>
+                          <svg viewBox="0 0 24 24" className="w-4 h-4 text-[#00a884] shrink-0" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-1.9 14.7L6 12.6l1.5-1.5 2.6 2.6 6.4-6.4 1.5 1.5-7.9 7.9z"/></svg>
+                        </div>
+                        <span className="text-[#8696a0] text-[11px] whitespace-nowrap">Atendimento Oficial</span>
+                      </div>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-3.5 flex flex-col gap-3.5 relative custom-scrollbar pb-6">
+                      <div className="absolute inset-0 opacity-[0.04] bg-[url('https://i.pinimg.com/originals/8c/98/99/8c98994518b575bfd8c949e91d20548b.jpg')] bg-repeat" />
+
+                      <div className="flex justify-center my-1 relative z-10">
+                        <span className="bg-[#182229] text-[#8696a0] text-[10px] font-medium px-3 py-1 rounded-lg shadow-sm">Hoje</span>
+                      </div>
+
+                      {/* Client */}
+                      <div className="flex flex-col items-end self-end max-w-[90%] relative z-10">
+                        <div className="bg-[#005c4b] text-[#e9edef] text-[12px] px-2.5 py-1.5 rounded-xl rounded-tr-sm shadow-sm relative">
+                          Olá! Vi aquele Fogão Brastemp 4 bocas no TikTok de vocês. Ainda tem pronta entrega?
+                          <span className="text-[#8696a0] text-[9px] ml-2 float-right mt-1.5">09:40</span>
+                        </div>
+                      </div>
+
+                      {/* Store */}
+                      <div className="flex flex-col items-start self-start max-w-[90%] relative z-10 mt-1">
+                        <div className="bg-[#202c33] text-[#e9edef] text-[12px] px-2.5 py-1.5 rounded-xl rounded-tl-sm shadow-sm relative">
+                          Olá! Bem-vindo(a) à Luna - Club RM. 🚀
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-start self-start max-w-[90%] relative z-10 mt-[-8px]">
+                        <div className="bg-[#202c33] text-[#e9edef] text-[12px] px-2.5 py-1.5 rounded-xl rounded-tl-sm shadow-sm relative">
+                          Temos sim! O <strong>Fogão Brastemp (R$ 1.299)</strong> está no nosso CD central. Se fecharmos agora, nosso Flex entrega <strong>hoje à tarde</strong>!
+                          <span className="text-[#8696a0] text-[9px] ml-2 float-right mt-1.5">09:41</span>
+                        </div>
+                      </div>
+
+                      {/* Client */}
+                      <div className="flex flex-col items-end self-end max-w-[90%] relative z-10 mt-1">
+                        <div className="bg-[#005c4b] text-[#e9edef] text-[12px] px-2.5 py-1.5 rounded-xl rounded-tr-sm shadow-sm relative">
+                          Ótimo, vou querer. Mas me mudei para um apê novo e não tenho a mangueira, nem quem instale.
+                          <span className="text-[#8696a0] text-[9px] ml-2 float-right mt-1.5">09:41</span>
+                        </div>
+                      </div>
+
+                      {/* Store */}
+                      <div className="flex flex-col items-start self-start max-w-[90%] relative z-10 mt-1">
+                        <div className="bg-[#202c33] text-[#e9edef] text-[12px] px-2.5 py-1.5 rounded-xl rounded-tl-sm shadow-sm relative">
+                          Fique tranquilo(a)! Ninguém fica sem cozinhar com a Rama. 😊
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-start self-start max-w-[90%] relative z-10 mt-[-8px]">
+                        <div className="bg-[#202c33] text-[#e9edef] text-[12px] px-2.5 py-1.5 rounded-xl rounded-tl-sm shadow-sm relative">
+                          Posso incluir o <strong>Kit Gás Premium</strong> (Mangueira de Cobre + Registro) por R$ 149,90 e já enviar nosso técnico amanhã cedo por apenas +R$ 90,00?
+                          <span className="text-[#8696a0] text-[9px] ml-2 float-right mt-1.5">09:42</span>
+                        </div>
+                      </div>
+
+                      {/* Client */}
+                      <div className="flex flex-col items-end self-end max-w-[90%] relative z-10 mt-1">
+                        <div className="bg-[#005c4b] text-[#e9edef] text-[12px] px-2.5 py-1.5 rounded-xl rounded-tr-sm shadow-sm relative">
+                          Nossa, perfeito! Pode fechar o pacote completo então.
+                          <span className="text-[#8696a0] text-[9px] ml-2 float-right mt-1.5">09:42</span>
+                        </div>
+                      </div>
+
+                      {/* Store - Fatura */}
+                      <div className="flex flex-col items-start self-start max-w-[95%] relative z-10 mt-1">
+                        <div className="bg-[#202c33] p-1.5 rounded-xl rounded-tl-sm shadow-sm w-[260px] relative">
+                          <div className="bg-[#0b141a] rounded-lg p-3 flex flex-col gap-2">
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-[#00a884] font-bold text-[10px] uppercase tracking-wider flex items-center gap-1.5">
+                                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                                Fatura RAMA
+                              </span>
+                            </div>
+                            <div className="text-white font-black text-2xl mb-1">R$ 1.538,90</div>
+                            
+                            <div className="flex flex-col gap-1 text-[#8696a0] text-[10px] font-medium border-t border-white/5 pt-2">
+                              <div className="flex justify-between"><span>Fogão Brastemp 4B</span><span className="text-white">1.299,00</span></div>
+                              <div className="flex justify-between"><span>Kit Gás Premium</span><span className="text-white">149,90</span></div>
+                              <div className="flex justify-between"><span>Instalação (Técnico)</span><span className="text-white">90,00</span></div>
+                            </div>
+
+                            <button className="w-full bg-[#00a884] hover:bg-[#008f6f] text-[#0b141a] font-bold py-2 rounded-md mt-2 text-[12px] transition-colors flex items-center justify-center gap-1.5 shadow-md">
+                              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                              Pagar via PIX
+                            </button>
+                          </div>
+                          <span className="text-[#8696a0] text-[9px] float-right mt-1.5 mr-1 mb-0.5">09:42</span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col items-start self-start max-w-[90%] relative z-10 mt-[-8px]">
+                        <div className="bg-[#202c33] text-[#e9edef] text-[12px] px-2.5 py-1.5 rounded-xl rounded-tl-sm shadow-sm relative">
+                          O técnico João chegará amanhã às 09:00 com o kit. E o fogão chega hoje até as 18h! 😉
+                          <span className="text-[#8696a0] text-[9px] ml-2 float-right mt-1.5">09:43</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-[#202c33] px-3 py-2 flex items-center gap-2 z-30 relative">
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 text-[#8696a0] shrink-0" fill="currentColor"><path d="M11.999 14.942c2.001 0 3.531-1.53 3.531-3.531V4.35c0-2.001-1.53-3.531-3.531-3.531S8.469 2.349 8.469 4.35v7.061c0 2.001 1.53 3.531 3.531 3.531z"/><path d="M17.634 11.411c0 3.116-2.529 5.644-5.644 5.644s-5.645-2.528-5.645-5.644H4.559c0 3.829 2.915 6.98 6.574 7.481v3.91h2.72v-3.91c3.659-.501 6.574-3.652 6.574-7.481h-1.793z"/></svg>
+                      <div className="flex-1 bg-[#2a3942] rounded-full flex items-center px-4 py-2.5">
+                        <span className="text-[#8696a0] text-[14px]">Mensagem</span>
+                      </div>
+                      <div className="w-10 h-10 rounded-full bg-[#00a884] flex items-center justify-center shrink-0">
+                        <svg viewBox="0 0 24 24" className="w-5 h-5 text-black" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
 }
