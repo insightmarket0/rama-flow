@@ -235,46 +235,15 @@ export default function Lembretes() {
   };
 
   return (
-    <div className="flex-1 p-4 md:p-8 pt-6 animate-in fade-in duration-500 max-w-[1400px] mx-auto w-full font-sans flex flex-col min-h-0 overflow-hidden">
+    <div className="flex-1 w-full bg-transparent text-white px-4 pb-4 pt-2 animate-in fade-in duration-500 font-sans flex flex-col min-h-0 overflow-hidden">
       
       {/* Header Intimista */}
-      <div className="mb-6 border-b border-white/5 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-6 shrink-0">
-        <div>
-          <div className="mb-2">
-            <h1 className="text-3xl md:text-4xl font-light text-white tracking-tight flex items-center gap-2">
-              Seu <span className="font-semibold text-[#00FF00]">Mundo</span>.
-            </h1>
-          </div>
-          <p className="text-gray-500 mt-2 text-sm max-w-xl leading-relaxed">
-            Um espaço totalmente seu. Organize sua agenda, checklist do dia a dia e rascunhos mentais.
-          </p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-3 pt-0 shrink-0">
+          <h1 className="text-3xl font-light text-white tracking-tight flex items-center gap-4">
+            <span className="text-[#00FF00]">Seu <span className="font-semibold">Mundo</span>.</span>
+            <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-gray-500 border-l border-[#00FF00]/30 pl-4 hidden xl:inline-block mt-1">Um espaço totalmente seu. Organize sua agenda, checklist e rascunhos mentais.</span>
+          </h1>
         </div>
-
-        {/* Módulo de Captura Rápida no Topo (Stealth Input) */}
-        <div className="w-full md:w-[450px]">
-          <form onSubmit={handleAddThought} className="relative group">
-            <div className="relative flex items-center bg-[#0A0A0A] border border-white/5 group-focus-within:border-[#00FF00]/40 rounded-xl overflow-hidden transition-all shadow-lg group-focus-within:shadow-[0_0_20px_rgba(0,255,0,0.05)]">
-              <div className="pl-4">
-                <BrainCircuit className="h-4 w-4 text-gray-500 group-focus-within:text-[#00FF00] transition-colors" />
-              </div>
-              <input 
-                type="text" 
-                value={quickThought}
-                onChange={(e) => setQuickThought(e.target.value)}
-                placeholder="O que está na sua mente agora?"
-                className="w-full bg-transparent border-none text-white text-xs px-3 py-3 focus:outline-none placeholder:text-gray-600"
-              />
-              <button 
-                type="submit"
-                disabled={!quickThought.trim()}
-                className="pr-4 pl-2 text-gray-600 hover:text-[#00FF00] disabled:opacity-30 disabled:hover:text-gray-600 transition-colors"
-              >
-                <Send className="h-4 w-4" />
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1 min-h-0 overflow-hidden pb-4">
         
@@ -520,13 +489,36 @@ export default function Lembretes() {
           {/* Header Fixo */}
           <div className="flex items-center justify-between mb-4 shrink-0 px-1">
             <h3 className="text-xl font-bold text-white flex items-center gap-2">
-              <Lightbulb className="h-5 w-5 text-[#00FF00]" />
-              Ideias Avulsas
-            </h3>
-            <span className="text-[9px] font-bold uppercase tracking-widest bg-white/5 border border-white/10 text-gray-500 px-2 py-1 rounded">
-              {ideas.length} Notas
-            </span>
-          </div>
+                <Lightbulb className="h-5 w-5 text-[#00FF00]" />
+                Ideias Avulsas
+              </h3>
+              <span className="text-[9px] font-bold uppercase tracking-widest bg-white/5 border border-white/10 text-gray-500 px-2 py-1 rounded">
+                {ideas.length} Notas
+              </span>
+            </div>
+
+            {/* Input Integrado */}
+            <form onSubmit={handleAddThought} className="relative group mb-4 shrink-0">
+              <div className="relative flex items-center bg-[#0A0A0A] border border-white/5 group-focus-within:border-[#00FF00]/40 rounded-xl overflow-hidden transition-all shadow-lg group-focus-within:shadow-[0_0_20px_rgba(0,255,0,0.05)]">
+                <div className="pl-4">
+                  <BrainCircuit className="h-4 w-4 text-gray-500 group-focus-within:text-[#00FF00] transition-colors" />
+                </div>
+                <input 
+                  type="text" 
+                  value={quickThought}
+                  onChange={(e) => setQuickThought(e.target.value)}
+                  placeholder="O que está na sua mente agora?"
+                  className="w-full bg-transparent border-none text-white text-xs px-3 py-3 focus:outline-none placeholder:text-gray-600"
+                />
+                <button 
+                  type="submit"
+                  disabled={!quickThought.trim()}
+                  className="pr-4 pl-2 text-gray-600 hover:text-[#00FF00] disabled:opacity-30 disabled:hover:text-gray-600 transition-colors"
+                >
+                  <Send className="h-4 w-4" />
+                </button>
+              </div>
+            </form>
 
           {/* Área Rolável */}
           <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-2">
