@@ -112,13 +112,13 @@ export default function Playbooks() {
   });
 
   return (
-    <div className="flex-1 min-h-[100dvh] bg-[#050505] text-white p-4 md:p-8 animate-in fade-in duration-500 font-sans selection:bg-[#CCFF00] selection:text-black pb-24">
+    <div className="flex-1 min-h-[100dvh] bg-[#050505] text-white pt-0 pl-0 -ml-4 -mt-2 pr-4 md:pr-8 animate-in fade-in duration-500 font-sans selection:bg-[#CCFF00] selection:text-black pb-24">
       
       {/* HEADER / HERO - BRUTALIST */}
-      <div className="max-w-7xl mx-auto mb-16 -mt-10 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8">
+      <div className="w-full mb-8 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8">
         <div className="flex flex-col">
-          <span className="text-[#CCFF00] font-black uppercase tracking-widest text-sm mb-2">Base de Conhecimento</span>
-          <h1 className="text-5xl md:text-8xl font-black uppercase tracking-tighter leading-none">
+          <span className="text-[#CCFF00] font-black uppercase tracking-widest text-sm relative z-10">Base de Conhecimento</span>
+          <h1 className="text-5xl md:text-8xl font-black uppercase tracking-tighter leading-[0.92] -mt-[2px] md:-mt-[4px] -ml-1 md:-ml-[6px]">
             SISTEMA DE<br />
             <span className="text-[#CCFF00]">PLAYBOOKS</span>
           </h1>
@@ -132,8 +132,8 @@ export default function Playbooks() {
       </div>
 
       {/* BENTO GRID LAYOUT */}
-      <div className="max-w-7xl mx-auto">
-        <h2 className="text-2xl font-black uppercase tracking-tight mb-8">Todos os Manuais</h2>
+      <div className="w-full">
+        <h2 className="text-2xl font-black uppercase tracking-tight mb-4">Todos os Manuais</h2>
         
         {filteredArticles.length === 0 ? (
           <div className="py-20 border-2 border-dashed border-white/10 flex items-center justify-center">

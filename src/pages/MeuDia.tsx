@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { 
   Zap, 
   Megaphone, 
@@ -233,6 +234,16 @@ export default function MeuDia() {
   const { user } = useAuth();
   const navigate = useNavigate();
   
+  const isAnderson = user?.email?.toLowerCase().includes("anderson") || user?.email?.toLowerCase() === "livia@hotmail.com";
+
+  const handleRestrictedAction = (callback: () => void) => {
+    if (isAnderson) {
+      callback();
+    } else {
+      toast.error("Acesso Restrito", { description: "Apenas a supervisão tem acesso a este módulo." });
+    }
+  };
+
   // Extrai e formata o nome do usuário logado
   const rawName = user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Equipe";
   const currentUserName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
@@ -459,7 +470,7 @@ export default function MeuDia() {
 
             {/* 3.1. Card Fixo de Prévia de Mensagens -> Escritório Virtual */}
             <div 
-              onClick={() => window.dispatchEvent(new CustomEvent('open-global-chat'))}
+              onClick={() => handleRestrictedAction(() => window.dispatchEvent(new CustomEvent('open-global-chat')))}
               className="col-span-1 bg-gradient-to-br from-slate-300/10 via-slate-400/5 to-slate-500/10 hover:from-slate-300/15 hover:to-slate-500/15 backdrop-blur-md rounded-[2rem] p-6 flex flex-col justify-between border border-white/10 cursor-pointer transition-all duration-500 h-[250px] relative overflow-hidden group shadow-[0_8px_30px_rgba(0,0,0,0.12)]"
             >
               {/* Brilho interno sutil */}
@@ -517,7 +528,7 @@ export default function MeuDia() {
                   )}
                 </div>
                 <button 
-                  onClick={() => setIsModalOpen(true)}
+                  onClick={() => handleRestrictedAction(() => setIsModalOpen(true))}
                   className="bg-white/5 hover:bg-[#00FF00]/20 hover:text-[#00FF00] text-gray-400 p-1 rounded-md transition-colors border border-white/5 hover:border-[#00FF00]/30"
                   title="Novo Aviso"
                 >
@@ -539,7 +550,7 @@ export default function MeuDia() {
                   <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 mb-2 min-h-0">
                     <div className="flex items-center gap-2 mb-4 flex-wrap relative pr-8">
                       <button 
-                        onClick={() => handleDeleteAnnouncement(ann.id)}
+                        onClick={() => handleRestrictedAction(() => handleDeleteAnnouncement(ann.id))}
                         className="absolute right-0 top-0 text-gray-500 hover:text-red-500 transition-colors bg-white/5 hover:bg-red-500/10 p-1.5 rounded-lg"
                         title="Excluir Aviso"
                       >
@@ -579,7 +590,7 @@ export default function MeuDia() {
                     </div>
                   </div>
                   <button 
-                    onClick={() => handleAcknowledge(ann.id)}
+                    onClick={() => handleRestrictedAction(() => handleAcknowledge(ann.id))}
                     disabled={hasAck}
                     className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
                       hasAck 

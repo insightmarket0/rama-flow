@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { AlertCircle, Plus, Search, Store, Trash2, ExternalLink, CheckCircle2, Check, Clock, Activity, LayoutGrid } from "lucide-react";
 import { SiMercadopago, SiShopee } from "react-icons/si";
 import { FaAmazon } from "react-icons/fa";
@@ -109,16 +109,11 @@ export default function MuralAjustes() {
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto pr-2 custom-scrollbar">
         
         {/* MINIMALIST HEADER */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-5 pt-0">
-            <div className="flex flex-col gap-2">
-              <h1 className="text-3xl font-light text-white flex items-center gap-3">
-                
-                Mural de Ajustes
-              </h1>
-              <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#00FF00]">
-                Correção de Erros e Otimização
-              </p>
-            </div>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-2 pt-0 shrink-0">
+            <h1 className="text-3xl font-light text-white tracking-tight flex items-center gap-4">
+              <span className="text-[#00FF00]">Mural de <span className="font-semibold">Ajustes</span>.</span>
+              <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-gray-500 border-l border-[#00FF00]/30 pl-4 hidden xl:inline-block mt-1">Correção de Erros e Otimização.</span>
+            </h1>
           </div>
   
           {/* MINIMALIST TABS E ACTIONS */}

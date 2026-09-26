@@ -158,9 +158,17 @@ export function AppSidebar() {
   const filteredNavGroups = NAV_GROUPS.map(group => {
     let modifiedGroup = { ...group };
 
-    if (group.id === "equipe") {
-      if (user?.email !== "livia@hotmail.com" && user?.email !== "rogerio@ramaflow.com" && user?.email !== "suporte.ramamagazine@gmail.com") {
+    // Restringe o acesso ao dashboard financeiro apenas para contas específicas
+    if (group.id === "comercial") {
+      if (user?.email !== "livia@hotmail.com" && user?.email !== "rogerio@ramaflow.com" && user?.email !== "suporte.ramamagazine@gmail.com" && !user?.email?.toLowerCase().includes("anderson")) {
         modifiedGroup.subItems = modifiedGroup.subItems.filter(item => item.url !== "/dashboard-financeiro");
+      }
+    }
+
+    // Regra explícita para o Rogério: Apenas os 4 primeiros cards
+    if (user?.email === "rogerio@ramaflow.com") {
+      if (!["home", "operacao", "comercial", "expedicao"].includes(group.id)) {
+        return null;
       }
     }
 
@@ -177,6 +185,13 @@ export function AppSidebar() {
 
     if (user?.email === "william@rama.com") {
       if (!["home", "operacao", "marketing", "gestao"].includes(group.id)) {
+        return null;
+      }
+    }
+
+    if (group.id === "marketing" || group.id === "gestao" || group.id === "sistema") {
+      const isAnderson = user?.email?.toLowerCase().includes("anderson") || user?.email?.toLowerCase() === "livia@hotmail.com";
+      if (!isAnderson) {
         return null;
       }
     }
