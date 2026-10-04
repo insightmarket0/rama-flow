@@ -1,16 +1,58 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, Navigation, MapPin, Navigation2, CheckCircle2 } from "lucide-react";
-
-const STOPS = [
-  { id: 1, cliente: "Você (Partida)", endereco: "Base Rama (Tatuapé)", horario: "08:00", isCompleted: true },
-  { id: 2, cliente: "João da Silva", endereco: "Rua das Flores, 123", horario: "09:00", isCompleted: false, isNext: true },
-  { id: 3, cliente: "Maria Souza", endereco: "Av. Brasil, 450", horario: "14:00", isCompleted: false, isNext: false },
-  { id: 4, cliente: "Carlos Oliveira", endereco: "Rua do Sol, 88", horario: "16:30", isCompleted: false, isNext: false },
-];
+import { ChevronLeft, MapPin, Navigation2, CheckCircle2 } from "lucide-react";
+import { useAgendaStore } from "../../store/useAgendaStore";
+import { format } from "date-fns";
 
 export default function InstaladorRota() {
   const navigate = useNavigate();
+  const servicos = useAgendaStore(state => state.servicos);
+
+  const stops = useMemo(() => {
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    const todaysServicos = servicos
+      .filter(s => s.data === todayStr)
+      .sort((a, b) => a.horario.localeCompare(b.horario));
+
+    // A Base sempre será o primeiro ponto. 
+    // Vamos considerar "completa" se o cara já fez o primeiro serviço, ou se já começou o dia.
+    // Pra simplificar, a Base sempre fica verde se tiver serviços.
+    const baseStop = {
+      id: "base",
+      cliente: "Você (Partida)",
+      endereco: "Sua Base Operacional",
+      horario: "Início do dia",
+      isCompleted: true,
+      isNext: false,
+      realId: null
+    };
+
+    let foundNext = false;
+    const mappedServicos = todaysServicos.map(s => {
+      const isCompleted = s.status === 'concluido';
+      let isNext = false;
+      
+      if (!isCompleted && !foundNext) {
+        isNext = true;
+        foundNext = true;
+      }
+
+      return {
+        id: s.id,
+        realId: s.id,
+        cliente: s.cliente,
+        endereco: s.endereco,
+        horario: s.horario,
+        isCompleted: isCompleted,
+        isNext: isNext
+      };
+    });
+
+    return [baseStop, ...mappedServicos];
+  }, [servicos]);
+
+  const totalParadas = stops.length - 1; // exclui a base
+  const paradasFeitas = stops.filter(s => s.isCompleted && s.id !== "base").length;
 
   return (
     <div className="flex flex-col min-h-[100dvh] bg-[#F8F9FA] text-[#1A1C1E] selection:bg-purple-200">
@@ -44,28 +86,34 @@ export default function InstaladorRota() {
         <div className="absolute inset-0 bg-gradient-to-t from-[#F8F9FA] via-transparent to-transparent z-20"></div>
       </div>
 
-      <main className="flex-1 px-6 py-2 flex flex-col gap-6 pb-40 relative z-30">
+      <main className="flex-1 px-6 py-4 flex flex-col gap-6 pb-40 relative z-30">
         
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Progresso do Dia</span>
-            <span className="text-lg font-black text-gray-900">1 de 3 Paradas</span>
+            <span className="text-lg font-black text-gray-900">{paradasFeitas} de {totalParadas} Paradas</span>
           </div>
           <div className="bg-purple-100 text-purple-600 font-bold px-3 py-1 rounded-full text-xs">
-            35km Restantes
+            Ativo
           </div>
         </div>
 
         {/* Timeline Steps */}
         <div className="flex flex-col gap-0 mt-2">
-          {STOPS.map((stop, index) => (
-            <div key={stop.id} className="flex gap-4 relative">
+          {stops.map((stop, index) => (
+            <div 
+              key={stop.id} 
+              className={`flex gap-4 relative ${stop.realId ? 'cursor-pointer hover:bg-gray-50 rounded-xl p-2 -ml-2 transition-colors' : 'p-2 -ml-2'}`}
+              onClick={() => {
+                if (stop.realId) navigate(`/instalador/servico/${stop.realId}`);
+              }}
+            >
               {/* Line connector */}
-              {index !== STOPS.length - 1 && (
-                <div className={`absolute left-3 top-8 bottom-[-16px] w-0.5 ${stop.isCompleted ? 'bg-green-500' : 'bg-gray-200'}`}></div>
+              {index !== stops.length - 1 && (
+                <div className={`absolute left-5 top-10 bottom-[-16px] w-0.5 ${stop.isCompleted ? 'bg-green-500' : 'bg-gray-200'}`}></div>
               )}
               
-              <div className="flex flex-col items-center z-10">
+              <div className="flex flex-col items-center z-10 shrink-0">
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center mt-1 shadow-sm ${
                   stop.isCompleted 
                     ? 'bg-green-500 text-white' 
@@ -77,11 +125,11 @@ export default function InstaladorRota() {
                 </div>
               </div>
               
-              <div className={`flex flex-col pb-6 ${stop.isNext ? '' : 'opacity-70'}`}>
+              <div className={`flex flex-col pb-6 ${stop.isNext || stop.id === 'base' ? '' : 'opacity-70'}`}>
                 <span className={`text-[10px] font-bold uppercase tracking-widest ${stop.isNext ? 'text-purple-600' : 'text-gray-400'}`}>
                   {stop.horario}
                 </span>
-                <span className={`text-base font-bold ${stop.isCompleted ? 'text-gray-500 line-through decoration-gray-300' : 'text-gray-900'}`}>
+                <span className={`text-base font-bold ${stop.isCompleted && stop.id !== 'base' ? 'text-gray-500 line-through decoration-gray-300' : 'text-gray-900'}`}>
                   {stop.cliente}
                 </span>
                 <span className="text-sm text-gray-500 font-medium leading-relaxed mt-0.5">
@@ -89,13 +137,22 @@ export default function InstaladorRota() {
                 </span>
                 
                 {stop.isNext && (
-                  <button className="mt-3 bg-purple-50 text-purple-600 font-bold text-xs uppercase tracking-widest px-4 py-2 rounded-xl flex items-center gap-2 w-fit hover:bg-purple-100 transition-colors">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(`https://waze.com/ul?q=${encodeURIComponent(stop.endereco)}`, '_blank');
+                    }}
+                    className="mt-3 bg-purple-50 text-purple-600 font-bold text-xs uppercase tracking-widest px-4 py-2 rounded-xl flex items-center gap-2 w-fit hover:bg-purple-100 transition-colors"
+                  >
                     <Navigation2 className="w-3 h-3" /> Iniciar Rota (Waze)
                   </button>
                 )}
               </div>
             </div>
           ))}
+          {totalParadas === 0 && (
+            <div className="text-center text-gray-500 py-10 font-bold">Nenhuma parada programada para hoje.</div>
+          )}
         </div>
 
       </main>

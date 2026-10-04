@@ -20,6 +20,8 @@ export default function GestaoInstaladores() {
   const deleteServico = useAgendaStore(state => state.deleteServico);
   const estoqueItens = useEstoqueStore(state => state.itens);
   const ultimaAtualizacaoEstoque = useEstoqueStore(state => state.ultimaAtualizacao);
+  const solicitacaoAtiva = useEstoqueStore(state => state.solicitacaoAtiva);
+  const registrarAbastecimento = useEstoqueStore(state => state.registrarAbastecimento);
   
   // Dashboard vs Wizard State
   const [isCreatingOS, setIsCreatingOS] = useState(false);
@@ -259,15 +261,35 @@ Assim que realizar o pagamento, é só enviar o comprovante por aqui mesmo. Qual
                 <span className="text-[9px] md:text-xs text-gray-500 font-bold mt-1 block truncate">Via GPS</span>
               </div>
             </div>
-            <div className="bg-[#0A0A0A] border border-white/5 p-4 md:p-5 rounded-xl md:rounded-2xl flex flex-col justify-between relative overflow-hidden group cursor-pointer hover:border-purple-500/50 transition-colors">
-              <div className="absolute right-0 top-0 bottom-0 w-1 md:w-2 bg-purple-500/20"></div>
+            <div 
+              onClick={() => {
+                if (solicitacaoAtiva) {
+                  registrarAbastecimento();
+                  toast.success("Abastecimento confirmado! O alerta na van foi desligado.");
+                }
+              }}
+              className={`bg-[#0A0A0A] border p-4 md:p-5 rounded-xl md:rounded-2xl flex flex-col justify-between relative overflow-hidden group transition-colors ${
+                solicitacaoAtiva 
+                  ? 'border-red-500 shadow-[0_0_15px_rgba(255,0,0,0.3)] cursor-pointer hover:bg-red-500/10' 
+                  : 'border-white/5 cursor-default'
+              }`}
+            >
+              <div className={`absolute right-0 top-0 bottom-0 w-1 md:w-2 ${solicitacaoAtiva ? 'bg-red-500 animate-pulse' : 'bg-purple-500/20'}`}></div>
               <div className="flex justify-between items-center mb-2 md:mb-4">
-                <span className="text-[9px] md:text-[10px] text-gray-500 font-bold uppercase tracking-widest leading-tight">Estoque</span>
-                <Package className="w-3 h-3 md:w-4 md:h-4 text-white group-hover:text-purple-400 transition-colors" />
+                <span className={`text-[9px] md:text-[10px] font-bold uppercase tracking-widest leading-tight ${solicitacaoAtiva ? 'text-red-500' : 'text-gray-500'}`}>
+                  {solicitacaoAtiva ? '⚠️ ALERTA DE REPOSIÇÃO' : 'Estoque'}
+                </span>
+                <Package className={`w-3 h-3 md:w-4 md:h-4 ${solicitacaoAtiva ? 'text-red-500' : 'text-white group-hover:text-purple-400 transition-colors'}`} />
               </div>
               <div>
                 <div className="text-xl md:text-3xl font-black text-white">{totalEstoqueCount} <span className="text-xs md:text-lg text-gray-500 font-medium">Itens</span></div>
-                <span className="text-[9px] md:text-xs text-gray-500 font-bold mt-1 block truncate">{estoqueStatus}</span>
+                {solicitacaoAtiva ? (
+                  <span className="text-[9px] md:text-xs text-red-400 font-bold mt-1 block truncate">
+                    Clique aqui após abastecer a van
+                  </span>
+                ) : (
+                  <span className="text-[9px] md:text-xs text-gray-500 font-bold mt-1 block truncate">{estoqueStatus}</span>
+                )}
               </div>
             </div>
           </div>
