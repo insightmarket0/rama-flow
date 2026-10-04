@@ -12,10 +12,13 @@ export type EstoqueItem = {
 type EstoqueStore = {
   itens: EstoqueItem[];
   ultimaAtualizacao: string | null;
+  solicitacaoAtiva: boolean;
+  solicitacaoData: string | null;
   adicionarItem: (item: Omit<EstoqueItem, 'id'>) => void;
   atualizarQuantidade: (id: string, quantidade: number) => void;
   registrarAbastecimento: () => void;
   deduzirEstoque: (nome: string, qtd: number) => void;
+  solicitarReposicao: () => void;
 };
 
 export const useEstoqueStore = create<EstoqueStore>()(
@@ -29,26 +32,36 @@ export const useEstoqueStore = create<EstoqueStore>()(
         { id: '5', nome: 'Abraçadeira', quantidade: 0, minimo: 10, preco: 5.00 },
       ],
       ultimaAtualizacao: null,
+      solicitacaoAtiva: false,
+      solicitacaoData: null,
       adicionarItem: (item) => set((state) => ({ 
         itens: [...state.itens, { ...item, id: Math.random().toString() }] 
       })),
       atualizarQuantidade: (id, quantidade) => set((state) => ({
         itens: state.itens.map(i => i.id === id ? { ...i, quantidade } : i)
       })),
-      registrarAbastecimento: () => set({ ultimaAtualizacao: new Date().toISOString() }),
+      registrarAbastecimento: () => set({ 
+        ultimaAtualizacao: new Date().toISOString(),
+        solicitacaoAtiva: false, // Ao abastecer, a solicitação some
+        solicitacaoData: null
+      }),
       deduzirEstoque: (nome, qtd) => set((state) => ({
         itens: state.itens.map(i => i.nome === nome ? { ...i, quantidade: Math.max(0, i.quantidade - qtd) } : i)
-      }))
+      })),
+      solicitarReposicao: () => set({ 
+        solicitacaoAtiva: true,
+        solicitacaoData: new Date().toISOString()
+      })
     }),
     {
-      name: 'estoque-storage-v2', // bumped version to wipe old cache
+      name: 'estoque-storage-v3', // bumped again for the new fields
     }
   )
 );
 
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (e) => {
-    if (e.key === 'estoque-storage-v2') {
+    if (e.key === 'estoque-storage-v3') {
       useEstoqueStore.persist.rehydrate();
     }
   });

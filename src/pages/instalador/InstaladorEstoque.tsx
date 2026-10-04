@@ -1,10 +1,13 @@
 import React from "react";
 import { Package, Plus, Minus, AlertTriangle } from "lucide-react";
 import { useEstoqueStore } from "../../store/useEstoqueStore";
+import { toast } from "sonner";
 
 export default function InstaladorEstoque() {
   const estoque = useEstoqueStore(state => state.itens);
   const atualizarQuantidade = useEstoqueStore(state => state.atualizarQuantidade);
+  const solicitarReposicao = useEstoqueStore(state => state.solicitarReposicao);
+  const solicitacaoAtiva = useEstoqueStore(state => state.solicitacaoAtiva);
 
   const updateQtd = (id: string, delta: number, currentQtd: number) => {
     const newQtd = Math.max(0, currentQtd + delta);
@@ -12,6 +15,15 @@ export default function InstaladorEstoque() {
   };
 
   const hasLowStock = estoque.some(item => item.quantidade <= item.minimo);
+
+  const handleSolicitar = () => {
+    if (solicitacaoAtiva) {
+      toast.error('Você já possui uma solicitação de reposição ativa aguardando o CRM.');
+      return;
+    }
+    solicitarReposicao();
+    toast.success('Solicitação enviada! A base foi notificada.');
+  };
 
   return (
     <div className="flex flex-col min-h-[100dvh] bg-[#F8F9FA] text-[#1A1C1E] selection:bg-purple-200">
@@ -75,14 +87,19 @@ export default function InstaladorEstoque() {
       {/* Modern FAB - Floating above the bottom nav */}
       <div className="fixed bottom-28 left-0 right-0 px-6 z-40 pointer-events-none flex justify-center">
         <button 
+          onClick={handleSolicitar}
           className={`pointer-events-auto w-full h-14 rounded-2xl font-bold text-sm flex justify-center items-center gap-3 shadow-lg transition-all duration-300 active:scale-95 ${
-            hasLowStock 
-              ? 'bg-white text-red-500 border border-red-100 hover:bg-red-50' 
-              : 'bg-white text-purple-600 border border-purple-100 hover:bg-purple-50'
+            solicitacaoAtiva
+              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+              : hasLowStock 
+                ? 'bg-white text-red-500 border border-red-100 hover:bg-red-50' 
+                : 'bg-white text-purple-600 border border-purple-100 hover:bg-purple-50'
           }`}
         >
           <Package className="w-5 h-5" />
-          {hasLowStock ? 'Solicitar Reposição Urgente' : 'Solicitar Reposição'}
+          {solicitacaoAtiva 
+            ? 'Reposição Solicitada (Aguarde)' 
+            : hasLowStock ? 'Solicitar Reposição Urgente' : 'Solicitar Reposição'}
         </button>
       </div>
 
