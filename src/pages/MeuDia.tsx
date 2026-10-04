@@ -19,7 +19,9 @@ import {
   Trees,
   LayoutGrid,
   Heart,
-  MessageSquare, X, Plus, Trash2, Send, MessageCircle, ChevronRight } from "lucide-react";
+  MessageSquare, X, Plus, Trash2, Send, MessageCircle, ChevronRight,
+  Crown, Rocket, Palette, Bot, Flame
+} from "lucide-react";
 import { RamaDoDiaWidget } from "@/components/RamaDoDiaWidget";
 import { PainelPagamentosHoje } from "@/components/finance/PainelPagamentosHoje";
 import { parseISO, isBefore, format } from "date-fns";
@@ -103,15 +105,17 @@ const MOCK_ADJUSTMENTS = [
   },
 ];
 
-const getQuoteOfTheDay = (email?: string) => {
+const getQuoteOfTheDay = (email?: string, name?: string) => {
   const now = new Date();
   const start = new Date(now.getFullYear(), 0, 0);
   const diff = now.getTime() - start.getTime();
   const oneDay = 1000 * 60 * 60 * 24;
   const dayOfYear = Math.floor(diff / oneDay);
   
-  // Exibir versículos bíblicos apenas para a conta do Rogério e da Mara
-  if (email === "suporte.ramamagazine@gmail.com" || email === "mara@hotmail.com") {
+  const isMarcelo = email?.toLowerCase().includes("marcelo") || name?.toLowerCase().includes("marcelo");
+  
+  // Exibir versículos bíblicos apenas para contas específicas (Rogério, Mara, Marcelo)
+  if (email === "suporte.ramamagazine@gmail.com" || email === "mara@hotmail.com" || isMarcelo) {
     return BIBLE_VERSES[dayOfYear % BIBLE_VERSES.length];
   }
   
@@ -247,6 +251,7 @@ export default function MeuDia() {
   // Extrai e formata o nome do usuário logado
   const rawName = user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Equipe";
   const currentUserName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+  const isMarcelo = rawName.toLowerCase().includes("marcelo") || user?.email?.toLowerCase().includes("marcelo");
 
   // Saudação de acordo com o horário
   const currentHour = new Date().getHours();
@@ -394,11 +399,12 @@ export default function MeuDia() {
 
   const isNothingPending = visibleAnnouncements.length === 0 && reminders.length === 0 && adjustments.length === 0;
 
-  const quoteOfDay = getQuoteOfTheDay(user?.email);
+  const quoteOfDay = getQuoteOfTheDay(user?.email, rawName);
 
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100vh-48px)] bg-transparent w-full gap-8 font-sans overflow-hidden animate-in fade-in duration-700">
+    <div className="relative flex flex-col lg:flex-row h-[calc(100vh-48px)] bg-transparent w-full gap-8 font-sans overflow-hidden animate-in fade-in duration-700">
       
+      <div className="flex flex-col lg:flex-row w-full h-full gap-8">
       {/* Coluna Esquerda: Tipografia Minimalista */}
       <div className="w-full lg:w-1/3 flex flex-col justify-center border-r border-white/5 pr-8 pt-20 pb-8 relative">
         
@@ -417,6 +423,23 @@ export default function MeuDia() {
 
         {/* Tipografia Gigante Empilhada */}
         <div className="flex flex-col space-y-1">
+          {isMarcelo && (
+            <div className="mb-6 animate-in fade-in slide-in-from-left-4 duration-700">
+              <div className="bg-[#111111]/80 backdrop-blur-md p-3 rounded-xl border border-[#00FF00]/20 flex items-center justify-between shadow-[0_10px_30px_rgba(0,255,0,0.05)] w-full max-w-[280px]">
+                <div className="flex flex-col">
+                  <span className="text-[#00FF00] text-[10px] font-bold uppercase tracking-widest">Painel Foco</span>
+                  <span className="text-gray-300 text-xs font-medium mt-0.5">Acesso Live Commerce</span>
+                </div>
+                <button
+                  onClick={() => navigate('/marketing/live-commerce')}
+                  className="bg-[#00FF00] hover:bg-[#00FF00]/80 text-black p-2 rounded-lg transition-all hover:scale-105"
+                  title="Ir para Live Commerce"
+                >
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
           <h1 className="text-4xl md:text-5xl font-light text-white tracking-tight leading-none mb-2">
             {greeting}, <br />
             <span className="font-medium text-[#00FF00]">{currentUserName}</span>.
@@ -503,12 +526,12 @@ export default function MeuDia() {
 
               {/* Avatar Pile */}
               <div className="flex items-center mt-3 z-10 relative">
-                <div className="w-8 h-8 rounded-full border-2 border-[#1e2330] bg-gray-200 z-50 overflow-hidden shadow-sm"><img src="/rogerio.png" className="w-full h-full object-cover" onError={(e) => e.currentTarget.src = 'https://ui-avatars.com/api/?name=RO&background=random'}/></div>
-                <div className="w-8 h-8 rounded-full border-2 border-[#1e2330] bg-purple-600 flex items-center justify-center text-[10px] font-bold text-white z-40 -ml-2 shadow-sm">MA</div>
-                <div className="w-8 h-8 rounded-full border-2 border-[#1e2330] bg-amber-600 flex items-center justify-center text-[10px] font-bold text-white z-30 -ml-2 shadow-sm">AN</div>
-                <div className="w-8 h-8 rounded-full border-2 border-[#1e2330] bg-blue-600 flex items-center justify-center text-[10px] font-bold text-white z-20 -ml-2 shadow-sm">AL</div>
-                <div className="w-8 h-8 rounded-full border-2 border-[#1e2330] bg-gray-200 z-10 -ml-2 overflow-hidden shadow-sm"><img src="/assets/will.jpg" className="w-full h-full object-cover" onError={(e) => e.currentTarget.src = 'https://ui-avatars.com/api/?name=WM&background=random'}/></div>
-                <div className="w-8 h-8 rounded-full border-2 border-[#1e2330] bg-green-500/20 flex items-center justify-center text-[10px] font-bold text-emerald-400 z-0 -ml-2 shadow-sm border-green-500/30">IA</div>
+                <div className="w-8 h-8 rounded-full border-2 border-[#1e2330] bg-zinc-800 flex items-center justify-center z-50 shadow-sm"><Crown className="w-4 h-4 text-yellow-400" /></div>
+                <div className="w-8 h-8 rounded-full border-2 border-[#1e2330] bg-purple-900 flex items-center justify-center z-40 -ml-2 shadow-sm"><Sparkles className="w-4 h-4 text-purple-300" /></div>
+                <div className="w-8 h-8 rounded-full border-2 border-[#1e2330] bg-amber-900 flex items-center justify-center z-30 -ml-2 shadow-sm"><Zap className="w-4 h-4 text-amber-400" /></div>
+                <div className="w-8 h-8 rounded-full border-2 border-[#1e2330] bg-blue-900 flex items-center justify-center z-20 -ml-2 shadow-sm"><Rocket className="w-4 h-4 text-blue-400" /></div>
+                <div className="w-8 h-8 rounded-full border-2 border-[#1e2330] bg-rose-900 flex items-center justify-center z-10 -ml-2 shadow-sm"><Flame className="w-4 h-4 text-rose-400" /></div>
+                <div className="w-8 h-8 rounded-full border-2 border-[#1e2330] bg-emerald-900 flex items-center justify-center z-0 -ml-2 shadow-sm"><Bot className="w-4 h-4 text-emerald-400" /></div>
               </div>
             </div>
 
@@ -711,7 +734,8 @@ export default function MeuDia() {
           </div>
         </div>
       )}
-</div>
+      </div>
+    </div>
   );
 }
 

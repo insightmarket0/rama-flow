@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { Calendar, Package, User } from "lucide-react";
+import { Home, CalendarDays, CreditCard, Settings, Wrench } from "lucide-react";
 
 export const MobileLayout = () => {
   const location = useLocation();
@@ -8,32 +8,37 @@ export const MobileLayout = () => {
   const navItems = [
     {
       path: "/instalador",
-      icon: Calendar,
+      icon: Home,
+      label: "Home",
+    },
+    {
+      path: "/instalador/servicos",
+      icon: CalendarDays,
       label: "Agenda",
     },
     {
       path: "/instalador/estoque",
-      icon: Package,
+      icon: Wrench,
       label: "Estoque",
     },
     {
       path: "/instalador/perfil",
-      icon: User,
+      icon: Settings,
       label: "Perfil",
     },
   ];
 
   return (
-    <div className="flex flex-col h-[100dvh] w-full bg-background overflow-hidden relative selection:bg-primary/30">
+    <div className="flex flex-col h-[100dvh] w-full bg-[#F8F9FA] overflow-hidden relative font-sans text-gray-900 selection:bg-purple-200">
       
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden bg-[#050505] pb-20 scroll-smooth">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden bg-[#F8F9FA] pb-28 scroll-smooth">
         <Outlet />
       </main>
 
-      {/* Floating Minimalist Navigation Pill */}
-      <div className="fixed bottom-4 left-0 right-0 flex justify-center z-50 pointer-events-none px-4">
-        <nav className="bg-[#111111]/90 backdrop-blur-xl border border-white/10 rounded-full flex items-center justify-center gap-4 px-6 py-2 shadow-[0_10px_40px_rgba(0,0,0,0.8)] pointer-events-auto">
+      {/* Floating Bottom Nav (Light Fintech style) */}
+      <div className="fixed bottom-6 left-6 right-6 z-50 pointer-events-none">
+        <div className="bg-white rounded-full px-6 py-4 flex justify-between items-center shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100 pointer-events-auto">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path || (item.path !== '/instalador' && location.pathname.startsWith(item.path));
             
@@ -41,25 +46,14 @@ export const MobileLayout = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className="relative flex flex-col items-center justify-center w-8 h-8 group"
+                className={`flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-purple-600' : 'text-gray-400 hover:text-purple-400'}`}
               >
-                {/* Active Indicator Dot */}
-                {isActive && (
-                  <div className="absolute -top-1 w-1 h-1 rounded-full bg-[#00FF00] shadow-[0_0_8px_#00FF00] transition-all duration-300" />
-                )}
-                
-                <item.icon 
-                  className={`transition-all duration-300 ${
-                    isActive 
-                      ? "text-white scale-110 w-5 h-5" 
-                      : "text-gray-500 group-hover:text-gray-400 scale-100 w-4 h-4"
-                  }`} 
-                  strokeWidth={isActive ? 2.5 : 2}
-                />
+                <item.icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 2} />
+                <span className={`text-[9px] ${isActive ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
               </Link>
             );
           })}
-        </nav>
+        </div>
       </div>
 
     </div>

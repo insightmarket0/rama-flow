@@ -30,19 +30,27 @@ const Fornecedores = lazy(() => import("./pages/Fornecedores"));
 const BusinessPlan = lazy(() => import("./pages/BusinessPlan"));
 
 const ComparativoContas = lazy(() => import("./pages/ComparativoContas"));
+const ContaPessoal = lazy(() => import("./pages/ContaPessoal"));
 const Auth = lazy(() => import("./pages/Auth"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const PainelDivergencias = lazy(() => import("./pages/PainelDivergencias"));
 const Marketing = lazy(() => import("./pages/Marketing"));
 const DemandasArtes = lazy(() => import("./pages/DemandasArtes"));
+const LiveCommerce = lazy(() => import("./pages/LiveCommerce"));
 const CentralCompras = lazy(() => import("./pages/CentralCompras"));
 
 // Mobile Installer Pages
 import { MobileLayout } from "./components/layout/MobileLayout";
 const InstaladorHome = lazy(() => import("./pages/instalador/InstaladorHome"));
+const InstaladorAgenda = lazy(() => import("./pages/instalador/InstaladorAgenda"));
 const InstaladorServico = lazy(() => import("./pages/instalador/InstaladorServico"));
 const InstaladorEstoque = lazy(() => import("./pages/instalador/InstaladorEstoque"));
+const InstaladorPerfil = lazy(() => import("./pages/instalador/InstaladorPerfil"));
+const InstaladorRota = lazy(() => import("./pages/instalador/InstaladorRota"));
+
+// Customer Facing Pages
+const ClienteBooking = lazy(() => import("./pages/cliente/ClienteBooking"));
 
 const queryClient = new QueryClient();
 
@@ -64,6 +72,7 @@ const App = () => (
         >
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/agendar" element={<ClienteBooking />} />
             <Route path="/" element={<Navigate to="/meu-dia" replace />} />
             <Route
               path="/dashboard-financeiro"
@@ -210,6 +219,17 @@ const App = () => (
             />
 
             <Route
+              path="/marketing/live-commerce"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <LiveCommerce />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path="/brand-book"
               element={
                 <ProtectedRoute>
@@ -280,6 +300,16 @@ const App = () => (
               }
             />
             <Route
+              path="/conta-pessoal"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <ContaPessoal />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/pedidos-compras"
               element={
                 <ProtectedRoute>
@@ -317,9 +347,11 @@ const App = () => (
               element={<MobileLayout />}
             >
               <Route index element={<InstaladorHome />} />
+              <Route path="servicos" element={<InstaladorAgenda />} />
+              <Route path="rota" element={<InstaladorRota />} />
               <Route path="servico/:id" element={<InstaladorServico />} />
               <Route path="estoque" element={<InstaladorEstoque />} />
-              <Route path="perfil" element={<div className="p-4 text-white">Perfil (Em Breve)</div>} />
+              <Route path="perfil" element={<InstaladorPerfil />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

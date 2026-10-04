@@ -1,87 +1,69 @@
-import React, { useState } from "react";
-import { Package, Plus, Minus, AlertTriangle, ArrowRight } from "lucide-react";
-
-const INITIAL_ESTOQUE = [
-  { id: 1, nome: "Kit Gás 1 Metro", qtd: 5, minimo: 2 },
-  { id: 2, nome: "Kit Gás 2 Metros", qtd: 3, minimo: 2 },
-  { id: 3, nome: "Registro Baixa Pressão", qtd: 1, minimo: 2 },
-  { id: 4, nome: "Mangueira Avulsa (m)", qtd: 15, minimo: 5 },
-  { id: 5, nome: "Abraçadeira", qtd: 30, minimo: 10 },
-];
+import React from "react";
+import { Package, Plus, Minus, AlertTriangle } from "lucide-react";
+import { useEstoqueStore } from "../../store/useEstoqueStore";
 
 export default function InstaladorEstoque() {
-  const [estoque, setEstoque] = useState(INITIAL_ESTOQUE);
+  const estoque = useEstoqueStore(state => state.itens);
+  const atualizarQuantidade = useEstoqueStore(state => state.atualizarQuantidade);
 
-  const updateQtd = (id: number, delta: number) => {
-    setEstoque(estoque.map(item => {
-      if (item.id === id) {
-        const newQtd = Math.max(0, item.qtd + delta);
-        return { ...item, qtd: newQtd };
-      }
-      return item;
-    }));
+  const updateQtd = (id: string, delta: number, currentQtd: number) => {
+    const newQtd = Math.max(0, currentQtd + delta);
+    atualizarQuantidade(id, newQtd);
   };
 
-  const hasLowStock = estoque.some(item => item.qtd <= item.minimo);
+  const hasLowStock = estoque.some(item => item.quantidade <= item.minimo);
 
   return (
-    <div className="flex flex-col min-h-[100dvh] bg-[#050505] text-white selection:bg-[#00FF00]/30">
+    <div className="flex flex-col min-h-[100dvh] bg-[#F8F9FA] text-[#1A1C1E] selection:bg-purple-200">
       
-      {/* Minimal Header */}
-      <header className="sticky top-0 z-50 bg-[#050505]/80 backdrop-blur-xl pt-4 pb-4 px-6 flex flex-col gap-1 border-b border-white/5">
-        <h1 className="text-3xl font-extrabold tracking-tight">Estoque da Van</h1>
-        <p className="text-gray-400 text-sm">Controle de materiais no veículo.</p>
-      </header>
-
-      <main className="flex-1 px-6 py-4 flex flex-col gap-2 pb-32">
+      <main className="flex-1 px-6 pt-6 pb-40 flex flex-col gap-4">
         {estoque.map((item) => {
-          const isLow = item.qtd <= item.minimo;
-          // Calcula a porcentagem para uma barrinha visual sutil (assumindo que o dobro do mínimo é um "estoque cheio")
+          const isLow = item.quantidade <= item.minimo;
           const maxQtd = item.minimo * 3; 
-          const fillPercentage = Math.min(100, (item.qtd / maxQtd) * 100);
+          const fillPercentage = Math.min(100, (item.quantidade / maxQtd) * 100);
 
           return (
-            <div key={item.id} className="flex flex-col gap-3 py-4 border-b border-white/5 group">
+            <div key={item.id} className="bg-white rounded-3xl p-5 flex flex-col gap-4 shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-gray-50">
               <div className="flex items-center justify-between">
-                <div className="flex flex-col gap-0.5">
-                  <span className={`text-base font-semibold ${isLow ? 'text-red-500' : 'text-gray-100'}`}>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[15px] font-bold text-[#1A1C1E]">
                     {item.nome}
                   </span>
                   
                   {isLow ? (
-                    <span className="text-red-500 flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest mt-1">
-                      <AlertTriangle className="w-3 h-3" /> Reposição Necessária
+                    <span className="text-red-500 bg-red-50 px-2 py-0.5 rounded-full w-fit flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest mt-1">
+                      <AlertTriangle className="w-3 h-3" /> Reposição
                     </span>
                   ) : (
-                    <span className="text-gray-500 text-[9px] font-bold uppercase tracking-widest mt-1">
-                      Nível Estável
+                    <span className="text-green-600 bg-green-50 px-2 py-0.5 rounded-full w-fit flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest mt-1">
+                      Estável
                     </span>
                   )}
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                   <button 
-                    onClick={() => updateQtd(item.id, -1)}
-                    className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/5 transition-colors active:scale-90"
+                    onClick={() => updateQtd(item.id, -1, item.quantidade)}
+                    className="w-10 h-10 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors active:scale-95"
                   >
-                    <Minus className="w-4 h-4" />
+                    <Minus className="w-5 h-5" />
                   </button>
-                  <span className={`text-xl font-bold w-6 text-center ${isLow ? 'text-red-500' : 'text-white'}`}>
-                    {item.qtd}
+                  <span className={`text-xl font-black w-6 text-center ${isLow ? 'text-red-600' : 'text-[#1A1C1E]'}`}>
+                    {item.quantidade}
                   </span>
                   <button 
-                    onClick={() => updateQtd(item.id, 1)}
-                    className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/5 transition-colors active:scale-90"
+                    onClick={() => updateQtd(item.id, 1, item.quantidade)}
+                    className="w-10 h-10 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors active:scale-95"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-5 h-5" />
                   </button>
                 </div>
               </div>
 
               {/* Progress Bar (Visual Indicator) */}
-              <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+              <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
                 <div 
-                  className={`h-full rounded-full transition-all duration-500 ${isLow ? 'bg-red-500' : 'bg-gray-600'}`}
+                  className={`h-full rounded-full transition-all duration-500 ${isLow ? 'bg-red-500' : 'bg-purple-500'}`}
                   style={{ width: `${fillPercentage}%` }}
                 />
               </div>
@@ -90,18 +72,17 @@ export default function InstaladorEstoque() {
         })}
       </main>
 
-      {/* Modern FAB - Floating at the bottom */}
-      <div className="fixed bottom-[72px] left-0 right-0 px-6 z-40 pointer-events-none flex justify-center">
+      {/* Modern FAB - Floating above the bottom nav */}
+      <div className="fixed bottom-28 left-0 right-0 px-6 z-40 pointer-events-none flex justify-center">
         <button 
-          className={`pointer-events-auto w-full h-14 rounded-full font-bold text-sm tracking-widest uppercase flex justify-center items-center gap-3 shadow-2xl transition-all duration-500 active:scale-95 ${
+          className={`pointer-events-auto w-full h-14 rounded-2xl font-bold text-sm flex justify-center items-center gap-3 shadow-lg transition-all duration-300 active:scale-95 ${
             hasLowStock 
-              ? 'bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.3)]' 
-              : 'bg-[#111111] text-white border border-white/10 hover:bg-white/5'
+              ? 'bg-white text-red-500 border border-red-100 hover:bg-red-50' 
+              : 'bg-white text-purple-600 border border-purple-100 hover:bg-purple-50'
           }`}
         >
-          <Package className={`w-5 h-5 ${hasLowStock ? 'text-white' : 'text-[#00FF00]'}`} />
+          <Package className="w-5 h-5" />
           {hasLowStock ? 'Solicitar Reposição Urgente' : 'Solicitar Reposição'}
-          <ArrowRight className={`w-5 h-5 ${hasLowStock ? 'opacity-100' : 'opacity-50'}`} />
         </button>
       </div>
 

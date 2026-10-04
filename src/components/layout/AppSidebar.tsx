@@ -39,7 +39,9 @@ import {
   Palette,
   Rocket,
   Terminal,
-  Database
+  Database,
+  PiggyBank,
+  Video
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -67,6 +69,7 @@ const NAV_GROUPS = [
     icon: CircleDollarSign,
     title: "Financeiro & Compras",
     subItems: [
+      { title: "Conta Pessoal", url: "/conta-pessoal", icon: PiggyBank },
       { title: "Contas Fixas", url: "/contas-fixas", icon: CalendarPlus },
       { title: "Pedidos de Compras (Novo)", url: "/pedidos-compras", icon: ShoppingCart },
       { title: "Análise Financeira (Novo)", url: "/comparativo", icon: LineChart },
@@ -93,6 +96,7 @@ const NAV_GROUPS = [
     subItems: [
       { title: "Dashboard Marketing", url: "/marketing", icon: Megaphone },
       { title: "Demandas de Artes", url: "/marketing/artes", icon: Palette },
+      { title: "Live Commerce", url: "/marketing/live-commerce", icon: Video },
       { title: "Identidade da Marca", url: "/brand-book", icon: Heart },
     ]
   },
@@ -158,6 +162,13 @@ export function AppSidebar() {
   const filteredNavGroups = NAV_GROUPS.map(group => {
     let modifiedGroup = { ...group };
 
+    const isMarcelo = user?.email?.toLowerCase().includes("marcelo") || user?.user_metadata?.name?.toLowerCase().includes("marcelo") || user?.user_metadata?.full_name?.toLowerCase().includes("marcelo") || (user?.email?.split("@")[0] || "").toLowerCase().includes("marcelo");
+    if (isMarcelo && group.id === "comercial") {
+      modifiedGroup.subItems = modifiedGroup.subItems.filter(item => 
+        ["/contas-fixas", "/pedidos-compras", "/comparativo"].includes(item.url)
+      );
+    }
+
     // Restringe o acesso ao dashboard financeiro apenas para contas específicas
     if (group.id === "comercial") {
       if (user?.email !== "livia@hotmail.com" && user?.email !== "rogerio@ramaflow.com" && user?.email !== "suporte.ramamagazine@gmail.com" && !user?.email?.toLowerCase().includes("anderson")) {
@@ -165,9 +176,9 @@ export function AppSidebar() {
       }
     }
 
-    // Regra explícita para o Rogério: Apenas os 4 primeiros cards
+    // Regra explícita para o Rogério:
     if (user?.email === "rogerio@ramaflow.com") {
-      if (!["home", "operacao", "comercial", "expedicao"].includes(group.id)) {
+      if (!["home", "operacao", "comercial", "expedicao", "gestao"].includes(group.id)) {
         return null;
       }
     }
@@ -189,11 +200,17 @@ export function AppSidebar() {
       }
     }
 
-    if (group.id === "marketing" || group.id === "gestao" || group.id === "sistema") {
-      const isAnderson = user?.email?.toLowerCase().includes("anderson") || user?.email?.toLowerCase() === "livia@hotmail.com";
-      if (!isAnderson) {
-        return null;
-      }
+    const isAnderson = user?.email?.toLowerCase().includes("anderson") || user?.email?.toLowerCase() === "livia@hotmail.com";
+
+    // Bloqueia Marketing e Sistema totalmente para não-admins
+    if ((group.id === "marketing" || group.id === "sistema") && !isAnderson) {
+      return null;
+    }
+
+    // Para o bloco de Gestão, se não for admin, mostra APENAS "Instaladores Externos"
+    if (group.id === "gestao" && !isAnderson) {
+      modifiedGroup.subItems = modifiedGroup.subItems.filter(item => item.url === "/instaladores");
+      if (modifiedGroup.subItems.length === 0) return null;
     }
 
     return modifiedGroup;

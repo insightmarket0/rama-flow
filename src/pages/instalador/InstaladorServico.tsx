@@ -1,62 +1,53 @@
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Check, Camera, Mic, CheckCircle2, PackagePlus, AlertCircle, X, ShoppingCart, DollarSign, ChevronRight } from "lucide-react";
+import { ChevronLeft, MapPin, Clock, Camera, Mic, Plus, CheckCircle2, ChevronRight, X, Package, ShoppingCart, Navigation, Minus } from "lucide-react";
 import SignaturePad from "react-signature-canvas";
-
-const MOCK_PIM = {
-  "Instalação Kit Gás 2M": [
-    { id: "item-1", nome: "Kit Mangueira 2 Metros", qtdPadrao: 1 },
-    { id: "item-2", nome: "Registro de Baixa Pressão", qtdPadrao: 1 },
-    { id: "item-3", nome: "Abraçadeira de Aço", qtdPadrao: 2 },
-  ]
-};
-
-const ESTOQUE_VEICULO = [
-  { nome: "Abraçadeira de Aço", preco: 5.00 },
-  { nome: "Mangueira (Metro Extra)", preco: 25.00 },
-  { nome: "Registro (Reserva)", preco: 45.00 },
-  { nome: "Fita Veda Rosca", preco: 8.00 },
-  { nome: "Válvula de Retenção", preco: 35.00 }
-];
-
-const JUSTIFICATIVAS = [
-  "Estrutura fora do padrão",
-  "Peça defeituosa / Quebra",
-  "Solicitação Extra (Venda)", 
-  "Outro (Detalhar)"
-];
+import { toast } from "sonner";
+import { useAgendaStore } from "../../store/useAgendaStore";
+import { useCRMStore } from "../../store/useCRMStore";
+import { useEstoqueStore } from "../../store/useEstoqueStore";
 
 export default function InstaladorServico() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const signatureRef = useRef<SignaturePad>(null);
   
-  const tipoServico = "Instalação Kit Gás 2M";
-  const itensPadrao = MOCK_PIM[tipoServico as keyof typeof MOCK_PIM] || [];
+  const servicos = useAgendaStore(state => state.servicos);
+  const deleteServico = useAgendaStore(state => state.deleteServico);
+  const updateStatus = useCRMStore(state => state.updateStatus);
+  const estoqueItens = useEstoqueStore(state => state.itens);
+  const deduzirEstoque = useEstoqueStore(state => state.deduzirEstoque);
   
-  const [checklistPadrao, setChecklistPadrao] = useState(false);
-  
-  type ExtraItem = { id: number; nome: string; preco: number; qtd: number; justificativa: string; detalhe: string; isPago?: boolean; formaPagamento?: string };
-  const [extras, setExtras] = useState<ExtraItem[]>([]);
-  const [showAddExtra, setShowAddExtra] = useState(false);
-  
-  const [newExtra, setNewExtra] = useState({ nome: ESTOQUE_VEICULO[0].nome, qtd: 1, justificativa: JUSTIFICATIVAS[0], detalhe: "" });
+  // Encontra o serviço real na agenda
+  const servicoReal = servicos.find(s => s.id === id);
+  const MOCK_SERVICO = servicoReal ? {
+    id: servicoReal.id,
+    cliente: servicoReal.cliente,
+    endereco: servicoReal.endereco,
+    horario: servicoReal.horario,
+    tipo: servicoReal.tipo,
+    valorTotal: servicoReal.valor,
+    pagamentoPrevisto: "PIX"
+  } : {
+    id: "N/A",
+    cliente: "Serviço Não Encontrado",
+    endereco: "N/A",
+    horario: "00:00",
+    tipo: "N/A",
+    valorTotal: 0,
+    pagamentoPrevisto: "PIX"
+  };
 
-  const [formaPagamentoCaixa, setFormaPagamentoCaixa] = useState("PIX");
+  const signatureRef = useRef<any>(null);
   const [signatureData, setSignatureData] = useState<string | null>(null);
+  const [extras, setExtras] = useState<any[]>([]);
+  const [showAddExtra, setShowAddExtra] = useState(false);
+  const [newExtra, setNewExtra] = useState({ nome: "", qtd: 1, justificativa: "Reposição/Garantia", detalhe: "", isPago: false, preco: 0 });
+  const [formaPagamentoCaixa, setFormaPagamentoCaixa] = useState("PIX");
 
-  const vendasExtrasPendentes = extras.filter(e => e.justificativa.includes("Venda") && !e.isPago);
-  const totalPixPendente = vendasExtrasPendentes.reduce((acc, curr) => acc + (curr.preco * curr.qtd), 0);
-
-  const isCompleted = useMemo(() => {
-    if (!checklistPadrao || !signatureData) return false;
-    if (vendasExtrasPendentes.length > 0) return false; 
-    for (const extra of extras) {
-      if (!extra.justificativa) return false;
-      if (extra.justificativa === "Outro (Detalhar)" && !extra.detalhe.trim()) return false;
-    }
-    return true;
-  }, [checklistPadrao, signatureData, extras, vendasExtrasPendentes]);
+  const handleClearSignature = () => {
+    signatureRef.current?.clear();
+    setSignatureData(null);
+  };
 
   const handleSaveSignature = () => {
     if (signatureRef.current && !signatureRef.current.isEmpty()) {
@@ -64,118 +55,131 @@ export default function InstaladorServico() {
     }
   };
 
-  const handleClearSignature = () => {
-    if (signatureRef.current) {
-      signatureRef.current.clear();
-      setSignatureData(null);
-    }
-  };
-
   const handleAddExtra = () => {
-    if (newExtra.justificativa === "Outro (Detalhar)" && !newExtra.detalhe.trim()) {
-      alert("Por favor, detalhe o motivo.");
-      return;
-    }
+    if (!newExtra.nome) return;
+    const itemEstoque = estoqueItens.find(i => i.nome === newExtra.nome);
+    const preco = itemEstoque ? itemEstoque.preco : 0;
     
-    const produtoSelecionado = ESTOQUE_VEICULO.find(item => item.nome === newExtra.nome);
-    const preco = produtoSelecionado ? produtoSelecionado.preco : 0;
-
-    setExtras([...extras, { ...newExtra, preco, id: Date.now(), isPago: false }]);
+    setExtras([...extras, { ...newExtra, id: Date.now(), preco }]);
     setShowAddExtra(false);
-    setNewExtra({ nome: ESTOQUE_VEICULO[0].nome, qtd: 1, justificativa: JUSTIFICATIVAS[0], detalhe: "" });
+    setNewExtra({ nome: "", qtd: 1, justificativa: "Reposição/Garantia", detalhe: "", isPago: false, preco: 0 });
   };
 
-  const removeExtra = (idToRemove: number) => {
-    setExtras(extras.filter(e => e.id !== idToRemove));
+  const removeExtra = (extraId: number) => {
+    setExtras(extras.filter(e => e.id !== extraId));
   };
 
   const confirmarPagamento = () => {
     setExtras(extras.map(e => e.justificativa.includes("Venda") ? { ...e, isPago: true } : e));
   };
 
-  return (
-    <div className="flex flex-col min-h-[100dvh] bg-[#050505] text-white selection:bg-[#00FF00]/30">
+  const handleFinalizar = () => {
+    if (id) {
+      // Deduzir tudo que foi usado do estoque real
+      extras.forEach(extra => {
+        deduzirEstoque(extra.nome, extra.qtd);
+      });
+
+      // Baixa no app mobile
+      deleteServico(id);
       
-      {/* Minimal Header */}
-      <header className="sticky top-0 z-50 bg-[#050505]/80 backdrop-blur-xl pt-4 pb-4 px-6 flex flex-col gap-4">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors w-fit">
-          <ArrowLeft className="w-5 h-5" />
-          <span className="text-sm font-medium">Voltar</span>
+      // Baixa no CRM (Operação Externa)
+      updateStatus(id, 'completed');
+    }
+    toast.success('Serviço finalizado com sucesso!');
+    navigate('/instalador');
+  };
+
+  const vendasExtrasPendentes = extras.filter(e => e.justificativa.includes("Venda") && !e.isPago);
+  const totalPixPendente = vendasExtrasPendentes.reduce((acc, curr) => acc + (curr.preco * curr.qtd), 0);
+  const isCompleted = signatureData !== null && vendasExtrasPendentes.length === 0;
+
+  return (
+    <div className="flex flex-col min-h-[100dvh] bg-[#F8F9FA] text-[#1A1C1E] selection:bg-purple-200">
+      
+      {/* Header Soft */}
+      <header className="sticky top-0 z-40 bg-[#F8F9FA]/90 backdrop-blur-xl pt-2 pb-2 px-6 flex items-center justify-between border-b border-gray-200/50">
+        <button onClick={() => navigate('/instalador')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-600 shadow-sm border border-gray-100 hover:bg-gray-50 active:scale-95 transition-all">
+          <ChevronLeft className="w-5 h-5" />
         </button>
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">João da Silva</h1>
-          <p className="text-[#00FF00] font-semibold text-xs tracking-widest uppercase mt-1 opacity-90">{tipoServico}</p>
+        <div className="flex flex-col items-end">
+          <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">OS #{MOCK_SERVICO.id}</span>
+          <span className="text-purple-600 text-xs font-bold uppercase tracking-widest">Em Andamento</span>
         </div>
       </header>
 
-      <main className="flex-1 px-6 py-4 flex flex-col gap-10 pb-32">
+      <main className="flex-1 px-6 py-6 flex flex-col gap-8 pb-40">
         
-        {/* Ficha Técnica (BOM) - Clean List */}
-        <section className="flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-1.5 h-1.5 rounded-full bg-gray-500" />
-            <h3 className="text-gray-400 text-xs font-bold tracking-widest uppercase">Material Padrão</h3>
-          </div>
+        {/* Info Principal */}
+        <section className="flex flex-col gap-2">
+          <h1 className="text-3xl font-black tracking-tight leading-none text-[#1A1C1E]">{MOCK_SERVICO.cliente}</h1>
+          <p className="text-purple-600 font-medium">{MOCK_SERVICO.tipo}</p>
           
-          <div className="flex flex-col gap-3">
-            {itensPadrao.map(item => (
-              <div key={item.id} className="flex justify-between items-center border-b border-white/5 pb-3">
-                <span className="text-gray-200 text-sm">{item.nome}</span>
-                <span className="text-gray-500 font-medium text-sm">x{item.qtdPadrao}</span>
+          <div className="flex flex-col gap-3 mt-4 bg-white p-5 rounded-3xl shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-gray-50">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex items-start gap-3">
+                <MapPin className="w-5 h-5 text-gray-400 shrink-0 mt-0.5" />
+                <span className="text-sm text-gray-600 font-medium leading-relaxed">{MOCK_SERVICO.endereco}</span>
               </div>
-            ))}
-          </div>
-          
-          <label className="flex items-center gap-4 mt-2 cursor-pointer group">
-            <div className={`w-6 h-6 rounded-md flex items-center justify-center transition-all duration-300 ${checklistPadrao ? 'bg-[#00FF00] text-black shadow-[0_0_15px_rgba(0,255,0,0.4)]' : 'bg-white/5 border border-white/10 text-transparent group-hover:bg-white/10'}`}>
-              <Check className="w-4 h-4" strokeWidth={3} />
+              <button 
+                onClick={() => window.open(`https://waze.com/ul?q=${encodeURIComponent(MOCK_SERVICO.endereco)}`, '_blank')}
+                className="shrink-0 px-3 py-1.5 rounded-full bg-purple-100 text-purple-600 text-[10px] font-bold uppercase tracking-widest hover:bg-purple-200 transition-colors flex items-center gap-1"
+              >
+                <Navigation className="w-3 h-3" /> Waze
+              </button>
             </div>
-            <span className={`text-sm font-medium transition-colors duration-300 ${checklistPadrao ? 'text-white' : 'text-gray-400'}`}>Confirmo o uso do material listado</span>
-            <input type="checkbox" className="hidden" checked={checklistPadrao} onChange={() => setChecklistPadrao(!checklistPadrao)} />
-          </label>
+            <div className="flex items-center gap-3 pt-3 border-t border-gray-100">
+              <Clock className="w-5 h-5 text-gray-400" />
+              <span className="text-sm font-bold text-gray-800">Agendado para {MOCK_SERVICO.horario}</span>
+            </div>
+          </div>
         </section>
 
-        {/* Material Extra Minimalist */}
+        {/* Uso de Estoque / Baixa */}
         <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-              <h3 className="text-gray-400 text-xs font-bold tracking-widest uppercase">Itens Extras</h3>
-            </div>
-            <button 
-              onClick={() => setShowAddExtra(!showAddExtra)}
-              className="text-[#00FF00] text-sm font-medium flex items-center gap-1 hover:opacity-80 transition-opacity"
-            >
-              <PackagePlus className="w-4 h-4" /> Adicionar
-            </button>
+            <h3 className="text-gray-500 text-xs font-bold tracking-widest uppercase flex items-center gap-2">
+              <Package className="w-4 h-4" /> Uso de Material
+            </h3>
+            {!showAddExtra && (
+              <button onClick={() => setShowAddExtra(true)} className="text-purple-600 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-full flex items-center gap-1 text-xs font-bold transition-colors">
+                <Plus className="w-3 h-3" /> Registrar Uso
+              </button>
+            )}
           </div>
 
+          {/* Form ADD */}
           {showAddExtra && (
-            <div className="bg-[#111111] rounded-2xl p-5 flex flex-col gap-4 animate-in slide-in-from-top-4 fade-in duration-300 border border-white/5">
+            <div className="bg-white rounded-3xl p-5 flex flex-col gap-5 border border-purple-100 shadow-sm animate-in fade-in slide-in-from-top-2">
               <select 
                 value={newExtra.nome}
                 onChange={e => setNewExtra({...newExtra, nome: e.target.value})}
-                className="bg-transparent border-b border-white/10 pb-2 text-base text-white focus:outline-none focus:border-[#00FF00] transition-colors w-full"
+                className="bg-transparent border-b border-gray-200 pb-2 text-base text-gray-900 focus:outline-none focus:border-purple-500 transition-colors"
               >
-                {ESTOQUE_VEICULO.map(item => <option key={item.nome} value={item.nome} className="bg-[#111111]">{item.nome}</option>)}
+                <option value="" disabled>Selecione um item da Van...</option>
+                {estoqueItens.map(i => <option key={i.id} value={i.nome}>{i.nome}</option>)}
               </select>
 
-              <div className="flex gap-4">
-                <input 
-                  type="number" 
-                  min="1"
-                  value={newExtra.qtd}
-                  onChange={e => setNewExtra({...newExtra, qtd: Number(e.target.value)})}
-                  placeholder="Qtd" 
-                  className="bg-transparent border-b border-white/10 pb-2 text-base text-white focus:outline-none focus:border-[#00FF00] transition-colors w-20 text-center" 
-                />
+              <div className="flex items-center gap-4">
+                <span className="text-xs text-gray-500 uppercase font-bold tracking-widest w-16">Qtd:</span>
+                <div className="flex items-center gap-4 bg-gray-50 rounded-full px-2 py-1 border border-gray-100">
+                  <button onClick={() => setNewExtra({...newExtra, qtd: Math.max(1, newExtra.qtd - 1)})} className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm text-gray-600 active:scale-95"><Minus className="w-4 h-4" /></button>
+                  <span className="font-bold text-lg w-4 text-center">{newExtra.qtd}</span>
+                  <button onClick={() => setNewExtra({...newExtra, qtd: newExtra.qtd + 1})} className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm text-gray-600 active:scale-95"><Plus className="w-4 h-4" /></button>
+                </div>
+              </div>
 
+              <div className="flex items-center gap-4">
+                <span className="text-xs text-gray-500 uppercase font-bold tracking-widest w-16">Motivo:</span>
                 <select 
                   value={newExtra.justificativa}
                   onChange={e => setNewExtra({...newExtra, justificativa: e.target.value})}
-                  className={`bg-transparent border-b pb-2 text-base focus:outline-none transition-colors w-full ${newExtra.justificativa.includes("Venda") ? 'border-[#00FF00] text-[#00FF00]' : 'border-white/10 text-white focus:border-[#00FF00]'}`}
+                  className="bg-transparent border-b border-gray-200 pb-2 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors"
                 >
-                  {JUSTIFICATIVAS.map(just => <option key={just} value={just} className="bg-[#111111] text-white">{just}</option>)}
+                  <option>Reposição/Garantia</option>
+                  <option>Ajuste de Instalação</option>
+                  <option>Venda Extra p/ Cliente</option>
+                  <option>Outro (Detalhar)</option>
                 </select>
               </div>
 
@@ -184,22 +188,22 @@ export default function InstaladorServico() {
                   placeholder="Detalhe o motivo..."
                   value={newExtra.detalhe}
                   onChange={e => setNewExtra({...newExtra, detalhe: e.target.value})}
-                  className="bg-transparent border-b border-white/10 pb-2 text-base text-white focus:outline-none focus:border-[#00FF00] transition-colors w-full"
+                  className="bg-transparent border-b border-gray-200 pb-2 text-base text-gray-900 focus:outline-none focus:border-purple-500 transition-colors w-full"
                 />
               )}
 
               {newExtra.justificativa.includes("Venda") && (
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-[#00FF00] text-xs font-bold uppercase tracking-wider">Total Extra</span>
-                  <span className="text-[#00FF00] text-xl font-light">
-                    R$ {((ESTOQUE_VEICULO.find(i => i.nome === newExtra.nome)?.preco || 0) * newExtra.qtd).toFixed(2).replace('.', ',')}
+                <div className="flex justify-between items-center py-2 bg-purple-50 px-4 rounded-xl">
+                  <span className="text-purple-600 text-xs font-bold uppercase tracking-wider">Total Extra</span>
+                  <span className="text-purple-700 text-xl font-black">
+                    R$ {((estoqueItens.find(i => i.nome === newExtra.nome)?.preco || 0) * newExtra.qtd).toFixed(2).replace('.', ',')}
                   </span>
                 </div>
               )}
 
               <div className="flex gap-3 pt-2">
-                <button onClick={() => setShowAddExtra(false)} className="px-6 py-3 text-sm font-medium text-gray-400 hover:text-white">Cancelar</button>
-                <button onClick={handleAddExtra} className={`flex-1 py-3 rounded-full text-sm font-bold text-black transition-transform active:scale-95 ${newExtra.justificativa.includes("Venda") ? 'bg-[#00FF00]' : 'bg-white'}`}>
+                <button onClick={() => setShowAddExtra(false)} className="px-6 py-3 text-sm font-medium text-gray-500 hover:text-gray-800">Cancelar</button>
+                <button onClick={handleAddExtra} className={`flex-1 py-3 rounded-full text-sm font-bold text-white shadow-md transition-transform active:scale-95 ${newExtra.justificativa.includes("Venda") ? 'bg-purple-600 shadow-purple-600/20' : 'bg-[#1A1C1E]'}`}>
                   {newExtra.justificativa.includes("Venda") ? 'Lançar Venda' : 'Confirmar'}
                 </button>
               </div>
@@ -208,21 +212,21 @@ export default function InstaladorServico() {
 
           {/* Lista de Extras */}
           {extras.length > 0 && (
-            <div className="flex flex-col gap-4 mt-2">
+            <div className="flex flex-col gap-3 mt-2">
               {extras.map(extra => (
-                <div key={extra.id} className="flex justify-between items-start group">
+                <div key={extra.id} className="bg-white p-4 rounded-2xl flex justify-between items-start group shadow-sm border border-gray-50">
                   <div className="flex flex-col">
-                    <span className={`text-base font-medium ${extra.justificativa.includes("Venda") ? 'text-[#00FF00]' : 'text-white'}`}>
-                      {extra.nome} <span className="opacity-50 text-sm">x{extra.qtd}</span>
+                    <span className={`text-sm font-bold ${extra.justificativa.includes("Venda") ? 'text-purple-600' : 'text-gray-900'}`}>
+                      {extra.nome} <span className="text-gray-400 font-medium">x{extra.qtd}</span>
                     </span>
                     <span className="text-gray-500 text-xs mt-0.5">{extra.justificativa} {extra.detalhe && `- ${extra.detalhe}`}</span>
                     {extra.justificativa.includes("Venda") && (
-                      <span className="text-[#00FF00] font-medium text-sm mt-1">R$ {(extra.preco * extra.qtd).toFixed(2).replace('.', ',')}</span>
+                      <span className="text-purple-700 font-black text-sm mt-1">R$ {(extra.preco * extra.qtd).toFixed(2).replace('.', ',')}</span>
                     )}
                   </div>
                   {!extra.isPago && (
-                    <button onClick={() => removeExtra(extra.id)} className="p-2 text-gray-600 hover:text-red-500 transition-colors">
-                      <X className="w-5 h-5" />
+                    <button onClick={() => removeExtra(extra.id)} className="w-8 h-8 bg-red-50 text-red-500 rounded-full flex items-center justify-center hover:bg-red-100 transition-colors">
+                      <X className="w-4 h-4" />
                     </button>
                   )}
                 </div>
@@ -230,15 +234,17 @@ export default function InstaladorServico() {
             </div>
           )}
 
-          {/* Checkout Minimalist */}
+          {/* Checkout Minimalist (Fintech style) */}
           {vendasExtrasPendentes.length > 0 && (
-            <div className="mt-6 bg-[#00FF00] text-black rounded-3xl p-6 flex flex-col gap-6 shadow-[0_10px_30px_rgba(0,255,0,0.15)]">
+            <div className="mt-6 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-[32px] p-6 flex flex-col gap-6 shadow-xl shadow-purple-500/20">
               <div className="flex justify-between items-end">
                 <div className="flex flex-col">
-                  <span className="text-black/60 font-bold text-[10px] tracking-widest uppercase">Pagamento Extra</span>
-                  <span className="text-3xl font-extrabold tracking-tight">R$ {totalPixPendente.toFixed(2).replace('.', ',')}</span>
+                  <span className="text-white/80 font-bold text-[10px] tracking-widest uppercase">Cobrar Extra</span>
+                  <span className="text-4xl font-black tracking-tight mt-1">R$ {totalPixPendente.toFixed(2).replace('.', ',')}</span>
                 </div>
-                <ShoppingCart className="w-8 h-8 opacity-20" />
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                  <ShoppingCart className="w-6 h-6 text-white" />
+                </div>
               </div>
               
               <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
@@ -246,7 +252,7 @@ export default function InstaladorServico() {
                   <button 
                     key={metodo}
                     onClick={() => setFormaPagamentoCaixa(metodo)}
-                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap ${formaPagamentoCaixa === metodo ? 'bg-black text-[#00FF00]' : 'bg-black/10 text-black/70 hover:bg-black/20'}`}
+                    className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${formaPagamentoCaixa === metodo ? 'bg-white text-purple-600 shadow-md' : 'bg-white/20 text-white hover:bg-white/30'}`}
                   >
                     {metodo}
                   </button>
@@ -254,13 +260,14 @@ export default function InstaladorServico() {
               </div>
 
               {formaPagamentoCaixa === "PIX" && (
-                <div className="w-full bg-white rounded-2xl flex flex-col items-center justify-center p-6 mt-2">
+                <div className="w-full bg-white rounded-3xl flex flex-col items-center justify-center p-6 mt-2">
                   <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=PIX_RAMA_${totalPixPendente}`} alt="QR Code PIX" className="w-32 h-32" />
+                  <span className="text-gray-500 text-xs font-medium mt-3">Leia o QR Code para pagar</span>
                 </div>
               )}
 
-              <button onClick={confirmarPagamento} className="w-full bg-black text-[#00FF00] py-4 rounded-full font-bold uppercase tracking-widest text-xs flex justify-center items-center gap-2 active:scale-95 transition-transform">
-                <CheckCircle2 className="w-4 h-4" /> Pagamento Recebido
+              <button onClick={confirmarPagamento} className="w-full bg-white text-purple-600 py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex justify-center items-center gap-2 active:scale-95 transition-transform shadow-lg">
+                <CheckCircle2 className="w-5 h-5" /> Confirmar Recebimento
               </button>
             </div>
           )}
@@ -268,27 +275,28 @@ export default function InstaladorServico() {
 
         {/* Mídias */}
         <section className="flex gap-4">
-          <button className="flex-1 bg-[#111111] border border-white/5 rounded-2xl p-5 flex flex-col gap-3 group hover:bg-[#151515] transition-colors">
-            <Camera className="w-6 h-6 text-gray-400 group-hover:text-white transition-colors" />
-            <span className="font-medium text-sm text-gray-300">Tirar Foto</span>
+          <button className="flex-1 bg-white border border-gray-100 rounded-3xl p-5 flex flex-col items-center gap-3 shadow-sm hover:bg-gray-50 transition-colors active:scale-95">
+            <div className="w-12 h-12 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center">
+              <Camera className="w-5 h-5" />
+            </div>
+            <span className="font-bold text-sm text-gray-700">Tirar Foto</span>
           </button>
-          <button className="flex-1 bg-[#111111] border border-white/5 rounded-2xl p-5 flex flex-col gap-3 group hover:bg-[#151515] transition-colors">
-            <Mic className="w-6 h-6 text-gray-400 group-hover:text-white transition-colors" />
-            <span className="font-medium text-sm text-gray-300">Gravar Áudio</span>
+          <button className="flex-1 bg-white border border-gray-100 rounded-3xl p-5 flex flex-col items-center gap-3 shadow-sm hover:bg-gray-50 transition-colors active:scale-95">
+            <div className="w-12 h-12 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center">
+              <Mic className="w-5 h-5" />
+            </div>
+            <span className="font-bold text-sm text-gray-700">Gravar Áudio</span>
           </button>
         </section>
 
         {/* Assinatura */}
         <section className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-gray-500" />
-              <h3 className="text-gray-400 text-xs font-bold tracking-widest uppercase">Assinatura</h3>
-            </div>
-            {signatureData && <span className="text-[#00FF00] text-xs font-bold flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> OK</span>}
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-gray-500 text-xs font-bold tracking-widest uppercase">Assinatura do Cliente</h3>
+            {signatureData && <span className="text-green-600 bg-green-50 px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1 uppercase tracking-widest"><CheckCircle2 className="w-3 h-3" /> Salva</span>}
           </div>
           
-          <div className="bg-white rounded-3xl overflow-hidden relative border border-white/5">
+          <div className="bg-white rounded-3xl overflow-hidden relative border border-gray-100 shadow-sm">
             <SignaturePad 
               ref={signatureRef}
               canvasProps={{className: "w-full h-48", style: { touchAction: "none" }}}
@@ -296,7 +304,7 @@ export default function InstaladorServico() {
             />
             <button 
               onClick={handleClearSignature}
-              className="absolute bottom-4 right-4 bg-gray-100 text-black/70 hover:bg-gray-200 hover:text-black px-4 py-2 rounded-full text-xs font-bold transition-colors"
+              className="absolute bottom-4 right-4 bg-gray-100 text-gray-600 hover:bg-gray-200 px-4 py-2 rounded-full text-xs font-bold transition-colors"
             >
               Refazer
             </button>
@@ -306,20 +314,20 @@ export default function InstaladorServico() {
       </main>
 
       {/* Modern FAB */}
-      <div className="fixed bottom-[72px] left-0 right-0 px-6 z-40 pointer-events-none flex justify-end">
+      <div className="fixed bottom-28 left-0 right-0 px-6 z-40 pointer-events-none flex justify-center">
         <button 
           disabled={!isCompleted}
-          onClick={() => navigate('/instalador')}
-          className={`pointer-events-auto h-14 px-8 rounded-full font-bold text-sm tracking-widest uppercase flex items-center gap-3 shadow-2xl transition-all duration-500 active:scale-95 ${
+          onClick={handleFinalizar}
+          className={`pointer-events-auto w-full h-14 rounded-2xl font-bold text-sm flex justify-center items-center gap-2 shadow-xl transition-all duration-300 active:scale-95 ${
             isCompleted 
-              ? 'bg-[#00FF00] text-black hover:bg-[#00e500]' 
-              : 'bg-[#111111] text-gray-600 border border-white/10 cursor-not-allowed opacity-80'
+              ? 'bg-[#1A1C1E] text-white' 
+              : 'bg-white text-gray-400 border border-gray-100 cursor-not-allowed'
           }`}
         >
           {vendasExtrasPendentes.length > 0 
             ? 'Aguardando PIX'
             : isCompleted 
-              ? 'Finalizar' 
+              ? 'Finalizar Atendimento' 
               : 'Pendente'}
           {isCompleted && <ChevronRight className="w-5 h-5" />}
         </button>
