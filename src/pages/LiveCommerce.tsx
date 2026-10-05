@@ -547,8 +547,6 @@ function SeedingModule() {
         </div>
       </div>
     </div>
-
-    </div>
   );
 }
 
