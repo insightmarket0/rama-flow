@@ -113,13 +113,16 @@ export async function generateSmartContractInstallments(params: {
     return;
   }
 
+  const baseDate = new Date(todayISO + "T12:00:00");
+  const firstDayOfCurrentMonth = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1).toISOString().split("T")[0];
+  
   if (rebuildMode === "replace-upcoming" || rebuildMode === "remove-upcoming") {
     await supabase
       .from("smart_contract_installments")
       .delete()
       .eq("smart_contract_id", expenseId)
       .neq("status", "pago")
-      .gte("due_date", todayISO);
+      .gte("due_date", firstDayOfCurrentMonth);
   }
 
   if (rebuildMode === "remove-upcoming" || !contract.is_active) {
@@ -127,7 +130,6 @@ export async function generateSmartContractInstallments(params: {
   }
 
   const installmentsToInsert = [];
-  const baseDate = new Date(todayISO + "T12:00:00");
   
   let stepMonths = 1;
   if (contract.recurrence_type === "bimestral") stepMonths = 2;
@@ -154,12 +156,13 @@ export async function generateSmartContractInstallments(params: {
 
     for (const day of days) {
       const due = new Date(targetMonth.getFullYear(), targetMonth.getMonth(), day, 12, 0, 0);
+      const dueISO = due.toISOString().split("T")[0];
       
-      if (due.toISOString().split("T")[0] >= todayISO) {
+      if (dueISO >= firstDayOfCurrentMonth) {
         installmentsToInsert.push({
           smart_contract_id: expenseId,
           value: contract.amount || 0,
-          due_date: due.toISOString().split("T")[0],
+          due_date: dueISO,
           status: "pendente",
           supplier_id: contract.supplier_id || null,
           user_id: contract.user_id || null

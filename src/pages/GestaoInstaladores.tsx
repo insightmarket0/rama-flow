@@ -162,25 +162,42 @@ export default function GestaoInstaladores() {
   };
 
   const handleCobrar = (ticket: InstallTicket) => {
-    // Formata a data para padrão BR (DD/MM/YYYY)
     const [ano, mes, dia] = ticket.scheduledDate.split('-');
     const dataFormatada = dia ? `${dia}/${mes}/${ano}` : ticket.scheduledDate;
+    const isPendente = ticket.price === 'Pendente' || !ticket.price;
 
-    const text = `Seu agendamento foi recebido e já está confirmado na nossa agenda.
+    const text = `Olá, *${ticket.customerName}*! Tudo excelente?
+Aqui é da central de atendimento.
 
-*Data:* ${dataFormatada}
-*Horário:* ${ticket.scheduledTime}
-*Serviço:* ${ticket.serviceRequested}
+Recebemos a sua solicitação com sucesso! Abaixo estão os detalhes do seu pedido:
 
-*Valor Total:* R$ ${ticket.price}
+*Serviço:* Instalação / Suporte
+*Equipamento:* ${ticket.product || 'A definir'}
+*Data Solicitada:* ${dataFormatada} às ${ticket.scheduledTime}
 
-Como você optou pelo desconto do pagamento antecipado, segue abaixo a nossa chave PIX para efetivação:
+${isPendente ? `Nossa equipe técnica está analisando sua solicitação. Em breve retornaremos com o *valor do seu orçamento* e a confirmação de disponibilidade!` : `*Valor do Orçamento:* O valor para a realização deste serviço ficou em *R$ ${ticket.price}*.`}
 
-*Chave PIX:* [SUA CHAVE AQUI]
-*Banco:* [NOME DO BANCO]
-*Titular:* [NOME DO TITULAR]
+${!isPendente ? 'Podemos confirmar e reservar este horário exclusivamente para você?' : 'Qualquer dúvida enquanto aguarda, sinta-se à vontade para nos chamar!'}`;
 
-Assim que realizar o pagamento, é só enviar o comprovante por aqui mesmo. Qualquer dúvida, estou à disposição!`;
+    window.open(`https://wa.me/${ticket.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
+  const handleEnviarPagamento = (ticket: InstallTicket) => {
+    const isPix = ticket.paymentMethod.toUpperCase().includes('PIX');
+    
+    const text = `Olá, *${ticket.customerName}*! Que maravilha, orçamento confirmado!
+
+Para finalizarmos a reserva na nossa agenda e liberarmos a rota do seu técnico, segue os dados para efetivação:
+
+${isPix ? `*Chave PIX (Celular/CNPJ):* (inserir sua chave aqui)
+*Banco:* Nubank
+*Favorecido:* (Nome da Empresa)` : `*Link Seguro de Pagamento (Cartão):*
+(inserir link do Mercado Pago / Ton aqui)`}
+
+*Valor do Serviço:* R$ ${ticket.price !== 'Pendente' ? ticket.price : 'A Combinar'}
+
+Assim que concluir, basta me enviar o comprovante por aqui mesmo. Agradecemos a preferência e conte conosco!`;
+
     window.open(`https://wa.me/${ticket.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -302,7 +319,7 @@ Assim que realizar o pagamento, é só enviar o comprovante por aqui mesmo. Qual
               </div>
               <div className="flex flex-col gap-3">
                 {tickets.filter(t => t.status === 'in_progress').map(ticket => (
-                  <ListCard key={ticket.id} ticket={ticket} onAction={() => updateStatus(ticket.id, 'completed')} onDelete={() => handleDelete(ticket.id)} onUpdatePrice={(price) => updatePrice(ticket.id, price)} onCobrar={() => handleCobrar(ticket)} />
+                  <ListCard key={ticket.id} ticket={ticket} onAction={() => updateStatus(ticket.id, 'completed')} onDelete={() => handleDelete(ticket.id)} onUpdatePrice={(price) => updatePrice(ticket.id, price)} onCobrar={() => handleCobrar(ticket)} onCobrarPix={() => handleEnviarPagamento(ticket)} />
                 ))}
               </div>
             </div>
@@ -313,7 +330,7 @@ Assim que realizar o pagamento, é só enviar o comprovante por aqui mesmo. Qual
               </div>
               <div className="flex flex-col gap-3">
                 {tickets.filter(t => t.status === 'pending').map(ticket => (
-                  <ListCard key={ticket.id} ticket={ticket} onAction={() => handleDispatch(ticket)} onDelete={() => handleDelete(ticket.id)} onUpdatePrice={(price) => updatePrice(ticket.id, price)} onCobrar={() => handleCobrar(ticket)} />
+                  <ListCard key={ticket.id} ticket={ticket} onAction={() => handleDispatch(ticket)} onDelete={() => handleDelete(ticket.id)} onUpdatePrice={(price) => updatePrice(ticket.id, price)} onCobrar={() => handleCobrar(ticket)} onCobrarPix={() => handleEnviarPagamento(ticket)} />
                 ))}
               </div>
             </div>
@@ -454,7 +471,7 @@ Assim que realizar o pagamento, é só enviar o comprovante por aqui mesmo. Qual
   );
 }
 
-function ListCard({ ticket, onAction, onDelete, onUpdatePrice, onCobrar }: { ticket: InstallTicket, onAction?: () => void, onDelete?: () => void, onUpdatePrice?: (p: string) => void, onCobrar?: () => void }) {
+function ListCard({ ticket, onAction, onDelete, onUpdatePrice, onCobrar, onCobrarPix }: { ticket: InstallTicket, onAction?: () => void, onDelete?: () => void, onUpdatePrice?: (p: string) => void, onCobrar?: () => void, onCobrarPix?: () => void }) {
   const isPending = ticket.status === 'pending';
   const borderColor = isPending ? 'border-l-[#FF3333]' : 'border-l-[#00FF00]';
   const [isEditingPrice, setIsEditingPrice] = useState(false);
@@ -499,6 +516,14 @@ function ListCard({ ticket, onAction, onDelete, onUpdatePrice, onCobrar }: { tic
                 <button onClick={handleSavePrice} className="text-[#00FF00] hover:scale-110 transition-transform"><Check className="w-3.5 h-3.5" /></button>
                 <button onClick={() => setIsEditingPrice(false)} className="text-red-500 hover:scale-110 transition-transform"><X className="w-3.5 h-3.5" /></button>
               </div>
+            ) : ticket.price === 'Pendente' || !ticket.price ? (
+              <button 
+                onClick={() => setIsEditingPrice(true)} 
+                className="flex items-center gap-1.5 bg-[#FF3333]/10 text-[#FF3333] border border-[#FF3333]/30 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest hover:bg-[#FF3333] hover:text-white transition-all shadow-[0_0_10px_rgba(255,51,51,0.1)] hover:shadow-[0_0_15px_rgba(255,51,51,0.4)]"
+                title="Clique para definir o valor do orçamento"
+              >
+                <DollarSign className="w-3 h-3" /> Definir Preço
+              </button>
             ) : (
               <span className="flex items-center gap-1 text-[#00FF00] font-bold">
                 <DollarSign className="w-3 h-3"/> {ticket.price}
@@ -511,17 +536,29 @@ function ListCard({ ticket, onAction, onDelete, onUpdatePrice, onCobrar }: { tic
             )}
             <span className="bg-white/10 px-1.5 rounded uppercase text-[9px] font-bold flex items-center gap-1">
               {ticket.paymentMethod}
-              {onCobrar && ticket.paymentMethod.toUpperCase().includes('AGORA') && (
+            </span>
+            {onCobrar && (
+              <div className="flex gap-1 ml-2">
                 <button 
                   onClick={onCobrar} 
-                  className="ml-1 bg-[#00FF00] text-black p-1 rounded hover:bg-white transition-colors flex items-center gap-1 shadow-[0_0_10px_rgba(0,255,0,0.3)]" 
-                  title="Cobrar via WhatsApp"
+                  className="bg-[#00FF00] text-black px-2 py-0.5 rounded text-[10px] font-black hover:bg-white transition-colors flex items-center gap-1 shadow-[0_0_10px_rgba(0,255,0,0.3)]" 
+                  title="Enviar Orçamento via WhatsApp"
                 >
                   <MessageCircle className="w-3 h-3 stroke-[3]" />
-                  <span>COBRAR</span>
+                  <span>ZAP</span>
                 </button>
-              )}
-            </span>
+                {onCobrarPix && (
+                  <button 
+                    onClick={onCobrarPix} 
+                    className="bg-purple-600 text-white px-2 py-0.5 rounded text-[10px] font-black hover:bg-purple-500 transition-colors flex items-center gap-1" 
+                    title="Enviar Dados de Pagamento via WhatsApp"
+                  >
+                    <DollarSign className="w-3 h-3 stroke-[3]" />
+                    <span>COBRAR</span>
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

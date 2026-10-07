@@ -21,7 +21,9 @@ export default function ClienteBooking() {
     paymentTiming: '',
     paymentMethod: '',
     scheduledDate: '',
-    scheduledTime: ''
+    scheduledTime: '',
+    origin: '',
+    price: ''
   });
 
   const [isFinished, setIsFinished] = useState(false);
@@ -45,32 +47,36 @@ export default function ClienteBooking() {
       address: formData.address + (formData.whoToAskFor ? ` (Procurar por: ${formData.whoToAskFor})` : ''),
       orderType: formData.serviceType,
       product: formData.product,
-      serviceRequested: 'Agendamento via Site',
-      price: 'A Combinar', // Or could be calculated
-      paymentMethod: `${formData.paymentMethod} (${formData.paymentTiming})`,
-      scheduledDate: scheduledDate,
-      scheduledTime: formData.scheduledTime || '00:00',
+      serviceRequested: `Orçamento via Site (Origem: ${formData.origin || 'Não informada'})`,
+      price: formData.price ? `R$ ${formData.price}` : 'Pendente',
+      paymentMethod: formData.paymentMethod ? `${formData.paymentMethod} (${formData.paymentTiming})` : 'A Definir',
+      scheduledDate: formData.scheduledDate || 'A Definir',
+      scheduledTime: formData.scheduledTime || 'A Definir',
       technician: 'A Definir',
       status: 'pending'
     });
 
     setIsFinished(true);
-    toast.success('Agendamento recebido com sucesso!');
+    toast.success('Orçamento solicitado com sucesso!');
   };
 
   if (isFinished) {
     return (
       <div className="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-center p-6 text-center font-sans">
-        <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
-          <CheckCircle2 className="w-10 h-10" />
+        <div className="w-24 h-24 bg-[#00FF00]/10 text-[#00FF00] rounded-full flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(0,255,0,0.15)]">
+          <CheckCircle2 className="w-12 h-12" />
         </div>
-        <h1 className="text-3xl font-black text-gray-900 mb-2">Tudo Certo!</h1>
-        <p className="text-gray-500 mb-8 max-w-sm">Seu agendamento foi recebido pela nossa central. Nossa equipe entrará em contato pelo WhatsApp para confirmar os detalhes e o valor final.</p>
+        <h1 className="text-4xl font-black text-gray-900 mb-4 tracking-tight">Solicitação Recebida</h1>
+        <p className="text-gray-500 mb-10 max-w-md text-lg leading-relaxed">
+          Sua solicitação foi encaminhada com sucesso à nossa equipe técnica. 
+          <br/><br/>
+          Em instantes, um de nossos especialistas entrará em contato via <b>WhatsApp</b> para apresentar o seu orçamento exclusivo e confirmar o agendamento.
+        </p>
         <button 
           onClick={() => window.location.reload()}
-          className="bg-black text-white px-8 py-4 rounded-xl font-bold"
+          className="bg-black text-white px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-xl"
         >
-          Fazer Novo Agendamento
+          Voltar ao Início
         </button>
       </div>
     );
@@ -105,7 +111,7 @@ export default function ClienteBooking() {
               <h2 className="text-3xl font-black tracking-tight leading-tight">Como podemos te ajudar hoje?</h2>
               <div className="grid gap-3">
                 <button 
-                  onClick={() => { updateForm('serviceType', 'Apenas Instalação'); nextStep(); }}
+                  onClick={() => updateForm('serviceType', 'Apenas Instalação')}
                   className={`p-5 rounded-2xl border-2 text-left transition-all ${formData.serviceType === 'Apenas Instalação' ? 'border-purple-600 bg-purple-50' : 'border-gray-100 hover:border-purple-200'}`}
                 >
                   <WrenchIcon className={`w-6 h-6 mb-3 ${formData.serviceType === 'Apenas Instalação' ? 'text-purple-600' : 'text-gray-400'}`} />
@@ -113,7 +119,7 @@ export default function ClienteBooking() {
                   <p className="text-gray-500 text-sm mt-1">Eu já tenho o equipamento, só preciso do técnico.</p>
                 </button>
                 <button 
-                  onClick={() => { updateForm('serviceType', 'Venda + Instalação'); nextStep(); }}
+                  onClick={() => updateForm('serviceType', 'Venda + Instalação')}
                   className={`p-5 rounded-2xl border-2 text-left transition-all ${formData.serviceType === 'Venda + Instalação' ? 'border-purple-600 bg-purple-50' : 'border-gray-100 hover:border-purple-200'}`}
                 >
                   <Package className={`w-6 h-6 mb-3 ${formData.serviceType === 'Venda + Instalação' ? 'text-purple-600' : 'text-gray-400'}`} />
@@ -121,6 +127,28 @@ export default function ClienteBooking() {
                   <p className="text-gray-500 text-sm mt-1">Quero comprar o equipamento e já agendar a instalação.</p>
                 </button>
               </div>
+
+              {formData.serviceType && (
+                <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-2 mt-2">
+                  <div>
+                    <label className="text-sm font-bold text-gray-700 mb-1.5 block">Equipamento</label>
+                    <input 
+                      type="text" 
+                      value={formData.product}
+                      onChange={e => updateForm('product', e.target.value)}
+                      placeholder="Ex: Forno, Cooktop, Coifa..."
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:border-purple-500 focus:bg-white transition-all font-medium"
+                    />
+                  </div>
+                  <button 
+                    disabled={!formData.product}
+                    onClick={nextStep}
+                    className="w-full bg-black text-white font-bold py-4 rounded-xl mt-2 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
+                  >
+                    Continuar <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -149,10 +177,26 @@ export default function ClienteBooking() {
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:border-purple-500 focus:bg-white transition-all font-medium"
                   />
                 </div>
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1.5 block">De onde é este orçamento?</label>
+                  <select
+                    value={formData.origin}
+                    onChange={e => updateForm('origin', e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:border-purple-500 focus:bg-white transition-all font-medium cursor-pointer"
+                  >
+                    <option value="" disabled>Selecione uma opção</option>
+                    <option value="Pedido de Venda">Pedido de Venda (Já sou cliente)</option>
+                    <option value="Loja Física / Revendedor">Loja Física / Revenda</option>
+                    <option value="Indicação / Venda Direta">Indicação (Amigo, vizinho ou parceiro)</option>
+                    <option value="Site Oficial">Site Oficial</option>
+                    <option value="WhatsApp / Redes Sociais">WhatsApp / Redes Sociais</option>
+                    <option value="Outros">Outro</option>
+                  </select>
+                </div>
               </div>
 
               <button 
-                disabled={!formData.customerName || !formData.whatsapp}
+                disabled={!formData.customerName || !formData.whatsapp || !formData.origin}
                 onClick={nextStep}
                 className="w-full bg-black text-white font-bold py-4 rounded-xl mt-4 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
               >
@@ -238,11 +282,17 @@ export default function ClienteBooking() {
                   <div className="grid grid-cols-4 gap-2">
                     {['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00'].map(time => {
                       const isSelected = formData.scheduledTime === time;
+                      const isSelectedDateToday = formData.scheduledDate === format(new Date(), 'yyyy-MM-dd');
+                      const currentHour = new Date().getHours();
+                      const timeHour = parseInt(time.split(':')[0], 10);
+                      const isPast = isSelectedDateToday && timeHour <= currentHour;
+
                       return (
                         <button 
                           key={time}
+                          disabled={isPast}
                           onClick={() => updateForm('scheduledTime', time)}
-                          className={`py-3 rounded-xl border-2 text-sm font-bold transition-all ${isSelected ? 'border-purple-600 bg-purple-50 text-purple-700' : 'border-gray-100 bg-white text-gray-600 hover:border-purple-200'}`}
+                          className={`py-3 rounded-xl border-2 text-sm font-bold transition-all ${isSelected ? 'border-purple-600 bg-purple-50 text-purple-700' : isPast ? 'border-gray-50 bg-gray-50 text-gray-300 cursor-not-allowed opacity-60' : 'border-gray-100 bg-white text-gray-600 hover:border-purple-200'}`}
                         >
                           {time}
                         </button>
@@ -268,44 +318,29 @@ export default function ClienteBooking() {
               <h2 className="text-3xl font-black tracking-tight leading-tight">Como prefere pagar?</h2>
               
               <div className="grid gap-3">
-                <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-2">Momento do Pagamento</p>
-                <button 
-                  onClick={() => updateForm('paymentTiming', 'Pagar Agora (10% OFF)')}
-                  className={`p-4 rounded-xl border-2 text-left font-bold transition-all ${formData.paymentTiming === 'Pagar Agora (10% OFF)' ? 'border-purple-600 bg-purple-50 text-purple-700' : 'border-gray-100 text-gray-700 hover:border-purple-200'}`}
-                >
-                  Pagar Agora (10% Desconto)
-                </button>
-                <button 
-                  onClick={() => updateForm('paymentTiming', 'Pagar na Instalação')}
-                  className={`p-4 rounded-xl border-2 text-left font-bold transition-all ${formData.paymentTiming === 'Pagar na Instalação' ? 'border-purple-600 bg-purple-50 text-purple-700' : 'border-gray-100 text-gray-700 hover:border-purple-200'}`}
-                >
-                  Pagar na Instalação
-                </button>
+                <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Sua preferência (Opcional)</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {['Pix', 'Cartão', 'Boleto'].map(method => (
+                    <button 
+                      key={method}
+                      onClick={() => {
+                        updateForm('paymentMethod', method);
+                        updateForm('paymentTiming', 'A Combinar');
+                      }}
+                      className={`py-3 px-2 rounded-xl border-2 text-center text-sm font-bold transition-all ${formData.paymentMethod === method ? 'border-purple-600 bg-purple-600 text-white' : 'border-gray-100 bg-white text-gray-600 hover:border-purple-200'}`}
+                    >
+                      {method}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              {formData.paymentTiming && (
-                <div className="grid gap-3 animate-in fade-in slide-in-from-bottom-2 mt-4">
-                  <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Forma de Pagamento</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {['Pix', 'Cartão', 'Dinheiro'].map(method => (
-                      <button 
-                        key={method}
-                        onClick={() => updateForm('paymentMethod', method)}
-                        className={`py-3 px-2 rounded-xl border-2 text-center text-sm font-bold transition-all ${formData.paymentMethod === method ? 'border-purple-600 bg-purple-600 text-white' : 'border-gray-100 bg-white text-gray-600 hover:border-purple-200'}`}
-                      >
-                        {method}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               <button 
-                disabled={!formData.paymentTiming || !formData.paymentMethod}
+                disabled={!formData.paymentMethod}
                 onClick={handleFinish}
                 className="w-full bg-[#00FF00] text-black font-black py-4 rounded-xl mt-8 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 hover:bg-[#00FF00]/80 transition-all shadow-lg shadow-[#00FF00]/20"
               >
-                Concluir Agendamento <CheckCircle2 className="w-5 h-5" />
+                Solicitar Orçamento <CheckCircle2 className="w-5 h-5" />
               </button>
             </div>
           )}
