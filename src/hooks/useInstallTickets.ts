@@ -123,7 +123,22 @@ export const useInstallTickets = () => {
       if (error) throw error;
       return mapFromDB(data);
     },
-    onSuccess: () => {
+    onMutate: async ({ id, status }) => {
+      await queryClient.cancelQueries({ queryKey: ["install-tickets"] });
+      const previousTickets = queryClient.getQueryData<InstallTicket[]>(["install-tickets"]);
+      if (previousTickets) {
+        queryClient.setQueryData<InstallTicket[]>(["install-tickets"], 
+          previousTickets.map(t => t.id === id ? { ...t, status } : t)
+        );
+      }
+      return { previousTickets };
+    },
+    onError: (err, newTicket, context) => {
+      if (context?.previousTickets) {
+        queryClient.setQueryData(["install-tickets"], context.previousTickets);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["install-tickets"] });
     }
   });
@@ -140,7 +155,22 @@ export const useInstallTickets = () => {
       if (error) throw error;
       return mapFromDB(data);
     },
-    onSuccess: () => {
+    onMutate: async ({ id, price }) => {
+      await queryClient.cancelQueries({ queryKey: ["install-tickets"] });
+      const previousTickets = queryClient.getQueryData<InstallTicket[]>(["install-tickets"]);
+      if (previousTickets) {
+        queryClient.setQueryData<InstallTicket[]>(["install-tickets"], 
+          previousTickets.map(t => t.id === id ? { ...t, price } : t)
+        );
+      }
+      return { previousTickets };
+    },
+    onError: (err, newTicket, context) => {
+      if (context?.previousTickets) {
+        queryClient.setQueryData(["install-tickets"], context.previousTickets);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["install-tickets"] });
     }
   });
@@ -154,7 +184,22 @@ export const useInstallTickets = () => {
       
       if (error) throw error;
     },
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["install-tickets"] });
+      const previousTickets = queryClient.getQueryData<InstallTicket[]>(["install-tickets"]);
+      if (previousTickets) {
+        queryClient.setQueryData<InstallTicket[]>(["install-tickets"], 
+          previousTickets.filter(t => t.id !== id)
+        );
+      }
+      return { previousTickets };
+    },
+    onError: (err, newTicket, context) => {
+      if (context?.previousTickets) {
+        queryClient.setQueryData(["install-tickets"], context.previousTickets);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["install-tickets"] });
     }
   });
@@ -163,8 +208,8 @@ export const useInstallTickets = () => {
     tickets,
     isLoading,
     addTicket: addTicket.mutateAsync,
-    updateStatus: updateStatus.mutateAsync,
-    updatePrice: updatePrice.mutateAsync,
+    updateStatus: (id: string, status: InstallTicket["status"]) => updateStatus.mutateAsync({ id, status }),
+    updatePrice: (id: string, price: string) => updatePrice.mutateAsync({ id, price }),
     deleteTicket: deleteTicket.mutateAsync
   };
 };

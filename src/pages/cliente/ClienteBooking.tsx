@@ -41,7 +41,7 @@ export default function ClienteBooking() {
     
     // Save to global CRM Store
     addTicket({
-      id: newId,
+      displayId: newId,
       customerName: formData.customerName,
       whatsapp: formData.whatsapp,
       address: formData.address + (formData.whoToAskFor ? ` (Procurar por: ${formData.whoToAskFor})` : ''),

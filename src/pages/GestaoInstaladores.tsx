@@ -482,7 +482,7 @@ function ListCard({ ticket, onAction, onDelete, onUpdatePrice, onCobrar, onCobra
     <div className={`bg-[#0A0A0A] border border-white/5 border-l-[4px] ${borderColor} rounded-xl p-3 md:p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-0 hover:bg-[#111] transition-colors group`}>
       <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-6 w-full md:w-auto">
         <div className="flex flex-row md:flex-col items-center md:items-start justify-between w-full md:w-32 shrink-0">
-          <span className="text-[10px] md:text-xs font-mono text-gray-500 font-bold">{ticket.id}</span>
+          <span className="text-[10px] md:text-xs font-mono text-gray-500 font-bold">{ticket.displayId || ticket.id.substring(0, 8)}</span>
           <span className="text-xs md:text-sm font-black text-white">{ticket.scheduledDate} {ticket.scheduledTime !== '00:00' && `• ${ticket.scheduledTime}`}</span>
         </div>
         
