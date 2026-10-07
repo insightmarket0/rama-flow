@@ -6,16 +6,12 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import { useCRMStore, InstallTicket } from "../store/useCRMStore";
+import { useInstallTickets, InstallTicket } from "../hooks/useInstallTickets";
 import { useAgendaStore } from "../store/useAgendaStore";
 import { useEstoqueStore } from "../store/useEstoqueStore";
 
 export default function GestaoInstaladores() {
-  const tickets = useCRMStore(state => state.tickets);
-  const addTicket = useCRMStore(state => state.addTicket);
-  const updateStatus = useCRMStore(state => state.updateStatus);
-  const deleteTicket = useCRMStore(state => state.deleteTicket);
-  const updatePrice = useCRMStore(state => state.updatePrice);
+  const { tickets, isLoading, updateStatus, deleteTicket, updatePrice } = useInstallTickets();
   const addServico = useAgendaStore(state => state.addServico);
   const deleteServico = useAgendaStore(state => state.deleteServico);
   const estoqueItens = useEstoqueStore(state => state.itens);

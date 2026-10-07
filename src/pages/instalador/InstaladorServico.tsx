@@ -4,7 +4,7 @@ import { ChevronLeft, MapPin, Clock, Camera, Mic, Plus, CheckCircle2, ChevronRig
 import SignaturePad from "react-signature-canvas";
 import { toast } from "sonner";
 import { useAgendaStore } from "../../store/useAgendaStore";
-import { useCRMStore } from "../../store/useCRMStore";
+import { useInstallTickets } from "../../hooks/useInstallTickets";
 import { useEstoqueStore } from "../../store/useEstoqueStore";
 
 export default function InstaladorServico() {
@@ -13,7 +13,7 @@ export default function InstaladorServico() {
   
   const servicos = useAgendaStore(state => state.servicos);
   const deleteServico = useAgendaStore(state => state.deleteServico);
-  const updateStatus = useCRMStore(state => state.updateStatus);
+  const { updateStatus } = useInstallTickets();
   const estoqueItens = useEstoqueStore(state => state.itens);
   const deduzirEstoque = useEstoqueStore(state => state.deduzirEstoque);
   

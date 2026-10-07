@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useCRMStore } from "../../store/useCRMStore";
+import { useInstallTickets } from "../../hooks/useInstallTickets";
 import { useAgendaStore } from "../../store/useAgendaStore";
 import { format, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -7,7 +7,7 @@ import { ArrowRight, CheckCircle2, ChevronLeft, Calendar as CalendarIcon, Clock,
 import { toast } from 'sonner';
 
 export default function ClienteBooking() {
-  const addTicket = useCRMStore(state => state.addTicket);
+  const { addTicket } = useInstallTickets();
   const addServico = useAgendaStore(state => state.addServico);
   
   const [step, setStep] = useState(1);
